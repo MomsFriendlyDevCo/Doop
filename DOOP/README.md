@@ -1,6 +1,8 @@
-Doop
-====
-A minimalist tries-to-be-un-opinionated micro-framework for Node.
+Doop!
+=====
+The MEAN micro-framework used by [MomsFriendlyDevCo](http://mfdc.biz).
+
+**If we hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate.**
 
 
 Basic principles:
