@@ -1,3 +1,9 @@
+<br><br>
+<p align="center">
+	<img src="https://github.com/MomsFriendlyDevCo/Doop/raw/master/DOOP/assets/doop.png">
+</p>
+<br><br>
+
 Doop!
 =====
 The MEAN micro-framework used by [MomsFriendlyDevCo](http://mfdc.biz).
