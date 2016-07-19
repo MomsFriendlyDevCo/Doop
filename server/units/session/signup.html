@@ -1,0 +1,141 @@
+<div class="ui middle aligned center aligned grid adr-login" ng-controller="UserSignupCtrl as signup">
+	<div class="column">
+		<div class="ui centered image">
+			<a href="/">
+				<img src="/content/images/logo.png" class="image" />
+			</a>
+		</div>
+		<h2 class="ui header">
+			<div class="content">
+				Sign Up for an account
+			</div>
+		</h2>
+
+		<!-- 1 - Show account/subscription types -->
+		<div class="ui stacked segment" ng-if="signup.isShowInfo">
+			<div class="ui grid">
+				<div class="eight wide column">
+					<div class="ui green header">Premium</div>
+					<div class="ui list">
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Internal messaging</div>
+							</div>
+						</div>
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">4Me Community</div>
+							</div>
+						</div>
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Tailored workouts</div>
+							</div>
+						</div>
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Training classes</div>
+							</div>
+						</div>
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Randomised workouts</div>
+							</div>
+						</div>
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Equipment settings</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="eight wide column">
+					<div class="ui default header">Basic</div>
+					<div class="ui list">
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Randomised workouts</div>
+							</div>
+						</div>
+						<div class="item">
+							<i class="check icon"></i>
+							<div class="content">
+								<div class="header">Equipment settings</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="sixteen wide column">
+					Upon signup you receive 1 month FREE premium trial subscription
+				</div>
+				<div class="sixteen wide column">
+					<button class="ui fluid large primary button" ng-click="signup.toggleInfo(false)">Proceed</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 2 - Proceed with signup -->
+
+		<div class="ui red error message" ng-if="signup.errors.length" ng-cloak>
+			Signup could not be complete due to the following error(s):
+			<div ng-repeat="err in signup.errors"><i class="icon warning"></i> {{ err }}</div>
+		</div>
+
+		<!-- Basic signup -->
+		<div ng-if="!signup.isShowInfo" ng-cloak>
+			<form class="ui large form" name="userSignupForm" ng-submit="signup.doSignup(userSignupForm.$valid)" method="POST">
+				<div class="ui stacked segment">
+					<div class="field">
+						<div class="ui left icon input">
+							<i class="user icon"></i>
+							<input type="text" name="name" ng-model="signup.user.name" placeholder="Your name" required>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui left icon input">
+							<i class="envelope icon"></i>
+							<input type="text" name="email" ng-model="signup.user.email" placeholder="Email address" required>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui left icon input">
+							<i class="lock icon"></i>
+							<input type="password" name="password" ng-model="signup.user.password" placeholder="Password" required>
+						</div>
+					</div>
+
+					<div class="inline field m-t-lg">
+						<div class="ui checkbox">
+							<input type="checkbox" id="terms" required>
+							<label for="terms">
+								I agree to the <a href="/tc" target="_blank">terms</a> and <a href="/privacy" target="_blank">privacy</a>
+							</label>
+						</div>
+					</div>
+					<button class="ui fluid large blue submit button" type="submit">Sign Up</button>
+				</div>
+			</form>
+
+			<div class="ui message">
+				<div class="adr-button-group">
+					<a href="/auth/facebook" class="ui fluid facebook button">
+						<i class="facebook icon"></i> Sign Up with Facebook
+					</a>
+					<a href="/auth/google" class="ui fluid google plus button">
+						<i class="google plus icon"></i> Sign Up with Google Plus
+					</a>
+				</div>
+			</div>
+
+		<div class="ui message">
+			Already have an account? <a href="/login">Login</a>
+		</div>
+	</div>
+</div>

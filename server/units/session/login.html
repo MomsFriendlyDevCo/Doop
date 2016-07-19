@@ -1,0 +1,57 @@
+<div class="ui middle aligned center aligned grid adr-app adr-login" ng-controller="UserLoginCtrl as login">
+	<div class="column">
+		<div class="ui centered image">
+			<a href="/">
+				<img src="/content/images/logo.png" class="image"/>
+			</a>
+		</div>
+		<h2 class="ui teal header">
+			<div class="content">
+				Login to your account
+			</div>
+		</h2>
+
+		<div class="ui red error message" ng-if="login.error" ng-cloak>
+			<i class="icon warning"></i>
+			{{ login.error }}
+		</div>
+
+		<div class="ui green success message" ng-if="login.msg" ng-cloak>
+			{{ login.msg }}
+		</div>
+
+		<form class="ui large form" name="userLoginForm" ng-submit="login.doLogin(userLoginForm.$valid)" method="POST">
+			<div class="ui stacked segment">
+				<div class="field">
+					<div class="ui left icon input">
+						<i class="user icon"></i>
+						<input type="text" name="username" ng-model="login.user.username" placeholder="Email address" required>
+					</div>
+				</div>
+				<div class="field">
+					<div class="ui left icon input">
+						<i class="lock icon"></i>
+						<input type="password" name="password" ng-model="login.user.password" placeholder="Password" required>
+					</div>
+				</div>
+				<button class="ui fluid large blue submit button" type="submit">Login</button>
+			</div>
+		</form>
+
+		<div class="ui message">
+			<div class="adr-button-group">
+				<a href="/auth/facebook" class="ui fluid facebook button">
+					<i class="facebook icon"></i> Sign In with Facebook
+				</a>
+				<a href="/auth/google" class="ui fluid google plus button">
+					<i class="google plus icon"></i> Sign In with Google Plus
+				</a>
+			</div>
+		</div>
+
+		<div class="ui message">
+			New to us? <a href="/signup">Sign Up</a>
+			<p><a href="/action/resetpass">Forgot Password?</a></p>
+		</div>
+	</div>
+</div>
