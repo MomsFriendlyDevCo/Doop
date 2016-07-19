@@ -1,4 +1,3 @@
-<br><br>
 <p align="center">
 	<img src="https://github.com/MomsFriendlyDevCo/Doop/raw/master/DOOP/assets/doop.png">
 </p>
