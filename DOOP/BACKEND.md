@@ -2,17 +2,11 @@ Doop
 ====
 [Doop index](DOOP.md)
 
-You are currently viewing the Doop Back-end reference. [Click here for the front-end reference](DOOP-FRONTEND.md). Below are concepts within Doop that relate specifically to the back-end (i.e. the NodeJS server side).
+You are currently viewing the Doop Back-end reference. [Click here for the front-end reference](FRONTEND.md). Below are concepts within Doop that relate specifically to the back-end (i.e. the NodeJS server side).
 
-
-Units
-=====
-A Doop Unit is a generic interchangeable collection of controllers, models, templates and other resources used by one system entity.
-
-These are stored both in `/app/units` and `/server/units` if for front-end or back-end respectively.
 
 Back-end units
---------------
+==============
 Can be composed of files with the following suffixes:
 
 * **.ctrl.js** - Back-end controller file. This is a simple `require()'d` include during the controller processing phase. It has access to the `app` object which is usually mutated via `app.get()`, `app.post()` etc. Think of controller files as a simple concat of all matching files at the end of the server load process to set up routes.
@@ -41,7 +35,7 @@ API
 ----
 Doop provides some exceptionally minimal base API listed in the following sub-sections.
 
-For the [front-end API click here](DOOP-FRONTEND.md).
+For the [front-end API click here](FRONTEND.md).
 
 
 app
@@ -108,4 +102,4 @@ An object structure available when loading a unit. This is primarily used to det
 See `app.getUnit()` for information on how this is determined.
 
 
-Back to the [Doop index](DOOP.md)
+[Back to main DOOP reference](README.md)

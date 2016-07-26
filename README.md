@@ -1,6 +1,6 @@
 Doop! The micro-framework from MFDC
 ===================================
-**If we hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate.**
+**If we hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate - Zapp Brannigan**
 
 
 This file should be replaed by your own project documentation.
