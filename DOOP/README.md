@@ -32,6 +32,13 @@ A Doop Unit is a generic interchangeable collection of controllers, models, temp
 These are stored both in `/app/units` and `/server/units` if for [front-end](FRONTEND.md) or [back-end](BACKEND.md) respectively.
 
 
+NPM modules
+-----------
+MFDC relies on various common NPM modules across all its projects.
+
+You can read more about how MFDC structures its project in the [Momsronomicon](https://github.com/MomsFriendlyDevCo/Momsronomicon/blob/master/devstack-node.md).
+
+
 Project layout
 ==============
 The project tree breakdown is listed below. For each path an 'edit chance' is given (i.e. the possibility of the developer needing to change the contents of that directory) and a brief description.
