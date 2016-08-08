@@ -66,7 +66,6 @@ global.paths = {
 		],
 	},
 	css: [
-		'client/app/core/app.css',
 		'client/app/**/*.css',
 	],
 	scripts: [
@@ -171,3 +170,4 @@ gulp.task('load:db', ['load:config'], function(finish) {
 gulp.task('server', ['build'], function() {
 	require(paths.server + '/server.js');
 });
+// }}}

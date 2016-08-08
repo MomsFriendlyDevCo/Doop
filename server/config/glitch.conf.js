@@ -2,4 +2,7 @@
 module.exports = {
 	port: 80,
 	url: 'http://glitch',
+	access: {
+		lockdown: false,
+	},
 };
