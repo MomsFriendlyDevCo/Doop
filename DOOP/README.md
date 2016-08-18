@@ -29,7 +29,7 @@ Units
 -----
 A Doop Unit is a generic interchangeable collection of controllers, models, templates and other resources used by one system entity.
 
-These are stored both in `/app/units` and `/server/units` if for [front-end](FRONTEND.md) or [back-end](BACKEND.md) respectively.
+These are stored both in `/client/units` and `/server/units` if for [front-end](FRONTEND.md) or [back-end](BACKEND.md) respectively.
 
 
 NPM modules
@@ -47,14 +47,16 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | Path or Glob                        | Description |
 |-------------------------------------|-------------|
 | `/`                                 | The project root |
-| `/app/`                             | Front-end resources directory |
+| `/client/`                          | Front-end resources directory. Anything in here is expected to be run/used in the web browser |
+| `/client/app/`                      | Front-end application codebase |
+| `/client/content/`                  | Front-end media/content assets |
 | `/build/`                           | Generated files directory |
 | `/data/`                            | Generic data for the project - could contain resource files used during automated builds |
 | `/docs/`                            | Any miscellaneous files not relevant to the operation of the project but which need to be retained e.g. scope documents, ERD diagrams |
 | `/gulpfile.js`                      | Main Gulp build-system config file |
 | `/gulp/*.gulp.js`                   | Global Gulp build-system task files |
 | `/node_modules/`                    | Install directory for all NPM controlled packages |
-| `/server/`                          | Back-end resources directory |
+| `/server/`                          | Back-end resources directory. Anything in here is expected to be run/used in the web server |
 | `/server/config/`                   | Storage for all config scripts read at startup, see `/server/config/index.conf.js` for default config setup. Other files are read depending on the `NODE_ENV` setting |
 | `/server/config/index.conf.js`      | Base config file showing default variables subsequently overridden by each `NODE_ENV` config file |
 | `/server/config/production.conf.js` | Production server config details. This should include settings to enable all minimizers and other optimizations for production-ready code |

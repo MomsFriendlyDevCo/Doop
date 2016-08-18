@@ -1,6 +1,6 @@
 Doop
 ====
-[Doop index](DOOP.md)
+[Doop index](README.md)
 
 You are currently viewing the Doop Back-end reference. [Click here for the front-end reference](FRONTEND.md). Below are concepts within Doop that relate specifically to the back-end (i.e. the NodeJS server side).
 
