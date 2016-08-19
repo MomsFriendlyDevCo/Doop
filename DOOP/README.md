@@ -48,8 +48,9 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 |-------------------------------------|-------------|
 | `/`                                 | The project root |
 | `/client/`                          | Front-end resources directory. Anything in here is expected to be run/used in the web browser |
-| `/client/app/`                      | Front-end application codebase |
-| `/client/content/`                  | Front-end media/content assets |
+| `/client/units/`                    | Directory of all front-end units |
+| `/client/units/themes/`             | Directory of app CSS/Styling |
+| `/client/units/content/`            | Front-end media/content assets -- e.g. images, videos, etc. |
 | `/build/`                           | Generated files directory |
 | `/data/`                            | Generic data for the project - could contain resource files used during automated builds |
 | `/docs/`                            | Any miscellaneous files not relevant to the operation of the project but which need to be retained e.g. scope documents, ERD diagrams |

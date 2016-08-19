@@ -13,9 +13,11 @@ Can be composed of files with the following suffixes:
 * **.modl.js** - Any model definitions. These would normally tell the app where the applicable model ReST API is.
 * **.serv.js** - Service files. These are singletons that can be used across multiple controllers.
 * **.dirv.js** - Angular directive definitions. If your app needs to directly manipulate the DOM, use a directive.
-* **.comp.js** - Angular component definitions. If your app has a need for a simple widget that doesn't directly manipulate DOM, use a component.
+* **.comp.js** - Front-end component definitions. If your app has a need for a simple widget that doesn't directly manipulate DOM, use a component.
 * **.fltr.js** - Angular filter definitions. These are custom filters that your app requires.
-* **.tmpl.html** - Angular template files. These are where the bulk of your app's HTML will go. These are partials, so they should NOT be complete HTML files (e.g. containing a `<html>`, `<head>`, `<body>`, etc.) -- leave that to the server-side layout / page files.
+* **.tmpl.html** - Front-end template files. These are where the bulk of your app's HTML will go. These are partials, so they should NOT be complete HTML files (e.g. containing a `<html>`, `<head>`, `<body>`, etc.) -- leave that to the server-side layout files.
+* **.rout.js** - Angular route definitions. Typically these may sit within a unit to expose the available routes/states for that unit.
+* **.conf.js** - Front-end configuration files. These files should not do anything else other than specify a configuration for an app/unit, if required.
 
 
 [Back to main DOOP reference](README.md)

@@ -13,6 +13,7 @@ Can be composed of files with the following suffixes:
 * **.gulp.js** - Gulp task files. Since gulp auto-resolves dependencies these can call on any of Gulps pre-defined tasks as prerequisites.
 * **.modl.js** - Any models defining data types. The format of these files differs based on the database driver being used. In most cases this will be a [Monoxide Schema](https://github.com/hash-bang/Monoxide#schema-setup).
 * **.serv.js** - Service files. These are the equivalent of complex controllers which should *have no side-effects when loaded*. Each service should instead hook into a process via `app.register()` calls to insert its behaviour into the correct load sequence position. Services are loaded before controllers and are available as-early-as-possible during the load sequence.
+* **.conf.js** - Back-end configuration file.
 
 
 Hooks
