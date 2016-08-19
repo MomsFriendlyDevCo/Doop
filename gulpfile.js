@@ -34,7 +34,7 @@ global.paths = {
 	config: __dirname + '/server/config',
 	server: __dirname + '/server',
 	html: ['client/**/*.html', 'server/**/*.html'],
-	ngPartials: 'client/app/**/*.html',
+	ngPartials: 'client/**/*.html',
 	data: 'data',
 	tests: 'tests',
 	build: 'server/build',
@@ -66,13 +66,13 @@ global.paths = {
 		],
 	},
 	css: [
-		'client/app/**/*.css',
+		'client/**/*.css',
 	],
 	scripts: [
-		'client/app/app.mod.js',
-		'client/app/app.conf.js',
-		'client/app/**/*.mod.js',
-		'client/app/**/*.js',
+		'client/app.js',
+		'client/app.conf.js',
+		'client/**/*.modu.js',
+		'client/**/*.js',
 	],
 	specs: [
 		'tests/client/specs/*.spec.js'
@@ -82,31 +82,21 @@ global.paths = {
 	],
 	fonts: [
 		// Add any specific font dependencies here
-		// FIXME: angular-ui-grid issue not identifying / using fonts/ folder
-		// 'node_modules/angular-ui-grid/ui-grid.eot',
-		// 'node_modules/angular-ui-grid/ui-grid.svg',
-		// 'node_modules/angular-ui-grid/ui-grid.ttf',
-		// 'node_modules/angular-ui-grid/ui-grid.woff',
 		'node_modules/font-awesome/fonts/**',
 	],
 	images: [
-		'client/content/images/**/*'
+		'client/units/content/images/**/*'
 	],
 	videos: [
-		'client/content/videos/**/*'
+		'client/units/content/videos/**/*'
 	],
 	report: 'report',
 	buildIncludes: [
 		// Add any directories / files that also need to be included into the build directory
-		'node_modules/semantic-ui-css/**/themes/**/*.*',
-		'node_modules/angular-ui-grid/ui-grid.eot',
-		'node_modules/angular-ui-grid/ui-grid.svg',
-		'node_modules/angular-ui-grid/ui-grid.ttf',
-		'node_modules/angular-ui-grid/ui-grid.woff',
 	],
 	scenarios: {
 		defaults: [
-			'server/scenarios/defaults/**/*scenario.json'
+			'server/units/scenarios/defaults/**/*scenario.json'
 		],
 	}
 };
