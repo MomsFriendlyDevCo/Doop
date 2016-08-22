@@ -7,7 +7,14 @@
 (function() {
 	angular
 		.module('app')
-		.controller('GlobalCtrl', function($rootScope, $scope) {
+		.controller('GlobalCtrl', function($rootScope, $scope, SessionServ) {
 
+			/**
+			 * Controller initialiser hook
+			 */
+			this.$onInit = function() {
+				// Init scope variables
+				$scope.session = SessionServ;
+			};
 		});
 })();

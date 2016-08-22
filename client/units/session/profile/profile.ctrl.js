@@ -1,7 +1,7 @@
 (function() {
 	angular
 		.module('app')
-		.controller('ProfileCtrl', function() {
+		.controller('ProfileCtrl', function($scope, SessionServ) {
 			var self = this;
 
 			/**

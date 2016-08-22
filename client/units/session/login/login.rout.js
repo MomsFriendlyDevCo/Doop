@@ -3,10 +3,10 @@
 		.module('app')
 		.config($stateProvider => {
 			$stateProvider
-				.state('profile', {
-					url: '/profile',
-					templateUrl: '/app/units/session/profile/profile.tmpl.html',
-					controller: 'ProfileCtrl as vm',
+				.state('login', {
+					url: '/login',
+					templateUrl: '/app/units/session/login/login.tmpl.html',
+					controller: 'LoginCtrl as vm',
 					data: {
 						// Put custom data to expose to controllers here
 					},

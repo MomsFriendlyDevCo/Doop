@@ -7,6 +7,7 @@
 			/*
 			* External Angular modules
 			*/
+			'ngResource',
 			'ui.router',
 
 			/**
