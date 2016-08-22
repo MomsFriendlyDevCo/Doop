@@ -7,8 +7,6 @@
 * all the required modules, controllers, services, etc. the app will need to run.
 */
 
-/* jshint node:true */
-
 // Requires {{{
 var _ = require('lodash');
 var async = require('async-chainable');
@@ -109,7 +107,7 @@ app.getUnit = function(path) {
 
 
 async()
-	// Initial boot 
+	// Initial boot
 	.then(next => {
 		console.log(colors.bold.blue('⚝  Doop! ⚝'));
 		console.log('-', colors.grey('[env]'), colors.cyan(app.config.env));

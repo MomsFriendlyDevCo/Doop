@@ -1,0 +1,18 @@
+// MFDC JSHINTRC FILE
+{
+	// Predefined globals whom JSHint will ignore.
+	"browser": true,
+	"node": true,
+
+	// Development.
+	"debug" : false,  // Allow debugger statements e.g. browser breakpoints.
+	"devel" : true,   // Allow developments statements e.g. `console.log();`.
+
+	// ECMAScript
+	"esversion": 6,
+	"strict": false,  // Require `use strict` pragma  in every file.
+
+	// Code styling preferences
+	"asi": false, // Tolerate Automatic Semicolon Insertion (no semicolons).
+	"white": true // Check against strict whitespace and indentation rules.
+}
