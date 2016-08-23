@@ -1,21 +1,19 @@
 /**
  * Angular app configuration file
  */
-(function() {
-	angular
-		.module('app')
-		.config($httpProvider => {
-			// Enable async HTTP for performance boost
-			$httpProvider.useApplyAsync(true);
-		})
+angular
+	.module('app')
+	.config(function($httpProvider) {
+		// Enable async HTTP for performance boost
+		$httpProvider.useApplyAsync(true);
+	})
 
-		/**
-		 * Initial / default route configuration
-		 */
-		.config($urlRouterProvider => {
-			// States are defined in their corresponding module
+	/**
+	 * Initial / default route configuration
+	 */
+	.config(function($urlRouterProvider) {
+		// States are defined in their corresponding unit
 
-			// For any unmatched url, redirect to /
-			$urlRouterProvider.otherwise('/');
-		});
-})();
+		// For any unmatched url, redirect to /
+		$urlRouterProvider.otherwise('/');
+	});

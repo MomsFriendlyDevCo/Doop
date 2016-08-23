@@ -1,15 +1,14 @@
-(function() {
-	angular
-		.module('app')
-		.controller('DashCtrl', function() {
-			var self = this;
+angular
+	.module('app')
+	.controller('DashCtrl', function($scope) {
+		var self = this;
 
-			/**
-			 * Controller initialiser hook
-			 */
-			this.$onInit = function() {
-				// Init scope variables
-				this.message = 'Welcome to the dashboard!';
-			};
-		});
-})();
+		this.refresh = function() {
+			// return $promise
+		};
+
+		// Init scope variables
+		this.message = 'Welcome to the dashboard!';
+
+		$scope.$evalAsync(this.refresh);
+	});

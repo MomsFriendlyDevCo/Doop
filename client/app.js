@@ -1,18 +1,16 @@
 /**
  * App client bootstrapper and initialiser
  */
-(function() {
-	angular
-		.module('app', [
-			/*
-			* External Angular modules
-			*/
-			'ngResource',
-			'ui.router',
+angular
+	.module('app', [
+		/*
+		* External Angular modules
+		*/
+		'ngResource',
+		'ui.router',
 
-			/**
-			* App modules
-			*/
-			'app.partials',
-		]);
-})();
+		/**
+		* App modules
+		*/
+		'app.partials',
+	]);

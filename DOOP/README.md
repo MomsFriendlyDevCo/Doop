@@ -22,6 +22,11 @@ References:
 * [Doop front-end reference](FRONTEND.md)
 
 
+Terminology:
+
+* The Doop documentation endeavour to use requirement levels that abide by the definitions specified by [RFC 2119 (Requirement Levels)](http://www.ietf.org/rfc/rfc2119.txt)
+
+
 General concept
 ===============
 
@@ -49,7 +54,7 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/`                                 | The project root |
 | `/client/`                          | Front-end resources directory. Anything in here is expected to be run/used in the web browser |
 | `/client/units/`                    | Directory of all front-end units |
-| `/client/units/themes/`             | Directory of app CSS/Styling |
+| `/client/units/theme/`              | Directory of default app CSS/Styling |
 | `/client/units/content/`            | Front-end media/content assets -- e.g. images, videos, etc. |
 | `/build/`                           | Generated files directory |
 | `/data/`                            | Generic data for the project - could contain resource files used during automated builds |

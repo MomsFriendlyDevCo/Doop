@@ -2,10 +2,10 @@ angular
 	.module('app')
 	.config(function($stateProvider) {
 		$stateProvider
-			.state('dashboard', {
-				url: '/',
-				templateUrl: '/app/units/dashboard/dashboard.tmpl.html',
-				controller: 'DashCtrl as vm',
+			.state('profile', {
+				url: '/profile',
+				templateUrl: '/app/units/profile/profile.tmpl.html',
+				controller: 'ProfileCtrl as vm',
 				data: {
 					// Put custom data to expose to controllers here
 				},
