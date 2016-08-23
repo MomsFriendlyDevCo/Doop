@@ -7,7 +7,7 @@ app.get('/logout', function(req, res) {
 /**
 * API to handle user logout
 */
-app.post('/api/users/logout', app.middleware.ensure.login, function(req, res) {
+app.post('/api/session/logout', app.middleware.ensure.login, function(req, res) {
 	req.logout();
 	res.status(200).send({});
 });

@@ -1,4 +1,5 @@
 <!-- FIXME: STUB -->
 <nav>
-	<a ui-sref="dashboard">Dash</a> | <a ui-sref="profile">Profile</a> | <a ui-sref="login">Login</a>
+	<a ui-sref="dashboard">Dash</a> | <a ui-sref="profile">Profile</a> | <a ui-sref="login" ng-if="!session.isLoggedIn">Login</a>
+	| <button ng-click="session.logout()" ng-if="session.isLoggedIn">Logout</button>
 </nav>

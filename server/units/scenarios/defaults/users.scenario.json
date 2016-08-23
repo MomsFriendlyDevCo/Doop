@@ -38,7 +38,15 @@
 			"password": "qwaszx",
 			"name": "Joe Admin",
 			"email": "admin@mfdc.biz",
-			"role": "root"
+			"role": "admin"
+		},
+		{
+			"_ref": "users.user",
+			"username": "user",
+			"password": "qwaszx",
+			"name": "Joe User",
+			"email": "user@mfdc.biz",
+			"role": "user"
 		}
 	]
 }

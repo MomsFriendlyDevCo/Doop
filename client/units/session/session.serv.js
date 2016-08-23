@@ -1,9 +1,10 @@
 angular
 	.module('app')
-	.service('SessionServ', function($rootScope, SessionModl) {
+	.service('SessionServ', function($rootScope, $state, SessionModl) {
 		var self = this;
 
 		this.data = {}; // User session data
+		this.isLoggedIn = false;
 
 		this.save = function() {
 			// Save session to db
@@ -15,9 +16,16 @@ angular
 
 		this.update = function() {
 			// Load session data from db
-			return SessionModl.get().$promise
+			return SessionModl.profile().$promise
 				.then(res => {
-					self.data = res.data;
+					self.data = res;
+
+					// Add convenience flags
+					if (self.data && self.data._id)
+						self.isLoggedIn = true;
+					else
+						self.isLoggedIn = false;
+
 					// TODO: NOW Assign to locate storage
 					// Local forage -- wrapper library -- wrap in try catch block
 
@@ -29,14 +37,23 @@ angular
 
 		this.getLocal = function() {
 			// Fetch local storage else do nothing
+			// TODO: Implement localStorage fetch
 		};
 
 		this.login = function(user) {
-			return SessionModl.login(user).$promise;
+			return SessionModl.login(user).$promise
+				.then(res => {
+					// Update local session then redirect to dash
+					self.update().then(res => $state.go('dashboard'));
+				});
 		};
 
 		this.logout = function() {
-			return SessionModl.logout().$promise;
+			return SessionModl.logout().$promise
+				.then(res => {
+					// Update local session then redirect to login
+					self.update().then(res => $state.go('login'));
+				});
 		};
 
 		// Init local storage for session data

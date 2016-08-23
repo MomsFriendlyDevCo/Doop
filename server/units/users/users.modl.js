@@ -19,37 +19,14 @@ var User = module.exports = monoxide.schema('users', {
 	settings: {type: 'object', default: {}},
 	created: {type: Date, default: Date.now},
 	lastLogin: {type: Date, default: Date.now},
-	advertisement:{type: Boolean, default: true},
 
 	// Profile {{{
-	achievements:[{
-		achievement:{type: 'pointer', ref: 'achievements'},
-		created: {type: Date, default: Date.now},
-	}],
-	challenges:[{type: 'pointer', ref: 'challenges'}],
-	friends:[{type: 'pointer', ref: 'users'}],
-	friendRequests:[{type: 'pointer', ref: 'users'}],
-	profileImage: {type: String, default: 'content/images/profile.png', index: true},
 	location: {
-		//country: {type: 'pointer', ref: 'countries', index: true}, // TODO: Implement full country list support
-		country: {type: String},
 		city: {type: String},
 		suburb: {type: String},
 		postcode: {type: String},
 	},
-	gender: {type: String, enum: ['male', 'female', 'not specified']},
-	gym: {type: String},
 	dob: {type: Date},
-	injuries: [{
-		bodyPart: {type: 'pointer', ref: 'bodyParts'},
-		permanent: {type: Boolean, default: false}
-	}],
-	presets: [{
-		title: {type: String},
-		equipment:[{type: 'pointer', ref: 'equipment'}],
-		locationType: {type: String},
-		duration: {type: 'number'}
-	}],
 	// }}}
 
 	// User auth-related data {{{

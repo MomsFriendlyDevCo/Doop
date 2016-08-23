@@ -3,3 +3,5 @@
 <h1>Profile</h1>
 
 <pre>{{ (session.data | json) || 'No session data available' }}</pre>
+
+<p>Is Logged In: {{ session.isLoggedIn }}</p>

@@ -13,7 +13,7 @@ app.post('/login', passport.authenticate('local', {
 	failureRedirect: '/login',
 	failureFlash: true
 }), function(req, res){
-	if(req.user.token){
+	if (req.user.token){
 		//User requested password reset but logs in with current password
 		db.users.update({username:req.user.username}, {token:null}, function(err, doc){
 			res.redirect('/')
@@ -40,7 +40,7 @@ app.get('/login', app.middleware.ensure.nologin, function(req, res) {
 /**
 * API to handle user login
 */
-app.post('/api/users/login', function(req, res) {
+app.post('/api/session/login', function(req, res) {
 	async()
 		.then('profile', function(next) {
 			passport.authenticate('local', function(err, user, info) {
@@ -58,7 +58,7 @@ app.post('/api/users/login', function(req, res) {
 			})(req, res, next);
 		})
 		.end(function(err) {
-			if (err) return res.send({error: 'Invalid username or password'});
+			if (err) return res.status(400).send({error: 'Invalid username or password'});
 			res.redirect('/api/session/profile');
 		});
 });
