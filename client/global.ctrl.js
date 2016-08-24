@@ -6,7 +6,7 @@
 */
 angular
 	.module('app')
-	.controller('GlobalCtrl', function($rootScope, $scope, SessionServ) {
+	.controller('GlobalCtrl', function($rootScope, $scope, $state, SessionServ) {
 		// Init user session object/data
 		$scope.session = SessionServ;
 	});

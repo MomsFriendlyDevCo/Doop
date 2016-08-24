@@ -7,12 +7,15 @@
 * Serves app root page
 */
 app.get('/', function(req, res) {
+	res.render('units/pages/main');
+
+	// FIXME: Enable for your project if applicable
 	// If user is logged in show dashboard, otherwise show landing/home page
-	if (req.user && req.user._id) {
-		res.render('units/pages/main');
-	} else {
-		res.render('units/pages/promo', { layout: 'units/layouts/promo' });
-	}
+	// if (req.user && req.user._id) {
+	// 	res.render('units/pages/main');
+	// } else {
+	// 	res.render('units/pages/promo', { layout: 'units/layouts/promo' });
+	// }
 });
 
 app.get('/tc', function(req, res) {

@@ -8,34 +8,31 @@ var async = require('async-chainable');
 var colors = require('chalk');
 var passport = require('passport');
 
+/**
+* Serve the login page
+*/
+app.get('/login', app.middleware.ensure.nologin, function(req, res) {
+	// Already logged in
+	if (_.get(req, 'user._id')) return res.redirect('/');
+
+	res.redirect('/#/login');
+});
+
 app.post('/login', passport.authenticate('local', {
 	successRedirect: '/',
 	failureRedirect: '/login',
 	failureFlash: true
 }), function(req, res){
 	if (req.user.token){
-		//User requested password reset but logs in with current password
+		// User requested password reset but logs in with current password
 		db.users.update({username:req.user.username}, {token:null}, function(err, doc){
-			res.redirect('/')
-		})
+			res.redirect('/');
+		});
 	} else {
 		res.redirect('/');
 	}
 });
 
-/**
-* Serve the login page
-*/
-app.get('/login', app.middleware.ensure.nologin, function(req, res) {
-	if (req.user) // Already logged in
-		return res.redirect('/');
-
-	res.render('units/session/login', {
-		layout: 'units/layouts/promo',
-		namespace: 'plain',
-		message: req.flash('passportMessage'),
-	});
-});
 
 /**
 * API to handle user login

@@ -20,24 +20,29 @@ angular
 				.then(res => {
 					self.data = res;
 
-					// Add convenience flags
-					if (self.data && self.data._id)
-						self.isLoggedIn = true;
-					else
-						self.isLoggedIn = false;
-
 					// TODO: NOW Assign to locate storage
 					// Local forage -- wrapper library -- wrap in try catch block
 
 				})
 				.catch(err => {
 					console.error('Could not update user session', err.data);
+				})
+				.finally(() => {
+					// Add convenience flags
+					if (self.data && self.data._id)
+						self.isLoggedIn = true;
+					else
+						self.isLoggedIn = false;
 				});
 		};
 
 		this.getLocal = function() {
 			// Fetch local storage else do nothing
 			// TODO: Implement localStorage fetch
+		};
+
+		this.destroy = function() {
+			self.data = {};
 		};
 
 		this.login = function(user) {
