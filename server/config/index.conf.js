@@ -60,8 +60,7 @@ var defaults = {
 		minifyImages: false,
 	},
 	mongo: {
-		// uri: 'mongodb://localhost/{{FIXME.db.name}}',
-		uri: 'mongodb://localhost/test',
+		uri: 'mongodb://localhost/{{FIXME.db.name}}',
 		options: {
 			db: {
 				safe: true
