@@ -44,7 +44,7 @@ global.app._registers = {};
 */
 global.app.register = function(hook, prereqs, callback) {
 	if (!_.has(global.app._registers, hook)) { // Not seen this type of hook before - create a base
-		global.app._registers[hook] = async().limit(1);
+		global.app._registers[hook] = [];
 	}
 
 	// Argument mangling {{{
@@ -54,11 +54,13 @@ global.app.register = function(hook, prereqs, callback) {
 	}
 	// }}}
 
-	var thisUnit = app.unit; // Store this so the closure doesn't change its value
-	global.app._registers[hook].defer(prereqs, thisUnit.id, function(next) {
-		console.log('-', colors.grey('[hook:' + hook + ']'), thisUnit.id);
-		callback(next);
+
+	global.app._registers[hook].push({
+		id: app.unit.id,
+		prereqs: prereqs,
+		callback: callback,
 	});
+
 	return global.app;
 };
 
@@ -68,6 +70,7 @@ global.app.register = function(hook, prereqs, callback) {
 * NOTE: This function is *intentionally* name different from a regular NodeJS event emitter as it takes a callback for each registered function
 * @param {string} hook The emitter to fire
 * @param {function} [callback] Optional callback to fire on completion. Called as `(err)`
+* @param {mixed,...} [param] Additional parameters to pass
 * @return {object} The app object
 * @see app.register()
 */
@@ -76,7 +79,23 @@ global.app.fire = function(hook, callback) {
 
 	console.log('-', colors.grey('[fire]'), hook);
 
-	global.app._registers[hook]
+	// Work out arguments to pass to each task (func args minus first two, named vars)
+	var callbackArgs = Array.prototype.slice.call(arguments, 0);
+	callbackArgs.shift();
+	callbackArgs.shift();
+
+	// Construct async object to handle all hook items
+	var handler = async();
+	global.app._registers[hook].forEach(function(cb) {
+		handler.defer(cb.prereqs, cb.id, function(next) {
+			console.log('-', colors.grey('[hook:' + hook + ', handler:' + cb.id + ']'));
+
+			cb.callback.apply(this, [next].concat(callbackArgs));
+		});
+	});
+
+	// Execute handler
+	handler
 		.await()
 		.end(callback);
 
