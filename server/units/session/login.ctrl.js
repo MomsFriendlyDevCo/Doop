@@ -36,6 +36,7 @@ app.post('/login', passport.authenticate('local', {
 
 /**
 * API to handle user login
+* @fires session.login
 */
 app.post('/api/session/login', function(req, res) {
 	async()
@@ -44,10 +45,12 @@ app.post('/api/session/login', function(req, res) {
 				if (err) return next(err);
 				if (user) {
 					console.log(colors.green('Successful login for'), colors.cyan(req.body.username));
-					req.logIn(user, function(err) {
-						if (err) return next(err);
-						next();
-					});
+					app.fire('session.login', function(err) {
+						req.logIn(user, function(err) {
+							if (err) return next(err);
+							next();
+						});
+					}, user);
 				} else {
 					console.log(colors.red('Failed login for'), colors.cyan(req.body.username));
 					next('Unauthorized');
