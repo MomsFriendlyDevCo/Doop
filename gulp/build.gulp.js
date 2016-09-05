@@ -4,6 +4,7 @@
 * NOTE: Requires global.paths to be defined from gulp.conf.js
 */
 
+var del = require('del');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var notify = require('gulp-notify');
