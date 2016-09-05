@@ -4,9 +4,12 @@
   "version": "0.0.0",
   "main": "gulpfile.js",
   "private": true,
+  "engines": {
+    "node": "4.x.x"
+  },
   "scripts": {
-    "start": "node server/server.js",
-    "build": "gulp build"
+    "build": "gulp build",
+    "start": "node server/server.js"
   },
   "repository": {
     "type": "git",
