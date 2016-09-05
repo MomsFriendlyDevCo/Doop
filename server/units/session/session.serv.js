@@ -1,4 +1,4 @@
-var colors = require('colors');
+var colors = require('chalk');
 var connectFlash = require('connect-flash');
 var expressSession = require('express-session');
 var monoxide = require('monoxide');
