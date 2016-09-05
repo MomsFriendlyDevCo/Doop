@@ -63,7 +63,7 @@ gulp.task('vendors-core', ['load:config'], function(finish) {
 		.set('includes', []) // Array of all JS / CSS files we need to include in the project
 		.forEach(paths.vendors.core, function(next, dep, depIndex) { // Process all strings into paths
 			// At the moment this doesn't surve a purpose but we could add extra properties here that do things like transpose individual files based on options
-			this.includes[depIndex] = config.root + '/' + dep;
+			this.includes[depIndex] = paths.root + '/' + dep;
 			next();
 		})
 		.then('includes', function(next) {
@@ -77,7 +77,7 @@ gulp.task('vendors-core', ['load:config'], function(finish) {
 		})
 		.forEach('includes', function(next, path) {
 			fs.stat(path, function(err, stats) {
-				if (err) return next('Error loading dependency path "' + path + '". Maybe you should specify the file directly with file://PATH - ' + err.toString());
+				if (err) return next('Error loading dependency path "' + path + '" - ' + err.toString());
 				if (stats.isDirectory()) return next('Dependency path "' + path + '" is a directory. This should be a file');
 				next();
 			});
