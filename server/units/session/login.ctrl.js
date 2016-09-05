@@ -18,6 +18,12 @@ app.get('/login', app.middleware.ensure.nologin, function(req, res) {
 	res.redirect('/#/login');
 });
 
+
+/**
+* Attempt login sequence with given login credentials - legacy FORM/POST method
+* @param {string} req.body.username The username to login with
+* @param {string} req.body.password The password to login with
+*/
 app.post('/login', passport.authenticate('local', {
 	successRedirect: '/',
 	failureRedirect: '/login',
@@ -35,7 +41,7 @@ app.post('/login', passport.authenticate('local', {
 
 
 /**
-* API to handle user login
+* Attempt login sequence with given login credentials - AJAX internal API based method
 * @fires session.login
 */
 app.post('/api/session/login', function(req, res) {

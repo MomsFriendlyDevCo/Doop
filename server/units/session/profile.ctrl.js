@@ -1,6 +1,6 @@
 /**
- * API for active user profile data
- */
+* API for active user profile data
+*/
 app.get('/api/session/profile', function(req, res) {
 	if (!req.user) return res.status(200).send({});
 
@@ -16,12 +16,13 @@ app.get('/api/session/profile', function(req, res) {
 		settings: req.user.settings || null,
 	};
 
-	res.json(user);
+	res.send(user);
 });
+
 
 /**
 * Save the user profile
-* @param object req.body.settings Settings object to save
+* @param {Object} req.body.settings Settings object to save
 */
 app.post('/api/session/profile', app.middleware.ensure.login, function(req, res) {
 	async()
@@ -31,14 +32,20 @@ app.post('/api/session/profile', app.middleware.ensure.login, function(req, res)
 			next();
 		})
 		// }}}
+		// Save user settings {{{
 		.then(function(next) {
+			if (!_.isObject(req.user.settings)) req.user.settings = {};
 			_.merge(req.user, _.pick(req.body, ['settings']));
-			req.user.save();
-			next();
+			req.user.save({
+				$data: {user: req.user._id},
+			}, next);
 		})
+		// }}}
+		// End {{{
 		.end(function(err) {
 			if (err) return res.status(400).send(err);
 			res.status(200).end();
 		});
+		// }}}
 });
 
