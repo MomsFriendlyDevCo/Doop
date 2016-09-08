@@ -42,13 +42,13 @@ app.register('preControllers', ['session'], function(finish) {
 				Users.findOne({
 					'auth.tokens.token': req.body.token
 				}, function(err, user) {
-					if (err || !user) return service.loginFail(req, res, next);
+					if (err || !user) return app.middleware.ensure.loginFail(req, res, next);
 					console.log('Accepted auth token', colors.cyan(req.body.token));
 					req.user = user;
 					next();
 				});
 			} else { // Not logged in and no method being passed to handle - reject
-				service.loginFail(req, res, next);
+				app.middleware.ensure.loginFail(req, res, next);
 			}
 		},
 
