@@ -69,7 +69,7 @@
     "jquery": "^3.1.0",
     "lodash": "^4.15.0",
     "map-stream": "0.0.6",
-    "mfdc-email": "^1.2.0",
+    "mfdc-email": "^2.0.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.14.1",
     "monoxide": "0.0.55",

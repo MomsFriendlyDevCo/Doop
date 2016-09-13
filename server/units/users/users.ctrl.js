@@ -72,7 +72,7 @@ app.post('/signup', app.middleware.ensure.nologin, function(req, res, finish) {
 		})
 		.then(function(next) {
 			// Dispatch signup email with account verfication link
-			email
+			email()
 				.to(req.body.email)
 				.subject('4ME Training Registration - Account Verification')
 				.template(app.config.paths.server + '/units/users/signup.email.html')

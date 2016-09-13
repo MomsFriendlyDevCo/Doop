@@ -30,8 +30,7 @@ app.route('/action/resetpass')
 			})
 			.then(function(next) {
 				// Dispatch reset password email with reset token link
-				email
-					// FIXME
+				email()
 					.to(req.body.email)
 					.subject('Signup')
 					.template(app.config.paths.server + '/units/users/resetPass.email.html')
