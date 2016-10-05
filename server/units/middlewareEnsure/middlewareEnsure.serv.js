@@ -70,7 +70,7 @@ app.register('preControllers', ['session'], function(finish) {
 			if (req.user && req.user._id && (req.user.role == 'admin' || req.user.role == 'root')) {
 				return next();
 			} else {
-				authFail(req, res, next);
+				app.middleware.ensure.authFail(req, res, next);
 			}
 		},
 
