@@ -7,7 +7,7 @@ var colors = require('chalk');
 var databaseLoader = require('.');
 
 app.register('preControllers', function(finish) {
-	
+
 	app.fire('preModels');
 
 	databaseLoader()
@@ -15,7 +15,7 @@ app.register('preControllers', function(finish) {
 		.on('error', err => finish('DB CONNECTION ERR: ' + err.toString()))
 		.on('model', path => {
 			app.unit = app.getUnit(path);
-			console.log('-', colors.grey('[modl]'), app.unit.shortName);
+			console.log('-', colors.grey('[schm]'), app.unit.shortName);
 		})
 		.on('end', models => {
 			app.fire('postModels');

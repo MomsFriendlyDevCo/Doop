@@ -30,14 +30,14 @@ global.paths = {
 		'test',
 		'client/app', // No need to watch this with nodemon as its handled seperately
 	],
-	client: __dirname + '/client',
-	config: __dirname + '/server/config',
-	server: __dirname + '/server',
-	html: ['client/**/*.html', 'server/**/*.html'],
-	ngPartials: 'client/**/*.html',
+	client: __dirname,
+	config: __dirname + '/config',
+	server: __dirname,
+	html: ['units/**/*.tmpl.html', 'units/**/*.html'],
+	ngPartials: 'units/**/*.tmpl.html',
 	data: 'data',
 	tests: 'tests',
-	build: 'server/build',
+	build: 'build',
 	vendors: {
 		// Vendor files
 		// This list supports brace expansion so 'foo.{css,js}' ~> ['foo.css', 'foo.js']
@@ -66,13 +66,19 @@ global.paths = {
 		],
 	},
 	css: [
-		'client/**/*.css',
+		'units/**/*.css',
 	],
 	scripts: [
-		'client/app.js',
-		'client/app.conf.js',
-		'client/**/*.modu.js',
-		'client/**/*.js',
+		'units/**/client.js',
+		'units/**/client.conf.js',
+		'units/**/*.modu.js',
+		'units/**/*.serv.js',
+		'units/**/*.dirv.js',
+		'units/**/*.comp.js',
+		'units/**/*.rout.js',
+		'units/**/*.modl.js',
+		'units/**/*.fltr.js',
+		'units/**/*.ctrl.js',
 	],
 	specs: [
 		'tests/client/specs/*.spec.js'

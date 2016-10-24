@@ -13,9 +13,9 @@ gulp.task('partials', ['load:config'], function() {
 		.pipe(minifyHtml())
 		.pipe(ngTemplateCache({
 			filename: 'partials.min.js',
-			module: 'app.partials',
-			standalone: true,
-			root: '/app/',
+			module: 'app',
+			standalone: false,
+			root: '/app/units/',
 		}))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {

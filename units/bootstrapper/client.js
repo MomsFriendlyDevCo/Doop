@@ -8,9 +8,4 @@ angular
 		*/
 		'ngResource',
 		'ui.router',
-
-		/**
-		* App modules
-		*/
-		'app.partials',
 	]);
