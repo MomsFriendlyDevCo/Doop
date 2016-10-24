@@ -109,10 +109,10 @@ global.app.fire = function(hook, callback) {
 * @return {Object} An object composed of various keys - see example below
 *
 * @example
-* app.getUnit('/some/path/somewhere/units/fooBarBaz/fooBarBaz.modl.js');
+* app.getUnit('/some/path/somewhere/units/fooBarBaz/fooBarBaz.schm.js');
 * {
 * 	id: 'fooBarBaz',
-* 	shortName: 'fooBarBaz/fooBarBaz.modl.js',
+* 	shortName: 'fooBarBaz/fooBarBaz.schm.js',
 * }
 */
 app.getUnit = function(path) {
@@ -133,13 +133,13 @@ async()
 		next();
 	})
 	// }}}
-	// Load all services {{{
+	// Load all service hooks {{{
 	.then(function(next) {
-		glob(app.config.paths.server + '/units/**/*.serv.js', function(err, files) {
+		glob(app.config.paths.server + '/units/**/*.hook.js', function(err, files) {
 			if (err) return next(err);
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
-				console.log('-', colors.grey('[serv]'), app.unit.shortName);
+				console.log('-', colors.grey('[hook]'), app.unit.shortName);
 				require(path);
 			});
 			next();
@@ -152,14 +152,14 @@ async()
 	// Fire 'preControllers' {{{
 	.then(next => app.fire('preControllers', next))
 	// }}}
-	// Load all controllers {{{
+	// Load all route path handlers {{{
 	.then(function(next) {
-		glob(app.config.paths.server + '/units/**/*.ctrl.js', function(err, files) {
+		glob(app.config.paths.server + '/units/**/*.path.js', function(err, files) {
 			if (err) return next(err);
 			if (!files.length) return next('No server controllers found');
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
-				console.log('-', colors.grey('[ctrl]'), app.unit.shortName);
+				console.log('-', colors.grey('[path]'), app.unit.shortName);
 				require(path);
 			});
 			next();

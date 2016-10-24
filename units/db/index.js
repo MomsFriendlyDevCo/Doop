@@ -37,7 +37,7 @@ module.exports = function databaseLoader(callback) {
 
 		self.emit('connected');
 
-		glob(app.config.paths.server + '/units/**/*.modl.js', function(err, files) {
+		glob(app.config.paths.server + '/units/**/*.schm.js', function(err, files) {
 			if (err) return next(err);
 			files.forEach(path => {
 				self.emit('model', path);
