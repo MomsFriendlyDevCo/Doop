@@ -20,9 +20,6 @@ app.register('preControllers', function(finish) {
 			app.fire('postModels');
 			app.db = global.db = models; // Setup global shortcut to models
 
-			// Glue gameSettings onto the model structure
-			app.db.gameSettings = require(app.config.paths.root + '/units/gameSettings/server/gameSettings.modl');
-
 			finish();
 		});
 });
