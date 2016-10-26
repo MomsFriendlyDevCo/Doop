@@ -72,8 +72,7 @@ var defaults = {
 		license: '{{FIXME.newrelic.license}}',
 	},
 	paths: {
-		root: path.normalize(__dirname + '/../..'),
-		server: path.normalize(__dirname + '/..'),
+		root: path.normalize(__dirname + '/..'),
 	},
 };
 

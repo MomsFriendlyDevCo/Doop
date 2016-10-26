@@ -4,11 +4,11 @@
 *
 * @example
 * // Access the database via a dumb module:
-* var db = require(config.paths.server + '/units/db/index')(function(db) { // db is now the modules loaded // })
+* var db = require(config.paths.root + '/units/db/index')(function(db) { // db is now the modules loaded // })
 *
 * @exmaple
 * // Access the database via an emitter
-* require(config.paths.server + '/units/db/index')()
+* require(config.paths.root + '/units/db/index')()
 * 	.on('end', (models) => { // Models is now the modules loaded // });
 */
 
@@ -37,7 +37,7 @@ module.exports = function databaseLoader(callback) {
 
 		self.emit('connected');
 
-		glob(app.config.paths.server + '/units/**/*.schm.js', function(err, files) {
+		glob(app.config.paths.root + '/units/**/*.schm.js', function(err, files) {
 			if (err) return next(err);
 			files.forEach(path => {
 				self.emit('model', path);
