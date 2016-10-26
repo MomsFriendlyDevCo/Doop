@@ -11,6 +11,7 @@
 var _ = require('lodash');
 var async = require('async-chainable');
 var colors = require('chalk');
+var debug = require('debug')('doop');
 var express = require('express');
 var fs = require('fs');
 var fspath = require('path');
@@ -54,11 +55,15 @@ global.app.register = function(hook, prereqs, callback) {
 	}
 	// }}}
 
+	var attacher = app.getCaller();
+	attacher.file = fspath.relative(app.config.paths.root, attacher.file);
 
+	debug('Registered hook "' + hook + '"' + (_.isArray(prereqs) && prereqs.length ? ' (prereqs: ' + prereqs.join(', ') + ')' : '') + ' from ' + attacher.file);
 	global.app._registers[hook].push({
 		id: app.unit.id,
 		prereqs: prereqs,
 		callback: callback,
+		attacher: attacher,
 	});
 
 	return global.app;
@@ -88,7 +93,7 @@ global.app.fire = function(hook, callback) {
 	var handler = async();
 	global.app._registers[hook].forEach(function(cb) {
 		handler.defer(cb.prereqs, cb.id, function(next) {
-			console.log('-', colors.grey('[hook:' + hook + ', handler:' + cb.id + ']'));
+			console.log('-', colors.grey('[hook:' + hook + ', handler:' + cb.id + ']'), cb.attacher.file);
 
 			cb.callback.apply(this, [next].concat(callbackArgs));
 		});
@@ -97,6 +102,10 @@ global.app.fire = function(hook, callback) {
 	// Execute handler
 	handler
 		.await()
+		.then(function(next) {
+			debug('Fire Hook Complete "' + hook + '"');
+			next();
+		})
 		.end(callback);
 
 	return global.app;
@@ -109,17 +118,42 @@ global.app.fire = function(hook, callback) {
 * @return {Object} An object composed of various keys - see example below
 *
 * @example
-* app.getUnit('/some/path/somewhere/units/fooBarBaz/fooBarBaz.schm.js');
+* app.getUnit('/units/fooBarBaz/fooBarBaz.modl.js');
 * {
 * 	id: 'fooBarBaz',
-* 	shortName: 'fooBarBaz/fooBarBaz.schm.js',
+* 	path: 'fooBarBaz/fooBarBaz.modl.js',
 * }
 */
 app.getUnit = function(path) {
-	var id = fspath.basename(fspath.dirname(path));
+	var relativePath = fspath.relative(app.config.paths.root + '/units', path);
+	var id = relativePath.split(fspath.sep)[0];
+
 	return {
 		id: id,
-		shortName: id + '/' + fspath.basename(path),
+		path: path,
+	};
+};
+// }}}
+// Globals - utility functions {{{
+/**
+* Recieve details about a functions caller
+* This function works similar to `arguments` in that its local to its own caller function (i.e. you can only get details about the function that is calling it)
+* @return {Object} An object with the keys: name (the function name, if any), file, line, char
+*/
+app.getCaller = function() {
+	var err = new Error()
+	var stack = err.stack.split(/\n+/);
+	stack.shift(); // getCaller()
+	stack.shift(); // this functions caller
+	stack.shift();
+
+	var bits = /^\s+at (.+?) \((.+?):([0-9]+?):([0-9]+?)\)$/.exec(stack[0]);
+
+	return {
+		name: bits[1],
+		file: bits[2],
+		line: bits[3],
+		char: bits[4],
 	};
 };
 // }}}
@@ -133,13 +167,13 @@ async()
 		next();
 	})
 	// }}}
-	// Load all service hooks {{{
+	// Load all services {{{
 	.then(function(next) {
 		glob(app.config.paths.root + '/units/**/*.hook.js', function(err, files) {
 			if (err) return next(err);
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
-				console.log('-', colors.grey('[hook]'), app.unit.shortName);
+				console.log('-', colors.grey('[hook]'), app.unit.id);
 				require(path);
 			});
 			next();
@@ -159,7 +193,7 @@ async()
 			if (!files.length) return next('No server controllers found');
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
-				console.log('-', colors.grey('[path]'), app.unit.shortName);
+				console.log('-', colors.grey('[path]'), app.unit.id);
 				require(path);
 			});
 			next();
