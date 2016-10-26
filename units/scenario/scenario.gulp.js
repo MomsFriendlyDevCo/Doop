@@ -11,7 +11,7 @@ var scenario = require('gulp-mongoose-scenario');
 /**
 * Setup the local Mongo DB with all the files located in paths.scenarios.defaults
 */
-gulp.task('scenario', ['load:db'], function(finish) {
+gulp.task('scenario', ['load:app.db'], function(finish) {
 	if (config.env == 'production') return finish('Refusing to reload database in production! If you REALLY want to do this use `NODE_ENV=something gulp db`');
 
 	gulp.src(__dirname + '/*.json')

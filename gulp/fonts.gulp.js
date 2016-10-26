@@ -13,7 +13,7 @@ var common = require('./common.gulp.lib');
 * Copy fonts
 * @return {Stream}
 */
-gulp.task('fonts', ['load:config'], function() {
+gulp.task('fonts', ['load:app'], function() {
 	var dest = paths.build + '/fonts';
 	gutil.log('Copying fonts');
 	return gulp

@@ -8,7 +8,7 @@ var minifyHtml = require('gulp-minify-html');
 var notify = require('gulp-notify');
 
 var templateBootCount = 0;
-gulp.task('partials', ['load:config'], function() {
+gulp.task('partials', ['load:app'], function() {
 	return gulp.src(paths.ngPartials)
 		.pipe(minifyHtml())
 		.pipe(ngTemplateCache({
@@ -20,7 +20,7 @@ gulp.task('partials', ['load:config'], function() {
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
 			notify({
-				title: config.title + ' - Partials',
+				title: app.config.title + ' - Partials',
 				message: 'Rebuilt angular template cache ' + (++templateBootCount > 1 ? ' #' + templateBootCount : ''),
 				icon: __dirname + '/icons/angular.png',
 			}).write(0);
