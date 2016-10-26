@@ -83,3 +83,27 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/units/scenarios/`                 | Sample population data for all models, created by [Mongoose-Scenario](https://github.com/hash-bang/Node-Mongoose-Scenario). Each sub-directory should correspond with a scenario build profile with `defaults` being the default |
 | `/units/scenarios/defaults/` | The default scenario file to use when no other is specified. The contents of this directory are processed when running `gulp db` |
 | `/tests/`                           | Optional testing files |
+
+
+Testing + Debugging
+===================
+
+Unit tests
+----------
+Larger projects can populate the `/tests/` directory with [Mocha](https://mochajs.org) + [Chai](http://chaijs.com/api/bdd) test cases. Tests can also be specified per-unit by adding any file matching the glob `*.test.js` within their unit directory.
+
+To run a Unit test you will need to have Mocha installed (`sudo npm i -g mocha`). Either run mocha with no specified files to process *all* test files or specify the specific test file(s) you wish Mocha to examine as command line arguments.
+
+**TIP:** Unit tests can be skipped temporarily by either adding an 'x' before `describe` / `it` or adding `.skip` as a suffix. e.g. To temporarily skip a test rename the function `describe('something something')` to `xdescribe('something something')` or `describe.skip('something something')`.
+**TIP::** As with the above you can also force Mocha to *only* run one test - this is useful if your test is deeply nested within an existing file and you don't want to add `skip` to each other case. To use this add `.only` as a suffix for the `describe` / `it` declaration. e.g. `it('should do this', function() { ... })` becomes `it.only('should do this', function() { ... })`.
+
+
+Command line debugging
+----------------------
+Doop, like most modules, responds to the `DEBUG` flag used by the [Debug](https://github.com/visionmedia/debug) module. This turns on verbose logging when running within a console.
+The `DEBUG` variable can be set to the specific module you would like to log, a number of them via comma-seperated-values or a glob expression. For example `DEBUG=doop gulp` runs Gulp and tells Doop to run in debug mode.
+
+Some tips:
+* For internal problems with Doop (such as issues with load order, hooks or other structural issues) set `DEBUG=doop` before running. e.g. `DEBUG=doop gulp` when running within Doop.
+* For async related issues set [Async-Chainables debug flag](https://github.com/hash-bang/async-chainable#debugging). e.g. `DEBUG=async-chainable gulp`
+* For database related issues set Monoxides debug flag. e.g. `DEBUG=monoxide`. This can be especially useful when debugging why Monoxide (the Doop ReST handler) didn't perform a certain action such as creating a record.
