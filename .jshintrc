@@ -15,5 +15,6 @@
 
 	// Code styling preferences
 	"asi": false, // Tolerate Automatic Semicolon Insertion (no semicolons).
-	"white": true // Check against strict whitespace and indentation rules.
+	"white": true, // Check against strict whitespace and indentation rules.
+	"laxbreak": true, // Dont care about multi-line logical expressions
 }
