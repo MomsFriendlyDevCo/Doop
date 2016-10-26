@@ -135,9 +135,11 @@ gulp.on('stop', function() { process.exit(0); });
 // Loaders {{{
 
 /**
-* Loads main app configuration file into `config` + `app.config`
+* Loads main app configuration file into `app`
+* This also includes loading `app.config`
+* If you want `app.db` you must also call `load:db`
 */
-gulp.task('load:config', [], function(finish) {
+gulp.task('load:app', [], function(finish) {
 	require('./units/core/app');
 	global.config = app.config;
 
@@ -147,7 +149,7 @@ gulp.task('load:config', [], function(finish) {
 /**
 * Connects to the database and loads all models into `app.db` + `db`
 */
-gulp.task('load:db', ['load:config'], function(finish) {
+gulp.task('load:app.db', ['load:app'], function(finish) {
 	require(config.paths.root + '/units/db/loader')(function(err, models) {
 		if (err) return finish(err);
 		global.db = app.db = models;

@@ -22,32 +22,32 @@ var common = require('./common.gulp.lib');
 * @return {Stream}
 */
 var cssBootCount = 0;
-gulp.task('css', ['load:config'], function() {
+gulp.task('css', ['load:app'], function() {
 	var hasErr = false;
 	return gulp.src(paths.css)
 		.pipe(gplumber({
 			errorHandler: function(err) {
 				gutil.log(colors.red('ERROR DURING CSS BUILD'));
-				notify({message: err.name + '\n' + err.message, title: config.title + ' - CSS Error'}).write(err);
+				notify({message: err.name + '\n' + err.message, title: app.config.title + ' - CSS Error'}).write(err);
 				process.stdout.write(err.stack);
 				hasErr = err;
 				this.emit('end');
 			},
 		}))
-		.pipe(gulpIf(config.gulp.debugCSS, sourcemaps.init()))
+		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.init()))
 		.pipe(concat('app.min.css'))
 		.pipe(bytediff.start())
 		.pipe(cleanCSS({
 			processImport: false, // Prevents 'Broken @import declaration' error during build task
 		}))
-		// .pipe(gulpIf(config.gulp.minifyCSS, minifyCSS()))
-		.pipe(gulpIf(config.gulp.debugCSS, sourcemaps.write()))
+		// .pipe(gulpIf(app.config.gulp.minifyCSS, minifyCSS()))
+		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.write()))
 		.pipe(bytediff.stop(common.bytediffFormatter))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
 			if (!hasErr)
 				notify({
-					title: config.title + ' - CSS',
+					title: app.config.title + ' - CSS',
 					message: 'Rebuilt frontend CSS' + (++cssBootCount > 1 ? ' #' + cssBootCount : ''),
 					icon: __dirname + '/icons/css.png',
 				}).write(0);

@@ -24,13 +24,13 @@ var common = require('./common.gulp.lib');
 * Compile all JS files into the build directory
 */
 var scriptBootCount = 0;
-gulp.task('scripts', ['load:config'], function() {
+gulp.task('scripts', ['load:app'], function() {
 	var hasErr;
 	return gulp.src(paths.scripts)
 		.pipe(gplumber({
 			errorHandler: function(err) {
 				gutil.log(colors.red('ERROR DURING JS BUILD'));
-				notify({message: err.name + '\n' + err.message, title: config.title + ' - JS Error'}).write(err);
+				notify({message: err.name + '\n' + err.message, title: app.config.title + ' - JS Error'}).write(err);
 				process.stdout.write(err.stack);
 				hasErr = err;
 				this.emit('end');
@@ -47,19 +47,19 @@ gulp.task('scripts', ['load:config'], function() {
 				return true;
 			},
 		}))
-		.pipe(gulpIf(config.gulp.debugJS, sourcemaps.init()))
+		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.init()))
 		.pipe(concat('app.min.js'))
 		.pipe(bytediff.start())
 		.pipe(replace("\"app\/", "\"\/app\/")) // Rewrite all literal paths to relative ones
-		.pipe(gulpIf(config.gulp.minifyJS, annotate()))
-		.pipe(gulpIf(config.gulp.minifyJS, uglify({mangle: false})))
-		.pipe(gulpIf(config.gulp.debugJS, sourcemaps.write()))
+		.pipe(gulpIf(app.config.gulp.minifyJS, annotate()))
+		.pipe(gulpIf(app.config.gulp.minifyJS, uglify({mangle: false})))
+		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.write()))
 		.pipe(bytediff.stop(common.bytediffFormatter))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
 			if (!hasErr)
 				notify({
-					title: config.title + ' - Scripts',
+					title: app.config.title + ' - Scripts',
 					message: 'Rebuilt frontend scripts' + (++scriptBootCount > 1 ? ' #' + scriptBootCount : ''),
 					icon: __dirname + '/icons/javascript.png',
 				}).write(0);
