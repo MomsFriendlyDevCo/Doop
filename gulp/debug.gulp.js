@@ -14,6 +14,15 @@ gulp.task('config', ['load:config'], function() {
 
 
 /**
+* Dump the full app structure to the console
+* This is similar to `gulp config` but dumps the stub `app` structure also
+*/
+gulp.task('app', ['load:config'], function() {
+	gutil.log(app);
+});
+
+
+/**
 * Connect to the local DB (using the current config) and output all user rows
 */
 gulp.task('db:test', ['load:db'], function(next) {

@@ -4,11 +4,11 @@
 *
 * @example
 * // Access the database via a dumb module:
-* var db = require(config.paths.root + '/units/db/index')(function(db) { // db is now the modules loaded // })
+* var db = require(config.paths.root + '/units/db/server/index')(function(db) { // db is now the modules loaded // })
 *
 * @exmaple
 * // Access the database via an emitter
-* require(config.paths.root + '/units/db/index')()
+* require(config.paths.root + '/units/db/server/index')()
 * 	.on('end', (models) => { // Models is now the modules loaded // });
 */
 
@@ -45,7 +45,7 @@ module.exports = function databaseLoader(callback) {
 			});
 
 			self.emit('end', monoxide.models);
-			if (_.isFunction(callback)) callback(monoxide.models);
+			if (_.isFunction(callback)) callback(null, monoxide.models);
 		});
 	});
 

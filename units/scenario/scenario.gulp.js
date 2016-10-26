@@ -14,13 +14,13 @@ var scenario = require('gulp-mongoose-scenario');
 gulp.task('scenario', ['load:db'], function(finish) {
 	if (config.env == 'production') return finish('Refusing to reload database in production! If you REALLY want to do this use `NODE_ENV=something gulp db`');
 
-	gulp.src(__dirname + '/defaults/*.{js,json}')
+	gulp.src(__dirname + '/*.json')
 		.pipe(scenario({
 			nuke: true,
 			connection: monoxide.connection,
-			getModels: () => Object.keys(db),
-			getCollection: collection => db[collection],
-			getCollectionSchema: collection => db[collection].$mongooseModel.schema,
+			getModels: () => Object.keys(app.db),
+			getCollection: collection => app.db[collection],
+			getCollectionSchema: collection => app.db[collection].$mongooseModel.schema,
 		}))
 		.on('error', function(err) {
 			gutil.log('Error loading scenario'.red, err);

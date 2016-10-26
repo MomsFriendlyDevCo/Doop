@@ -135,26 +135,22 @@ gulp.on('stop', function() { process.exit(0); });
 // Loaders {{{
 
 /**
-* Loads main app configuration file
+* Loads main app configuration file into `config` + `app.config`
 */
 gulp.task('load:config', [], function(finish) {
-	// Make a stub app object so the units can register themselves correctly {{{
-	global.app = {
-		quiet: true,
-		config: require(paths.config + '/index.conf'),
-	};
-	// }}}
+	require('./units/core/app');
 	global.config = app.config;
 
 	finish();
 });
 
 /**
-* Connects to the database and loads all models into `db`
+* Connects to the database and loads all models into `app.db` + `db`
 */
 gulp.task('load:db', ['load:config'], function(finish) {
-	require(config.paths.server + '/units/db/index')(models => {
-		global.db = models;
+	require(config.paths.root + '/units/db/loader')(function(err, models) {
+		if (err) return finish(err);
+		global.db = app.db = models;
 		finish();
 	});
 });
