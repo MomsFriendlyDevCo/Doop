@@ -92,6 +92,6 @@ app.route('/api/users/resetpass')
 				if (err) return res.status(400).send({ err: err });
 
 				res.send({ status: 'success', message: 'Password reset', email: req.body.email });
-			})
+			});
 			// }}}
 	});
