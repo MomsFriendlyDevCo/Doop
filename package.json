@@ -28,6 +28,7 @@
     "bootstrap": "^3.3.7",
     "bouncy": "^3.2.2",
     "brace-expansion": "^1.1.6",
+    "chai": "^3.5.0",
     "chalk": "^1.1.3",
     "compression": "^1.6.2",
     "connect-flash": "^0.1.1",
@@ -75,6 +76,7 @@
     "map-stream": "0.0.6",
     "mfdc-email": "^2.0.0",
     "mkdirp": "^0.5.1",
+    "mocha": "^3.1.2",
     "moment": "^2.15.2",
     "monoxide": "0.0.62",
     "multer": "^1.2.0",
@@ -84,6 +86,7 @@
     "passport-local": "^1.0.0",
     "pm2": "^2.0.19",
     "rimraf": "^2.5.4",
-    "run-sequence": "^1.2.2"
+    "run-sequence": "^1.2.2",
+    "superagent": "^2.3.0"
   }
 }
