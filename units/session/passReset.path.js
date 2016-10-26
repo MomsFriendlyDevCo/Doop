@@ -34,7 +34,7 @@ app.route('/action/resetpass')
 					// FIXME
 					.to(req.body.email)
 					.subject('Signup')
-					.template(app.config.paths.server + '/units/users/resetPass.email.html')
+					.template(app.config.paths.root + '/units/users/resetPass.email.html')
 					.templateParams({
 						// Construct the link the user will need to activate to verify their account and thus complete signup
 						tokenURI: app.config.url + '/action/resetpass/' + this.user.token

@@ -7,7 +7,7 @@ app.register('preControllers', function(finish) {
 	process.env.NEW_RELIC_APP_NAME = app.config.name;
 	process.env.NEW_RELIC_NO_CONFIG_FILE = true;
 	process.env.NEW_RELIC_LOG_LEVEL = 'info';
-	process.env.NEW_RELIC_HOME = app.config.paths.server;
+	process.env.NEW_RELIC_HOME = app.config.paths.root;
 	require('newrelic');
 
 	finish();

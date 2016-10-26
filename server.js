@@ -135,7 +135,7 @@ async()
 	// }}}
 	// Load all service hooks {{{
 	.then(function(next) {
-		glob(app.config.paths.server + '/units/**/*.hook.js', function(err, files) {
+		glob(app.config.paths.root + '/units/**/*.hook.js', function(err, files) {
 			if (err) return next(err);
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
@@ -154,7 +154,7 @@ async()
 	// }}}
 	// Load all route path handlers {{{
 	.then(function(next) {
-		glob(app.config.paths.server + '/units/**/*.path.js', function(err, files) {
+		glob(app.config.paths.root + '/units/**/*.path.js', function(err, files) {
 			if (err) return next(err);
 			if (!files.length) return next('No server controllers found');
 			files.forEach(path => {
