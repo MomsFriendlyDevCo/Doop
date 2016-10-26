@@ -1,4 +1,5 @@
 // MFDC JSHINTRC FILE
+// vim:ft=javascript
 {
 	// Predefined globals whom JSHint will ignore.
 	"browser": true,
