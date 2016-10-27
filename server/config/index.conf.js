@@ -63,7 +63,7 @@ var defaults = {
 		uri: 'mongodb://localhost/{{FIXME.db.name}}',
 		options: {
 			db: {
-				safe: true
+				safe: true,
 			}
 		}
 	},
@@ -72,8 +72,7 @@ var defaults = {
 		license: '{{FIXME.newrelic.license}}',
 	},
 	paths: {
-		root: path.normalize(__dirname + '/../..'),
-		server: path.normalize(__dirname + '/..'),
+		root: path.normalize(__dirname + '/..'),
 	},
 };
 

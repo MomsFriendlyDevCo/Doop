@@ -2,7 +2,7 @@
   "name": "FIXME.project.name",
   "description": "FIXME.project.description",
   "version": "0.0.0",
-  "main": "gulpfile.js",
+  "main": "server.js",
   "private": true,
   "engines": {
     "node": "4.x.x"
