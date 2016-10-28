@@ -33,7 +33,7 @@ app.route('/action/resetpass')
 				email()
 					.to(req.body.email)
 					.subject('Signup')
-					.template(app.config.paths.server + '/units/users/resetPass.email.html')
+					.template(app.config.paths.root + '/units/users/resetPass.email.html')
 					.templateParams({
 						// Construct the link the user will need to activate to verify their account and thus complete signup
 						tokenURI: app.config.url + '/action/resetpass/' + this.user.token
@@ -91,6 +91,6 @@ app.route('/api/users/resetpass')
 				if (err) return res.status(400).send({ err: err });
 
 				res.send({ status: 'success', message: 'Password reset', email: req.body.email });
-			})
+			});
 			// }}}
 	});

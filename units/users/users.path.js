@@ -75,7 +75,7 @@ app.post('/signup', app.middleware.ensure.nologin, function(req, res, finish) {
 			email()
 				.to(req.body.email)
 				.subject('4ME Training Registration - Account Verification')
-				.template(app.config.paths.server + '/units/users/signup.email.html')
+				.template(app.config.paths.root + '/units/users/signup.email.html')
 				.templateParams({
 					// Construct the link the user will need to activate to verify their account and thus complete signup
 					tokenURI: app.config.url + '/validate/' + this.user.token,

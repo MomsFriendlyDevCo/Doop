@@ -4,10 +4,9 @@
 */
 var colors = require('chalk');
 
-var databaseLoader = require('.');
+var databaseLoader = require('./loader');
 
 app.register('preControllers', function(finish) {
-	
 	app.fire('preModels');
 
 	databaseLoader()
@@ -15,11 +14,12 @@ app.register('preControllers', function(finish) {
 		.on('error', err => finish('DB CONNECTION ERR: ' + err.toString()))
 		.on('model', path => {
 			app.unit = app.getUnit(path);
-			console.log('-', colors.grey('[modl]'), app.unit.shortName);
+			console.log('-', colors.grey('[modl]'), app.unit.id);
 		})
 		.on('end', models => {
 			app.fire('postModels');
 			app.db = global.db = models; // Setup global shortcut to models
+
 			finish();
 		});
 });

@@ -31,9 +31,9 @@ build/Release
 .DS_Store
 .idea
 *.swp
-server/build/
+build/
 config/private.conf.js
 newrelic_agent.log
 node_modules/
 tmp
-/data/
+data/
