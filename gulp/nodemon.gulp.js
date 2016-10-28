@@ -14,7 +14,7 @@ var common = require('./common.gulp.lib');
 * Launch a server and watch the local file system for changes (restarting the server if any are detected)
 * This task independently watches the client side files dir (inc. Angular) for changes and only rebuilds those without rebooting the server if a change is detected
 */
-gulp.task('nodemon', ['load:config', 'build'], function(finish) {
+gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 	watch(paths.scripts, function() {
 		gutil.log('Rebuild client-side JS files...');
 		gulp.start('scripts');
@@ -49,7 +49,7 @@ gulp.task('nodemon', ['load:config', 'build'], function(finish) {
 		.on('start', function() {
 			if (runCount > 0) return;
 			notify({
-				title: config.title + ' - Nodemon',
+				title: app.config.title + ' - Nodemon',
 				message: 'Server started',
 				icon: __dirname + '/icons/node.png',
 			}).write(0);
@@ -57,7 +57,7 @@ gulp.task('nodemon', ['load:config', 'build'], function(finish) {
 		.on('restart', function() {
 			runCount++;
 			notify({
-				title: config.title + ' - Nodemon',
+				title: app.config.title + ' - Nodemon',
 				message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
 				icon: __dirname + '/icons/nodemon.png',
 			}).write(0);

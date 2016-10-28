@@ -6,4 +6,4 @@ Doop! The micro-framework from MFDC
 This file should be replaced by your own project documentation.
 
 
-[Click here for the Doop documentation](DOOP/)
+[Click here for the Doop documentation](https://github.com/MomsFriendlyDevCo/Doop/tree/master/DOOP)

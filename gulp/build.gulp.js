@@ -70,7 +70,7 @@ gulp.task('build:clean', function(finish) {
 * Move video assets into build directory
 * @return {Stream}
 */
-gulp.task('videos', ['load:config'], function() {
+gulp.task('videos', ['load:app'], function() {
 	var dest = paths.build + '/content/videos';
 	gutil.log('Copying videos');
 	return gulp

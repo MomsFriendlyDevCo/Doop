@@ -30,14 +30,14 @@ global.paths = {
 		'test',
 		'client/app', // No need to watch this with nodemon as its handled seperately
 	],
-	client: __dirname + '/client',
-	config: __dirname + '/server/config',
-	server: __dirname + '/server',
-	html: ['client/**/*.html', 'server/**/*.html'],
-	ngPartials: 'client/**/*.html',
+	client: __dirname,
+	config: __dirname + '/config',
+	server: __dirname,
+	html: ['units/**/*.tmpl.html', 'units/**/*.html'],
+	ngPartials: 'units/**/*.tmpl.html',
 	data: 'data',
 	tests: 'tests',
-	build: 'server/build',
+	build: 'build',
 	vendors: {
 		// Vendor files
 		// This list supports brace expansion so 'foo.{css,js}' ~> ['foo.css', 'foo.js']
@@ -66,13 +66,19 @@ global.paths = {
 		],
 	},
 	css: [
-		'client/**/*.css',
+		'units/**/*.css',
 	],
 	scripts: [
-		'client/app.js',
-		'client/app.conf.js',
-		'client/**/*.modu.js',
-		'client/**/*.js',
+		'units/**/client.js',
+		'units/**/client.conf.js',
+		'units/**/*.modu.js',
+		'units/**/*.serv.js',
+		'units/**/*.dirv.js',
+		'units/**/*.comp.js',
+		'units/**/*.rout.js',
+		'units/**/*.modl.js',
+		'units/**/*.fltr.js',
+		'units/**/*.ctrl.js',
 	],
 	specs: [
 		'tests/client/specs/*.spec.js'
@@ -129,26 +135,24 @@ gulp.on('stop', function() { process.exit(0); });
 // Loaders {{{
 
 /**
-* Loads main app configuration file
+* Loads main app configuration file into `app`
+* This also includes loading `app.config`
+* If you want `app.db` you must also call `load:db`
 */
-gulp.task('load:config', [], function(finish) {
-	// Make a stub app object so the units can register themselves correctly {{{
-	global.app = {
-		quiet: true,
-		config: require(paths.config + '/index.conf'),
-	};
-	// }}}
+gulp.task('load:app', [], function(finish) {
+	require('./units/core/app');
 	global.config = app.config;
 
 	finish();
 });
 
 /**
-* Connects to the database and loads all models into `db`
+* Connects to the database and loads all models into `app.db` + `db`
 */
-gulp.task('load:db', ['load:config'], function(finish) {
-	require(config.paths.server + '/units/db/index')(models => {
-		global.db = models;
+gulp.task('load:app.db', ['load:app'], function(finish) {
+	require(config.paths.root + '/units/db/loader')(function(err, models) {
+		if (err) return finish(err);
+		global.db = app.db = models;
 		finish();
 	});
 });

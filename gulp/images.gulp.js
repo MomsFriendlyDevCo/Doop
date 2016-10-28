@@ -14,13 +14,13 @@ var common = require('./common.gulp.lib');
 * Compress images
 * @return {Stream}
 */
-gulp.task('images', ['load:config'], function() {
+gulp.task('images', ['load:app'], function() {
 	var dest = paths.build + '/content/images';
 	gutil.log('Compressing, caching, and copying images');
 	return gulp
 		.src(paths.images)
 		// NOTE: Image optimization can SIGNIFICANTLY slow down the gulp build process and for compressions that are that great either
-		.pipe(gulpIf(config.gulp.minifyImages, cache(imagemin({
+		.pipe(gulpIf(app.config.gulp.minifyImages, cache(imagemin({
 			optimizationLevel: 3
 		}))))
 		.pipe(gulp.dest(dest));
