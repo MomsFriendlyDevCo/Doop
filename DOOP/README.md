@@ -34,7 +34,7 @@ Units
 -----
 A Doop Unit is a generic interchangeable collection of controllers, models, templates and other resources used by one system entity.
 
-These are stored both in `/client/units` and `/server/units` if for [front-end](FRONTEND.md) or [back-end](BACKEND.md) respectively.
+Front-end and back-end resources are stored both in their containing unit within `/units`. See [front-end](FRONTEND.md) or [back-end](BACKEND.md), respectively.
 
 
 NPM modules
@@ -93,6 +93,8 @@ Unit tests
 Larger projects can populate the `/tests/` directory with [Mocha](https://mochajs.org) + [Chai](http://chaijs.com/api/bdd) test cases. Tests can also be specified per-unit by adding any file matching the glob `*.test.js` within their unit directory.
 
 To run a Unit test you will need to have Mocha installed (`sudo npm i -g mocha`). Either run mocha with no specified files to process *all* test files or specify the specific test file(s) you wish Mocha to examine as command line arguments.
+
+Run the *all* the tests with mocha in the project root directory with `mocha`.
 
 **TIP:** Unit tests can be skipped temporarily by either adding an 'x' before `describe` / `it` or adding `.skip` as a suffix. e.g. To temporarily skip a test rename the function `describe('something something')` to `xdescribe('something something')` or `describe.skip('something something')`.
 **TIP::** As with the above you can also force Mocha to *only* run one test - this is useful if your test is deeply nested within an existing file and you don't want to add `skip` to each other case. To use this add `.only` as a suffix for the `describe` / `it` declaration. e.g. `it('should do this', function() { ... })` becomes `it.only('should do this', function() { ... })`.
