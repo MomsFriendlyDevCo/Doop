@@ -14,7 +14,7 @@ app.register('preControllers', function(finish) {
 		.on('error', err => finish('DB CONNECTION ERR: ' + err.toString()))
 		.on('model', path => {
 			app.unit = app.getUnit(path);
-			console.log('-', colors.grey('[modl]'), app.unit.id);
+			console.log('-', colors.grey('[schm]'), app.unit.id);
 		})
 		.on('end', models => {
 			app.fire('postModels');
