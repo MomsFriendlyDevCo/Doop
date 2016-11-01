@@ -20,6 +20,7 @@ References:
 
 * [Doop back-end reference](BACKEND.md)
 * [Doop front-end reference](FRONTEND.md)
+* [Doop command-line interface](https://github.com/MomsFriendlyDevCo/doop-cli)
 
 
 Terminology:
