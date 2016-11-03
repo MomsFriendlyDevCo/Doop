@@ -67,7 +67,7 @@ app.post('/signup', app.middleware.ensure.nologin, function(req, res, finish) {
 				username: req.body.username || req.body.email,
 				password: req.body.password,
 				status: 'pendingVerify',
-				token: uuid.v4(), // FIXME: Should improve token generation to a better hash
+				_token: uuid.v4(),
 			}, next);
 		})
 		.then(function(next) {
@@ -78,7 +78,7 @@ app.post('/signup', app.middleware.ensure.nologin, function(req, res, finish) {
 				.template(app.config.paths.root + '/units/users/signup.email.html')
 				.templateParams({
 					// Construct the link the user will need to activate to verify their account and thus complete signup
-					tokenURI: app.config.url + '/validate/' + this.user.token,
+					tokenURI: app.config.url + '/validate/' + this.user._token,
 				})
 				.send(next);
 		})
@@ -94,9 +94,9 @@ app.post('/signup', app.middleware.ensure.nologin, function(req, res, finish) {
 });
 
 app.use('/api/users/:id?', monoxide.express.middleware('users', {
-	query: [ app.middleware.ensure.admin ],
-	create: [],
-	save: [ app.middleware.ensure.login ],
-	get: [ app.middleware.ensure.login ],
-	delete: [ app.middleware.ensure.admin ]
+	query: app.middleware.ensure.admin,
+	create: app.middleware.ensure.admin,
+	save: app.middleware.ensure.admin,
+	get: app.middleware.ensure.login,
+	delete: app.middleware.ensure.admin,
 }));

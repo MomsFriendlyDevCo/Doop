@@ -29,9 +29,9 @@ app.post('/login', passport.authenticate('local', {
 	failureRedirect: '/login',
 	failureFlash: true
 }), function(req, res){
-	if (req.user.token){
+	if (req.user._token){
 		// User requested password reset but logs in with current password
-		db.users.update({username:req.user.username}, {token:null}, function(err, doc){
+		req.user.save({_token: undefined}, function(err, doc) {
 			res.redirect('/');
 		});
 	} else {

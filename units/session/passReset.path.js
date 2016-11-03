@@ -24,7 +24,7 @@ app.route('/action/resetpass')
 					if (!user) return next('User with that email does not exist');
 
 					// Add reset token to user account
-					user.token = uuid.v4();
+					user._token = uuid.v4();
 					user.save(next);
 				});
 			})
@@ -36,7 +36,7 @@ app.route('/action/resetpass')
 					.template(app.config.paths.root + '/units/users/resetPass.email.html')
 					.templateParams({
 						// Construct the link the user will need to activate to verify their account and thus complete signup
-						tokenURI: app.config.url + '/action/resetpass/' + this.user.token
+						tokenURI: app.config.url + '/action/resetpass/' + this.user._token
 					})
 					.send(next);
 			})
@@ -72,7 +72,7 @@ app.route('/api/users/resetpass')
 			// Fetch user by token {{{
 			.then('user', function(next) {
 				// Find user by token
-				db.users.findOne({ token: req.body.token }, function(err, user) {
+				db.users.findOne({_token: req.body.token}, function(err, user) {
 					if (err) return next(err);
 					if (!user) return next('Could validate token: no users match the provided token');
 					next(null, user);
@@ -81,7 +81,7 @@ app.route('/api/users/resetpass')
 			// }}}
 			// Set password + reset token {{{
 			.then(function(next) {
-				user.token = undefined;
+				user._token = undefined;
 				user.password = req.body.password;
 				user.save(next);
 			})

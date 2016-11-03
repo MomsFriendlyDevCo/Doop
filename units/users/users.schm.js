@@ -12,42 +12,13 @@ var User = module.exports = monoxide.schema('users', {
 	_passhash: {type: String},
 	_passhash2: {type: String},
 	_passsalt: {type: String},
+	_token: {type: String},
 	name: {type: String},
-	status: {type: String, enum: ['pendingVerify', 'pendingInfo', 'active', 'deleted'], default: 'active', index: true}, // TODO: Change default to 'pendingVerify'
+	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
-	token: {type: String},
 	settings: {type: 'object', default: {}},
 	created: {type: Date, default: Date.now},
 	lastLogin: {type: Date, default: Date.now},
-
-	// Profile {{{
-	location: {
-		city: {type: String},
-		suburb: {type: String},
-		postcode: {type: String},
-	},
-	dob: {type: Date},
-	// }}}
-
-	// User auth-related data {{{
-	_auth: {
-		subscription: {
-			type: {type: String, enum: ['premium', 'trial', 'basic'], default: 'trial', index: true},
-			expiry: {type: Date},
-			created: {type: Date, default: Date.now},
-		},
-		facebook: {
-			profileId: {type: String},
-		},
-		google: {
-			profileId: {type: String},
-		},
-		stripe: {
-			customerId: {type: String},
-			created: {type: Date}
-		}
-	},
-	// }}}
 });
 
 // Deal with logins + user passwords {{{

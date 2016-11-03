@@ -1,6 +1,6 @@
 var expect = require('chai').expect;
 
-describe('user', function() {
+describe('Session Unit', function() {
 
 	var user;
 	it('should be able to login', function(done) {

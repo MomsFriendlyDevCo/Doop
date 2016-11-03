@@ -1,0 +1,33 @@
+<div ng-controller="DebugCtrl as $ctrl" class="container">
+	<div class="row pad-top-lg">
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header"><h4>Loader</h4></div>
+				<div class="list-group">
+					<a class="list-group-item" ng-click="$ctrl.loaderStart('debug1')">$loader.start("debug1")</a>
+					<a class="list-group-item" ng-click="$ctrl.loaderStop('debug1')">$loader.stop("debug1")</a>
+					<a class="list-group-item" ng-click="$ctrl.loaderStartBackground('debug2')">$loader.startBackground("debug2")</a>
+					<a class="list-group-item" ng-click="$ctrl.loaderStop('debug2')">$loader.stop("debug2")</a>
+					<a class="list-group-item" ng-click="$ctrl.loaderStart('debug3', false)">$loader.start("debug3", false)</a>
+					<a class="list-group-item" ng-click="$ctrl.loaderStop('debug3')">$loader.stop("debug3")</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header"><h4>Notifications</h4></div>
+				<div class="list-group">
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.primary('Hello World')">ToastsServ.primary('Hello World')</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.info('Hello World')">ToastsServ.info('Hello World')</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.success('Hello World')">ToastsServ.success('Hello World')</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.warning('Hello World')">ToastsServ.warning('Hello World')</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.error('Hello World')">ToastsServ.error('Hello World')</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.catch()">ToastsServ.catch()</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.catch({error: 'Hello World'})">ToastsServ.catch({error: 'Hello World'})</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.offline(true)">ToastsServ.offline()</a>
+					<a class="list-group-item" ng-click="$ctrl.ToastsServ.offline(false)">ToastsServ.offline(false)</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

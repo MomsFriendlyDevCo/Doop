@@ -11,12 +11,12 @@ app.route('/validate/:token')
 			})
 			// }}}
 			.then('user', function(next) {
-				db.users.findOne({ token: req.params.token }, function(err, user) {
+				db.users.findOne({_token: req.params.token}, function(err, user) {
 					if (err && err != 'Not found') return next(err);
 					if (!user || err == 'Not found') return next('Could not validate token: no users match the provided token');
 
 					user.status = 'active';
-					user.token = undefined;
+					user._token = undefined;
 
 					user.save(next);
 				});

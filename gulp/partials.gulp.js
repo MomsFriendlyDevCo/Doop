@@ -15,7 +15,7 @@ gulp.task('partials', ['load:app'], function() {
 			filename: 'partials.min.js',
 			module: 'app',
 			standalone: false,
-			root: '/app/units/',
+			root: '/units/',
 		}))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {

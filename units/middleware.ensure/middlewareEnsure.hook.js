@@ -38,15 +38,6 @@ app.register('preControllers', ['session'], function(finish) {
 		login: function(req, res, next) {
 			if (req.user && req.user._id) { // Check standard passport auth (inc. cookies)
 				return next();
-			} else if (req.body.token) { // Token has been provided
-				Users.findOne({
-					'auth.tokens.token': req.body.token
-				}, function(err, user) {
-					if (err || !user) return app.middleware.ensure.loginFail(req, res, next);
-					console.log('Accepted auth token', colors.cyan(req.body.token));
-					req.user = user;
-					next();
-				});
 			} else { // Not logged in and no method being passed to handle - reject
 				app.middleware.ensure.loginFail(req, res, next);
 			}
