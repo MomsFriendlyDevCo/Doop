@@ -25,14 +25,11 @@ global.paths = {
 	root: __dirname, // Root directory of the project
 	ignore: [ // Do not monitor these paths for changes
 		'node_modules',
-		'server/build',
+		'build',
 		'data',
 		'test',
-		'client/app', // No need to watch this with nodemon as its handled seperately
 	],
-	client: __dirname,
 	config: __dirname + '/config',
-	server: __dirname,
 	html: ['units/**/*.tmpl.html', 'units/**/*.html'],
 	ngPartials: 'units/**/*.tmpl.html',
 	data: 'data',
