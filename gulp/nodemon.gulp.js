@@ -35,16 +35,11 @@ gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 		gulp.start('vendors');
 	});
 
-	watch(paths.images, function() {
-		gutil.log('Rebuild images...');
-		gulp.start('images');
-	});
-
 	var runCount = 0;
 	nodemon({
-		script: paths.server + '/server.js',
-		ext: 'html js ejs css scss',
-		ignore: paths.ignore.concat(paths.scripts, paths.css), // Only watch server files - everything else is handled seperately anyway
+		script: paths.root + '/server.js',
+		ext: 'js ejs',
+		ignore: [].concat(paths.ignore, paths.scripts, paths.css, paths.ngPartials), // Only watch server files - everything else is handled seperately anyway
 	})
 		.on('start', function() {
 			if (runCount > 0) return;
