@@ -10,7 +10,6 @@ app.register('preServer', function(finish) {
 	app.use('/build', express.static(app.config.paths.root + '/build'));
 	app.use('/content', express.static(app.config.paths.root + '/build/content'));
 	app.use('/data', express.static(app.config.paths.root + '/data'));
-	app.use('/fonts', express.static(app.config.paths.root + '/build/fonts'));
 
 	finish();
 });

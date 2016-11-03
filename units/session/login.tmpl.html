@@ -1,0 +1,25 @@
+<div class="login-content">
+	<div class="lc-block toggled" id="l-login">
+		<form class="lcb-form" name="userLoginForm" ng-submit="$ctrl.login(userLoginForm.$valid)" method="POST">
+			<div class="alert alert-danger" ng-if="$ctrl.error">{{$ctrl.error}}</div>
+
+			<div class="input-group m-b-20">
+				<span class="input-group-addon"><i class="fa fa-user"></i></span>
+				<div class="fg-line">
+					<input type="text" name="username" ng-model="$ctrl.user.username" placeholder="Email address" class="form-control" required autofocus>
+				</div>
+			</div>
+
+			<div class="input-group m-b-20">
+				<span class="input-group-addon"><i class="fa fa-key"></i></span>
+				<div class="fg-line">
+					<input type="password" name="password" ng-model="$ctrl.user.password" placeholder="Password"  class="form-control" required>
+				</div>
+			</div>
+
+			<button type="submit" class="btn btn-login btn-success btn-float waves-effect waves-circle waves-float">
+				<i class="fa fa-arrow-right"></i>
+			</button>
+		</form>
+	</div>
+</div>

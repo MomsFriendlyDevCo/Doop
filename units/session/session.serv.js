@@ -5,6 +5,7 @@ angular
 
 		this.data = {}; // User session data
 		this.isLoggedIn = false;
+		this.isUpdated = false; // Have we tried to fetch the user info yet?
 
 		this.save = function() {
 			// Save session to db
@@ -26,15 +27,14 @@ angular
 					} catch(e) {
 						console.error('Could not cache session data');
 					}
-
-					// Broadcast to app that session data has changed
-					$rootScope.$broadcast('session.updated', self.data);
 				})
 				.catch(err => {
 					console.error('Could not update user session', err.data);
 				})
 				.finally(() => {
-					self.checkLogin();
+					this.isUpdated = true;
+					this.checkLogin();
+					$rootScope.$broadcast('session.updated', self.data);
 				});
 		};
 
@@ -83,10 +83,11 @@ angular
 
 		this.checkLogin = function() {
 			// Add convenience flags
-			if (self.data && self.data._id)
+			if (self.data && self.data._id) {
 				self.isLoggedIn = true;
-			else
+			} else {
 				self.isLoggedIn = false;
+			}
 		};
 
 		// Init local storage for session data

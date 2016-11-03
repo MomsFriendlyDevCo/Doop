@@ -6,6 +6,13 @@ angular
 		/*
 		* External Angular modules
 		*/
+		'angular-bs-confirm',
+		'angular-ui-loader',
+		'angular-bs-popover',
+		'angular-bs-tooltip',
 		'ngResource',
+		'ui.gravatar',
+		'ui-notification',
 		'ui.router',
+		'uiSwitch',
 	]);

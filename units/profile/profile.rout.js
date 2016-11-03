@@ -7,7 +7,7 @@ angular
 				templateUrl: '/app/units/profile/profile.tmpl.html',
 				controller: 'ProfileCtrl as vm',
 				data: {
-					// Put custom data to expose to controllers here
+					title: 'User Profile',
 				},
 			});
 	});

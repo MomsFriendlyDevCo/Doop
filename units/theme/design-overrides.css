@@ -1,0 +1,78 @@
+/**
+* Overrides for the default Material Design themes
+*/
+
+/* Basic HTML elements {{{ */
+/* All <a> elements + ng-click items should act as clickable */
+a, [ng-click] {
+	cursor: pointer;
+}
+/* }}} */
+/* Angular {{{ */
+.ng-cloak, [ng-cloak] {
+	display: none !important;
+}
+/* }}} */
+/* Tables {{{ */
+table.table td > a {
+	display: block;
+	color: #333;
+}
+/* }}} */
+
+/* Page: Login {{{ */
+/* This is a really hideous hack to make the login pane cover the entire rest of the screen while its visible */
+/* No shame #YOLO - MC 2016-11-02 */
+.login-content {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	z-index: 1000;
+}
+/* }}} */
+
+/* Theme override: dashboard icons {{{ */
+.chart {
+	padding: 12px 0 5px 10px !important;
+	width: 100px;
+	font-size: 39px;
+	text-align: center;
+	color: #FFF;
+}
+/* }}} */
+/* Theme override: profile area (top-left of sidebar) {{{ */
+.s-profile>a {
+	background: url('/theme/profile-menu.png') left top no-repeat !important;
+	background-size: 100% 100% !important;
+}
+
+#profile-links {
+	list-style: none;
+	padding-left: 0;
+	margin: 0;
+}
+
+#profile-links > li > a {
+	padding: 14px 20px 14px 65px;
+	display: block;
+	font-weight: 500;
+	position: relative;
+	color: #262626;
+}
+
+#profile-links > li > a:hover {
+	background-color: #f7f7f7;
+}
+
+#profile-links > li > a > i {
+	position: absolute;
+	left: 25px;
+	font-size: 18px;
+	top: 2px;
+	width: 25px;
+	text-align: center;
+	padding: 13px 0;
+}
+/* }}} */

@@ -1,0 +1,36 @@
+<div class="container">
+	<div class="block-header">
+		<h2>Manage Users</h2>
+		<div class="actions">
+			<input ng-model="$ctrl.query" class="form-control form-control-sm" type="search" placeholder="Search..." autofocus>
+		</div>
+	</div>
+	<div class="card">
+		<div class="card-body table-responsive">
+			<table ng-show="$ctrl.users.length" class="table table-hover">
+				<thead>
+					<tr>
+						<th style="width: 20px">Status</th>
+						<th>Email</th>
+						<th>Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="u in found = ($ctrl.users | filter:$ctrl.query) track by u._id">
+						<td class="text-center"><a href="#/admin/users/{{u._id}}">
+							<i ng-if="u.role=='admin' || u.role=='root'" class="fa fa-lg fa-user-circle" tooltip="User is an admin" tooltip-position="left" tooltip-container="body"></i>
+							<i ng-if="u.status=='deleted'" class="fa fa-lg fa-trash" tooltip="User has been deleted" tooltip-position="left" tooltip-container="body"></i>
+						</a></td>
+						<td><a href="#/admin/users/{{u._id}}">{{u.username == u.email ? u.email : u.email + ' (user: ' + u.username + ')'}}</a></td>
+						<td><a href="#/admin/users/{{u._id}}">{{u.name}}</a></td>
+					</tr>
+				</tbody>
+			</table>
+			<div ng-show="!$ctrl.users.length || !found.length">
+				<div class="alert alert-warning">
+					No users found matching your search criteria.
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

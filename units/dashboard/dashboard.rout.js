@@ -4,10 +4,9 @@ angular
 		$stateProvider
 			.state('dashboard', {
 				url: '/',
-				templateUrl: '/app/units/dashboard/dashboard.tmpl.html',
-				controller: 'DashCtrl as vm',
+				templateUrl: '/units/dashboard/dashboard.tmpl.html',
 				data: {
-					// Put custom data to expose to controllers here
+					title: 'Dashboard',
 				},
 			});
 	});
