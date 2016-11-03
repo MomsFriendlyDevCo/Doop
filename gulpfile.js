@@ -58,7 +58,8 @@ global.paths = {
 			'node_modules/lodash/lodash.js',
 			'node_modules/moment/moment.js',
 			// --- packages with dependents below this line --- //
-			// 'node_modules/tether/dist/js/tether.js',
+			'node_modules/bootstrap/dist/css/bootstrap.css',
+			'node_modules/bootstrap/dist/js/bootstrap.js',
 			// --- less important vendors below this line (alphabetical) --- //
 			'node_modules/angular-ui-router/release/angular-ui-router.js',
 			'node_modules/angular-resource/angular-resource.js',
