@@ -4,5 +4,7 @@
 */
 
 app.get('/', function(req, res) {
-	res.render('units/pages/main');
+	res.render('units/pages/main', {
+		theme: app.config.title,
+	});
 });

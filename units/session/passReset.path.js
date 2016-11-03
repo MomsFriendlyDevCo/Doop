@@ -7,7 +7,9 @@ var uuid = require('node-uuid');
 */
 app.route('/action/resetpass')
 	.get(function(req, res) {
-		res.render('units/session/resetPass');
+		res.render('units/session/resetPass', {
+			theme: app.config.theme,
+		});
 	})
 	.post(function(req, res) {
 		async()
