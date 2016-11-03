@@ -109,3 +109,13 @@ Some tips:
 * For internal problems with Doop (such as issues with load order, hooks or other structural issues) set `DEBUG=doop` before running. e.g. `DEBUG=doop gulp` when running within Doop.
 * For async related issues set [Async-Chainables debug flag](https://github.com/hash-bang/async-chainable#debugging). e.g. `DEBUG=async-chainable gulp`
 * For database related issues set Monoxides debug flag. e.g. `DEBUG=monoxide`. This can be especially useful when debugging why Monoxide (the Doop ReST handler) didn't perform a certain action such as creating a record.
+
+
+Site deployment checklist
+=========================
+This list is intended as a guide to help deploy a Doop site:
+
+* Replace all `FIXME` markers - especially in `config/index.conf.js` and `package.json`
+* Replace the contents of `units/theme/favicon` with your own Favicon. We recommend using [Real Favicon Generator](http://realfavicongenerator.net) to generate all the weird and wondeful varients that are required. Remember to also update the paths to the favicon in `units/layouts/main.html` if they change.
+* Check the database connection works and set up a basic database with `gulp db`
+* Edit the `units/config/config.serv.js` file and configure what data should be exposed to the front-end.
