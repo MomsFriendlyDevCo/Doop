@@ -4,7 +4,7 @@
 *
 * Additional features:
 *
-* 	* Exposed as `ToastsServ` rather than `Notification` which could be confused for a model
+* 	* Exposed as `$toast` rather than `Notification` which could be confused for a model
 *	* Adds `.catch(err)` method which attempts to determine the correct error text to display
 */
 angular
@@ -15,7 +15,7 @@ angular
 			positionY: 'bottom',
 		});
 	})
-	.service('ToastsServ', function($rootScope, Notification) {
+	.service('$toast', function($rootScope, Notification) {
 		var toasts = this;
 
 		toasts.primary = Notification.primary.bind(Notification);
