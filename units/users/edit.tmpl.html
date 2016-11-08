@@ -22,7 +22,7 @@
 				<label class="col-sm-3 control-label">Role</label>
 				<div class="col-sm-9 select">
 					<select ng-model="$ctrl.user.role" class="form-control">
-						<option ng-repeat="role in $ctrl.meta.roles" value="{{role.id}}">{{role.title}}</option>
+						<option ng-repeat="role in $ctrl.meta.role.enum" value="{{role.id}}">{{role.title}}</option>
 					</select>
 				</div>
 			</div>
