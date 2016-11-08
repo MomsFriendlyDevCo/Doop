@@ -1,13 +1,13 @@
 angular
 	.module('app')
-	.service('SessionServ', function($rootScope, $state, $window, SessionModl) {
-		var self = this;
+	.service('$session', function($rootScope, $state, $window, SessionModl) {
+		var $ctrl = this;
 
-		this.data = {}; // User session data
-		this.isLoggedIn = false;
-		this.isUpdated = false; // Have we tried to fetch the user info yet?
+		$ctrl.data = {}; // User session data
+		$ctrl.isLoggedIn = false;
+		$ctrl.isUpdated = false; // Have we tried to fetch the user info yet?
 
-		this.save = function() {
+		$ctrl.save = function() {
 			// Save session to db
 			return SessionModl.save().$promise
 				.catch(err => {
@@ -15,15 +15,15 @@ angular
 				});
 		};
 
-		this.update = function() {
+		$ctrl.update = function() {
 			// Load session data from db
 			return SessionModl.profile().$promise
 				.then(res => {
-					self.data = res;
+					$ctrl.data = res;
 
 					// Attempt to save new session data to local storage
 					try {
-						$window.localStorage.setItem('session', JSON.stringify(self.data));
+						$window.localStorage.setItem('session', JSON.stringify($ctrl.data));
 					} catch(e) {
 						console.error('Could not cache session data');
 					}
@@ -32,27 +32,27 @@ angular
 					console.error('Could not update user session', err.data);
 				})
 				.finally(() => {
-					this.isUpdated = true;
-					this.checkLogin();
-					$rootScope.$broadcast('session.updated', self.data);
+					$ctrl.isUpdated = true;
+					$ctrl.checkLogin();
+					$rootScope.$broadcast('session.updated', $ctrl.data);
 				});
 		};
 
 		/**
 		* Attempts to fetch session data by first trying local storage, otherwise fallback to remote fetch
 		*/
-		this.get = function() {
-			if (!self.getLocal()) $rootScope.$evalAsync(self.update());
+		$ctrl.get = function() {
+			if (!$ctrl.getLocal()) $rootScope.$evalAsync($ctrl.update());
 		};
 
 		/**
 		* Attempts to fetch session data from local storage.
 		* @return Boolean indicating whether local session data was successfully retrieved from localStorage.
 		*/
-		this.getLocal = function() {
+		$ctrl.getLocal = function() {
 			if ($window.localStorage.getItem('session')) {
 				try {
-					return !!(self.data = JSON.parse($window.localStorage.getItem('session')));
+					return !!($ctrl.data = JSON.parse($window.localStorage.getItem('session')));
 				} catch(e) {
 					return false;
 				}
@@ -61,40 +61,40 @@ angular
 			}
 		};
 
-		this.destroy = function() {
-			self.data = {};
+		$ctrl.destroy = function() {
+			$ctrl.data = {};
 		};
 
-		this.login = function(user) {
+		$ctrl.login = function(user) {
 			return SessionModl.login(user).$promise
 				.then(res => {
 					// Update local session then redirect to dash
-					self.update().then(res => $state.go('dashboard'));
+					$ctrl.update().then(res => $state.go('dashboard'));
 				});
 		};
 
-		this.logout = function() {
+		$ctrl.logout = function() {
 			return SessionModl.logout().$promise
 				.then(res => {
 					// Update local session then redirect to login
-					self.update().then(res => $state.go('login'));
+					$ctrl.update().then(res => $state.go('login'));
 				});
 		};
 
-		this.checkLogin = function() {
+		$ctrl.checkLogin = function() {
 			// Add convenience flags
-			if (self.data && self.data._id) {
-				self.isLoggedIn = true;
+			if ($ctrl.data && $ctrl.data._id) {
+				$ctrl.isLoggedIn = true;
 			} else {
-				self.isLoggedIn = false;
+				$ctrl.isLoggedIn = false;
 			}
 		};
 
 		// Init local storage for session data
-		this.getLocal();
+		$ctrl.getLocal();
 
 		$rootScope.$evalAsync(() => {
 			// Fetch session data on service creation
-			self.update();
+			$ctrl.update();
 		});
 	});

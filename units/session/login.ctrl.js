@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.controller('LoginCtrl', function($rootScope, $state, AuthServ, SessionServ) {
+	.controller('LoginCtrl', function($rootScope, $session, $state, AuthServ) {
 		var $ctrl = this;
 
 		// Define visibility control for this controller
@@ -16,10 +16,8 @@ angular
 			if (!isValid) return;
 
 			// Perform login
-			SessionServ.login(this.user)
-				.then(res => {
-					$rootScope.$broadcast('loginSuccess');
-				})
+			$session.login(this.user)
+				.then(_=> $rootScope.$broadcast('loginSuccess'))
 				.catch(err => {
 					$rootScope.$broadcast('loginFailure');
 					// Handle login-specifc errors the server may throw
