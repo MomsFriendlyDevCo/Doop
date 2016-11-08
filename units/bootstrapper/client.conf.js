@@ -21,21 +21,21 @@ angular
 	/**
 	* Router: Loader display while routing
 	*/
-	.run(function($rootScope, $loader, $state) {
-		$rootScope.$on('$stateChangeStart', _=> $loader.clear().start('stateChange'));
-		$rootScope.$on('$stateChangeSuccess', _=> $loader.stop('stateChange'));
-		$rootScope.$on('$stateChangeError', _=> $loader.stop('stateChange'));
+	.run(function($loader, $transitions) {
+		$transitions.onStart({}, _=> $loader.clear().start('stateChange'));
+		$transitions.onSuccess({}, _=> $loader.stop('stateChange'));
+		$transitions.onError({}, _=> $loader.stop('stateChange'));
 	})
 
 	/**
 	* Router: Restrict every page except /login
 	* If the user is NOT logged in redirect to /login in all instances
 	*/
-	.run(function($location, $rootScope, SessionServ) {
-		$rootScope.$on('$stateChangeStart', function(e, newState, fromState) {
+	.run(function($location, $rootScope, $transitions, SessionServ) {
+		$transitions.onStart({}, function(trans) {
 			if (
 				!SessionServ.isLoggedIn && // User is not logged in AND
-				!/^session-/.test(newState.name) // Route does not begin with 'session-' (login, signup, logout etc.)
+				!/^session-/.test(trans.to().name) // Route does not begin with 'session-' (login, signup, logout etc.)
 			) {
 				if (SessionServ.isUpdated) { // User isn't logged in and we have confirmed this with a trip to the server
 					$location.path('/login');
@@ -53,8 +53,8 @@ angular
 	* Router: Cleanup on page exit
 	* Destroys any open Bootstrap modals, tooltips or popovers
 	*/
-	.run(function($rootScope) {
-		$rootScope.$on('$stateChangeStart', function() {
+	.run(function($transitions) {
+		$transitions.onSuccess({}, _=> {
 			// Destory any open Bootstrap modals
 			$('body > .modal-backdrop').remove();
 
@@ -69,24 +69,20 @@ angular
 	/**
 	* Router: Focus any input element with the 'autofocus' attribute on state change
 	*/
-	.run(function($rootScope) {
-		$rootScope.$on('$stateChangeSuccess', function() {
-			$('div[ui-view=main]').find('input[autofocus]').focus();
-		});
+	.run(function($transitions) {
+		$transitions.onSuccess({}, _=> $('div[ui-view=main]').find('input[autofocus]').focus());
 	})
 
 	/**
 	* Router: Reattach 'waves' effect on every router reload
 	*/
-	.run(function($rootScope) {
-		$rootScope.$on('$stateChangeSuccess', _=> Waves.init());
+	.run(function($transitions) {
+		$transitions.onSuccess({}, _=> Waves.init());
 	})
 
 	/**
 	* Router: Adjust page title when the state changes
 	*/
-	.run(function($rootScope, ConfigServ) {
-		$rootScope.$on('$stateChangeStart', function(e, state) {
-			document.title = ConfigServ.title + (state.data && state.data.title ? ' | ' + state.data.title : '');
-		});
+	.run(function($state, $transitions, ConfigServ) {
+		$transitions.onSuccess({}, _=> document.title = ConfigServ.title + ($state.current.data && $state.current.data.title ? ' | ' + $state.current.data.title : ''));
 	})
