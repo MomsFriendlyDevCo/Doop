@@ -1,10 +1,10 @@
 angular
 	.module('app')
-	.controller('DashCtrl', function($scope, $state, AuthServ) {
+	.controller('DashCtrl', function($scope, $auth, $state) {
 		var self = this;
 
 		// Define visibility control for this controller
-		AuthServ.ensureAuthenticated();
+		$auth.ensureAuthenticated();
 
 		// Init scope variables
 		this.message = 'Welcome to the dashboard!';
