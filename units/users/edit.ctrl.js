@@ -15,9 +15,9 @@ angular
 	})
 	.component('usersEditCtrl', {
 		templateUrl: '/units/users/edit.tmpl.html',
-		controller: function($scope, $location, $loader, $stateParams, $timeout, $toast, SessionServ, Users) {
+		controller: function($scope, $location, $loader, $session, $stateParams, $timeout, $toast, Users) {
 			var $ctrl = this;
-			$ctrl.$session = SessionServ;
+			$ctrl.$session = $session;
 
 			// Meta data {{{
 			$ctrl.meta = {

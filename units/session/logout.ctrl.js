@@ -1,10 +1,8 @@
 angular
 	.module('app')
-	.controller('LogoutCtrl', function(SessionServ, $timeout, $window) {
+	.controller('LogoutCtrl', function($session, $timeout, $window) {
 		$timeout(function() { // Wait a second for everything to settle then logout
-			SessionServ.logout()
-				.then(res => {
-					$window.location = '/';
-				});
+			$session.logout()
+				.then(_=> $window.location = '/');
 		}, 1000);
 	});

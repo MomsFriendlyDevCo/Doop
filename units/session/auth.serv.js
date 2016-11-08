@@ -1,13 +1,13 @@
 angular
 	.module('app')
-	.service('AuthServ', function($rootScope, $state, SessionServ) {
+	.service('AuthServ', function($rootScope, $session, $state) {
 
 		/**
 		* Ensures user is authenticated
 		*/
 		this.ensureAuthenticated = function() {
 			// FIXME: Need way to prevent non-user manually navigating to state
-			// if (!_.get(SessionServ, 'isLoggedIn')) $state.go('login');
+			// if (!_.get($session, 'isLoggedIn')) $state.go('login');
 
 			$rootScope.$on('session.updated', (e, user) => {
 				if (!_.get(user, '_id')) $state.go('login');
@@ -19,7 +19,7 @@ angular
 		*/
 		this.ensureUnauthenticated = function() {
 			// FIXME: Need way to prevent non-user manually navigating to state
-			// if (_.get(SessionServ, 'isLoggedIn')) $state.go('dashboard');
+			// if (_.get($session, 'isLoggedIn')) $state.go('dashboard');
 
 			$rootScope.$on('session.updated', (e, user) => {
 				if (_.get(user, '_id')) $state.go('dashboard');
