@@ -28,6 +28,17 @@ angular
 			};
 			// }}}
 
+			// User deleter {{{
+			$ctrl.delete = function(id) {
+				$loader.start($scope.$id);
+
+				Users.delete({id: id}).$promise
+					.then($ctrl.refresh)
+					.catch($toast.catch)
+					.finally(() => $loader.stop($scope.$id));
+			};
+			// }}}
+
 			$scope.$evalAsync($ctrl.refresh);
 		},
 	});
