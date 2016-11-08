@@ -1,10 +1,21 @@
 angular
 	.module('app')
-	.controller('DebugCtrl', function($scope, $loader, $state, $toast) {
-		var $ctrl = this;
+	.config(function($stateProvider) {
+		$stateProvider
+			.state('debug', {
+				url: '/debug',
+				component: 'debugCtrl',
+				data: {
+					title: 'Debugging',
+				},
+			})
+	})
+	.component('debugCtrl', {
+		templateUrl: '/units/debug/debug.tmpl.html',
+		controller: function($scope, $loader, $state, $toast) {
+			var $ctrl = this;
 
-		$ctrl.loaderStart = (id,asBackground) => $loader.start(id, asBackground);
-		$ctrl.loaderStartBackground = id => $loader.startBackground(id);
-		$ctrl.loaderStop = id => $loader.stop(id);
-		$ctrl.$toast = $toast;
+			$ctrl.$loader = $loader;
+			$ctrl.$toast = $toast;
+		},
 	});
