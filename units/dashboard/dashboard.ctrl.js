@@ -1,17 +1,27 @@
 angular
 	.module('app')
-	.controller('DashCtrl', function($scope, $auth, $state) {
-		var self = this;
+	.config(function($stateProvider) {
+		$stateProvider
+			.state('dashboard', {
+				url: '/',
+				component: 'dashCtrl',
+				data: {
+					title: 'Dashboard',
+				},
+			});
+	})
+	.component('dashCtrl', {
+		templateUrl: '/units/dashboard/dashboard.tmpl.html',
+		controller: function($scope, $auth, $state) {
+			var $ctrl = this;
 
-		// Define visibility control for this controller
-		$auth.ensureAuthenticated();
+			// Define visibility control for this controller
+			$auth.ensureAuthenticated();
 
-		// Init scope variables
-		this.message = 'Welcome to the dashboard!';
+			$ctrl.refresh = function() {
+				// return $promise
+			};
 
-		this.refresh = function() {
-			// return $promise
-		};
-
-		$scope.$evalAsync(this.refresh);
+			$scope.$evalAsync($ctrl.refresh);
+		},
 	});
