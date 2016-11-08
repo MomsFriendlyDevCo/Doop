@@ -13,6 +13,14 @@ a, [ng-click] {
 	display: none !important;
 }
 /* }}} */
+/* Cards {{{ */
+/* .card-body > .btn-float {{{ */
+.card-body > .btn-float {
+	right: 10px;
+	top: 10px;
+}
+/* }}} */
+/* }}} */
 /* Forms {{{ */
 /* .form-control {{{ */
 /* Fix the weird dropdown button for the material theme */
