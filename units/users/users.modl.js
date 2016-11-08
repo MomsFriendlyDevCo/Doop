@@ -1,6 +1,6 @@
 angular
 	.module('app')
 	.factory('Users', function($resource) {
-		return $resource('/api/users',{}, {
+		return $resource('/api/users/:id',{}, {
 		});
 	});

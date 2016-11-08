@@ -13,6 +13,18 @@ a, [ng-click] {
 	display: none !important;
 }
 /* }}} */
+/* Forms {{{ */
+/* .form-control {{{ */
+/* Fix the weird dropdown button for the material theme */
+form .select:before {
+	top: 10px !important;
+
+	/* font-awesome > chevron-down */
+	font: normal normal normal 14px/1 FontAwesome;
+	content: "\f078" !important;
+}
+/* }}} */
+/* }}} */
 /* Tables {{{ */
 table.table td > a {
 	display: block;

@@ -1,0 +1,34 @@
+<div class="container">
+	<div class="block-header">
+		<h2>Edit User - {{$ctrl.user.username}}</h2>
+		<div class="actions">
+		</div>
+	</div>
+	<form ng-submit="$ctrl.save()" class="card">
+		<div class="card-body card-padding form-horizontal">
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Name</label>
+				<div class="col-sm-9">
+					<input ng-model="$ctrl.user.name" type="text" class="form-control"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Email</label>
+				<div class="col-sm-9">
+					<input ng-model="$ctrl.user.email" type="email" class="form-control"/>
+				</div>
+			</div>
+			<div ng-if="$ctrl.$session.data.isAdmin" class="form-group">
+				<label class="col-sm-3 control-label">Role</label>
+				<div class="col-sm-9 select">
+					<select ng-model="$ctrl.user.role" class="form-control">
+						<option ng-repeat="role in $ctrl.meta.roles" value="{{role.id}}">{{role.title}}</option>
+					</select>
+				</div>
+			</div>
+			<div class="text-right">
+				<button type="submit" class="btn btn-success wave-effect"><i class="fa fa-check"></i> Save User</button>
+			</div>
+		</div>
+	</form>
+</div>

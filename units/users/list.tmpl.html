@@ -17,12 +17,12 @@
 				</thead>
 				<tbody>
 					<tr ng-repeat="u in found = ($ctrl.users | filter:$ctrl.query) track by u._id">
-						<td class="text-center"><a href="#/admin/users/{{u._id}}">
+						<td class="text-center"><a href="#/users/{{u._id}}">
 							<i ng-if="u.role=='admin' || u.role=='root'" class="fa fa-lg fa-user-circle" tooltip="User is an admin" tooltip-position="left" tooltip-container="body"></i>
 							<i ng-if="u.status=='deleted'" class="fa fa-lg fa-trash" tooltip="User has been deleted" tooltip-position="left" tooltip-container="body"></i>
 						</a></td>
-						<td><a href="#/admin/users/{{u._id}}">{{u.username == u.email ? u.email : u.email + ' (user: ' + u.username + ')'}}</a></td>
-						<td><a href="#/admin/users/{{u._id}}">{{u.name}}</a></td>
+						<td><a href="#/users/{{u._id}}">{{u.username == u.email ? u.email : u.email + ' (user: ' + u.username + ')'}}</a></td>
+						<td><a href="#/users/{{u._id}}">{{u.name}}</a></td>
 					</tr>
 				</tbody>
 			</table>
