@@ -63,7 +63,7 @@ var defaults = {
 		minifyImages: false,
 	},
 	mongo: {
-		uri: 'mongodb://localhost/{{FIXME.project.db}}',
+		uri: 'mongodb://localhost/doop', // FIXME: Repoint this at your database
 		options: {
 			db: {
 				safe: true,
