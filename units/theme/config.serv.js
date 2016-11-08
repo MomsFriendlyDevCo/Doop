@@ -3,7 +3,7 @@
 */
 angular
 	.module('app')
-	.service('ConfigServ', function($rootScope) {
+	.service('$config', function($rootScope) {
 		return {
 			title: 'Doop',
 		};

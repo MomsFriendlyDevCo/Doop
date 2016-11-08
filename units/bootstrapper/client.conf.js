@@ -83,6 +83,6 @@ angular
 	/**
 	* Router: Adjust page title when the state changes
 	*/
-	.run(function($state, $transitions, ConfigServ) {
-		$transitions.onSuccess({}, _=> document.title = ConfigServ.title + ($state.current.data && $state.current.data.title ? ' | ' + $state.current.data.title : ''));
+	.run(function($config, $state, $transitions) {
+		$transitions.onSuccess({}, _=> document.title = $config.title + ($state.current.data && $state.current.data.title ? ' | ' + $state.current.data.title : ''));
 	})
