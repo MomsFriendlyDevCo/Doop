@@ -1,10 +1,10 @@
 angular
 	.module('app')
-	.controller('LoginCtrl', function($rootScope, $session, $state, AuthServ) {
+	.controller('LoginCtrl', function($rootScope, $auth, $session, $state) {
 		var $ctrl = this;
 
 		// Define visibility control for this controller
-		AuthServ.ensureUnauthenticated();
+		$auth.ensureUnauthenticated();
 
 		// Init scope variables
 		this.user = { username: '', password: '' };

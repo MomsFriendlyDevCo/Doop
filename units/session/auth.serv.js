@@ -1,11 +1,12 @@
 angular
 	.module('app')
-	.service('AuthServ', function($rootScope, $session, $state) {
+	.service('$auth', function($rootScope, $session, $state) {
+		var $ctrl = this;
 
 		/**
 		* Ensures user is authenticated
 		*/
-		this.ensureAuthenticated = function() {
+		$ctrl.ensureAuthenticated = function() {
 			// FIXME: Need way to prevent non-user manually navigating to state
 			// if (!_.get($session, 'isLoggedIn')) $state.go('login');
 
@@ -17,7 +18,7 @@ angular
 		/**
 		* Ensures user is NOT authenticated
 		*/
-		this.ensureUnauthenticated = function() {
+		$ctrl.ensureUnauthenticated = function() {
 			// FIXME: Need way to prevent non-user manually navigating to state
 			// if (_.get($session, 'isLoggedIn')) $state.go('dashboard');
 
