@@ -12,8 +12,9 @@ angular
 	})
 	.component('usersListCtrl', {
 		templateUrl: '/units/users/list.tmpl.html',
-		controller: function($scope, $location, $loader, $timeout, $toast, Users) {
+		controller: function($scope, $location, $loader, $timeout, $toast, Users, SessionServ) {
 			var $ctrl = this;
+			$ctrl.$session = SessionServ;
 
 			// Data refresher {{{
 			$ctrl.users;

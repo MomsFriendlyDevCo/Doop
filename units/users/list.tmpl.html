@@ -7,6 +7,7 @@
 	</div>
 	<div class="card">
 		<div class="card-body table-responsive">
+			<a ng-if="$ctrl.$session.data.isAdmin" class="btn btn-success btn-float waves-effect" tooltip="Invite new user" href="#/users/invite"><i class="fa fa-paper-plane"></i></a>
 			<table ng-show="$ctrl.users.length" class="table table-hover">
 				<thead>
 					<tr>

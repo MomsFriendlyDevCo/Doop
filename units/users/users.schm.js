@@ -19,6 +19,13 @@ var User = module.exports = monoxide.schema('users', {
 	settings: {type: 'object', default: {}},
 	created: {type: Date, default: Date.now},
 	lastLogin: {type: Date, default: Date.now},
+	address: {
+		street: String,
+		suburb: String,
+		state: String,
+		country: {type: String, default: "Australia"},
+		postcode: String,
+	},
 });
 
 // Deal with logins + user passwords {{{
