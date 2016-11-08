@@ -6,10 +6,10 @@
 */
 angular
 	.module('app')
-	.controller('GlobalCtrl', function($rootScope, $scope, $session, $state, ConfigServ) {
+	.controller('GlobalCtrl', function($config, $rootScope, $scope, $session, $state) {
 		var $ctrl = this;
 		// Init user session object/data
-		$ctrl.config = ConfigServ;
+		$ctrl.config = $config;
 		$ctrl.session = $session;
 		$ctrl.state = $state; // NOTE: To access the current state in a view use `$global.state.current`
 	});
