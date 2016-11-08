@@ -19,19 +19,10 @@ angular
 			var $ctrl = this;
 			$ctrl.$session = $session;
 
-			// Meta data {{{
-			$ctrl.meta = {
-				roles: [
-					{id: 'user', title: 'User'},
-					{id: 'admin', title: 'Admin'},
-					{id: 'root', title: 'Root'},
-				],
-			};
-			// }}}
-
 			if (!$stateParams.id) return $location.path('/');
 
 			// Data refresher {{{
+			$ctrl.meta;
 			$ctrl.user;
 			$ctrl.refresh = function() {
 				$loader.start($scope.$id, $ctrl.user === undefined);
@@ -40,6 +31,9 @@ angular
 					.then(data => $ctrl.user = data)
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
+
+				if (!$ctrl.meta) // Not asked the server for meta data yet
+					Users.meta().$promise.then(data => $ctrl.meta = data);
 			};
 			// }}}
 
