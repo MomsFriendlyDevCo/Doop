@@ -64,3 +64,41 @@ app.post('/api/users/invite', app.middleware.ensure.admin, function(req, res) {
 		});
 		// }}}
 });
+
+
+/**
+* Accept an invite by its token
+* @param {string} req.body.token The token to accept
+* @param {string} req.body.name The users name to store
+* @param {string} req.body.password The users password to store
+*/
+app.post('/api/users/inviteAccept', function(req, res) {
+	async()
+		// Sanity checks {{{
+		.then(function(next) {
+			if (!req.body.token) return next('req.body.token must be specified');
+			if (!req.body.name) return next('req.body.name must be specified');
+			if (!req.body.password) return next('req.body.password must be specified');
+			next();
+		})
+		// }}}
+		// Find user {{{
+		.then('user', function(next) {
+			db.users.findOne({_token: req.body.token}, next);
+		})
+		// }}}
+		// Update user {{{
+		.then(function(next) {
+			this.user._token = undefined;
+			this.user.name = req.body.name;
+			this.user.password = req.body.password;
+			this.user.save(next);
+		})
+		// }}}
+		// End {{{
+		.end(function(err) {
+			if (err) return res.status(400).send({error: err.toString()});
+			res.status(200).end();
+		});
+		// }}}
+});
