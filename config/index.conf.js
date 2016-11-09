@@ -50,6 +50,7 @@ var defaults = {
 		from: 'noreply@{{FIXME.project.domain}}',
 		to: '',
 		cc: [],
+		signoff: 'Doop',
 	},
 	mailgun: {
 		apiKey: '{{FIXME.mailgun.apiKey}}',

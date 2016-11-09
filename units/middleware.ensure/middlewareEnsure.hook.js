@@ -66,21 +66,13 @@ app.register('preControllers', ['session'], function(finish) {
 		},
 
 		/**
-		 * Verifies the user has access to premium features or not
+		 * Verifies the user is root
 		 */
-		premium: function(req, res, next) {
-			if (
-				req.user &&
-				req.user._id &&
-				(
-					(req.user.role == 'admin' || req.user.role == 'root')
-					||
-					(req.user.role == "user" && (req.user._auth.subscription.type == 'premium' || req.user._auth.subscription.type == 'trial'))
-				)
-			) {
+		root: function(req, res, next) {
+			if (req.user && req.user._id && req.user.role == 'root') {
 				return next();
 			} else {
-				return res.redirect('/');
+				app.middleware.ensure.authFail(req, res, next);
 			}
 		},
 	};

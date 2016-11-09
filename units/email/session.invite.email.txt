@@ -1,0 +1,10 @@
+You have been invited to the {{config.title}} system.
+
+Please click the below link to complete the signup process:
+
+{{{url}}}
+
+
+
+
+{{config.email.signoff}}
