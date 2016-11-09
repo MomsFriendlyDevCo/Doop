@@ -23,14 +23,14 @@ angular
 			var $ctrl = this;
 
 			$ctrl.user = {email: ''};
+			$ctrl.error;
 
 			$ctrl.invite = function() {
-				Users.create({
-					email: $ctrl.user.email,
-					username: $ctrl.user.email,
+				Users.invite({
+					emails: $ctrl.user.email.split(/[\s\n,]+/),
 				}).$promise
 					.then(data => $location.path('/users'))
-					.catch($toast.catch)
+					.catch(res => $ctrl.error = res.data.error);
 			};
 		},
 	});
