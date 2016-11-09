@@ -5,9 +5,12 @@
 	<form ng-submit="$ctrl.invite()" class="card">
 		<div class="card-body card-padding form-horizontal">
 			<div class="form-group">
-				<label class="col-sm-3 control-label">Email address</label>
-				<div class="col-sm-9">
-					<input ng-model="$ctrl.user.email" type="email" class="form-control" autofocus/>
+				<p class="c-black">Email addresses</p>
+				<div ng-if="$ctrl.error" class="alert alert-danger">{{$ctrl.error}}</div>
+
+				<small>Enter all the email addresses you want to invite. You can separate multiple email addresses using spaces, commas or put them on separate lines.</small>
+				<div class="col-sm-12 m-t-25">
+					<textarea ng-model="$ctrl.user.email" class="form-control" rows="10" autofocus></textarea>
 				</div>
 			</div>
 			<div class="text-right">

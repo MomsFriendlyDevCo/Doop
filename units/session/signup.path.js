@@ -10,6 +10,7 @@ app.route('/validate/:token')
 				next();
 			})
 			// }}}
+			// Find user by token (and reset it) {{{
 			.then('user', function(next) {
 				db.users.findOne({_token: req.params.token}, function(err, user) {
 					if (err && err != 'Not found') return next(err);
@@ -21,10 +22,13 @@ app.route('/validate/:token')
 					user.save(next);
 				});
 			})
+			// }}}
+			// End {{{
 			.end(function(err) {
 				if (err) return res.status(400).send({ error: err });
 
 				// Redirect to the login page on success
 				res.redirect('/login/#/?verify=success');
 			});
+			// }}}
 	});
