@@ -118,6 +118,7 @@
 		<ul ng-controller="SidebarCtrl as sidebar" class="main-menu">
 			<li ng-class="sidebar.area == 'dashboard' && 'active'"><a href="#/" class="waves-effect"><i class="fa fa-dashboard"></i> Dashboard</a></li>
 			<li ng-class="sidebar.area=='users' && 'active'" ng-if="$global.session.data.isAdmin"><a href="#/users" class="waves-effect"><i class="fa fa-group"></i> Manage Users</a></li>
+			<li ng-class="sidebar.area=='showcase' && 'active'" ng-if="$global.session.data.isRoot"><a href="#/showcase" class="waves-effect"><i class="fa fa-paint-brush"></i> Doop Material Showcase</a></li>
 		</ul>
 
 		<!-- }}} -->
