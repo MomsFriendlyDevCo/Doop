@@ -52,7 +52,7 @@ app.post('/api/users/invite', app.middleware.ensure.admin, function(req, res) {
 				.template(app.config.paths.root + '/units/email/session.invite.email.txt')
 				.templateParams({
 					config: app.config,
-					url: app.config.publicUrl + '/invite/accept/' + user._token,
+					url: app.config.publicUrl + '/#/invite/accept/' + user._token,
 				})
 				.send(next);
 		})
