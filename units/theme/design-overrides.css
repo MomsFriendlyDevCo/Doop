@@ -122,4 +122,8 @@ table.table td > .btn-group {
 	text-align: center;
 	padding: 13px 0;
 }
+
+.main-menu .main-menu {
+	margin: 0 !important;
+}
 /* }}} */
