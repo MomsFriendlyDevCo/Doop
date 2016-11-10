@@ -27,15 +27,15 @@ if (process.env.VCAP_SERVICES) {
 // }}}
 
 var defaults = {
-	name: "{{FIXME.project.name}}",
-	title: "{{FIXME.project.title}}",
+	name: "doop", // FIXME: Lower case, URL compatible name, no spaces or other weirdness
+	title: "Doop", // FIXME: Human friendly name
 	env: env,
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
 	url: 'http://localhost',
 	secret: "{{FIXME.random}}", // A quick way to populate this is with `cat /dev/urandom | base64 | head -n10`
 	theme: { // Variables passed to the HTML page renderer - do not put anything private in here
-		title: '{{FIXME.project.title}}',
+		title: 0/*IMPORT: app.config.title*/,
 	},
 	access: {
 		lockdown: false, // Set to true to lock the site with the below users
