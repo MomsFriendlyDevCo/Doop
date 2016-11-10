@@ -11,7 +11,7 @@ angular
 			})
 	})
 	.component('showcaseCtrl', {
-		templateUrl: '/units/theme.showcase/showcase.tmpl.html',
+		templateUrl: '/units/showcase/showcase.tmpl.html',
 		controller: function($scope, $loader, $state, $toast) {
 			var $ctrl = this;
 
