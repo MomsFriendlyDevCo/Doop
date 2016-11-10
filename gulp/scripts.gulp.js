@@ -48,6 +48,7 @@ gulp.task('scripts', ['load:app'], function() {
 				return true;
 			},
 		}))
+		.pipe(replace(/^'use strict';\n$/m, ''))
 		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.init()))
 		.pipe(concat('app.min.js'))
 		.pipe(bytediff.start())
