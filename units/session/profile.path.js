@@ -11,6 +11,7 @@ app.get('/api/session/profile', function(req, res) {
 		email: req.user.email,
 		name: req.user.name,
 		role: req.user.role,
+		address: req.user.address,
 		isAdmin: (req.user.role == 'admin' || req.user.role == 'root'),
 		isRoot: (req.user.role == 'root'),
 		settings: req.user.settings || null,
