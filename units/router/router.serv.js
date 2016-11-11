@@ -8,13 +8,13 @@
 angular
 	.module('app')
 	.service('$router', function($q, $rootScope) {
-		var $ctrl = this;
-		$ctrl.routes = [];
-		$ctrl.current = {
+		var $router = this;
+		$router.routes = [];
+		$router.current = {
 			params: {}, // Extracted parameters based on the rule tokens
 			main: null, // The main view - this will be the matched rule object
 		};
-		$ctrl.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
+		$router.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
 
 		// Rule instance {{{
 		/**
@@ -65,8 +65,8 @@ angular
 			this.priority = priority => {
 				if (isFinite(priority)) {
 					this._priority = priority;
-				} else if ($ctrl.priorityAliases.hasOwnProperty(priority)) {
-					this._priority = $ctrl.priorityAliases[priority];
+				} else if ($router.priorityAliases.hasOwnProperty(priority)) {
+					this._priority = $router.priorityAliases[priority];
 				} else {
 					throw new Error('Unknown priority number or alias: ' + priority);
 				}
@@ -91,7 +91,7 @@ angular
 					this._path = path;
 					this._segments = [];
 				} else if (typeof path == 'string' && path) { // Is a string
-					this._path = $ctrl.pathToRegExp(path);
+					this._path = $router.pathToRegExp(path);
 					this._segments = (path.match(/:[a-z0-9_-]+\??/gi) || []).map(function(seg) {
 							var segExamined = /^:(.+?)(\?)?$/.exec(seg);
 							return {
@@ -116,7 +116,7 @@ angular
 			};
 
 			this.path(path); // Set initial path if there is one
-			$ctrl.routes.push(this);
+			$router.routes.push(this);
 			return this;
 		};
 		// }}}
@@ -126,7 +126,7 @@ angular
 		* @param {string} path The path to convert
 		* @return {RegExp} A valid regular expression
 		*/
-		$ctrl.pathToRegExp = function(path) {
+		$router.pathToRegExp = function(path) {
 			var safePath = path
 				.replace(/\/:[a-z0-9_-]+(\?)?/gi, (all, optional) => '!!!CAPTURE ' + (optional ? 'OPTIONAL' : 'REQUIRED') + '!!!') // Change all :something? markers into tokens
 				.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // Convert all remaining content into a 'safe' string (regexp encoding)
@@ -140,13 +140,13 @@ angular
 		* Create a new router rule
 		* @param {string} [path] Optional path to set
 		*/
-		$ctrl.rule = path => new RouterRule(path);
+		$router.rule = path => new RouterRule(path);
 
 		/**
 		* Shortcut to create a new rule
 		* @see rule()
 		*/
-		$ctrl.when = $ctrl.rule; // Shortcut function
+		$router.when = $router.rule; // Shortcut function
 
 
 		/**
@@ -154,8 +154,8 @@ angular
 		* @param {string} path The path to examine
 		* @return {boolean|RouterRule} Either the found rule or boolean false
 		*/
-		$ctrl.resolve = function(path) {
-			return $ctrl.routes.find(rule => rule.matches(path));
+		$router.resolve = function(path) {
+			return $router.routes.find(rule => rule.matches(path));
 		};
 
 		/**
@@ -163,15 +163,15 @@ angular
 		* @param {string} path The path to navigate to
 		* @return {Promise} A promise object for the navigation
 		*/
-		$ctrl.go = function(path) {
-			$rootScope.$broadcast('$routerStart', $ctrl.current.main);
+		$router.go = function(path) {
+			$rootScope.$broadcast('$routerStart', $router.current.main);
 			return $q(function(resolve, reject) {
-				var rule = $ctrl.resolve(path);
+				var rule = $router.resolve(path);
 				if (rule) {
-					$ctrl.current.main = rule;
-					// We cant just set $ctrl.current.params as that would break the references to it - so we have to empty it, then refill
-					Object.keys($ctrl.current.params).forEach(k => delete $ctrl.current.params[k]);
-					angular.extend($ctrl.current.params, rule.extractParams(path));
+					$router.current.main = rule;
+					// We cant just set $router.current.params as that would break the references to it - so we have to empty it, then refill
+					Object.keys($router.current.params).forEach(k => delete $router.current.params[k]);
+					angular.extend($router.current.params, rule.extractParams(path));
 					resolve(rule);
 				} else {
 					$rootScope.$broadcast('$routerError');
@@ -183,7 +183,7 @@ angular
 		// Setup a watcher on the main window location hash
 		$rootScope.$watch(_=> location.hash, function() {
 			var newHash = location.hash.replace(/^#!?/, '');
-			$ctrl.go(newHash);
+			$router.go(newHash);
 		});
 	})
 	.service('$routerParams', $router => $router.current.params)
