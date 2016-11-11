@@ -2,6 +2,7 @@
 <div id="_config" class="block-header"><h2>$config Service</h2></div>
 <div class="card">
 	<div class="card-body card-padding">
+		<p class="c-black">Current state of <code>$config</code>
 		<pre>{{$ctrl.$config | json}}</pre>
 	</div>
 </div>
@@ -17,6 +18,16 @@
 		<a class="list-group-item" ng-click="$ctrl.$loader.stop('debug2')">$loader.stop("debug2")</a>
 		<a class="list-group-item" ng-click="$ctrl.$loader.start('debug3', false)">$loader.start("debug3", false)</a>
 		<a class="list-group-item" ng-click="$ctrl.$loader.stop('debug3')">$loader.stop("debug3")</a>
+	</div>
+</div>
+<!-- }}} -->
+
+<!-- $router service {{{ -->
+<div id="_router" class="block-header"><h2>$router Service</h2></div>
+<div class="card">
+	<div class="card-body card-padding">
+		<p class="c-black">Current state of <code>$router.current</code>
+		<pre>{{$ctrl.$router.current | json}}</pre>
 	</div>
 </div>
 <!-- }}} -->
