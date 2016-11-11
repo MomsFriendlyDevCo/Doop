@@ -42,6 +42,15 @@ $router.when('/widgets/:id').component('widgetsListCtrl');
 // Specify that some parameters are optional - suffix each token with a question mark
 $router.when('/foo/:id1?/:id2?/:id3?').component('fooCtrl');
 
+// When visiting one URL redirect to another
+$router.when('/foo').go('/bar');
+// OR
+$router.when('/foo').redirect('/bar');
+
+// Set the priority of a routing rule
+$router.when('/foo').priority('low').redirect('/somewhere/else');
+
+
 // Listen for routing events and perform an action when the page has changed
 
 // Before we navigate...
@@ -76,6 +85,10 @@ An object containing all parameters extracted from the URL in tokenized form.
 
 For example if the rule has the path `/widgets/:id` and the current URL is `/widgets/123` the parameters object will be `{id: 123}`.
 
+$router.priorityAliases
+-----------------------
+A lookup object of different priority aliases - e.g. `lowest`, `normal` etc.
+
 $router.pathToRegExp()
 ----------------------
 Utility function to convert a path into a regular expression.
@@ -94,8 +107,8 @@ $router.resolve(path)
 ---------------------
 Return the first matching router rule that matches the given path.
 
-$router.go(path)
-----------------
+$router.go(path) / $router.redirect(path)
+-----------------------------------------
 Navigate to the given path.
 
 
@@ -108,6 +121,10 @@ RouterRule.component(name)
 --------------------------
 Configure the action of the rule to display the named component.
 
+RouterRule.go(path) / RouterRule.redirect(path)
+-----------------------------------------------
+Configure the action of the rule to redirect to another path
+
 RouterRule.matches(path)
 ------------------------
 Tests a given path against the rule. This will return a boolean if the rule matches.
@@ -115,6 +132,11 @@ Tests a given path against the rule. This will return a boolean if the rule matc
 RouterRule.path(path)
 ---------------------
 Set the path of the rule. This can be a tokenized Ruby style path or a regular expression.
+
+RouterRule.priroty(priority)
+----------------------------
+Set the priority out of 100 that the rule should install itself at in the router rules stack.
+The value can either be a number or a string corresponding to an entry in `$router.priorityAliases`.
 
 RouterRule.extractParams(path)
 ------------------------------
