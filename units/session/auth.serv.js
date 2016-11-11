@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.service('$auth', function($rootScope, $session, $state) {
+	.service('$auth', function($rootScope, $location, $session) {
 		var $ctrl = this;
 
 		/**
@@ -11,7 +11,7 @@ angular
 			// if (!_.get($session, 'isLoggedIn')) $state.go('login');
 
 			$rootScope.$on('session.updated', (e, user) => {
-				if (!_.get(user, '_id')) $state.go('login');
+				if (!_.get(user, '_id')) $location.path('/login');
 			});
 		};
 
@@ -23,7 +23,7 @@ angular
 			// if (_.get($session, 'isLoggedIn')) $state.go('dashboard');
 
 			$rootScope.$on('session.updated', (e, user) => {
-				if (_.get(user, '_id')) $state.go('dashboard');
+				if (_.get(user, '_id')) $location.path('/');
 			});
 		};
 

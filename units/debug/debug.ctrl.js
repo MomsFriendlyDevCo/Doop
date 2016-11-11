@@ -1,18 +1,9 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('debug', {
-				url: '/debug',
-				component: 'debugCtrl',
-				data: {
-					title: 'Debugging',
-				},
-			})
-	})
+	.run($router => $router.when('/debug').component('debugCtrl'))
 	.component('debugCtrl', {
 		templateUrl: '/units/debug/debug.tmpl.html',
-		controller: function($scope, $loader, $state, $toast) {
+		controller: function($scope, $loader, $toast) {
 			var $ctrl = this;
 
 			$ctrl.$loader = $loader;

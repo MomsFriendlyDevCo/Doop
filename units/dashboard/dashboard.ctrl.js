@@ -1,18 +1,9 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('dashboard', {
-				url: '/',
-				component: 'dashCtrl',
-				data: {
-					title: 'Dashboard',
-				},
-			});
-	})
+	.run($router => $router.when('/').component('dashCtrl'))
 	.component('dashCtrl', {
 		templateUrl: '/units/dashboard/dashboard.tmpl.html',
-		controller: function($scope, $auth, $state) {
+		controller: function($scope, $auth) {
 			var $ctrl = this;
 
 			// Define visibility control for this controller

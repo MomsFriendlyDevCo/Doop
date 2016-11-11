@@ -1,15 +1,6 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('users-list', {
-				url: '/users',
-				component: 'usersListCtrl',
-				data: {
-					title: 'Manage Users',
-				},
-			})
-	})
+	.run($router => $router.when('/users').component('usersListCtrl'))
 	.component('usersListCtrl', {
 		templateUrl: '/units/users/list.tmpl.html',
 		controller: function($scope, $location, $loader, $session, $timeout, $toast, Users) {

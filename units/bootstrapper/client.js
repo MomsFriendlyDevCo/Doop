@@ -13,6 +13,5 @@ angular
 		'ngResource',
 		'ui.gravatar',
 		'ui-notification',
-		'ui.router',
 		'uiSwitch',
 	]);

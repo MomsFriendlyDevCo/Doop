@@ -1,18 +1,9 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('session-login', {
-				url: '/login',
-				component: 'loginCtrl',
-				data: {
-					title: 'Login',
-				},
-			});
-	})
+	.run($router => $router.when('/login').component('loginCtrl'))
 	.component('loginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
-		controller: function($rootScope, $auth, $session, $state) {
+		controller: function($rootScope, $auth, $session) {
 			var $ctrl = this;
 
 			// Define visibility control for this controller

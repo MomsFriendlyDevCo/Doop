@@ -1,25 +1,13 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('users-edit', {
-				url: '/users/:id',
-				component: 'usersEditCtrl',
-				data: {
-					title: 'Edit User',
-					breadcrumbs: [
-						{title: 'Manage Users', url: '/users'},
-					],
-				},
-			})
-	})
+	.run($router => $router.when('/users/:id').component('usersEditCtrl'))
 	.component('usersEditCtrl', {
 		templateUrl: '/units/users/edit.tmpl.html',
-		controller: function($scope, $location, $loader, $session, $stateParams, $timeout, $toast, Users) {
+		controller: function($scope, $location, $loader, $routerParams, $session, $timeout, $toast, Users) {
 			var $ctrl = this;
 			$ctrl.$session = $session;
 
-			if (!$stateParams.id) return $location.path('/');
+			if (!$routerParams.id) return $location.path('/');
 
 			// Data refresher {{{
 			$ctrl.meta;
@@ -27,7 +15,7 @@ angular
 			$ctrl.refresh = function() {
 				$loader.start($scope.$id, $ctrl.user === undefined);
 
-				Users.get({id: $stateParams.id}).$promise
+				Users.get({id: $routerParams.id}).$promise
 					.then(data => $ctrl.user = data)
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
@@ -40,7 +28,7 @@ angular
 			// Save {{{
 			$ctrl.save = function() {
 				$loader.start($scope.$id);
-				Users.save({id: $stateParams.id}, $ctrl.user).$promise
+				Users.save({id: $routerParams.id}, $ctrl.user).$promise
 					.then(_=> $toast.success('User details saved'))
 					.then(_=> $location.path('/users'))
 					.catch($toast.catch)

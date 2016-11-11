@@ -1,22 +1,6 @@
 angular
 	.module('app')
-	.config(function($urlRouterProvider) {
-		// Install the /invite suffix so it routes BEFORE users-edit
-		$urlRouterProvider.when('/users/invite', $state => $state.go('users-invite'));
-	})
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('users-invite', {
-				url: '/users/invite',
-				component: 'usersInviteCtrl',
-				data: {
-					title: 'Invite User',
-					breadcrumbs: [
-						{title: 'Manage Users', url: '/users'},
-					],
-				},
-			})
-	})
+	.run($router => $router.when('/users/invite').component('usersInviteCtrl'))
 	.component('usersInviteCtrl', {
 		templateUrl: '/units/session/invite.tmpl.html',
 		controller: function($scope, $loader, $location, $toast, Users) {

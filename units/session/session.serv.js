@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.service('$session', function($rootScope, $state, $window, SessionModl) {
+	.service('$session', function($rootScope, $location, $window, SessionModl) {
 		var $ctrl = this;
 
 		$ctrl.data = {}; // User session data
@@ -69,7 +69,7 @@ angular
 			return SessionModl.login(user).$promise
 				.then(res => {
 					// Update local session then redirect to dash
-					$ctrl.update().then(res => $state.go('dashboard'));
+					$ctrl.update().then(res => $location.path('/'));
 				});
 		};
 
@@ -77,7 +77,7 @@ angular
 			return SessionModl.logout().$promise
 				.then(res => {
 					// Update local session then redirect to login
-					$ctrl.update().then(res => $state.go('login'));
+					$ctrl.update().then(res => $location.path('/login'));
 				});
 		};
 
@@ -93,8 +93,6 @@ angular
 		// Init local storage for session data
 		$ctrl.getLocal();
 
-		$rootScope.$evalAsync(() => {
-			// Fetch session data on service creation
-			$ctrl.update();
-		});
+		// Fetch session data on service creation
+		$rootScope.$evalAsync(_=> $ctrl.update());
 	});
