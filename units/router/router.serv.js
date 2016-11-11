@@ -160,10 +160,11 @@ angular
 
 		/**
 		* Navigate to the given path if it exists
-		* @param {string} path The path to navigate to
+		* @param {string} [path] The path to navigate to. If path is falsy, '/' is assumed
 		* @return {Promise} A promise object for the navigation
 		*/
 		$router.go = function(path) {
+			if (!path) path = '/';
 			$rootScope.$broadcast('$routerStart', $router.current.main);
 			return $q(function(resolve, reject) {
 				var rule = $router.resolve(path);
