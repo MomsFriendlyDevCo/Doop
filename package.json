@@ -24,7 +24,6 @@
     "angular-resource": "^1.5.8",
     "angular-ui-loader": "^1.0.1",
     "angular-ui-notification": "^0.2.0",
-    "angular-ui-router": "^1.0.0-beta.3",
     "angular-ui-switch": "^0.1.1",
     "async-chainable": "^2.2.3",
     "async-chainable-exec": "^1.3.2",
