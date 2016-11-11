@@ -1,58 +1,83 @@
 angular
 	.module('app')
-	.service('$session', function($rootScope, $location, $window, SessionModl) {
-		var $ctrl = this;
+	.service('$session', function($rootScope, $location, $q, $window, SessionModl) {
+		var $session = this;
 
-		$ctrl.data = {}; // User session data
-		$ctrl.isLoggedIn = false;
-		$ctrl.isUpdated = false; // Have we tried to fetch the user info yet?
+		$session.data = {}; // User session data
+		$session.isLoggedIn = false; // Whether the user is logged in according to the server
+		$session.isUpdated = false; // Have we tried to fetch the user info yet?
 
-		$ctrl.save = function() {
-			// Save session to db
-			return SessionModl.save().$promise
-				.catch(err => {
-					console.error('Could not save user session', err.data);
+		/**
+		* Return a promise for when this user is logged in
+		* NOTE - if the user is ALREADY logged in or DEFINIATELY NOT logged in this function will return an already resolved/rejected promise.
+		*        If neither are true we return a defer / future and resolve that when we know for certain
+		* @return {Promise} A promise which will resolve on login or reject on fail (or not logged in)
+		*/
+		$session.promise = function() {
+			if ($session.isLoggedIn) { // Already logged in
+				return $q.resolve($session.data);
+			} else if ($session.isUpdated) { // NOT logged in and we have already spoken to the server
+				return $q.reject();
+			} else { // NOT logged in and we have NOT spoken to the server - return a future and resolve/reject when we can
+				return $q(function(resolve, reject) {
+					var loginUnwatcher = $rootScope.$on('session.updated', function() { // Ask to be updated when the server replies
+						if ($session.isLoggedIn) {
+							resolve($session.data);
+						} else {
+							reject();
+						}
+						loginUnwatcher(); // Release the $on watcher
+					});
 				});
+			}
 		};
 
-		$ctrl.update = function() {
+		/**
+		* Save the current user details back to the server
+		* @return {Promise} A promise object for the save request
+		*/
+		$session.save = function() {
+			// Save session to db
+			return SessionModl.save().$promise
+				.catch(err => console.error('Could not save user session', err.data));
+		};
+
+		/**
+		* Refresh user information from the server
+		* This function is automatically executed on bootstrap
+		* @return {Promise} A promise object for the fetch request
+		*/
+		$session.update = function() {
 			// Load session data from db
 			return SessionModl.profile().$promise
 				.then(res => {
-					$ctrl.data = res;
+					$session.data = res;
 
 					// Attempt to save new session data to local storage
 					try {
-						$window.localStorage.setItem('session', JSON.stringify($ctrl.data));
+						$window.localStorage.setItem('session', JSON.stringify($session.data));
 					} catch(e) {
-						console.error('Could not cache session data');
+						console.warn('Could not cache session data');
 					}
 				})
 				.catch(err => {
 					console.error('Could not update user session', err.data);
 				})
 				.finally(() => {
-					$ctrl.isUpdated = true;
-					$ctrl.checkLogin();
-					$rootScope.$broadcast('session.updated', $ctrl.data);
+					$session.isUpdated = true;
+					$session.isLoggedIn = ($session.data && $session.data._idi);
+					$rootScope.$broadcast('session.updated', $session.data);
 				});
 		};
 
 		/**
-		* Attempts to fetch session data by first trying local storage, otherwise fallback to remote fetch
-		*/
-		$ctrl.get = function() {
-			if (!$ctrl.getLocal()) $rootScope.$evalAsync($ctrl.update());
-		};
-
-		/**
 		* Attempts to fetch session data from local storage.
-		* @return Boolean indicating whether local session data was successfully retrieved from localStorage.
+		* @return {boolean} indicating whether local session data was successfully retrieved from localStorage.
 		*/
-		$ctrl.getLocal = function() {
+		$session.getLocal = function() {
 			if ($window.localStorage.getItem('session')) {
 				try {
-					return !!($ctrl.data = JSON.parse($window.localStorage.getItem('session')));
+					return !!($session.data = JSON.parse($window.localStorage.getItem('session')));
 				} catch(e) {
 					return false;
 				}
@@ -61,38 +86,27 @@ angular
 			}
 		};
 
-		$ctrl.destroy = function() {
-			$ctrl.data = {};
-		};
-
-		$ctrl.login = function(user) {
+		/**
+		* Attempt to log in the user
+		* @return {Promise} The promise object for the server request
+		*/
+		$session.login = function(user) {
 			return SessionModl.login(user).$promise
-				.then(res => {
-					// Update local session then redirect to dash
-					$ctrl.update().then(res => $location.path('/'));
-				});
+				.then(res => $session.update().then(res => $location.path('/'))); // Update local session then redirect to root
 		};
 
-		$ctrl.logout = function() {
+		/**
+		* Attempt to logout the user
+		* @return {Promise} The promise object for the server request
+		*/
+		$session.logout = function() {
 			return SessionModl.logout().$promise
-				.then(res => {
-					// Update local session then redirect to login
-					$ctrl.update().then(res => $location.path('/login'));
-				});
-		};
-
-		$ctrl.checkLogin = function() {
-			// Add convenience flags
-			if ($ctrl.data && $ctrl.data._id) {
-				$ctrl.isLoggedIn = true;
-			} else {
-				$ctrl.isLoggedIn = false;
-			}
+				.then(res => $session.update().then(res => $location.path('/login'))); // Update local session then redirect to login
 		};
 
 		// Init local storage for session data
-		$ctrl.getLocal();
+		$session.getLocal();
 
 		// Fetch session data on service creation
-		$rootScope.$evalAsync(_=> $ctrl.update());
+		$rootScope.$evalAsync(_=> $session.update());
 	});
