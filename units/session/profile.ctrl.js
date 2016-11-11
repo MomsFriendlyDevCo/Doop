@@ -1,18 +1,9 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('users-profile', {
-				url: '/profile',
-				component: 'usersProfileCtrl',
-				data: {
-					title: 'Edit Your Profile',
-				},
-			})
-	})
+	.run($router => $router.when('/profile').component('usersProfileCtrl'))
 	.component('usersProfileCtrl', {
 		templateUrl: '/units/session/profile.tmpl.html',
-		controller: function($scope, $location, $loader, $session, $stateParams, $timeout, $toast, Users) {
+		controller: function($scope, $location, $loader, $routerParams, $session, $timeout, $toast, Users) {
 			var $ctrl = this;
 
 			// Data refresher {{{

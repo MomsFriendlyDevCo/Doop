@@ -1,15 +1,6 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('session-logout', {
-				url: '/logout',
-				component: 'logoutCtrl',
-				data: {
-					title: 'Logout',
-				},
-			});
-	})
+	.run($router => $router.when('/logout').component('logoutCtrl'))
 	.component('logoutCtrl', {
 		templateUrl: '/units/session/logout.tmpl.html',
 		controller: function($session, $timeout, $window) {

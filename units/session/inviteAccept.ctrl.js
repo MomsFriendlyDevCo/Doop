@@ -1,18 +1,9 @@
 angular
 	.module('app')
-	.config(function($stateProvider) {
-		$stateProvider
-			.state('users-inviteAccept', {
-				url: '/invite/accept/:token',
-				component: 'usersInviteAcceptCtrl',
-				data: {
-					title: 'Accept Invite',
-				},
-			})
-	})
+	.run($router => $router.when('/invite/accept/:token').component('usersInviteAcceptCtrl'))
 	.component('usersInviteAcceptCtrl', {
 		templateUrl: '/units/session/inviteAccept.tmpl.html',
-		controller: function($scope, $stateParams, $toast, $window, Users) {
+		controller: function($scope, $routerParams, $toast, $window, Users) {
 			var $ctrl = this;
 
 			$ctrl.error;
@@ -34,7 +25,7 @@ angular
 				} else if ($ctrl.user.password != $ctrl.user.password2) {
 					$ctrl.error = 'Your passwords do not match';
 				} else {
-					Users.inviteAccept(_.merge({}, $ctrl.user, {token: $stateParams.token})).$promise
+					Users.inviteAccept(_.merge({}, $ctrl.user, {token: $routerParams.token})).$promise
 						.then(_=> $window.location = '/')
 						.catch($toast.catch)
 				}
