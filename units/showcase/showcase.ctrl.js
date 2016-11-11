@@ -3,12 +3,13 @@ angular
 	.run($router => $router.when('/showcase/:id?').component('showcaseCtrl'))
 	.component('showcaseCtrl', {
 		templateUrl: '/units/showcase/showcase.tmpl.html',
-		controller: function($scope, $config, $loader, $routerParams, $toast) {
+		controller: function($scope, $config, $loader, $router, $routerParams, $toast) {
 			var $ctrl = this;
 
 			$ctrl.$config = $config;
 			$ctrl.$loader = $loader;
 			$ctrl.$toast = $toast;
+			$ctrl.$router = $router;
 
 			// Jump to the right object ID if the $routerParams.id changes
 			$scope.$watch(_=> $routerParams.id, function() {
