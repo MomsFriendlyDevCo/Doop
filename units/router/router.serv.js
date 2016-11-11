@@ -14,6 +14,7 @@ angular
 			params: {}, // Extracted parameters based on the rule tokens
 			main: null, // The main view - this will be the matched rule object
 		};
+		$ctrl.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
 
 		// Rule instance {{{
 		/**
@@ -22,11 +23,62 @@ angular
 		*/
 		var RouterRule = function(path) {
 			this._path;
+			this._action = 'component'; // Action to take when the rule matches. ENUM: 'component', 'redirect'
 			this._component;
+			this._redirect;
 			this._segments = [];
+			this._priority = 50;
 
-			this.component = c => this._component = c;
-			this.matches = p => this._path.test(p);
+			/**
+			* Set the component to use when the rule is satisfied
+			* @param {string} component The component to use
+			* @return {RouterRule} This chainable object
+			*/
+			this.component = component => {
+				this._action = 'component';
+				this._component = component;
+				return this;
+			};
+
+			/**
+			* Set the a path to redirect to if this rule is satisfied
+			* @param {string} component The component to use
+			* @return {RouterRule} This chainable object
+			*/
+			this.go = path => {
+				this._action = 'redirect';
+				this._redirect = path;
+				return this;
+			};
+
+			/**
+			* Alias of go
+			* @see go()
+			*/
+			this.redirect = this.go;
+
+			/**
+			* Set the priority of this rule
+			* @param {number|string} The priority number or alias (see $router.priorityAliases)
+			* @return {RouterRule} This chainable object
+			*/
+			this.priority = priority => {
+				if (isFinite(priority)) {
+					this._priority = priority;
+				} else if ($ctrl.priorityAliases.hasOwnProperty(priority)) {
+					this._priority = $ctrl.priorityAliases[priority];
+				} else {
+					throw new Error('Unknown priority number or alias: ' + priority);
+				}
+				return this;
+			};
+
+			/**
+			* Return if the given path satisfies this rule
+			* @param {string} path The path to test against
+			* @return {boolean} Whether this rule is satisifed by the given path
+			*/
+			this.matches = p => this._path && this._path.test(p);
 
 			/**
 			* Set the path matcher in the rule
@@ -38,7 +90,7 @@ angular
 				if (typeof path == 'object' && Object.prototype.toString.call(path) == '[object RegExp]') { // Is a RegExp
 					this._path = path;
 					this._segments = [];
-				} else { // Is a string
+				} else if (typeof path == 'string' && path) { // Is a string
 					this._path = $ctrl.pathToRegExp(path);
 					this._segments = (path.match(/:[a-z0-9_-]+\??/gi) || []).map(function(seg) {
 							var segExamined = /^:(.+?)(\?)?$/.exec(seg);
@@ -112,6 +164,7 @@ angular
 		* @return {Promise} A promise object for the navigation
 		*/
 		$ctrl.go = function(path) {
+			$rootScope.$broadcast('$routerStart', $ctrl.current.main);
 			return $q(function(resolve, reject) {
 				var rule = $ctrl.resolve(path);
 				if (rule) {
@@ -121,6 +174,7 @@ angular
 					angular.extend($ctrl.current.params, rule.extractParams(path));
 					resolve(rule);
 				} else {
+					$rootScope.$broadcast('$routerError');
 					reject(rule);
 				}
 			});
@@ -134,10 +188,11 @@ angular
 	})
 	.service('$routerParams', $router => $router.current.params)
 	.component('routerView', {
-		controller: function($compile, $element, $router, $scope) {
+		controller: function($compile, $element, $rootScope, $router, $scope) {
 			$scope.$watch(_=> $router.current.main, function() {
 				var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
 				$element.html($compile('<' + componentName + '></' + componentName + '>')($scope));
+				$rootScope.$broadcast('$routerSuccess', $router.current.main);
 			});
 		},
 	})
