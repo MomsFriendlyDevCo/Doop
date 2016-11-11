@@ -180,6 +180,12 @@ angular
 			});
 		};
 
+		/**
+		* Alias of go()
+		* @see go()
+		*/
+		$router.redirect = $router.go;
+
 		// Setup a watcher on the main window location hash
 		$rootScope.$watch(_=> location.hash, function() {
 			var newHash = location.hash.replace(/^#!?/, '');
@@ -188,10 +194,19 @@ angular
 	})
 	.service('$routerParams', $router => $router.current.params)
 	.component('routerView', {
-		controller: function($compile, $element, $rootScope, $router, $scope) {
+		controller: function($compile, $element, $location, $rootScope, $router, $scope) {
 			$scope.$watch(_=> $router.current.main, function() {
-				var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
-				$element.html($compile('<' + componentName + '></' + componentName + '>')($scope));
+				switch ($router.current.main._action) {
+					case 'component':
+						var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
+						$element.html($compile('<' + componentName + '></' + componentName + '>')($scope));
+						break;
+					case 'redirect':
+						$location.path($router.current.main._redirect);
+						break;
+					default:
+						throw new Error('Unknown router action: ' + $router.current.main._action);
+				}
 				$rootScope.$broadcast('$routerSuccess', $router.current.main);
 			});
 		},
