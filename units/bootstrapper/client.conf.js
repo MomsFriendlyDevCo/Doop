@@ -9,28 +9,51 @@ angular
 	})
 
 	/**
-	* Initial / default route configuration
+	* Router behaviours
 	*/
-	.config(function($urlRouterProvider) {
-		// States are defined in their corresponding unit
+	.run(function($config, $loader, $rootScope, $router) {
+		// If nothing matches go to '/' {{{
+		$router.rule().priority('lowest').go('/');
+		// }}}
 
-		// For any unmatched url, redirect to /
-		$urlRouterProvider.otherwise('/');
+		// Animate the page loader while navigating {{{
+		$rootScope.$on('$routerStart', _=> $loader.clear().start('routerNav'));
+		$rootScope.$on('$routerSuccess', _=> $loader.stop('routerNav'));
+		$rootScope.$on('$routerError', _=> $loader.stop('routerNav'));
+		// }}}
+
+		// Cleanup Bootstrap elements on navigation {{{
+		$rootScope.$on('$routerStart', _=> {
+			// Destory any open Bootstrap modals
+			$('body > .modal-backdrop').remove();
+
+			// Destroy any open Bootstrap tooltips
+			$('body > .tooltip').remove();
+
+			// Destroy any open Bootstrap popovers
+			$('body > .popover').remove();
+		});
+		// }}}
+
+		// Focus any input element post-navigation {{{
+		$rootScope.$on('$routerSuccess', _=> $('div[ui-view=main]').find('input[autofocus]').focus());
+		// }}}
+
+		// Reattach 'waves' effect on every router reload {{{
+		$rootScope.$on('$routerSuccess', _=> Waves.init());
+		// }}}
+
+		// Adjust page title when the page changes {{{
+		$rootScope.$on('$routerSuccess', (e, rule) => document.title = $config.title + (rule.data && rule.data.title ? ' | ' + rule.data.title : ''));
+		// }}}
 	})
 
-	/**
-	* Router: Loader display while routing
-	*/
-	.run(function($loader, $transitions) {
-		$transitions.onStart({}, _=> $loader.clear().start('stateChange'));
-		$transitions.onSuccess({}, _=> $loader.stop('stateChange'));
-		$transitions.onError({}, _=> $loader.stop('stateChange'));
-	})
-
+	// FIXME: Defunct
 	/**
 	* Router: Restrict every page except /login
 	* If the user is NOT logged in redirect to /login in all instances
 	*/
+	/*
 	.run(function($location, $rootScope, $session, $transitions) {
 		$transitions.onStart({}, function(trans) {
 			if (
@@ -48,41 +71,4 @@ angular
 			}
 		});
 	})
-
-	/**
-	* Router: Cleanup on page exit
-	* Destroys any open Bootstrap modals, tooltips or popovers
 	*/
-	.run(function($transitions) {
-		$transitions.onSuccess({}, _=> {
-			// Destory any open Bootstrap modals
-			$('body > .modal-backdrop').remove();
-
-			// Destroy any open Bootstrap tooltips
-			$('body > .tooltip').remove();
-
-			// Destroy any open Bootstrap popovers
-			$('body > .popover').remove();
-		});
-	})
-
-	/**
-	* Router: Focus any input element with the 'autofocus' attribute on state change
-	*/
-	.run(function($transitions) {
-		$transitions.onSuccess({}, _=> $('div[ui-view=main]').find('input[autofocus]').focus());
-	})
-
-	/**
-	* Router: Reattach 'waves' effect on every router reload
-	*/
-	.run(function($transitions) {
-		$transitions.onSuccess({}, _=> Waves.init());
-	})
-
-	/**
-	* Router: Adjust page title when the state changes
-	*/
-	.run(function($config, $state, $transitions) {
-		$transitions.onSuccess({}, _=> document.title = $config.title + ($state.current.data && $state.current.data.title ? ' | ' + $state.current.data.title : ''));
-	})
