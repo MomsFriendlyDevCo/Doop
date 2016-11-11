@@ -169,11 +169,13 @@ angular
 			return $q(function(resolve, reject) {
 				var rule = $router.resolve(path);
 				if (rule) {
+					var previousRule = $router.current.main;
 					$router.current.main = rule;
 					// We cant just set $router.current.params as that would break the references to it - so we have to empty it, then refill
 					Object.keys($router.current.params).forEach(k => delete $router.current.params[k]);
 					angular.extend($router.current.params, rule.extractParams(path));
 					resolve(rule);
+					if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
 				} else {
 					$rootScope.$broadcast('$routerError');
 					reject(rule);
