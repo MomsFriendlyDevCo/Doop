@@ -1,7 +1,7 @@
 var glob = require('glob');
 
 // Load the app stub
-require('../units/core/app');
+require('../units/core/backend');
 
 // Provide a superagent session and other shared information
 app.test = {

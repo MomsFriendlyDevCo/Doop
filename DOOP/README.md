@@ -65,7 +65,8 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/server.js`                          |               | Back-end/application entry point
 | `/tests/`                             |               | Optional testing files
 | `/units/`                             |               | Directory of all back-end and front-end units
-| `/units/bootstrapper/client.js`       |               | Front-end entry point
+| `/units/core/backend.js`              |               | Back-end entry point (this class creates a stub `global.app` object suitable for use in Gulp / Mocha etc.
+| `/units/core/frontend.js`             |               | Front-end entry point
 | `/units/content/`                     |               | Front-end media/content assets -- e.g. images, videos, etc.
 | `/units/layouts/*.html`               |               | Main layout template files
 | `/units/layouts/main.html`            |               | Default layout template file to use unless specified in server controller

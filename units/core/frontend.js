@@ -1,8 +1,20 @@
 /**
-* Angular app configuration file
-*/
+ * App client entry-point and initialiser
+ */
 angular
-	.module('app')
+	.module('app', [
+		/*
+		* External Angular modules
+		*/
+		'angular-bs-confirm',
+		'angular-ui-loader',
+		'angular-bs-popover',
+		'angular-bs-tooltip',
+		'ngResource',
+		'ui.gravatar',
+		'ui-notification',
+		'uiSwitch',
+	])
 
 	// Anglar core config {{{
 	.config(function($httpProvider) {
