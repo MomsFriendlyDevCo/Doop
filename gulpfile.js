@@ -76,6 +76,7 @@ global.paths = {
 		'units/**/*.css',
 	],
 	scripts: [
+		'units/core/frontend.js',
 		'units/**/client.js',
 		'units/**/client.conf.js',
 		'units/**/*.modu.js',
@@ -147,7 +148,7 @@ gulp.on('stop', function() { process.exit(0); });
 * If you want `app.db` you must also call `load:db`
 */
 gulp.task('load:app', [], function(finish) {
-	require('./units/core/app');
+	require('./units/core/backend');
 	global.config = app.config;
 
 	finish();
