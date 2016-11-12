@@ -166,7 +166,7 @@ angular
 			* @return {Promise} A promise which will resolve if this rule is satisfied by the given path
 			*/
 			this.matches = (path,requires) => $q((resolve, reject) => {
-				if (this._path && this._path.test(path)) { // Matches basic pathing rules
+				if ((!this._path) || (this._path && this._path.test(path))) { // Matches basic pathing rules (if no path pass though)
 					if (!this._requires.length || requires === false) return resolve();
 					$q.all(this._requires.map(r => r())) // Run each factory function to crack open the promise inside then resolve it
 						.then(_=>resolve())
@@ -206,6 +206,7 @@ angular
 			* @return {Object} A populated object with all the tokens extracted
 			*/
 			this.extractParams = function(path) {
+				if (!this._path) return {};
 				var extracted = this._path.exec(path);
 				var params = {};
 				this._segments.forEach((seg,i) => params[seg.id] = extracted[i+1] ? extracted[i+1].replace(/^\//, '') : null);
@@ -267,8 +268,9 @@ angular
 							.then(_=> mainResolve(rule)) // If the rule matches fire the mainResolver which also stops this chain being processed
 							.catch(err => { if (err) { mainReject(err) } else { ruleResolve() } }) // If it errored see if its a valid complaint (if so reject it via mainReject) else continue on
 					}));
-				}, $q.resolve());
-			});
+				}, $q.resolve())
+					.then(_=> mainReject())
+			})
 		};
 
 		/**
@@ -290,9 +292,9 @@ angular
 						resolve(rule);
 						if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
 					})
-					.catch(_=> {
-						$rootScope.$broadcast('$routerError');
-						reject(rule);
+					.catch(err => {
+						$rootScope.$broadcast('$routerError', err);
+						reject(err);
 					})
 			});
 		};

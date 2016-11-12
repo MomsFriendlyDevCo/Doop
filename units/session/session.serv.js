@@ -44,7 +44,6 @@ angular
 			return $q(function(resolve, reject) {
 				$session.promise()
 					.then(function(user) {
-						console.log('IS USER', role, '?', _.includes(_.castArray(role), user.role));
 						if (_.includes(_.castArray(role), user.role)) {
 							resolve(user);
 						} else {
