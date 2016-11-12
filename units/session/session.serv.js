@@ -16,7 +16,7 @@ angular
 		$session.promise = function() {
 			if ($session.isLoggedIn) { // Already logged in
 				return $q.resolve($session.data);
-			} else if ($session.isUpdated) { // NOT logged in and we have already spoken to the server
+			} else if (!$session.isLoggedIn && $session.isUpdated) { // NOT logged in and we have already spoken to the server
 				return $q.reject();
 			} else { // NOT logged in and we have NOT spoken to the server - return a future and resolve/reject when we can
 				return $q(function(resolve, reject) {
@@ -65,7 +65,7 @@ angular
 				})
 				.finally(() => {
 					$session.isUpdated = true;
-					$session.isLoggedIn = ($session.data && $session.data._idi);
+					$session.isLoggedIn = ($session.data && $session.data._id);
 					$rootScope.$broadcast('session.updated', $session.data);
 				});
 		};
