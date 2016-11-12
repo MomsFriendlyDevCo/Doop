@@ -156,22 +156,18 @@ RouterRule.priorty(priority)
 Set the priority out of 100 that the rule should install itself at in the router rules stack.
 The value can either be a number or a string corresponding to an entry in `$router.priorityAliases`.
 
-RouterRule.requires(...tests)
------------------------------
+RouterRule.requires(...tests) / RouterRule.require(...tests)
+------------------------------------------------------------
 A function, promise or an array therefof of conditions that must be satisfied for this rule to match.
 
 ```javascript
 // Only match if `$session.promise()` returns correctly
 $router.when('/foo')
-	.requires($session.promise())
+	.requires($session.promise)
 	.component('fooCtrl');
-
-// Only match if we have a $session.data + $session.data.auth = true
-$router.when('/bar')
-	.requires(_=> $session.data)
-	.requires(_=> $session.data.auth)
-	.component('barCtrl');
 ```
+
+**NOTE**: Promises only ever resolve _once_ so its important to pass in a function which _creates a new promise_ (a Promise Factory pattern). This was the factory is instanciated whenever the rule is checked with a new state each time. The Router will warn if it is passed a Promise directly rather than a function which returns a promise.
 
 
 RouterRule.extractParams(path)

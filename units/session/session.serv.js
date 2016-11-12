@@ -7,6 +7,8 @@ angular
 		$session.isLoggedIn = false; // Whether the user is logged in according to the server
 		$session.isUpdated = false; // Have we tried to fetch the user info yet?
 
+		// Promise utilities {{{
+
 		/**
 		* Return a promise for when this user is logged in
 		* NOTE - if the user is ALREADY logged in or DEFINIATELY NOT logged in this function will return an already resolved/rejected promise.
@@ -31,6 +33,35 @@ angular
 				});
 			}
 		};
+
+		/**
+		* Similar to $session.promise but only resolves if the user is logged in AND that $session.data.role is equal to role (or any of the items in role if its an array)
+		* @param {string|array} role The role(s) to verify against
+		* @return {Promise} A promise which will resolve if the user is logged in and role matches
+		* @see promise()
+		*/
+		$session.promise.role = function(role) {
+			return $q(function(resolve, reject) {
+				$session.promise()
+					.then(function(user) {
+						console.log('IS USER', role, '?', _.includes(_.castArray(role), user.role));
+						if (_.includes(_.castArray(role), user.role)) {
+							resolve(user);
+						} else {
+							reject(user);
+						}
+					})
+					.catch(_=> reject());
+			});
+		};
+
+		/**
+		* Alias of $session.promise.role(['admin', 'root'])
+		* @see promise.role()
+		*/
+		$session.promise.admin = _=> $session.promise.role(['admin', 'root']);
+
+		// }}}
 
 		/**
 		* Save the current user details back to the server

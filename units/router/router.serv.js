@@ -84,43 +84,51 @@ angular
 			};
 
 			/**
-			* Sets a requirement for the rule to be satisifed
-			* This can be a callback function or a promise which must resolve for the rule to be satisifed
+			* Sets a requirement for the rule to be satisfied
+			* This is a promise or array of promises which must resolve for the rule to be satisfied
 			* NOTE: All regular functions will be transformed into promises (so we can process them faster later)
-			* @param {function|array|Promise} ...test Either a single function, array of functions or Promise to be satisifed for the rule to match
+			* @param {array|Promise} ...test Either a single promise or an array of promises to be satisfied for the rule to match
 			* @return {RouterRule} This chainable object
 			*/
-			this.requires = _=> {
-				Array.prototype.push.apply(this._requires, 
-					_(arguments)
-						.flatten() // Flatten array of stuff
-						.map(function(f) {
-							if (_.isPromise(f)) {
-								return f;
-							} else if (_.isFunction(f)) {
-								return $q((resolve, reject) => {
-									if (f()) { resolve() } else { reject() };
-								});
-							} else {
-								throw new Error('RouterRule.requires() must be given either a promise, function or arrays of the same. Unknown type: ' + (typeof f));
-							}
-						})
-						.value()
-				);
+			this.requires = function() {
+				if ($router.warns.requiresChecking) {
+					_.flatten(arguments).forEach(p => {
+						if (!_.isFunction(p)) {
+							console.warn(
+								'RouterRule.requires() must be passed a PROMISE FACTORY - ' +
+								(_.hasIn(p, 'then')
+									? 'promises only ever run once!'
+									: 'was given unexpected type: ' + (typeof p)
+								) + 
+								' Pass in a factory or disable this message with $router.warnings("requiresChecking", false)'
+							);
+						}
+					});
+				}
+
+				Array.prototype.push.apply(this._requires, _.flatten(arguments));
 
 				return this;
 			};
 
 			/**
+			* Alias of requires()
+			* @see requires
+			*/
+			this.require = this.requires;
+
+			/**
 			* Return if the given path satisfies this rule
 			* @param {string} path The path to test against
 			* @param {boolean} [requires=true] Obey requires attached to the rule
-			* @return {Promise} A promise which will resolve if this rule is satisifed by the given path
+			* @return {Promise} A promise which will resolve if this rule is satisfied by the given path
 			*/
 			this.matches = (path,requires) => $q((resolve, reject) => {
 				if (this._path && this._path.test(path)) { // Matches basic pathing rules
-					resolve();
-					// return $q.all(this._path.requires); // Check all requires pass
+					if (!this._requires.length || requires === false) return resolve();
+					$q.all(this._requires.map(r => r())) // Run each factory function to crack open the promise inside then resolve it
+						.then(_=>resolve())
+						.catch(_=>reject())
 				} else {
 					reject();
 				}
