@@ -9,40 +9,42 @@ angular
 	.run($router => $router.when('/widgets/:id?').component('widgetsListCtrl'))
 	.component('widgetsListCtrl', {
 		templateUrl: '/units/widgets/list.tmpl.html',
-		controller: function($scope, $routerParams) {
+		controller: function($scope, $router) {
 			var $ctrl = this;
 
-			// Do something with the widget ID specified in $routerParams.id
+			// Do something with the widget ID specified in $router.params.id
 		},
 	});
 ```
 
 Features:
 
-* Chainable syntax (`$router.when('/this/path').component('something')`)
-* Normal Angular event system - none of the rather silly `$transition` system AUIR uses
-* Sensible rule sorting - tokens are prioritized LAST so `/foo/:id` gets matched after `/foo/create`
-* Routes can be updated in real time - the router will automatically resort priorities as rules are added and removed
-* Promised based architecture - fits in better with the way Angular does things and allows for async handling gracefully
-* Exceptionally small
-* Exceptionally fast
+* **Chainable syntax** - Use a simple BDD / chainable layout to define routes e.g. `$router.when('/this/path').requires($session.checkLogin).component('something')`
+* **Regular Angular event system** - none of that weird `$transition` system Angular-UI-Router uses. The router fires `$rootScope.$broadcast('$routerSuccess')` events like everything else
+* **Sensible route prioritization** - tokens are prioritized _LAST_ so `/foo/:id` gets matched after `/foo/create`. Rather than creating weird hierarchical rules, you can just dump rules into the router and let it figure it out
+* **Component support** - Components are the future
+* **Routes can be updated in real time** - the router will automatically resort rules as things are added and removed
+* **Promise based architecture** - fits in better with the way Angular does things and allows for async handling gracefully
+* **"Provide" pattern proof** - Angular is hard enough to understand as it is without having to reference two different classes that do seemingly different things. $router exposes exactly ONE well defined and easy to use service
+* **Exceptionally small** - Seriously look at the source - its one file of about 80 lines of actual code
+* **Exceptionally fast** - Because there is no weird [cruft](http://catb.org/jargon/html/C/cruft.html) to handle there are no excess parts of the router that slows everything down
 
 
 Why?
 ----
 Because [angular-ui-router](https://github.com/angular-ui/ui-router) is too bloody complicated, difficult to grok and the documentation sucks.
 
-This project is an attempt to simplify routing to its absolute bare essencials.
+This project is an attempt to simplify routing to its absolute bare essentials using a sane syntax with sensible examples.
 
 
 Common usage
 ============
 
 ```javascript
-// Use a given controller when matching a path (ID will be available in $routerParams.id)
+// Use a given controller when matching a path (ID will be available in $router.params.id)
 $router.when('/widgets/:id').component('widgetsListCtrl');
 
-// Specify that some parameters are optional - suffix each token with a question mark
+// Specify that some parameters are optional - just suffix each token with a question mark
 $router.when('/foo/:id1?/:id2?/:id3?').component('fooCtrl');
 
 // When visiting one URL redirect to another
@@ -52,6 +54,16 @@ $router.when('/foo').redirect('/bar');
 
 // Set the priority of a routing rule
 $router.when('/foo').priority('low').redirect('/somewhere/else');
+
+// Require that a rule only matches if a promise resolves correctly (we assume $session.isLoggedIn works)
+$router.when('/super-secure-area').requires($session.isLoggedIn).component('superSecureCtrl');
+
+// ... or multiple promises
+$router.when('/super-secure-area')
+	.require(something)
+	.require(somethingElse)
+	.require([lots, o, promises])
+	.component('superSecureCtrl');
 
 
 // Listen for routing events and perform an action when the page has changed
@@ -94,7 +106,7 @@ A lookup object of different priority aliases - e.g. `lowest`, `normal` etc.
 
 $router.sort
 ------------
-Various information about sorting the array. This containes `$router.sort.enabled` which toggles whether to sort, `$router.sort.isSorted` which specifies the dirty flag of the routes being sorted, `$router.sort.keyOrder` which is an array of rule keys to sort by (in order) and `$router.sort.stringCharOrder` which is the alphanumeric sort order priority for string values.
+Various configuration options to sort the `$router.routes` collection. This containes `$router.sort.enabled` which toggles whether to sort, `$router.sort.isSorted` which specifies the dirty flag of the routes being sorted, `$router.sort.keyOrder` which is a complex collection of how to sort the array (see the source code). The sorting function can be overrideen by subclassing / decorating `$router.sort.sorter`.
 
 $router.warns
 -------------
@@ -174,10 +186,6 @@ RouterRule.extractParams(path)
 ------------------------------
 Function to extract parameters from the URL into the parameters object.
 
-
-$routerParams (service)
------------------------
-A service which returns the current `$router.current.params` object.
 
 routerView (directive)
 ----------------------
