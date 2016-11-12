@@ -201,7 +201,7 @@ angular
 
 			/**
 			* Extract the parameters from a given path
-			* This is used to populate $router.current.params when we navigate
+			* This is used to populate $router.params when we navigate
 			* @param {string} path The path component to match against
 			* @return {Object} A populated object with all the tokens extracted
 			*/
@@ -284,9 +284,9 @@ angular
 					.then(rule => {
 						var previousRule = $router.current.main;
 						$router.current.main = rule;
-						// We cant just set $router.current.params as that would break the references to it - so we have to empty it, then refill
-						Object.keys($router.current.params).forEach(k => delete $router.current.params[k]);
-						angular.extend($router.current.params, rule.extractParams(path));
+						// We cant just set $router.params as that would break the references to it - so we have to empty it, then refill
+						Object.keys($router.params).forEach(k => delete $router.params[k]);
+						angular.extend($router.params, rule.extractParams(path));
 						resolve(rule);
 						if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
 					})
@@ -327,7 +327,6 @@ angular
 			$router.go(newHash);
 		});
 	})
-	.service('$routerParams', $router => $router.current.params)
 	.component('routerView', {
 		controller: function($compile, $element, $location, $rootScope, $router, $scope) {
 			$scope.$watch(_=> $router.current.main, function() {

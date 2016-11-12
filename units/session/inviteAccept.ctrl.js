@@ -3,7 +3,7 @@ angular
 	.run($router => $router.when('/invite/accept/:token').component('usersInviteAcceptCtrl'))
 	.component('usersInviteAcceptCtrl', {
 		templateUrl: '/units/session/inviteAccept.tmpl.html',
-		controller: function($scope, $routerParams, $toast, $window, Users) {
+		controller: function($scope, $router, $toast, $window, Users) {
 			var $ctrl = this;
 
 			$ctrl.error;
@@ -25,7 +25,7 @@ angular
 				} else if ($ctrl.user.password != $ctrl.user.password2) {
 					$ctrl.error = 'Your passwords do not match';
 				} else {
-					Users.inviteAccept(_.merge({}, $ctrl.user, {token: $routerParams.token})).$promise
+					Users.inviteAccept(_.merge({}, $ctrl.user, {token: $router.params.token})).$promise
 						.then(_=> $window.location = '/')
 						.catch($toast.catch)
 				}

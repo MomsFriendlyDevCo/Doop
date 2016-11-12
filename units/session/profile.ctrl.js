@@ -3,7 +3,7 @@ angular
 	.run($router => $router.when('/profile').component('usersProfileCtrl'))
 	.component('usersProfileCtrl', {
 		templateUrl: '/units/session/profile.tmpl.html',
-		controller: function($scope, $location, $loader, $routerParams, $session, $timeout, $toast, Users) {
+		controller: function($scope, $location, $loader, $session, $timeout, $toast, Users) {
 			var $ctrl = this;
 
 			// Data refresher {{{
