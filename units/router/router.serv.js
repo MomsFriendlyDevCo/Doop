@@ -297,6 +297,7 @@ angular
 	.component('routerView', {
 		controller: function($compile, $element, $location, $rootScope, $router, $scope) {
 			$scope.$watch(_=> $router.current.main, function() {
+				if (!$router.current.main) return; // Main route not loaded yet
 				switch ($router.current.main._action) {
 					case 'component':
 						var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
