@@ -10,16 +10,58 @@ angular
 	.service('$router', function($q, $rootScope) {
 		var $router = this;
 		$router.routes = [];
+		$router.params = {}; // Extracted parameters based on the rule tokens
 		$router.current = {
-			params: {}, // Extracted parameters based on the rule tokens
 			main: null, // The main view - this will be the matched rule object
 		};
 		$router.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
 		$router.sort = {
-			enabled: false,
+			enabled: true,
 			isSorted: false,
-			keyOrder: ['_priority', '_path'],
-			stringCharOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', // Character orders when comparing string positions (anything not here gets the value 999)
+			keyOrder: [
+				{key: '_priority', reverse: true},
+				{key: '_pathHuman', charOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', fallback: _=> String.fromCharCode(65000)},
+				{key: '_path', charOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', fallback: _=> String.fromCharCode(65000)},
+			],
+			// Sorter function {{{
+			// Code taken in-part from https://github.com/hash-bang/string-sort (author of this module is the author of string-sort)
+			// See that module for a test kit and documentation
+			// TL;DR - this is a [Schwartzian Transform](https://en.wikipedia.org/wiki/Schwartzian_transform)
+			sorter: function() {
+				// Cache the lookup table for each key rule
+				$router.sort.keyOrder.forEach(keyRule => {
+					if (keyRule.charOrder) {
+						keyRule.charOrderTable = {};
+						keyRule.charOrder.split('').forEach((c,i) => keyRule.charOrderTable[c] = String.fromCharCode(i + 65));
+					}
+				});
+
+				$router.routes = $router.routes
+					.map(r => [r].concat($router.sort.keyOrder.map(keyRule => { // Pack the rules into an array of the form [RouterRule, fields...]
+						// Construct each key value
+						if (!_.hasIn(r, keyRule.key)) { // Lookup key missing
+							return undefined;
+						} else if (keyRule.charOrderTable) { // Translate string into something we can use
+							return r[keyRule.key]
+								.toString()
+								.split('')
+								.map(c => keyRule.charOrderTable[c] || keyRule.fallback(c))
+								.join('');
+						} else { // Just return the value
+							return r[keyRule.key];
+						}
+					})))
+					.sort(function(a, b) { // Sort everything...
+						for (var k = 0; k < $router.sort.keyOrder.length; k++) { // Compare each field until we hit something that differs
+							if (_.isUndefined(a[k+1]) || _.isUndefined(b[k+1])) continue; // Skip non-existant comparitors
+							if (a[k+1] == b[k+1]) continue; // Fall though as both values are the same
+							// If we got here the fields differ
+							return a[k+1] > b[k+1] ? ($router.sort.keyOrder[k].reverse ? -1 : 1) : ($router.sort.keyOrder[k].reverse ? 1 : -1);
+						}
+					})
+					.map(i => i[0]); // Unpack and return the rule again
+			},
+			// }}}
 		};
 		$router.warns = {
 			requiresChecking: true, // Warn when passing an object / promise to rule.requires() rather than a promise factory
@@ -212,16 +254,7 @@ angular
 		*/
 		$router.resolve = function(path) {
 			if ($router.sort.enabled && !$router.sort.isSorted) {
-				$router.routes.sort(function(a, b) {
-					$router.sort.keyOrder.find(function(k) {
-						if (typeof a[k] == 'number') {
-							if (a[k] == b[k]) return false; // Equal
-							return a[k] > b[k] ? 1 : -1;
-						} else {
-							console.log('DONT KNOW HOW TO SORT', typeof a[k], 'AGAINST', typeof b[k]);
-						}
-					});
-				});
+				$router.sort.sorter();
 				$router.sort.isSorted = true;
 			}
 
