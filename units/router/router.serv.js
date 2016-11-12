@@ -21,6 +21,9 @@ angular
 			keyOrder: ['_priority', '_path'],
 			stringCharOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', // Character orders when comparing string positions (anything not here gets the value 999)
 		};
+		$router.warns = {
+			requiresChecking: true, // Warn when passing an object / promise to rule.requires() rather than a promise factory
+		};
 
 		// Rule instance {{{
 		/**
@@ -257,6 +260,24 @@ angular
 		* @see go()
 		*/
 		$router.redirect = $router.go;
+
+		/**
+		* Disable a specific warning flag or all flags by just passing `false`
+		* @param {string|boolean} key Either the key of the warning to set the value of OR a boolean to set all
+		* @param {boolean} [value] The new value of the key if one was specified
+		* @return {$router} This chainable object
+		*/
+		$router.warnings = (key, val) => {
+			if (_.isBoolean(key)) {
+				_.forEach($router.warns, (v,k) => $router.warns[k] = val)
+			} else if ($router.warns[key]) {
+				$router.warns[key] = val;
+			} else {
+				throw new Error('Unknown warning key to disable: ' + key + '. Valid warning keys are: ' + _.keys($router.warns));
+			}
+
+			return $router;
+		};
 
 		// Setup a watcher on the main window location hash
 		$rootScope.$watch(_=> location.hash, function() {

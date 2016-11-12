@@ -10,6 +10,7 @@ angular
 	.module('app')
 	.service('$config', function($rootScope) {
 		return {
+			isProduction: 0/*IMPORT: app.config.isProduction*/,
 			title: 0/*IMPORT: app.config.title*/,
 			profiles: 0/*IMPORT: app.config.profiles*/,
 		};

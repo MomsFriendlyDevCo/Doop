@@ -27,6 +27,7 @@ if (process.env.VCAP_SERVICES) {
 // }}}
 
 var defaults = {
+	isProduction: false, // Master `is this production mode` switch - disables debugging and various other speed tweaks when enabled
 	name: "doop", // FIXME: Lower case, URL compatible name, no spaces or other weirdness
 	title: "Doop", // FIXME: Human friendly name
 	env: env,

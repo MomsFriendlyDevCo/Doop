@@ -13,6 +13,12 @@ angular
 
 	// Router config {{{
 
+	// Disable developer warnings if we're in production {{{
+	.run(function($config, $router) {
+		if ($config.isProduction) $router.warnings(false);
+	})
+	// }}}
+
 	// If no route matches go to '/' {{{
 	.run(function($router) {
 		$router.rule().priority('lowest').redirect('/');
@@ -71,4 +77,6 @@ angular
 	.run(function($config, $rootScope) {
 		$rootScope.$on('$routerSuccess', (e, rule) => document.title = $config.title + (rule.data && rule.data.title ? ' | ' + rule.data.title : ''));
 	})
+	// }}}
+
 	// }}}
