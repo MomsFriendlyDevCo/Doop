@@ -96,6 +96,13 @@ $router.sort
 ------------
 Various information about sorting the array. This containes `$router.sort.enabled` which toggles whether to sort, `$router.sort.isSorted` which specifies the dirty flag of the routes being sorted, `$router.sort.keyOrder` which is an array of rule keys to sort by (in order) and `$router.sort.stringCharOrder` which is the alphanumeric sort order priority for string values.
 
+$router.warns
+-------------
+An object containing a list of keys corresponding to various functions the router will check before it runs. These should only ever be enabled at run time as they take extra processing cycles.
+
+Use `$router.warnings(KEY, ENABLED)` to set by key or disable them all with `$router.warnings(false)` to disable all.
+
+
 $router.pathToRegExp()
 ----------------------
 Utility function to convert a path into a regular expression.
@@ -105,6 +112,10 @@ $router.rule(path)
 Create a new router rule and append it onto the `$router.routes` stack.
 
 See [RouterRule](#routerrule).
+
+$router.warnings(key, value) / $router.warnings(false)
+------------------------------------------------------
+Disable a specific warning / debugging flag within the router or disable all flags with `$router.warnings(false)`.
 
 $router.when(path)
 ------------------
