@@ -183,10 +183,11 @@ angular
 			* @return {RouterRule} This chainable object
 			*/
 			this.path = function(path) {
-				if (typeof path == 'object' && Object.prototype.toString.call(path) == '[object RegExp]') { // Is a RegExp
+				if (_.isRegExp(path)) { // Is a RegExp
 					this._path = path;
 					this._segments = [];
-				} else if (typeof path == 'string' && path) { // Is a string
+				} else if (_.isString(path) && path) { // Is a string
+					this._pathHuman = path; // Store the human version of the path for sorting later
 					this._path = $router.pathToRegExp(path);
 					this._segments = (path.match(/:[a-z0-9_-]+\??/gi) || []).map(function(seg) {
 							var segExamined = /^:(.+?)(\?)?$/.exec(seg);
