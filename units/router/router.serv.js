@@ -15,6 +15,12 @@ angular
 			main: null, // The main view - this will be the matched rule object
 		};
 		$router.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
+		$router.sort = {
+			enabled: false,
+			isSorted: false,
+			keyOrder: ['_priority', '_path'],
+			stringCharOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', // Character orders when comparing string positions (anything not here gets the value 999)
+		};
 
 		// Rule instance {{{
 		/**
@@ -28,6 +34,7 @@ angular
 			this._redirect;
 			this._segments = [];
 			this._priority = 50;
+			this._requires = [];
 
 			/**
 			* Set the component to use when the rule is satisfied
@@ -74,11 +81,47 @@ angular
 			};
 
 			/**
+			* Sets a requirement for the rule to be satisifed
+			* This can be a callback function or a promise which must resolve for the rule to be satisifed
+			* NOTE: All regular functions will be transformed into promises (so we can process them faster later)
+			* @param {function|array|Promise} ...test Either a single function, array of functions or Promise to be satisifed for the rule to match
+			* @return {RouterRule} This chainable object
+			*/
+			this.requires = _=> {
+				Array.prototype.push.apply(this._requires, 
+					_(arguments)
+						.flatten() // Flatten array of stuff
+						.map(function(f) {
+							if (_.isPromise(f)) {
+								return f;
+							} else if (_.isFunction(f)) {
+								return $q((resolve, reject) => {
+									if (f()) { resolve() } else { reject() };
+								});
+							} else {
+								throw new Error('RouterRule.requires() must be given either a promise, function or arrays of the same. Unknown type: ' + (typeof f));
+							}
+						})
+						.value()
+				);
+
+				return this;
+			};
+
+			/**
 			* Return if the given path satisfies this rule
 			* @param {string} path The path to test against
-			* @return {boolean} Whether this rule is satisifed by the given path
+			* @param {boolean} [requires=true] Obey requires attached to the rule
+			* @return {Promise} A promise which will resolve if this rule is satisifed by the given path
 			*/
-			this.matches = p => this._path && this._path.test(p);
+			this.matches = (path,requires) => $q((resolve, reject) => {
+				if (this._path && this._path.test(path)) { // Matches basic pathing rules
+					resolve();
+					// return $q.all(this._path.requires); // Check all requires pass
+				} else {
+					reject();
+				}
+			});
 
 			/**
 			* Set the path matcher in the rule
@@ -117,6 +160,7 @@ angular
 
 			this.path(path); // Set initial path if there is one
 			$router.routes.push(this);
+			$router.sort.isSorted = false;
 			return this;
 		};
 		// }}}
@@ -151,11 +195,35 @@ angular
 
 		/**
 		* Return what rule would match if given a path to examine
+		* This function also resorts the router stack if $router.sort.isSorted is false
 		* @param {string} path The path to examine
-		* @return {boolean|RouterRule} Either the found rule or boolean false
+		* @return {Promise} A promise with the resolved rule
 		*/
 		$router.resolve = function(path) {
-			return $router.routes.find(rule => rule.matches(path));
+			if ($router.sort.enabled && !$router.sort.isSorted) {
+				$router.routes.sort(function(a, b) {
+					$router.sort.keyOrder.find(function(k) {
+						if (typeof a[k] == 'number') {
+							if (a[k] == b[k]) return false; // Equal
+							return a[k] > b[k] ? 1 : -1;
+						} else {
+							console.log('DONT KNOW HOW TO SORT', typeof a[k], 'AGAINST', typeof b[k]);
+						}
+					});
+				});
+				$router.sort.isSorted = true;
+			}
+
+			return $q(function(mainResolve, mainReject) { // Compose a resolver by creating a series chain of rules (each rule is the parent of the previous using .then())
+				var resolver = $router.routes.reduce((chain, rule) => {
+					return chain.then(_=> $q((ruleResolve, ruleReject) => {
+						// For each rule return a promise that is upside down - if it resolves, the rule matches and it should call the mainResolve, if it DOESN'T it should resolve anyway so the next one can run
+						rule.matches(path)
+							.then(_=> mainResolve(rule)) // If the rule matches fire the mainResolver which also stops this chain being processed
+							.catch(err => { if (err) { mainReject(err) } else { ruleResolve() } }) // If it errored see if its a valid complaint (if so reject it via mainReject) else continue on
+					}));
+				}, $q.resolve());
+			});
 		};
 
 		/**
@@ -167,19 +235,20 @@ angular
 			if (!path) path = '/';
 			$rootScope.$broadcast('$routerStart', $router.current.main);
 			return $q(function(resolve, reject) {
-				var rule = $router.resolve(path);
-				if (rule) {
-					var previousRule = $router.current.main;
-					$router.current.main = rule;
-					// We cant just set $router.current.params as that would break the references to it - so we have to empty it, then refill
-					Object.keys($router.current.params).forEach(k => delete $router.current.params[k]);
-					angular.extend($router.current.params, rule.extractParams(path));
-					resolve(rule);
-					if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
-				} else {
-					$rootScope.$broadcast('$routerError');
-					reject(rule);
-				}
+				$router.resolve(path)
+					.then(rule => {
+						var previousRule = $router.current.main;
+						$router.current.main = rule;
+						// We cant just set $router.current.params as that would break the references to it - so we have to empty it, then refill
+						Object.keys($router.current.params).forEach(k => delete $router.current.params[k]);
+						angular.extend($router.current.params, rule.extractParams(path));
+						resolve(rule);
+						if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
+					})
+					.catch(_=> {
+						$rootScope.$broadcast('$routerError');
+						reject(rule);
+					})
 			});
 		};
 

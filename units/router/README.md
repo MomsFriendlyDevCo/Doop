@@ -21,6 +21,9 @@ Features:
 
 * Chainable syntax (`$router.when('/this/path').component('something')`)
 * Normal Angular event system - none of the rather silly `$transition` system AUIR uses
+* Sensible rule sorting - tokens are prioritized LAST so `/foo/:id` gets matched after `/foo/create`
+* Routes can be updated in real time - the router will automatically resort priorities as rules are added and removed
+* Promised based architecture - fits in better with the way Angular does things and allows for async handling gracefully
 * Exceptionally small
 * Exceptionally fast
 
@@ -89,6 +92,10 @@ $router.priorityAliases
 -----------------------
 A lookup object of different priority aliases - e.g. `lowest`, `normal` etc.
 
+$router.sort
+------------
+Various information about sorting the array. This containes `$router.sort.enabled` which toggles whether to sort, `$router.sort.isSorted` which specifies the dirty flag of the routes being sorted, `$router.sort.keyOrder` which is an array of rule keys to sort by (in order) and `$router.sort.stringCharOrder` which is the alphanumeric sort order priority for string values.
+
 $router.pathToRegExp()
 ----------------------
 Utility function to convert a path into a regular expression.
@@ -133,10 +140,28 @@ RouterRule.path(path)
 ---------------------
 Set the path of the rule. This can be a tokenized Ruby style path or a regular expression.
 
-RouterRule.priroty(priority)
+RouterRule.priorty(priority)
 ----------------------------
 Set the priority out of 100 that the rule should install itself at in the router rules stack.
 The value can either be a number or a string corresponding to an entry in `$router.priorityAliases`.
+
+RouterRule.requires(...tests)
+-----------------------------
+A function, promise or an array therefof of conditions that must be satisfied for this rule to match.
+
+```javascript
+// Only match if `$session.promise()` returns correctly
+$router.when('/foo')
+	.requires($session.promise())
+	.component('fooCtrl');
+
+// Only match if we have a $session.data + $session.data.auth = true
+$router.when('/bar')
+	.requires(_=> $session.data)
+	.requires(_=> $session.data.auth)
+	.component('barCtrl');
+```
+
 
 RouterRule.extractParams(path)
 ------------------------------
