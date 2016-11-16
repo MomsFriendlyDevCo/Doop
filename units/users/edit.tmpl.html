@@ -31,11 +31,17 @@
 			<div class="form-group">
 				<label class="col-sm-3 control-label">Change user password</label>
 				<div class="col-sm-9">
-					<a ng-show="!$ctrl.passwordUnlock" ng-click="$ctrl.togglePasswordUnlock()" class="btn btn-warning waves-effect"><i class="fa fa-unlock"></i> Set user password</a>
+					<div ng-show="!$ctrl.passwordUnlock">
+						<a ng-click="$ctrl.togglePasswordUnlock()" class="btn btn-warning waves-effect"><i class="fa fa-unlock"></i> Set user password</a>
+						<a ng-click="$ctrl.sendResetEmail()" class="btn btn-warning waves-effect"><i class="fa fa-envelope"></i> Send password reset email</a>
+					</div>
 					<div ng-show="$ctrl.passwordUnlock" class="input-group">
 						<input ng-model="$ctrl.user.password" type="text" class="form-control"/>
 						<div class="input-group-addon">
 							<a ng-click="$ctrl.passwordGenerate()" class="btn btn-primary waves-effect" tooltip="Generate a random password"><i class="fa fa-key"></i></a>
+						</div>
+						<div class="input-group-addon">
+							<a ng-click="$ctrl.sendResetEmail()" class="btn btn-primary waves-effect" tooltip="Send user a password reset email"><i class="fa fa-envelope"></i></a>
 						</div>
 					</div>
 				</div>
