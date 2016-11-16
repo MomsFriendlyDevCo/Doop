@@ -33,6 +33,7 @@ angular
 				_.isString(obj) ? obj :
 				_.has(obj, 'error') && obj.error ? obj.error :
 				_.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg :
+				_.has(obj, 'data.error') && obj.data.error ? obj.data.error :
 				_.has(obj, 'statusText') && obj.statusText ? obj.statusText :
 				obj.toString() ? obj.toString() :
 				'An error has occured'
