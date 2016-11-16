@@ -1,7 +1,7 @@
 angular
 	.module('app')
-	.run($router => $router.when('/invite/accept/:token').component('usersInviteAcceptCtrl'))
-	.component('usersInviteAcceptCtrl', {
+	.run($router => $router.when('/invite/accept/:token').component('sessionInviteAcceptCtrl'))
+	.component('sessionInviteAcceptCtrl', {
 		templateUrl: '/units/session/inviteAccept.tmpl.html',
 		controller: function($scope, $router, $toast, $window, Users) {
 			var $ctrl = this;

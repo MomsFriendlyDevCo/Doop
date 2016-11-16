@@ -1,7 +1,7 @@
 angular
 	.module('app')
-	.run($router => $router.when('/profile').component('usersProfileCtrl'))
-	.component('usersProfileCtrl', {
+	.run($router => $router.when('/profile').component('sessionProfileCtrl'))
+	.component('sessionProfileCtrl', {
 		templateUrl: '/units/session/profile.tmpl.html',
 		controller: function($scope, $location, $loader, $session, $timeout, $toast, Users) {
 			var $ctrl = this;
