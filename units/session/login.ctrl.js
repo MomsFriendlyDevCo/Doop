@@ -3,11 +3,8 @@ angular
 	.run($router => $router.when('/login').component('loginCtrl'))
 	.component('loginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
-		controller: function($rootScope, $auth, $session) {
+		controller: function($rootScope, $session) {
 			var $ctrl = this;
-
-			// Define visibility control for this controller
-			$auth.ensureUnauthenticated();
 
 			// Init scope variables
 			this.user = { username: '', password: '' };

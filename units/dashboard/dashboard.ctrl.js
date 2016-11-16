@@ -3,15 +3,10 @@ angular
 	.run($router => $router.when('/').component('dashCtrl'))
 	.component('dashCtrl', {
 		templateUrl: '/units/dashboard/dashboard.tmpl.html',
-		controller: function($scope, $auth) {
+		controller: function($scope) {
 			var $ctrl = this;
 
-			// Define visibility control for this controller
-			$auth.ensureAuthenticated();
-
-			$ctrl.refresh = function() {
-				// return $promise
-			};
+			$ctrl.refresh = function() {};
 
 			$scope.$evalAsync($ctrl.refresh);
 		},
