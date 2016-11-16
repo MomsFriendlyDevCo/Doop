@@ -4,6 +4,8 @@
 	</div>
 	<form ng-submit="$ctrl.save()" class="card">
 		<div class="card-body card-padding form-horizontal">
+			<div ng-show="$ctrl.error" class="alert alert-warning">{{$ctrl.error}}</div>
+
 			<div class="form-group">
 				<label class="col-sm-3 control-label">Name</label>
 				<div class="col-sm-9">
@@ -14,6 +16,19 @@
 				<label class="col-sm-3 control-label">Email</label>
 				<div class="col-sm-9">
 					<input ng-model="$ctrl.user.email" type="email" class="form-control"/>
+				</div>
+			</div>
+
+			<legend>Password</legend>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Change password</label>
+				<div class="col-sm-9">
+					<a ng-show="!$ctrl.passwordUnlock" ng-click="$ctrl.togglePasswordUnlock()" class="btn btn-warning waves-effect"><i class="fa fa-unlock"></i> Change password</a>
+					<div ng-show="$ctrl.passwordUnlock" class="input-group">
+						<input ng-model="$ctrl.user.password" type="password" class="form-control"/>
+						<br/>
+						<input ng-model="$ctrl.user.password2" type="password" class="form-control"/>
+					</div>
 				</div>
 			</div>
 

@@ -5,6 +5,7 @@ angular
 		templateUrl: '/units/session/profile.tmpl.html',
 		controller: function($scope, $location, $loader, $session, $timeout, $toast, Users) {
 			var $ctrl = this;
+			$ctrl.error;
 
 			// Data refresher {{{
 			$ctrl.meta;
@@ -22,14 +23,29 @@ angular
 
 			// Save {{{
 			$ctrl.save = function() {
-				$loader.start($scope.$id);
-				Users.save({id: $session.data._id}, $ctrl.user).$promise
-					.then(_=> $toast.success('Profile saved'))
-					.then(_=> $location.path('/'))
-					.then(_=> $session.update())
-					.catch($toast.catch)
-					.finally(() => $loader.stop($scope.$id));
+				if ($ctrl.passwordUnlock && !$ctrl.user.password) {
+					$ctrl.passwordUnlock = false;
+					delete $ctrl.user.password;
+					delete $ctrl.user.password2;
+				} else if ($ctrl.user.password && $ctrl.user.password != $ctrl.user.password2) {
+					$ctrl.error = 'Your passwords must match';
+				} else {
+					delete $ctrl.user.password2;
+
+					$loader.start($scope.$id);
+					Users.save({id: $session.data._id}, $ctrl.user).$promise
+						.then(_=> $toast.success('Profile saved'))
+						.then(_=> $location.path('/'))
+						.then(_=> $session.update())
+						.catch($toast.catch)
+						.finally(() => $loader.stop($scope.$id));
+				}
 			};
+			// }}}
+
+			// Password setting {{{
+			$ctrl.passwordUnlock = false;
+			$ctrl.togglePasswordUnlock = _=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
 			// }}}
 
 			$scope.$evalAsync($ctrl.refresh);
