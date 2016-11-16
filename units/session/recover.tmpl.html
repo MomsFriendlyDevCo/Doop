@@ -1,0 +1,18 @@
+<div class="login-content">
+	<div class="lc-block toggled" id="l-login">
+		<form class="lcb-form" name="userRecoverForm" ng-submit="$ctrl.recover(userRecoverForm.$valid)" method="POST">
+			<div class="alert alert-danger" ng-if="$ctrl.error">{{$ctrl.error}}</div>
+
+			<div class="input-group m-b-20">
+				<span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+				<div class="fg-line">
+					<input type="email" name="username" ng-model="$ctrl.user.email" placeholder="Your email address" class="form-control" required autofocus>
+				</div>
+			</div>
+
+			<button type="submit" class="btn btn-login btn-success btn-float waves-effect waves-circle waves-float">
+				<i class="fa fa-arrow-right"></i>
+			</button>
+		</form>
+	</div>
+</div>

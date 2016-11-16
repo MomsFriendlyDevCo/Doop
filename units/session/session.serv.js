@@ -134,6 +134,14 @@ angular
 				.then(res => $session.update().then(res => $location.path('/login'))); // Update local session then redirect to login
 		};
 
+		/**
+		* Attempt password recovery with a user
+		* @param {string} email The users email address
+		*/
+		$session.recover = function(email) {
+			return SessionModl.recover({email: email}).$promise;
+		};
+
 		// Init local storage for session data
 		$session.getLocal();
 
