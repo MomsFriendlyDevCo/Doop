@@ -66,6 +66,15 @@ table.table td > .btn-group {
 }
 /* }}} */
 /* }}} */
+/* Text {{{ */
+/* Text Sizes {{{ */
+.text-xs {font-size: 8pt;}
+.text-sm {font-size: 10pt;}
+.text-md {font-size: 14pt;}
+.text-lg {font-size: 16pt;}
+.text-xlg {font-size: 20pt;}
+/* }}} */
+/* }}} */
 
 /* Page: Login {{{ */
 /* This is a really hideous hack to make the login pane cover the entire rest of the screen while its visible */
