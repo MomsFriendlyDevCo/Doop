@@ -34,7 +34,7 @@ angular
 			};
 			// }}}
 
-			// Password setting {{{
+			// Password functionality {{{
 			$ctrl.passwordUnlock = false;
 			$ctrl.togglePasswordUnlock = _=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
 			$ctrl.passwordGenerate = function() {
@@ -42,6 +42,12 @@ angular
 				$ctrl.user.password =
 					_.sample(['alpha', 'beta', 'gamma', 'delta', 'zeta', 'theta', 'iota', 'kappa', 'sigma', 'omega']) +
 					_.random(100,999);
+			};
+
+			$ctrl.sendResetEmail = function() {
+				Users.recover({email: $ctrl.user.email}).$promise
+					.then(_=> $toast.success('Password reset email sent to ' + $ctrl.user.email))
+					.catch($toast.catch);
 			};
 			// }}}
 
