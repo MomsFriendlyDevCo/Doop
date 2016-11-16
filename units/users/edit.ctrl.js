@@ -3,11 +3,9 @@ angular
 	.run($router => $router.when('/users/:id').component('usersEditCtrl'))
 	.component('usersEditCtrl', {
 		templateUrl: '/units/users/edit.tmpl.html',
-		controller: function($scope, $location, $loader, $router, $session, $timeout, $toast, Users) {
+		controller: function($location, $loader, $router, $scope, $session, $toast, Users) {
 			var $ctrl = this;
 			$ctrl.$session = $session;
-
-			if (!$router.params.id) return $location.path('/');
 
 			// Data refresher {{{
 			$ctrl.meta;
@@ -33,6 +31,17 @@ angular
 					.then(_=> $location.path('/users'))
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
+			};
+			// }}}
+
+			// Password setting {{{
+			$ctrl.passwordUnlock = false;
+			$ctrl.togglePasswordUnlock = _=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
+			$ctrl.passwordGenerate = function() {
+				$ctrl.passwordUnlock = true;
+				$ctrl.user.password =
+					_.sample(['alpha', 'beta', 'gamma', 'delta', 'zeta', 'theta', 'iota', 'kappa', 'sigma', 'omega']) +
+					_.random(100,999);
 			};
 			// }}}
 
