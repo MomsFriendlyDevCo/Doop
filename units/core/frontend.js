@@ -7,14 +7,23 @@ angular
 		* External Angular modules
 		*/
 		'angular-bs-confirm',
-		'angular-ui-loader',
 		'angular-bs-popover',
 		'angular-bs-tooltip',
+		'angular-ui-loader',
 		'ngResource',
 		'ui.gravatar',
 		'ui-notification',
 		'uiSwitch',
 	])
+
+	// Global controller {{{
+	.controller('GlobalCtrl', function($config, $rootScope, $scope, $session) {
+		var $ctrl = this;
+		// Init user session object/data
+		$ctrl.config = $config;
+		$ctrl.session = $session;
+	})
+	// }}}
 
 	// Anglar core config {{{
 	.config(function($httpProvider) {
