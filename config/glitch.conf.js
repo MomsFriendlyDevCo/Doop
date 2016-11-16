@@ -5,4 +5,7 @@ module.exports = {
 	access: {
 		lockdown: false,
 	},
+	profiles: {
+		domain: 'glitch',
+	},
 };
