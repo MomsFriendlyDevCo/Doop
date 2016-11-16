@@ -28,6 +28,7 @@ Features:
 * **"Provide" pattern proof** - Angular is hard enough to understand as it is without having to reference two different classes that do seemingly different things. $router exposes exactly ONE well defined and easy to use service
 * **Exceptionally small** - Seriously look at the source - its one file of about 80 lines of actual code
 * **Exceptionally fast** - Because there is no weird [cruft](http://catb.org/jargon/html/C/cruft.html) to handle there are no excess parts of the router that slows everything down
+* **Undefined queries** - No need to define all acceptable query strings. Anything contained after the `?` character gets decoded and placed in `$router.query` which can be watched for changes
 
 
 Why?
@@ -90,15 +91,25 @@ $router.routes
 --------------
 An array in priority order of all currently configured rules.
 
-$router.current.main
---------------------
-The currently matched rule.
-
-$router.current.params
-----------------------
+$router.params
+--------------
 An object containing all parameters extracted from the URL in tokenized form.
 
 For example if the rule has the path `/widgets/:id` and the current URL is `/widgets/123` the parameters object will be `{id: 123}`.
+
+**NOTE**: This object will never break its reference meaning it can be watched and rebound.
+
+$router.query
+-------------
+An object containing all query parameters extracted from the URL.
+
+For example if the rule has the path `/widgets/:id` and the current URL is `/widgets/123?foo=bar&baz` the parameters object will be `{foo: 'bar', baz: true}`.
+
+**NOTE**: This object will never break its reference meaning it can be watched and rebound.
+
+$router.current.main
+--------------------
+The currently matched rule.
 
 $router.priorityAliases
 -----------------------
