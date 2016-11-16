@@ -1,7 +1,7 @@
 angular
 	.module('app')
-	.run($router => $router.when('/login').component('loginCtrl'))
-	.component('loginCtrl', {
+	.run($router => $router.when('/login').component('sessionLoginCtrl'))
+	.component('sessionLoginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
 		controller: function($rootScope, $session) {
 			var $ctrl = this;
