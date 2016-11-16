@@ -51,7 +51,7 @@ angular
 		$rootScope.$on('$routerStart', function(e, rule) {
 			if (!rule) return; // No route figured out yet
 			// Array of component names that we will allow if the user is not logged in
-			var allowComponents = ['loginCtrl', 'logoutCtrl', 'usersInviteCtrl', 'usersInviteAcceptCtrl'];
+			var allowComponents = ['loginCtrl', 'logoutCtrl', 'sessionRecoverCtrl', 'sessionRecoverAcceptCtrl', 'usersInviteCtrl', 'usersInviteAcceptCtrl'];
 			if (_.includes(allowComponents, rule._component)) return; // Component is already approved - do nothing
 			$session.promise() // Ask session if we are logged in
 				.catch(_=> $location.path('/login')) // Not logged in - redirect to /login

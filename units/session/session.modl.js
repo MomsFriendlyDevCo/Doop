@@ -5,7 +5,6 @@ angular
 			profile: { url: '/api/session/profile' },
 			login: { url: '/api/session/login', method: 'POST' },
 			logout: { url: '/api/session/logout', method: 'POST' },
-			resetPass: { url: '/action/resetpass', method: 'POST' },
-			resetPassNew: { url: '/action/resetpass/:token', method: 'POST' },
+			recover: {url: '/api/users/recover', method: 'POST' },
 		});
 	});
