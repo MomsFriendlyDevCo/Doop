@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.service('$session', function($rootScope, $location, $q, $window, SessionModl) {
+	.service('$session', function($rootScope, $location, $q, $window, Users) {
 		var $session = this;
 
 		$session.data = {}; // User session data
@@ -68,7 +68,7 @@ angular
 		*/
 		$session.save = function() {
 			// Save session to db
-			return SessionModl.save().$promise
+			return Users.save().$promise
 				.catch(err => console.error('Could not save user session', err.data));
 		};
 
@@ -79,7 +79,7 @@ angular
 		*/
 		$session.update = function() {
 			// Load session data from db
-			return SessionModl.profile().$promise
+			return Users.profile().$promise
 				.then(res => {
 					$session.data = res;
 
@@ -121,7 +121,7 @@ angular
 		* @return {Promise} The promise object for the server request
 		*/
 		$session.login = function(user) {
-			return SessionModl.login(user).$promise
+			return Users.login(user).$promise
 				.then(res => $session.update().then(res => $location.path('/'))); // Update local session then redirect to root
 		};
 
@@ -130,7 +130,7 @@ angular
 		* @return {Promise} The promise object for the server request
 		*/
 		$session.logout = function() {
-			return SessionModl.logout().$promise
+			return Users.logout().$promise
 				.then(res => $session.update().then(res => $location.path('/login'))); // Update local session then redirect to login
 		};
 
@@ -139,7 +139,7 @@ angular
 		* @param {string} email The users email address
 		*/
 		$session.recover = function(email) {
-			return SessionModl.recover({email: email}).$promise;
+			return Users.recover({email: email}).$promise;
 		};
 
 		// Init local storage for session data
