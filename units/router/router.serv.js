@@ -11,6 +11,7 @@ angular
 		var $router = this;
 		$router.routes = [];
 		$router.params = {}; // Extracted parameters based on the rule tokens
+		$router.query = {}; // Query portion of the URI
 		$router.current = {
 			main: null, // The main view - this will be the matched rule object
 		};
@@ -213,6 +214,27 @@ angular
 				return params;
 			};
 
+			/**
+			* Turn a raw query string into an object
+			* The query string can optionally begin with a '?'
+			* @params {string} query The raw query string to process
+			* @return {Object} A populated object from the query string
+			*/
+			this.extractQuery = function(query) {
+				if (!query) return {};
+
+				return _(_(query).trimStart('?').split('&'))
+					.map(pair => {
+						var keyVal = pair.split('=', 2);
+						return (keyVal.length < 2) ? [keyVal[0], true] : keyVal;
+					})
+					.fromPairs()
+					.mapKeys((v, k) => decodeURIComponent(k))
+					.mapValues((v, k) => decodeURIComponent(v))
+					.value();
+			};
+
+
 			this.path(path); // Set initial path if there is one
 			$router.routes.push(this);
 			$router.sort.isSorted = false;
@@ -275,13 +297,18 @@ angular
 
 		/**
 		* Navigate to the given path if it exists
-		* @param {string} [path] The path to navigate to. If path is falsy, '/' is assumed
+		* @param {string} [rawPath] The path to navigate to. If path is falsy, '/' is assumed
 		* @return {Promise} A promise object for the navigation
 		*/
-		$router.go = function(path) {
-			if (!path) path = '/';
+		$router.go = function(rawPath) {
+			if (!rawPath) rawPath = '/';
 			$rootScope.$broadcast('$routerStart', $router.current.main);
 			return $q(function(resolve, reject) {
+				// Break the path into the path portion + query string
+				var urlInfo = /^(.*?)(\?.*)?$/.exec(rawPath);
+				var path = urlInfo[1];
+				var query = urlInfo[2];
+
 				$router.resolve(path)
 					.then(rule => {
 						var previousRule = $router.current.main;
@@ -289,6 +316,11 @@ angular
 						// We cant just set $router.params as that would break the references to it - so we have to empty it, then refill
 						Object.keys($router.params).forEach(k => delete $router.params[k]);
 						angular.extend($router.params, rule.extractParams(path));
+
+						// Clear out + rebuild $router.query also
+						Object.keys($router.query).forEach(k => delete $router.query[k]);
+						angular.extend($router.query, rule.extractQuery(query));
+
 						resolve(rule);
 						if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
 					})
