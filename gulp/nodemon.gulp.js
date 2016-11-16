@@ -15,6 +15,30 @@ var common = require('./common.gulp.lib');
 * This task independently watches the client side files dir (inc. Angular) for changes and only rebuilds those without rebooting the server if a change is detected
 */
 gulp.task('nodemon', ['load:app', 'build'], function(finish) {
+	var runCount = 0;
+	var monitor = nodemon({
+		script: paths.root + '/server.js',
+		ext: 'js',
+		ignore: [].concat(paths.ignore, paths.scripts, paths.css, paths.ngPartials), // Only watch server files - everything else is handled seperately anyway
+	})
+		.on('start', function() {
+			if (runCount > 0) return;
+			notify({
+				title: app.config.title + ' - Nodemon',
+				message: 'Server started',
+				icon: __dirname + '/icons/node.png',
+			}).write(0);
+		})
+		.on('restart', function() {
+			runCount++;
+			notify({
+				title: app.config.title + ' - Nodemon',
+				message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
+				icon: __dirname + '/icons/nodemon.png',
+			}).write(0);
+		});
+
+	// Install secondary watches
 	watch(paths.scripts, function() {
 		gutil.log('Rebuild client-side JS files...');
 		gulp.start('scripts');
@@ -35,26 +59,12 @@ gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 		gulp.start('vendors');
 	});
 
-	var runCount = 0;
-	nodemon({
-		script: paths.root + '/server.js',
-		ext: 'js ejs',
-		ignore: [].concat(paths.ignore, paths.scripts, paths.css, paths.ngPartials), // Only watch server files - everything else is handled seperately anyway
-	})
-		.on('start', function() {
-			if (runCount > 0) return;
-			notify({
-				title: app.config.title + ' - Nodemon',
-				message: 'Server started',
-				icon: __dirname + '/icons/node.png',
-			}).write(0);
-		})
-		.on('restart', function() {
-			runCount++;
-			notify({
-				title: app.config.title + ' - Nodemon',
-				message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
-				icon: __dirname + '/icons/nodemon.png',
-			}).write(0);
-		});
+	watch([
+		paths.root + '/units/pages/**/*.html',
+		paths.root + '/units/layouts/**/*.html',
+	], function() {
+		gutil.log('Rebuild pages / layouts...');
+		monitor.emit('restart');
+	});
+
 });
