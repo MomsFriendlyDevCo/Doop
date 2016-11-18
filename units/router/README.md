@@ -91,6 +91,10 @@ $router.routes
 --------------
 An array in priority order of all currently configured rules.
 
+$router.path
+------------
+The current path portion of the route.
+
 $router.params
 --------------
 An object containing all parameters extracted from the URL in tokenized form.
@@ -106,6 +110,18 @@ An object containing all query parameters extracted from the URL.
 For example if the rule has the path `/widgets/:id` and the current URL is `/widgets/123?foo=bar&baz` the parameters object will be `{foo: 'bar', baz: true}`.
 
 **NOTE**: This object will never break its reference meaning it can be watched and rebound.
+
+$router.setQuery(key, [val])
+----------------------------
+Set the query portion of the URL and trigger a renaviate operation.
+
+This parameter takes two parameters. If both are specified the key specified will be simply set in `$router.query`. If the second parameter is omitted the key is removed. If no parameters are passed the query is blanked.
+
+```html
+<a ng-click="$router.setQuery('foo', 'bar')">Go to #/?foo=bar</a>
+<a ng-click="$router.setQuery('foo')">Go to #/</a>
+<a ng-click="$router.setQuery()">Go to #/</a>
+```
 
 $router.current.main
 --------------------
