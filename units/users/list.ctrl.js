@@ -3,8 +3,9 @@ angular
 	.run(($router, $session) => $router.when('/users').require($session.promise.admin).component('usersListCtrl'))
 	.component('usersListCtrl', {
 		templateUrl: '/units/users/list.tmpl.html',
-		controller: function($scope, $location, $loader, $session, $timeout, $toast, Users) {
+		controller: function($scope, $location, $loader, $router, $session, $timeout, $toast, Users) {
 			var $ctrl = this;
+			$ctrl.$router = $router;
 			$ctrl.$session = $session;
 
 			// Data refresher {{{
@@ -12,7 +13,13 @@ angular
 			$ctrl.refresh = function() {
 				$loader.start($scope.$id, $ctrl.users === undefined);
 
-				Users.query().$promise
+				var query = {
+					sort: $router.query.sort || 'name',
+				};
+
+				if ($router.query.role) query.role = $router.query.role;
+
+				Users.query(query).$promise
 					.then(data => $ctrl.users = data)
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
@@ -30,6 +37,7 @@ angular
 			};
 			// }}}
 
+			$scope.$watch(_=> $router.query, $ctrl.refresh, true);
 			$scope.$evalAsync($ctrl.refresh);
 		},
 	});

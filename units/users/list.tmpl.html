@@ -11,9 +11,9 @@
 			<table ng-show="$ctrl.users.length" class="table table-hover">
 				<thead>
 					<tr>
-						<th style="width: 20px">Status</th>
-						<th>Email</th>
-						<th>Name</th>
+						<th style="width: 100px">&nbsp;</th>
+						<th ng-click="$ctrl.$router.setQuery('sort', 'email')">Email</th>
+						<th ng-click="$ctrl.$router.setQuery('sort', 'name')">Name</th>
 						<th width="32px"></th>
 					</tr>
 				</thead>
