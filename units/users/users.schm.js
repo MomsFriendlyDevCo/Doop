@@ -45,6 +45,18 @@ User
 	});
 // }}}
 
+// Whenever we are saving and we dont have a username use the email address {{{
+User
+	.hook('create', function(next, query) {
+		if (!query.username) query.username = query.email;
+		next();
+	})
+	.hook('save', function(next, query) {
+		if (!query.username) query.username = query.email;
+		next();
+	});
+// }}}
+
 // Setup utility methods {{{
 User
 	.method('splitName', function() {
