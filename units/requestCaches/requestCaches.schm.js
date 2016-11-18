@@ -28,7 +28,7 @@ requestCaches.runConditional =  function(type, query, freshCallback, callback) {
 	async()
 		// Compute the hash {{{
 		.then('hash', function(next) {
-			next(null, sha1(type + '-' + _.keyArrange(query)));
+			next(null, sha1(type + '-' + JSON.stringify(_.keyArrange(query))));
 		})
 		// }}}
 		// Fetch the existing requestCaches value (if any) {{{
