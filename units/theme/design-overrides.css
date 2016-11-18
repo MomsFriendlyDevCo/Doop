@@ -43,13 +43,31 @@ table.table tr:hover td.btn-context {
 /* }}} */
 /* Forms {{{ */
 /* .form-control {{{ */
-/* Fix the weird dropdown button for the material theme */
-form .select:before {
+/* Fix the weird dropdown button for the material theme {{{ */
+.form-group .select:before {
 	top: 10px !important;
 
 	/* font-awesome > chevron-down */
 	font: normal normal normal 14px/1 FontAwesome;
 	content: "\f078" !important;
+}
+/* }}} */
+/* Fix the weird checkbox symbol {{{ */
+.form-group .checkbox {
+	top: 8px;
+}
+
+.form-group .checkbox > label {
+	margin-top: -3px;
+}
+
+.form-group .checkbox i.input-helper:after {
+	top: 1px !important;
+	left: 1px !important;
+
+	/* font-awesome > chevron-down */
+	font: normal normal normal 14px/1 FontAwesome;
+	content: "\f00c" !important;
 }
 /* }}} */
 /* }}} */
@@ -134,5 +152,10 @@ table.table td > .btn-group {
 
 .main-menu .main-menu {
 	margin: 0 !important;
+}
+/* }}} */
+/* Theme override: login form {{{ */
+.lc-block:not(.lc-block-alt) .lcb-form {
+	padding: 25px !important;
 }
 /* }}} */
