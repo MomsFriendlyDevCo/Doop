@@ -10,6 +10,7 @@ angular
 	.service('$router', function($q, $rootScope) {
 		var $router = this;
 		$router.routes = [];
+		$router.path = null; // The current path portion of the route
 		$router.params = {}; // Extracted parameters based on the rule tokens
 		$router.query = {}; // Query portion of the URI
 		$router.current = {
@@ -312,6 +313,7 @@ angular
 				$router.resolve(path)
 					.then(rule => {
 						var previousRule = $router.current.main;
+						$router.path = path;
 						$router.current.main = rule;
 						// We cant just set $router.params as that would break the references to it - so we have to empty it, then refill
 						Object.keys($router.params).forEach(k => delete $router.params[k]);
@@ -353,6 +355,23 @@ angular
 			}
 
 			return $router;
+		};
+
+		/**
+		* Set the query portion of the URL and trigger a renaviate operation
+		* @param {string} key The key portion of the query to set. If this is falsy all query items are removed
+		* @param {mixed} [val] The value of the router query to set, if this is undefined it is removed
+		*/
+		$router.setQuery = (key, val) => {
+			var newQuery = key ? _.clone($router.query) : {};
+
+			if (val === undefined) {
+				delete newQuery[key];
+			} else {
+				newQuery[key] = val;
+			}
+
+			location.hash = '#' + $router.path + (_.isEmpty(newQuery) ? '' : '?' + _.map(newQuery, (v, k) => k + '=' + v).join('='));
 		};
 
 		// Setup a watcher on the main window location hash
