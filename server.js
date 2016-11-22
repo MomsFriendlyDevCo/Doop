@@ -93,7 +93,7 @@ global.app.fire = function(hook, callback) {
 	var handler = async();
 	global.app._registers[hook].forEach(function(cb) {
 		handler.defer(cb.prereqs, cb.id, function(next) {
-			console.log('-', colors.grey('[hook:' + hook + ', handler:' + cb.id + ']'), cb.attacher.file);
+			debug('[hook:' + hook + ', handler:' + cb.id + ']', cb.attacher.file);
 
 			cb.callback.apply(this, [next].concat(callbackArgs));
 		});
@@ -171,11 +171,13 @@ async()
 	.then(function(next) {
 		glob(app.config.paths.root + '/units/**/*.hook.js', function(err, files) {
 			if (err) return next(err);
+			var loaded = [];
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
-				console.log('-', colors.grey('[hook]'), app.unit.id);
+				loaded.push(app.unit);
 				require(path);
 			});
+			console.log('-', colors.grey('[hook]'), loaded.map(l => l.id).join(', '));
 			next();
 		});
 	})
@@ -191,11 +193,13 @@ async()
 		glob(app.config.paths.root + '/units/**/*.path.js', function(err, files) {
 			if (err) return next(err);
 			if (!files.length) return next('No server controllers found');
+			var loaded = [];
 			files.forEach(path => {
 				app.unit = app.getUnit(path);
-				console.log('-', colors.grey('[path]'), app.unit.id);
+				loaded.push(app.unit);
 				require(path);
 			});
+			console.log('-', colors.grey('[path]'), loaded.map(l => l.id).join(', '));
 			next();
 		});
 	})

@@ -14,10 +14,10 @@ app.register('preControllers', function(finish) {
 		.on('error', err => finish('DB CONNECTION ERR: ' + err.toString()))
 		.on('model', path => {
 			app.unit = app.getUnit(path);
-			console.log('-', colors.grey('[schm]'), app.unit.id);
 		})
 		.on('end', models => {
 			app.fire('postModels');
+			console.log('-', colors.grey('[schm]'), Object.keys(models).join(', '));
 			app.db = global.db = models; // Setup global shortcut to models
 
 			finish();
