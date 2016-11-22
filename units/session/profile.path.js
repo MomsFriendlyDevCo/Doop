@@ -51,4 +51,3 @@ app.post('/api/session/profile', app.middleware.ensure.login, function(req, res)
 		});
 		// }}}
 });
-
