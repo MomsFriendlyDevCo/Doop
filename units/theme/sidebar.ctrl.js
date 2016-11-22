@@ -9,4 +9,9 @@ angular
 			this.areas = newState.name.split('-');
 			this.area = this.areas[0];
 		});
+
+		$('.sidebar-toggle').click(_=> {
+			$('body').toggleClass('sidebar-toggled');
+			$('.hi-trigger, #sidebar').toggleClass('toggled');
+		});
 	});
