@@ -46,6 +46,7 @@
     "ejs": "^2.5.2",
     "express": "^4.14.0",
     "express-ejs-layouts": "^2.2.0",
+    "express-list-endpoints": "^2.0.3",
     "express-log-url": "^1.0.4",
     "express-session": "^1.14.2",
     "font-awesome": "^4.7.0",
@@ -99,6 +100,7 @@
     "rimraf": "^2.5.4",
     "run-sequence": "^1.2.2",
     "sha1": "^1.1.1",
+    "string-sort": "^1.2.0",
     "superagent": "^2.3.0",
     "ui-select": "^0.19.6",
     "uuid": "^2.0.3"
