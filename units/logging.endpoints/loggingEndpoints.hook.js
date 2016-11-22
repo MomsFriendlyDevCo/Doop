@@ -9,7 +9,7 @@ app.register('postServer', function(finish) {
 	_(expressEndpoints(app))
 		.map(ep => ep.methods.map(m => [m, ep.path]))
 		.flatten()
-		.tap(ep => stringSort.sortBy(ep, 1, {charOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_'}))
+		.thru(ep => stringSort.sortBy(ep, 1, {charOrder: '/abcdefghijklmnopqrstuvwxyz0123456789:-_'}))
 		.forEach(function(ep) {
 			console.log(
 				'-',
