@@ -7,6 +7,8 @@
 var monoxide = require('monoxide');
 
 var User = module.exports = monoxide.schema('users', {
+	created: {type: Date, default: Date.now},
+	lastLogin: {type: Date, default: Date.now},
 	username: {type: String, required: true, index: {unique: true}},
 	email: {type: String, required: true, index: {unique: true}},
 	_passhash: {type: String},
@@ -17,8 +19,6 @@ var User = module.exports = monoxide.schema('users', {
 	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
 	settings: {type: 'object', default: {}},
-	created: {type: Date, default: Date.now},
-	lastLogin: {type: Date, default: Date.now},
 	address: {
 		street: String,
 		city: String,

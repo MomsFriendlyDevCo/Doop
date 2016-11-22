@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 /**
 * API for active user profile data
 */
