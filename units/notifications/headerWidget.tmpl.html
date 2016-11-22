@@ -1,0 +1,56 @@
+<li class="pull-right">
+	<ul ng-if="$ctrl.$session.isLoggedIn" ng-click="$ctrl.refreshList()" class="hi-menu">
+		<!-- Notification dropdown {{{ -->
+		<li class="dropdown">
+			<a data-toggle="dropdown">
+				<i class="him-icon fa fa-bell"></i>
+				<i ng-show="$ctrl.notificationCount > 0" class="him-counts">{{$ctrl.notificationCount | number}}</i>
+			</a>
+			<div class="dropdown-menu dropdown-menu-lg pull-right">
+				<div ng-show="!$ctrl.notificationsLoadedOnce" class="list-group him-notification">
+					<div class="lg-header">Notifications</div>
+					<div class="md-body text-center">
+						<div class="p-t-25 p-b-25">
+							<i class="fa fa-spinner fa-spin fa-4x"></i>
+							<div class="text-muted p-t-10">Loading notifications...</div>
+						</div>
+					</div>
+				</div>
+				<div ng-show="$ctrl.notificationsLoadedOnce" class="list-group him-notification">
+					<div class="lg-header">
+						Notifications
+
+						<ul class="actions">
+							<li>
+								<a ng-click="$ctrl.refreshList($event)" tooltip="Refresh message list" tooltip-position="bottom">
+									<i class="fa" ng-class="$ctrl.notificationsLoading ? 'fa-spinner fa-spin text-muted' : 'fa-refresh'"></i>
+								</a>
+							</li>
+							<li class="dropdown">
+								<a ng-click="$ctrl.markAllRead()" tooltip="Mark all as read" tooltip-position="bottom"><i class="fa fa-check"></i></a>
+							</li>
+						</ul>
+					</div>
+					<div class="md-body">
+						<div ng-show="$ctrl.notificationsLoadedOnce">
+							<div ng-show="!$ctrl.notifications.length" class="p-t-10 p-b-10 text-center text-muted">No notifications to show</div>
+							<a ng-repeat="notification in $ctrl.notifications track by notification._id" href="#/notification/{{notification._id}}" class="list-group-item media">
+								<div class="pull-left">
+									<img gravatar-src="notification.from.email" gravatar-size="50" gravatar-default="identicon" class="img-circle img-user media-object">
+					
+								</div>
+								<div class="media-body">
+									<div class="lgi-heading">{{notification.from.name}}</div>
+									<small class="lgi-text">{{notification.subject}}</small>
+								</div>
+							</a>
+						</div>
+					</div>
+
+					<a class="view-more" href="#/notifications">View All</a>
+				</div>
+			</div>
+		</li>
+		<!-- }}} -->
+	</ul>
+</li>
