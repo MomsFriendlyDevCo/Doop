@@ -35,7 +35,6 @@ app.post('/api/users/invite', app.middleware.ensure.admin, function(req, res) {
 			var task = this;
 			db.users.create({
 				email: email,
-				username: email,
 				_token: uuid.v4(),
 			}, function(err, res) {
 				if (err) return next(err);

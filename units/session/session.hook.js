@@ -59,9 +59,8 @@ app.register('preControllers', ['db'], function(finish) {
 	// Tell passport to to retrieve the full user we stashed in passport.serializeUser()
 	passport.deserializeUser(function(id, next) {
 		db.users
-			.findOne({username: id}, function(err, user) {
-				return next(err, user);
-			});
+			.findOne({username: id})
+			.exec(next);
 	});
 
 	// Boot passport and its session handler
