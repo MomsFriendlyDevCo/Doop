@@ -1,0 +1,22 @@
+{
+	"notifications": [
+		{
+			"from": "users.mc",
+			"to": "users.mc",
+			"subject": "Test message to self",
+			"body": "Hello World"
+		},
+		{
+			"from": "users.root",
+			"to": "users.mc",
+			"subject": "From Root!",
+			"body": "From Root!"
+		},
+		{
+			"from": "users.vm",
+			"to": "users.mc",
+			"subject": "From VM!",
+			"body": "From VM!"
+		}
+	]
+}
