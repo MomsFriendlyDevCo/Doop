@@ -32,12 +32,43 @@ table.table tr:hover td.btn-context {
 	font-size: 20px;
 }
 /* }}} */
+/* .btn-group-float {{{ */
+.btn-group-float {
+	display: block;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	z-index: 1000;
+}
+
+.btn-group-float > .btn {
+	padding: 25px;
+	border-radius: 100%;
+}
+/* }}} */
 /* }}} */
 /* Cards {{{ */
 /* .card-body > .btn-float {{{ */
 .card-body > .btn-float {
 	right: 10px;
 	top: 10px;
+}
+/* }}} */
+/* .card > .card-footer {{{ */
+/* Pseudo clearfix */
+.card .card-footer:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+
+.card .card-footer {
+	clear: both;
+	border-top: 1px solid #EEE;
+	padding: 20px;
 }
 /* }}} */
 /* }}} */
@@ -71,6 +102,14 @@ table.table tr:hover td.btn-context {
 }
 /* }}} */
 /* }}} */
+/* }}} */
+/* Label {{{ */
+/* Label peers are too close together {{{ */
+.label + .label {
+	margin-left: 10px;
+}
+/* }}} */
+/* }}} */
 /* Tables {{{ */
 /* All A links should display as normal text {{{ */
 table.table td > a {
@@ -85,6 +124,9 @@ table.table td > .btn-group {
 /* }}} */
 /* }}} */
 /* Text {{{ */
+/* Text colors {{{ */
+.text-muted {color: #AAA !important};
+/* }}} */
 /* Text Sizes {{{ */
 .text-xs {font-size: 8pt;}
 .text-sm {font-size: 10pt;}
@@ -157,5 +199,20 @@ table.table td > .btn-group {
 /* Theme override: login form {{{ */
 .lc-block:not(.lc-block-alt) .lcb-form {
 	padding: 25px !important;
+}
+/* }}} */
+/* Theme override: navbar {{{ */
+header .hi-logo > a > img {
+	margin-right: 10px;
+	padding-bottom: 2px;
+}
+/* }}} */
+/* Theme override: minicharts {{{ */
+.mini-charts {
+	padding: 0 10px;
+}
+
+.mini-charts .mini-charts-item {
+	margin-bottom: 0px;
 }
 /* }}} */
