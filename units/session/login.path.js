@@ -46,6 +46,13 @@ app.post('/login', passport.authenticate('local', {
 */
 app.post('/api/session/login', function(req, res) {
 	async()
+		.then(function(next) {
+			// Mangle incomming details to trim data + lowercase username
+			// These are mainly to be nice to people on mobile with weird predictive keyboards
+			req.body.username = _.trim(req.body.username.toLowerCase());
+			req.body.password = _.trim(req.body.password);
+			next();
+		})
 		.then('profile', function(next) {
 			passport.authenticate('local', function(err, user, info) {
 				if (err) return next(err);
