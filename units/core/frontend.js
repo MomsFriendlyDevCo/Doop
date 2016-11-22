@@ -11,7 +11,9 @@ angular
 		'angular-bs-tooltip',
 		'angular-ui-loader',
 		'ngResource',
+		'ngSanitize',
 		'ui.gravatar',
+		'ui.select',
 		'ui-notification',
 		'uiSwitch',
 	])
@@ -100,4 +102,10 @@ angular
 	})
 	// }}}
 
+	// }}}
+
+	// Theme {{{
+	.config(function(uiSelectConfig) {
+		uiSelectConfig.theme = 'selectize';
+	})
 	// }}}

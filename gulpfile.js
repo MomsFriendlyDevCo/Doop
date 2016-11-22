@@ -65,10 +65,12 @@ global.paths = {
 			'node_modules/angular-ui-loader/dist/ng-loader.js',
 			'node_modules/angular-ui-notification/dist/angular-ui-notification.{css,js}',
 			'node_modules/angular-resource/angular-resource.js',
+			'node_modules/angular-sanitize/angular-sanitize.js',
 			'node_modules/angular-ui-switch/angular-ui-switch.{css,js}',
 			'node_modules/font-awesome/css/font-awesome.css',
 			'node_modules/node-waves/dist/waves.css',
 			'node_modules/node-waves/dist/waves.js',
+			'node_modules/ui-select/dist/select.{css,js}',
 		],
 	},
 	css: [

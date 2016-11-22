@@ -416,6 +416,67 @@
 </div>
 <!-- }}} -->
 
+<!-- Forms {{{ -->
+<div id="forms" class="block-header"><h2>Form Elements</h2></div>
+<div class="row">
+	<div class="col-sm-12">
+		<form class="card">
+			<div class="card-body card-padding form-horizontal">
+				<div class="form-group">
+					<label class="col-sm-3 control-label">State</label>
+					<div class="col-sm-9">
+						<pre>{{$ctrl.user | json}}</pre>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">Textbox</label>
+					<div class="col-sm-9">
+						<input ng-model="$ctrl.user.name" type="text" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">Select box (standard)</label>
+					<div class="col-sm-9 select">
+						<select ng-model="$ctrl.user.role" class="form-control">
+							<option ng-repeat="role in $ctrl.roles track by role.id" value="{{role.id}}">{{role.title}}</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">Select box (ui-select)</label>
+					<div class="col-sm-9">
+						<ui-select ng-model="$ctrl.user.role" title="Choose a role...">
+							<ui-select-match placeholder="Select an role...">{{$select.selected.title}}</ui-select-match>
+							<ui-select-choices repeat="role.id as role in $ctrl.roles | filter:$select.search track by role.id">
+								<div ng-bind-html="role.title | highlight:$select.search"></div>
+							</ui-select-choices>
+						</ui-select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">Checkboxes</label>
+					<div class="col-sm-9 form-inline">
+						<div class="checkbox"><label><input type="checkbox" ng-model="$ctrl.user.availability.monday"/><i class="input-helper"></i> Monday</label></div>
+						<div class="checkbox m-l-15"><label><input type="checkbox" ng-model="$ctrl.user.availability.tuesday"/><i class="input-helper"></i> Tuesday</label></div>
+						<div class="checkbox m-l-15"><label><input type="checkbox" ng-model="$ctrl.user.availability.wednesday"/><i class="input-helper"></i> Wednesday</label></div>
+						<div class="checkbox m-l-15"><label><input type="checkbox" ng-model="$ctrl.user.availability.thursday"/><i class="input-helper"></i> Thursday</label></div>
+						<div class="checkbox m-l-15"><label><input type="checkbox" ng-model="$ctrl.user.availability.friday"/><i class="input-helper"></i> Friday</label></div>
+						<div class="checkbox m-l-15"><label><input type="checkbox" ng-model="$ctrl.user.availability.saturday"/><i class="input-helper"></i> Saturday</label></div>
+						<div class="checkbox m-l-15"><label><input type="checkbox" ng-model="$ctrl.user.availability.sunday"/><i class="input-helper"></i> Sunday</label></div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">Switch</label>
+					<div class="col-sm-9 select">
+						<switch ng-model="$ctrl.user.enabled" class="green"></switch>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<!-- }}} -->
+
 <!-- Stats panels {{{ -->
 <div id="stats" class="block-header"><h2>Stats Panels</h2></div>
 <div class="mini-charts">
