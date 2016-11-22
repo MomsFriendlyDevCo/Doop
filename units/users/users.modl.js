@@ -3,6 +3,7 @@ angular
 	.factory('Users', function($resource) {
 		return $resource('/api/users/:id',{}, {
 			// Additions to default ReST
+			count: {method: 'GET', url: '/api/users/count'},
 			create: {method: 'POST', url: '/api/users'},
 			meta: {method: 'GET', url: '/api/users/meta?collectionEnums=true'},
 
