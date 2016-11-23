@@ -13,6 +13,17 @@ a, [ng-click] {
 	display: none !important;
 }
 /* }}} */
+/* Badges {{{ */
+/* Material theme doesnt understand .badge-* {{{ */
+.badge-muted {background-color: #AAA !important;}
+.badge-default {background-color: #777 !important;}
+.badge-primary {background-color:  !important;}
+.badge-success {background-color: #5cb85c !important;}
+.badge-info {background-color: #5bc0de !important;}
+.badge-warning {background-color: #f0ad4e !important;}
+.badge-danger {background-color: #d9534f !important;}
+/* }}} */
+/* }}} */
 /* Buttons {{{ */
 /* .btn-context - display a dropdown context menu {{{ */
 /* See the users list for an example in a table */
@@ -102,11 +113,17 @@ table.table tr:hover td.btn-context {
 }
 /* }}} */
 /* }}} */
+/* Checkboxes {{{ */
+/* Disable text selection for labels - prevents accidental text selection when rapidly clicking */
+.checkbox > label {
+	user-select: none;
+}
+/* }}} */
 /* }}} */
 /* Label {{{ */
 /* Label peers are too close together {{{ */
 .label + .label {
-	margin-left: 10px;
+	margin-left: 5px;
 }
 /* }}} */
 /* }}} */
