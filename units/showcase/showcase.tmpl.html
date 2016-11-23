@@ -49,6 +49,25 @@
 </div>
 <!-- }}} -->
 
+<!-- Animation {{{ -->
+<div id="animation" class="block-header"><h2>Animation</h2></div>
+<div class="card">
+	<div class="card-body card-padding">
+		<div class="text-center">
+			<div class="animate-element animated">
+				<i class="fa fa-lemon-o fa-4x"></i>
+			</div>
+		</div>
+
+		<div class="p-t-20">
+			<a ng-repeat="effect in $ctrl.animationEffects" ng-click="$ctrl.animate(effect)" class="btn btn-primary waves-effect">{{effect}}</a>
+		</div>
+
+		<div class="alert alert-info">To animate an element simple apply the <code>animated</code> element and call <code>$animate.addClass(ELEMENT, EFFECT).then(/* Do when finished*/)</code></div>
+	</div>
+</div>
+<!-- }}} -->
+
 <!-- Buttons {{{ -->
 <div id="buttons" class="block-header"><h2>Buttons</h2></div>
 <div class="card">

@@ -10,6 +10,7 @@ angular
 		'angular-bs-popover',
 		'angular-bs-tooltip',
 		'angular-ui-loader',
+		'ngAnimate',
 		'ngResource',
 		'ngSanitize',
 		'ui.gravatar',

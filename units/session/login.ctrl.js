@@ -3,7 +3,7 @@ angular
 	.run($router => $router.when('/login').component('sessionLoginCtrl'))
 	.component('sessionLoginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
-		controller: function($rootScope, $session) {
+		controller: function($animate, $rootScope, $session) {
 			var $ctrl = this;
 
 			// Init scope variables
@@ -26,6 +26,9 @@ angular
 						} else {
 							$ctrl.error = 'Could not login!';
 						}
+
+						$animate.addClass(angular.element('.lcb-form'), 'shake')
+							.then(_=> $animate.removeClass(angular.element('.lcb-form'), 'shake'))
 					});
 			};
 		},
