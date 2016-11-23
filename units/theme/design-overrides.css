@@ -20,6 +20,7 @@ a, [ng-click] {
 /* }}} */
 /* Badges {{{ */
 /* Material theme doesnt understand .badge-* {{{ */
+.badge {border-radius: 10px !important;}
 .badge-muted {background-color: #AAA !important;}
 .badge-default {background-color: #777 !important;}
 .badge-primary {background-color:  !important;}
@@ -138,6 +139,31 @@ table.table tr:hover td.btn-context {
 /* Label peers are too close together {{{ */
 .label + .label {
 	margin-left: 5px;
+}
+/* }}} */
+/* }}} */
+/* Scrollbars {{{ */
+/* Custom scrollbars {{{ */
+::-webkit-scrollbar {
+	height: 10px;
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: rgba( 0, 0, 0, 0.1 );
+}
+
+::-webkit-scrollbar-track-piece {
+	margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba( 0, 0, 0, 0.15 );
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba( 0, 0, 0, 0.4 );
 }
 /* }}} */
 /* }}} */
