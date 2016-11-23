@@ -1,7 +1,7 @@
 var express = require('express');
 
 app.register('preServer', function(finish) {
-	app.use('/theme', express.static(__dirname, {extensions: ['jpg', 'png']}));
+	app.use('/theme', app.middleware.extensions('jpg', 'png'), express.static(__dirname));
 
 	finish();
 });
