@@ -13,6 +13,11 @@ a, [ng-click] {
 	display: none !important;
 }
 /* }}} */
+/* Animation {{{ */
+.animated-fast {
+	animation-duration: 0.5s;
+}
+/* }}} */
 /* Badges {{{ */
 /* Material theme doesnt understand .badge-* {{{ */
 .badge-muted {background-color: #AAA !important;}
@@ -146,6 +151,12 @@ table.table td > a {
 /* Button groups should not show a shadow {{{ */
 table.table td > .btn-group {
 	box-shadow: none;
+}
+/* }}} */
+/* All text should align to middle by default {{{ */
+.table tr>td, .table tr>th, .table tr>td, .table tr>th, .table tr>td, .table tr>th {
+	vertical-align: middle !important;
+	padding: 10px !important;
 }
 /* }}} */
 /* }}} */
