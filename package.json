@@ -88,7 +88,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^3.1.2",
     "moment": "^2.16.0",
-    "monoxide": "0.0.72",
+    "monoxide": "0.0.75",
     "multer": "^1.2.0",
     "mustache": "^2.3.0",
     "newrelic": "^1.34.0",

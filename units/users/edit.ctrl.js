@@ -1,9 +1,10 @@
 angular
 	.module('app')
-	.run($router => $router.when('/users/:id').component('usersEditCtrl'))
+	.run(($router, $session) => $router.when('/users/:id').require($session.promise.admin).component('usersEditCtrl'))
+	.run(($router, $session) => $router.when('/users/create').require($session.promise.admin).component('usersEditCtrl'))
 	.component('usersEditCtrl', {
 		templateUrl: '/units/users/edit.tmpl.html',
-		controller: function($location, $loader, $router, $scope, $session, $toast, Users) {
+		controller: function($location, $loader, $q, $router, $scope, $session, $toast, Organisations, Users) {
 			var $ctrl = this;
 			$ctrl.$session = $session;
 
@@ -13,8 +14,14 @@ angular
 			$ctrl.refresh = function() {
 				$loader.start($scope.$id, $ctrl.user === undefined);
 
-				Users.get({id: $router.params.id}).$promise
-					.then(data => $ctrl.user = data)
+				$q.all([
+					Users.get({id: $router.params.id}).$promise
+						.then(data => {
+							data.dob = new Date(data.dob);
+							$ctrl.user = data;
+						})
+						.catch(e => { if (e.status && e.status == 404) $location.path('/users') }),
+				])
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
 
