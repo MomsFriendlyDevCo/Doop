@@ -29,7 +29,7 @@ gulp.task('scenario', ['load:app.db'], function(finish) {
 			notify({
 				title: config.title + ' - Scenario',
 				message: 'Build database',
-				icon: __dirname + '/icons/mongodb.png',
+				icon: app.config.paths.root + '/gulp/icons/mongodb.png',
 			}).write(0);
 			finish(err);
 		});
