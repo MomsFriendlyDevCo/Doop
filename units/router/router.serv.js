@@ -381,13 +381,14 @@ angular
 		});
 	})
 	.component('routerView', {
-		controller: function($compile, $element, $location, $rootScope, $router, $scope) {
+		controller: function($compile, $element, $location, $rootScope, $router, $scope, $timeout) {
 			$scope.$watch(_=> $router.current.main, function() {
 				if (!$router.current.main) return; // Main route not loaded yet
 				switch ($router.current.main._action) {
 					case 'component':
 						var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
 						$element.html($compile('<' + componentName + '></' + componentName + '>')($scope));
+						$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current.main));
 						break;
 					case 'redirect':
 						$location.path($router.current.main._redirect);
@@ -395,7 +396,6 @@ angular
 					default:
 						throw new Error('Unknown router action: ' + $router.current.main._action);
 				}
-				$rootScope.$broadcast('$routerSuccess', $router.current.main);
 			});
 		},
 	})
