@@ -68,6 +68,7 @@ angular
 		$router.warns = {
 			requiresChecking: true, // Warn when passing an object / promise to rule.requires() rather than a promise factory
 		};
+		$router.tokenRules = {};  // Token validators (see $router.tokenRule)
 
 		// Rule instance {{{
 		/**
@@ -79,7 +80,7 @@ angular
 			this._action = 'component'; // Action to take when the rule matches. ENUM: 'component', 'redirect'
 			this._component;
 			this._redirect;
-			this._segments = [];
+			this._segments = []; // The extracted capture groups for the rule in order. Each item has 'id', 'required' and an optional 'validator'
 			this._priority = 50;
 			this._requires = [];
 
@@ -168,7 +169,16 @@ angular
 			* @return {Promise} A promise which will resolve if this rule is satisfied by the given path
 			*/
 			this.matches = (path,requires) => $q((resolve, reject) => {
-				if ((!this._path) || (this._path && this._path.test(path))) { // Matches basic pathing rules (if no path pass though)
+				var segValues;
+
+				if ( // Matches basic pathing rules (if no path pass though)
+					!this._path || // Either this rule doesnt have a path OR
+					(
+						this._path.test(path) && // The patch matches AND
+						(segValues = this.extractParams(path)) && // Parameters can be extracted from the path
+						this._segments.every(seg => _.isFunction(seg.validator) ? seg.validator(segValues[seg.id]) : seg.validator) // If this segment has a validator use its return
+					)
+				) {
 					if (!this._requires.length || requires === false) return resolve();
 					$q.all(this._requires.map(r => r())) // Run each factory function to crack open the promise inside then resolve it
 						.then(_=>resolve())
@@ -191,11 +201,13 @@ angular
 				} else if (_.isString(path) && path) { // Is a string
 					this._pathHuman = path; // Store the human version of the path for sorting later
 					this._path = $router.pathToRegExp(path);
-					this._segments = (path.match(/:[a-z0-9_-]+\??/gi) || []).map(function(seg) {
+					this._segments = (path.match(/:[a-z0-9_-]+\??/gi) || [])
+						.map(function(seg) {
 							var segExamined = /^:(.+?)(\?)?$/.exec(seg);
 							return {
 								id: segExamined[1],
 								required: !segExamined[2],
+								validator: $router.tokenRules[segExamined[1]] || true,
 							};
 						});
 				}
@@ -358,9 +370,23 @@ angular
 		};
 
 		/**
+		* Define a rule to be used with a given token.
+		* This should be a function that will return whether the given value can be accepted to satisfy that rule segment
+		* Token rules are defined centrally in $router.tokenRules
+		* @param {string} token The token to validate against. Leading ':' will be automatically removed
+		* @param {function} function(value) Validation function that is expected to return a truthy value if the segment validates
+		* @return {$router} This chainable router object
+		*/
+		$router.tokenRule = (token, validator) => {
+			$router.tokenRules[_.trimStart(token, ':')] = validator;
+			return $router;
+		};
+
+		/**
 		* Set the query portion of the URL and trigger a renaviate operation
 		* @param {string} key The key portion of the query to set. If this is falsy all query items are removed
 		* @param {mixed} [val] The value of the router query to set, if this is undefined it is removed
+		* @return {$router} This chainable router object
 		*/
 		$router.setQuery = (key, val) => {
 			var newQuery = key ? _.clone($router.query) : {};
@@ -372,6 +398,7 @@ angular
 			}
 
 			location.hash = '#' + $router.path + (_.isEmpty(newQuery) ? '' : '?' + _.map(newQuery, (v, k) => k + '=' + v).join('='));
+			return $router;
 		};
 
 		// Setup a watcher on the main window location hash

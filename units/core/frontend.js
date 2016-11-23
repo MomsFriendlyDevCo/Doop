@@ -43,6 +43,12 @@ angular
 	})
 	// }}}
 
+	// Validate ':id' against a 24 bit hex string if seen in a URL {{{
+	.run(function($router) {
+		$router.tokenRule(':id', id => /^[0-9a-f]+$/.test(id));
+	})
+	// }}}
+
 	// If no route matches go to '/' {{{
 	.run(function($router) {
 		$router.rule().priority('lowest').redirect('/');
@@ -100,6 +106,16 @@ angular
 	// Adjust page title when the page changes {{{
 	.run(function($config, $rootScope) {
 		$rootScope.$on('$routerSuccess', (e, rule) => document.title = $config.title + (rule.data && rule.data.title ? ' | ' + rule.data.title : ''));
+	})
+	// }}}
+
+	// Page load animation {{{
+	.run(function($animate, $rootScope) {
+		$rootScope.$on('$routerSuccess', _=> {
+			var pageArea = angular.element('#content');
+			$animate.addClass(pageArea, 'fadeInUp')
+				.then(_=> $animate.removeClass(pageArea, 'fadeInUp'));
+		});
 	})
 	// }}}
 

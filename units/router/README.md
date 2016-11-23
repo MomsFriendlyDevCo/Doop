@@ -1,6 +1,6 @@
 Doop-Router
 ===========
-A non-annoying, exceedingly simple router using a chainable syntax.
+A non-annoying, exceedingly simple but extremely powerful router using a chainable syntax.
 
 
 ```javascript
@@ -25,6 +25,7 @@ Features:
 * **Component support** - Components are the future
 * **Routes can be updated in real time** - the router will automatically resort rules as things are added and removed
 * **Promise based architecture** - fits in better with the way Angular does things and allows for async handling gracefully
+* **Central definition of tokens** - define what commonly used capture tokens should need to validate (e.g. that `:id` should be a 24 bit hex string, globally)
 * **"Provide" pattern proof** - Angular is hard enough to understand as it is without having to reference two different classes that do seemingly different things. $router exposes exactly ONE well defined and easy to use service
 * **Exceptionally small** - Seriously look at the source - its one file of about 80 lines of actual code
 * **Exceptionally fast** - Because there is no weird [cruft](http://catb.org/jargon/html/C/cruft.html) to handle there are no excess parts of the router that slows everything down
@@ -122,6 +123,22 @@ This parameter takes two parameters. If both are specified the key specified wil
 <a ng-click="$router.setQuery('foo')">Go to #/</a>
 <a ng-click="$router.setQuery()">Go to #/</a>
 ```
+
+$router.tokenRule(token, validator)
+-----------------------------------
+Define a rule to be used with a given token.  This should be a function that will return whether the given value can be accepted to satisfy that rule segment
+
+```javascript
+// Any URL containing ':id' will only validate if ID is a number
+$router.tokenRule(':id', v => /^0-9+$/.test(v));
+
+// Any URL containing ':id' will only validate if ID is a MongoDB style ObjectID
+$router.tokenRule(':id', v => /^[0-9a-f]+$/.test(v));
+
+// Only allow ISO style dates (year-month-day)
+$router.tokenRule(':date', v => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v));
+```
+
 
 $router.current.main
 --------------------
