@@ -3,7 +3,7 @@ angular
 	.run($router => $router.when('/showcase/:id?').component('showcaseCtrl'))
 	.component('showcaseCtrl', {
 		templateUrl: '/units/showcase/showcase.tmpl.html',
-		controller: function($scope, $config, $loader, $router, $toast) {
+		controller: function($animate, $config, $loader, $router, $scope, $toast) {
 			var $ctrl = this;
 
 			$ctrl.$config = $config;
@@ -37,5 +37,28 @@ angular
 				{id: 'admin', title: 'Admin'},
 				{id: 'root', title: 'Root'},
 			];
+
+
+			// Animations
+			$ctrl.animationEffects = [
+				'bounce', 'flash', 'jello', 'pulse', 'rubberBand', 'shake', 'tada', 'swing', 'wobble',
+				'bounceIn', 'bounceInDown', 'bounceInLeft', 'bounceInRight', 'bounceInUp',
+				'bounceOut', 'bounceOutDown', 'bounceOutLeft', 'bounceOutRight', 'bounceOutUp',
+				'fadeIn', 'fadeInDown', 'fadeInDownBig', 'fadeInLeft', 'fadeInLeftBig', 'fadeInRight', 'fadeInRightBig', 'fadeInUp', 'fadeInUpBig',
+				'fadeOut', 'fadeOutDown', 'fadeOutDownBig', 'fadeOutLeft', 'fadeOutLeftBig', 'fadeOutRight', 'fadeOutRightBig', 'fadeOutUp', 'fadeOutUpBig',
+				'flip', 'flipInX', 'flipInY', 'flipOutX', 'flipOutY',
+				'lightSpeedIn', 'lightSpeedOut',
+				'rotateIn', 'rotateInDownLeft', 'rotateInDownRight', 'rotateInUpLeft', 'rotateInUpRight',
+				'rotateOut', 'rotateOutDownLeft', 'rotateOutDownRight', 'rotateOutUpLeft', 'rotateOutUpRight',
+				'zoomIn', 'zoomInDown', 'zoomInLeft', 'zoomInRight', 'zoomInUp',
+				'zoomOut', 'zoomOutDown', 'zoomOutLeft', 'zoomOutRight', 'zoomOutUp',
+				'hinge', 'rollIn', 'rollOut',
+			];
+			$ctrl.animate = effect => {
+				var elem = angular.element('.animate-element');
+
+				$animate.addClass(elem, effect)
+					.then(_=> $animate.removeClass(elem, effect)) // Remove class again when we're done
+			};
 		},
 	});

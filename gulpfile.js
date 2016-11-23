@@ -58,6 +58,8 @@ global.paths = {
 			// NOTE: Don't need main bootstrap.css as the theme provides this
 			'node_modules/bootstrap/dist/js/bootstrap.js',
 			// --- less important vendors below this line (alphabetical) --- //
+			'node_modules/animate.css/animate.css',
+			'node_modules/angular-animate/angular-animate.js',
 			'node_modules/angular-bs-confirm/angular-bs-confirm.js',
 			'node_modules/angular-bs-popover/angular-bs-popover.js',
 			'node_modules/angular-bs-tooltip/angular-bs-tooltip.js',
