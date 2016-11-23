@@ -3,7 +3,7 @@
 * This avoids having to do 'does the user have an email' tests each time we want to show a name
 *
 * @example
-* <user-widget user="someUser"></user-widget>
+* <user-link user="someUser"></user-link>
 */
 angular
 	.module('app')
