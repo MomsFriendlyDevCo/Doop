@@ -5,7 +5,7 @@ angular
 			// Additions to default ReST
 			count: {method: 'GET', url: '/api/users/count'},
 			create: {method: 'POST', url: '/api/users'},
-			meta: {method: 'GET', url: '/api/users/meta?collectionEnums=true'},
+			meta: {method: 'GET', url: '/api/users/meta?collectionEnums=true&prototype=true'},
 
 			// Session handling
 			login: { url: '/api/session/login', method: 'POST' },
