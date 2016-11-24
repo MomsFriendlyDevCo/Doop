@@ -2,7 +2,7 @@ angular
 	.module('app')
 	.component('sidebar', {
 		templateUrl: '/units/theme/sidebar.tmpl.html',
-		controller: function($rootScope, $router, $session) {
+		controller: function($element, $rootScope, $router, $session) {
 			var $ctrl = this;
 			$ctrl.$session = $session;
 
@@ -19,5 +19,13 @@ angular
 				$('body').toggleClass('sidebar-toggled');
 				$('.hi-trigger, #sidebar').toggleClass('toggled');
 			});
+
+			// Close sidebar when in mobile mode on any click event
+			$element.on('click', 'a', function() {
+				if ($(this).data('toggle') == 'collapse') return; // Ignore menus that collapse
+				$('body').removeClass('sidebar-toggled');
+				$('.hi-trigger, #sidebar').removeClass('toggled');
+			});
+
 		},
 	});
