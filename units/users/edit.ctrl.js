@@ -4,7 +4,7 @@ angular
 	.run(($router, $session) => $router.when('/users/create').require($session.promise.admin).component('usersEditCtrl'))
 	.component('usersEditCtrl', {
 		templateUrl: '/units/users/edit.tmpl.html',
-		controller: function($location, $loader, $q, $router, $scope, $session, $toast, Organisations, Users) {
+		controller: function($location, $loader, $q, $router, $scope, $session, $toast, Users) {
 			var $ctrl = this;
 			$ctrl.$session = $session;
 
