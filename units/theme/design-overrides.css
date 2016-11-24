@@ -50,6 +50,11 @@ table.table tr:hover td.btn-context {
 }
 /* }}} */
 /* .btn-group-float {{{ */
+/* Hide when animating */
+#content.ng-animate .btn-group-float {
+	display: none;
+}
+
 .btn-group-float {
 	display: block;
 	position: fixed;
