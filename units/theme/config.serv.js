@@ -4,7 +4,7 @@
 * {
 * 	something: 0/*$IMPORT: app.config.some.variable
 * }
-* AGAIN NOTE: the above quote is impomplete as the remaining 'asterisk plus forwardslash' buggers up the script compiler
+* AGAIN NOTE: the above quote is incomplete as the remaining 'asterisk plus forwardslash' buggers up the script compiler
 */
 angular
 	.module('app')
