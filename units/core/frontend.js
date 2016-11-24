@@ -29,10 +29,35 @@ angular
 	// }}}
 
 	// Anglar core config {{{
+	// Enable async HTTP for performance boost {{{
 	.config(function($httpProvider) {
-		// Enable async HTTP for performance boost
 		$httpProvider.useApplyAsync(true);
 	})
+	// }}}
+
+	// Add additional methods to $resource {{{
+	.config(function($resourceProvider) {
+		angular.extend($resourceProvider.defaults.actions, {
+			count: {
+				method: 'GET',
+				params: {
+					id: 'count',
+				},
+			},
+			create: {
+				method: 'POST',
+			},
+			meta: {
+				method: 'GET',
+				params: {
+					id: 'meta',
+					collectionEnums: true,
+					prototype: true,
+				},
+			},
+		});
+	})
+	// }}}
 	// }}}
 
 	// Router config {{{
