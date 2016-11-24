@@ -101,12 +101,6 @@ global.paths = {
 		// Add any specific font dependencies here
 		'node_modules/font-awesome/fonts/**',
 	],
-	images: [
-		'client/units/content/images/**/*'
-	],
-	videos: [
-		'client/units/content/videos/**/*'
-	],
 	report: 'report',
 	buildIncludes: [
 		// Add any directories / files that also need to be included into the build directory
