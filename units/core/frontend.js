@@ -93,6 +93,15 @@ angular
 	})
 	// }}}
 
+	// Add helper classes to the body element when were routing {{{
+	.run(function($rootScope, $timeout) {
+		// add .router-routing class to body when routing and remove it 1s after we have finished loading (i.e. everything has settled)
+		$rootScope.$on('$routerStart', _=> angular.element('body').addClass('router-routing'))
+		$rootScope.$on('$routerSuccess', _=> $timeout(_=> angular.element('body').removeClass('router-routing'), 1000));
+		$rootScope.$on('$routerError', _=> $timeout(_=> angular.element('body').removeClass('router-routing'), 1000));
+	})
+	// }}}
+
 	// Animate the page loader while navigating {{{
 	.run(function($loader, $rootScope) {
 		$rootScope.$on('$routerStart', _=> $loader.clear().start('routerNav'));
