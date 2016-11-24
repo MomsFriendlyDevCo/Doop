@@ -50,9 +50,9 @@ table.table tr:hover td.btn-context {
 }
 /* }}} */
 /* .btn-group-float {{{ */
-/* Hide when animating */
-#content.ng-animate .btn-group-float {
-	display: none;
+/* Hide when routing or animating */
+body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
+	opacity: 0;
 }
 
 .btn-group-float {
@@ -61,6 +61,8 @@ table.table tr:hover td.btn-context {
 	bottom: 20px;
 	right: 20px;
 	z-index: 1000;
+	opacity: 1;
+	transition: opacity 1s;
 }
 
 .btn-group-float > .btn {
