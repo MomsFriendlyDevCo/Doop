@@ -19,9 +19,9 @@ var common = require('./common.gulp.lib');
 gulp.task('build', function(finish) {
 	gutil.log('Building the optimized app');
 
-	// FIXME: This is a temporary work around until gulp 4 - https://github.com/OverZealous/run-sequence
+	// FIXME: This is a temporary work around until Gulp 4 - https://github.com/OverZealous/run-sequence
 	runSequence(
-		['css', 'partials', 'scripts', 'vendors', 'fonts', 'images', 'videos'],
+		['css', 'partials', 'scripts', 'vendors', 'fonts'],
 		'build:includes',
 		'build:complete',
 		finish
@@ -63,17 +63,4 @@ gulp.task('build:clean', function(finish) {
 
 	var delPaths = [].concat(paths.build, paths.report);
 	return rimraf(delPaths, finish);
-});
-
-
-/**
-* Move video assets into build directory
-* @return {Stream}
-*/
-gulp.task('videos', ['load:app'], function() {
-	var dest = paths.build + '/content/videos';
-	gutil.log('Copying videos');
-	return gulp
-		.src(paths.videos)
-		.pipe(gulp.dest(dest));
 });

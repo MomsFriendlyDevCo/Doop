@@ -67,11 +67,11 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/units/`                             |               | Directory of all back-end and front-end units
 | `/units/core/backend.js`              |               | Back-end entry point (this class creates a stub `global.app` object suitable for use in Gulp / Mocha etc.
 | `/units/core/frontend.js`             |               | Front-end entry point
-| `/units/content/`                     |               | Front-end media/content assets -- e.g. images, videos, etc.
 | `/units/layouts/*.html`               |               | Main layout template files
 | `/units/layouts/main.html`            |               | Default layout template file to use unless specified in server controller
 | `/units/scenarios/defaults/`          |               | The default scenario file to use when no other is specified. The contents of this directory are processed when running `gulp db`
 | `/units/scenarios/`                   |               | Sample population data for all models, created by [Mongoose-Scenario](https://github.com/hash-bang/Node-Mongoose-Scenario). Each sub-directory should correspond with a scenario build profile with `defaults` being the default
+| `/units/theme/`                       |               | Front-end media and content assets related to the theme
 | `/units/**/*.ctrl.js`                 | `fooCtrl` (lower case, singular, suffix with `ctrl`) | Front-end Angular controllers -- where the front-end business logic is resides
 | `/units/**/*.dirv.js`                 | `foo` (lower case, singular)                         | Front-end Angular directives -- these are reuseable HTML components / custom HTML elements
 | `/units/**/*.fltr.js`                 | `foo` (lower case, singular)                         | Front-end Angular filters
@@ -118,5 +118,6 @@ This list is intended as a guide to help deploy a Doop site:
 
 * Replace all `FIXME` markers - especially in `config/index.conf.js` and `package.json`
 * Replace the contents of `units/theme/favicon` with your own Favicon. We recommend using [Real Favicon Generator](http://realfavicongenerator.net) to generate all the weird and wondeful varients that are required. Remember to also update the paths to the favicon in `units/layouts/main.html` if they change.
+* Replace `units/theme/logo.png` with your own project logo
 * Check the database connection works and set up a basic database with `gulp db`
-* Edit the `units/config/config.serv.js` file and configure what data should be exposed to the front-end.
+* Edit the `units/config/config.serv.js` file and configure what data should be exposed to the front-end
