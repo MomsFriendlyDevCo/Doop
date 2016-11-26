@@ -12,6 +12,6 @@ angular
 		return {
 			isProduction: 0/*IMPORT: app.config.isProduction*/,
 			title: 0/*IMPORT: app.config.title*/,
-			profiles: 0/*IMPORT: app.config.profiles*/,
+			instances: 0/*IMPORT: app.config.instances*/,
 		};
 	});

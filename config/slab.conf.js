@@ -5,7 +5,7 @@ module.exports = {
 	access: {
 		lockdown: false,
 	},
-	profiles: {
+	instances: {
 		domain: 'slab',
 	},
 };

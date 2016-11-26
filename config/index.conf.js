@@ -79,7 +79,7 @@ var defaults = {
 	paths: {
 		root: path.normalize(__dirname + '/..'),
 	},
-	profiles: {
+	instances: {
 		enabled: false,// FIXME: Set this to true if you want to use profiles (you will also need to update units/theme/config.serv.js)
 		domain: 'localhost',
 		default: 'default',
