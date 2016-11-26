@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run($router => $router.when('/login').component('sessionLoginCtrl'))
+	.run($router => $router.when('/login').title('Login').component('sessionLoginCtrl'))
 	.component('sessionLoginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
 		controller: function($animate, $rootScope, $session) {

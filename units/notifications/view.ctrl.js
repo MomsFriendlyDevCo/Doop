@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run($router => $router.when('/notifications/:id').component('notificationsViewCtrl'))
+	.run($router => $router.when('/notifications/:id').title('View Notification').component('notificationsViewCtrl'))
 	.component('notificationsViewCtrl', {
 		templateUrl: '/units/notifications/view.tmpl.html',
 		controller: function($location, $loader, $router, $scope, $toast, Notifications) {

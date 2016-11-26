@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run($router => $router.when('/').component('dashCtrl'))
+	.run($router => $router.when('/').title('Dashboard').component('dashCtrl'))
 	.component('dashCtrl', {
 		templateUrl: '/units/dashboard/dashboard.tmpl.html',
 		controller: function($scope) {

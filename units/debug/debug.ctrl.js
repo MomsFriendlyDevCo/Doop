@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run($router => $router.when('/debug').component('debugCtrl'))
+	.run($router => $router.when('/debug').title('Debug').component('debugCtrl'))
 	.component('debugCtrl', {
 		templateUrl: '/units/debug/debug.tmpl.html',
 		controller: function($scope, $loader, $toast) {

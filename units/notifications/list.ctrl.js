@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run(($router, $session) => $router.when('/notifications').require($session.promise.admin).component('notificationsListCtrl'))
+	.run(($router, $session) => $router.when('/notifications').require($session.promise.admin).title('Notifications').component('notificationsListCtrl'))
 	.component('notificationsListCtrl', {
 		templateUrl: '/units/notifications/list.tmpl.html',
 		controller: function($scope, $location, $loader, $toast, Notifications) {
