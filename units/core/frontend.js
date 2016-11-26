@@ -139,7 +139,7 @@ angular
 
 	// Adjust page title when the page changes {{{
 	.run(function($config, $rootScope) {
-		$rootScope.$on('$routerSuccess', (e, rule) => document.title = $config.title + (rule.data && rule.data.title ? ' | ' + rule.data.title : ''));
+		$rootScope.$on('$routerSuccess', (e, rule) => document.title = $config.title + (_.has(rule, '_data.title') ? ' | ' + rule._data.title : ''));
 	})
 	// }}}
 

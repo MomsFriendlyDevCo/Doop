@@ -83,6 +83,7 @@ angular
 			this._segments = []; // The extracted capture groups for the rule in order. Each item has 'id', 'required' and an optional 'validator'
 			this._priority = 50;
 			this._requires = [];
+			this._data = {};
 
 			/**
 			* Set the component to use when the rule is satisfied
@@ -129,6 +130,29 @@ angular
 			};
 
 			/**
+			* Set the data element of a rule
+			* This is really just a setter for _data
+			* @param {*} key The data element to set. If this is a single elemnt the entire data object is overwritten, this can also be a key along with the next value
+			* @param {*} value If this is specified this function acts as a setter of the form `data(key, value)`
+			* @return {RouterRule} This chainable object
+			*/
+			this.data = (key, value) => {
+				if (value === undefined) {
+					this._data = data;
+				} else {
+					this._data[key] = value;
+				}
+				return this;
+			};
+
+			/**
+			* Shortcut function to call RouterRule.data('title', DATA)
+			* @param {string} title A suitable title string to set
+			* @see data()
+			*/
+			this.title = title => this.data('title', title);
+
+			/**
 			* Sets a requirement for the rule to be satisfied
 			* This is a promise or array of promises which must resolve for the rule to be satisfied
 			* NOTE: All regular functions will be transformed into promises (so we can process them faster later)
@@ -144,7 +168,7 @@ angular
 								(_.hasIn(p, 'then')
 									? 'promises only ever run once!'
 									: 'was given unexpected type: ' + (typeof p)
-								) + 
+								) +
 								' Pass in a factory or disable this message with $router.warnings("requiresChecking", false)'
 							);
 						}
@@ -168,7 +192,7 @@ angular
 			* @param {boolean} [requires=true] Obey requires attached to the rule
 			* @return {Promise} A promise which will resolve if this rule is satisfied by the given path
 			*/
-			this.matches = (path,requires) => $q((resolve, reject) => {
+			this.matches = (path, requires) => $q((resolve, reject) => {
 				var segValues;
 
 				if ( // Matches basic pathing rules (if no path pass though)
@@ -180,6 +204,7 @@ angular
 					)
 				) {
 					if (!this._requires.length || requires === false) return resolve();
+
 					$q.all(this._requires.map(r => r())) // Run each factory function to crack open the promise inside then resolve it
 						.then(_=>resolve())
 						.catch(_=>reject())

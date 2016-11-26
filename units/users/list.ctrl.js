@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run(($router, $session) => $router.when('/users').require($session.promise.admin).component('usersListCtrl'))
+	.run(($router, $session) => $router.when('/users').require($session.promise.admin).title('Users').component('usersListCtrl'))
 	.component('usersListCtrl', {
 		templateUrl: '/units/users/list.tmpl.html',
 		controller: function($scope, $location, $loader, $router, $session, $timeout, $toast, Users) {
