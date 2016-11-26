@@ -195,7 +195,8 @@ table.table td > .btn-group {
 /* }}} */
 /* Text {{{ */
 /* Text colors {{{ */
-.text-muted {color: #AAA !important};
+.text-muted {color: #AAA !important;}
+.text-black {color: #4C4C4C !important;}
 /* }}} */
 /* Text Sizes {{{ */
 .text-xs {font-size: 8pt;}
