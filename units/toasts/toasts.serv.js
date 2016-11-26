@@ -16,19 +16,20 @@ angular
 		});
 	})
 	.service('$toast', function($rootScope, Notification) {
-		var toasts = this;
+		var $toast = this;
 
-		toasts.primary = Notification.primary.bind(Notification);
-		toasts.info = Notification.info.bind(Notification);;
-		toasts.success = Notification.success.bind(Notification);;
-		toasts.warning = Notification.warning.bind(Notification);;
-		toasts.error = Notification.error.bind(Notification);;
+		$toast.primary = Notification.primary.bind(Notification);
+		$toast.info = Notification.info.bind(Notification);
+		$toast.success = Notification.success.bind(Notification);
+		$toast.warning = Notification.warning.bind(Notification);
+		$toast.error = Notification.error.bind(Notification);
+		$toast.clear = Notification.clearAll.bind(Notification);
 
-		toasts.catch = function(obj) {
+		$toast.catch = function(obj) {
 			console.log('$toasts.catch', obj);
-			if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return toasts.offline(true);
+			if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
 
-			toasts.error(
+			$toast.error(
 				_.isUndefined(obj) ? 'An error has occured' :
 				_.isString(obj) ? obj :
 				_.has(obj, 'error') && obj.error ? obj.error :
@@ -41,27 +42,27 @@ angular
 		};
 
 		// $toasts.offline(isOffline=true) {{{
-		toasts.offlineKiller;
-		toasts.offline = function(isOffline=true) {
+		$toast.offlineKiller;
+		$toast.offline = function(isOffline=true) {
 			if (isOffline) {
-				if (!toasts.offlineKiller) { // Not yet shown the message
-					toasts.error({
+				if (!$toast.offlineKiller) { // Not yet shown the message
+					$toast.error({
 						delay: false,
 						closeOnClick: false,
 						message: 'Cannot communicate with server'
 					})
-						.then(scope => toasts.offlineKiller = scope.kill); // Grab the toasts killer from inside the promise (when it resolves)
+						.then(scope => $toast.offlineKiller = scope.kill); // Grab the toasts killer from inside the promise (when it resolves)
 				}
-			} else if (toasts.offlineKiller) { // No longer offline but we need to tidy up the warning
-				toasts.offlineKiller();
-				toasts.offlineKiller = undefined;
+			} else if ($toast.offlineKiller) { // No longer offline but we need to tidy up the warning
+				$toast.offlineKiller();
+				$toast.offlineKiller = undefined;
 			}
 		};
 		// }}}
 
 		$rootScope.$on('isOffline', function(e, isOffline) {
-			toasts.offline(isOffline);
+			$toast.offline(isOffline);
 		});
 
-		return toasts;
+		return $toast;
 	});
