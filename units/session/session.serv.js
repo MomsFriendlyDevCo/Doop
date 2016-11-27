@@ -122,7 +122,7 @@ angular
 		*/
 		$session.login = function(user) {
 			return Users.login(user).$promise
-				.then(res => $session.update().then(res => $location.path('/'))); // Update local session then redirect to root
+				.then(res => $session.update().then(res => $window.location = '/')); // Update local session then redirect to root
 		};
 
 		/**
