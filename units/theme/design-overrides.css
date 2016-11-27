@@ -29,6 +29,12 @@ a, [ng-click] {
 .badge-warning {background-color: #f0ad4e !important;}
 .badge-danger {background-color: #d9534f !important;}
 /* }}} */
+/* .badge-fill - make a badge act as a filling block {{{ */
+.badge.badge-fill {
+	display: block;
+	width: 100%;
+}
+/* }}} */
 /* }}} */
 /* Buttons {{{ */
 /* .btn-context - display a dropdown context menu {{{ */
