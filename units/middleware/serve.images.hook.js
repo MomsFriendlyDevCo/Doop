@@ -16,6 +16,7 @@
 
 var _ = require('lodash');
 var async = require('async-chainable');
+var colors = require('chalk');
 var gm = require('gm');
 var fs = require('fs');
 var fspath = require('path');
@@ -113,7 +114,11 @@ app.register('init', function(finish) {
 					gm(task.path)
 						.resize(task.size)
 						.write(task.dst, function(err) {
-							if (err) return next(err);
+							if (err) {
+								console.log(colors.blue('[middleware.service.images]'), colors.red('Error generating GraphicsMagik responsive image ', err.toString(), ' - using full image instead. This may be because you dont have GraphicsMagik setup'));
+								return next();
+							}
+
 							task.path = task.dst; // Mutate path to the new path
 							next();
 						});
