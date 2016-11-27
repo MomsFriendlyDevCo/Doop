@@ -3,7 +3,7 @@
 *
 * e.g.
 *
-*	<file-upload/>
+*	<file-upload></file-upload>
 *
 */
 angular
