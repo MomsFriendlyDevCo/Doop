@@ -191,6 +191,12 @@ RouterRule (Object instance)
 An instance of a router rule.
 If a path is specified `RouterRule.path()` is automatically called.
 
+RouterRule.data(object | key,value)
+-----------------------------------
+Store data in the routers rule.
+This is a handy area to stash information about a route such as the page title.
+If passed a single entity the entire `RouterRule._data` element is overwritten, otherwise this function is treated like a key setter.
+
 RouterRule.component(name)
 --------------------------
 Configure the action of the rule to display the named component.
@@ -224,6 +230,12 @@ $router.when('/foo')
 ```
 
 **NOTE**: Promises only ever resolve _once_ so its important to pass in a function which _creates a new promise_ (a Promise Factory pattern). This was the factory is instanciated whenever the rule is checked with a new state each time. The Router will warn if it is passed a Promise directly rather than a function which returns a promise.
+
+
+RouterRule.title(title)
+-----------------------
+A shorthand function to set the `title` element of `RouterRule._data`.
+In effect this calls `RouterRule.data('title', YOUR VALUE)` for you.
 
 
 RouterRule.extractParams(path)
