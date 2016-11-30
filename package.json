@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "gulp build",
-    "start": "node server/server.js"
+    "start": "node ./server.js"
   },
   "repository": {
     "type": "git",
