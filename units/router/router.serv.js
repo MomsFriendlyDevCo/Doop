@@ -1,6 +1,6 @@
 /**
-* MC's utterly braindead router
-* Because there is an upper limit to the insanity we can cope with in angular-ui-router
+* Doops exceedingly splendid front-end router
+* Because there is an upper limit to the insanity we can cope with in angular-ui-router. We crossed that line some time ago.
 * @author Matt Carter <m@ttcareter.com>
 * @date 2016-11-10
 */
