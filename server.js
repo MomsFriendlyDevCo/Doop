@@ -95,7 +95,27 @@ global.app.fire = function(hook, callback) {
 		handler.defer(cb.prereqs, cb.id, function(next) {
 			debug('[hook:' + hook + ', handler:' + cb.id + ']', cb.attacher.file);
 
-			cb.callback.apply(this, [next].concat(callbackArgs));
+			if (!debug.enabled) { // Not debugging just run the callback (fast)
+				cb.callback.apply(this, [next].concat(callbackArgs));
+			} else { // Run hook with debugging helpers (slow)
+				cb.callback.apply(this, [function(err, val) {
+					debug('[hook:' + hook + ', handler:' + cb.id + ']', cb.attacher.file, 'completed');
+
+					setTimeout(function() { // Set into next cycle so async-chainable can mark the IDs as completed
+						var waitingOn =_(handler._struct)
+							.filter(s => s.waitingOn > 0)
+							.map(s => s.waitingOnIds)
+							.map(s => s + ' (' + cb.attacher.file + ')')
+							.flatten()
+							.value();
+
+						if (waitingOn.length) debug('[hook:' + hook + ']', 'Waiting on:', waitingOn.join(', '));
+						if (waitingOn[0] == 'middleware (units/db/db.hook.js)') debugger;
+					});
+
+					next(err, val);
+				}].concat(callbackArgs));
+			}
 		});
 	});
 
