@@ -46,7 +46,7 @@ gulp.task('pm2-deploy', ['load:app'], function(finish) {
 				});
 			} else {
 				gutil.log('No PM2 process named', colors.cyan(app.config.name), 'found. Booting for first time');
-				pm2.start({name: app.config.name, script: paths.server + '/server.js'}, function(err) {
+				pm2.start({name: app.config.name, script: paths.root + '/server.js'}, function(err) {
 					// Deal with use case where the user has booted the process without a name {{{
 					if (err == 'Error: Script already launched') {
 						gutil.log('PM2 process already exists but without a name. Rebooting + renaming');
@@ -55,7 +55,7 @@ gulp.task('pm2-deploy', ['load:app'], function(finish) {
 								pm2.stop('server.js', next);
 							})
 							.then(function(next) {
-								pm2.start({name: app.config.name, script: paths.server + '/server.js'}, next);
+								pm2.start({name: app.config.name, script: paths.root + '/server.js'}, next);
 							})
 							.end(next);
 					} else if (err) {
@@ -93,7 +93,7 @@ gulp.task('pm2-start', ['load:app'], function(finish) {
 				});
 			} else {
 				gutil.log('No PM2 process named', colors.cyan(app.config.name), 'found. Booting for first time');
-				pm2.start({name: app.config.name, script: paths.server + '/server.js'}, function(err) {
+				pm2.start({name: app.config.name, script: paths.root + '/server.js'}, function(err) {
 					// Deal with use case where the user has booted the process without a name {{{
 					if (err == 'Error: Script already launched') {
 						gutil.log('PM2 process already exists but without a name. Rebooting + renaming');
@@ -102,7 +102,7 @@ gulp.task('pm2-start', ['load:app'], function(finish) {
 								pm2.stop('server.js', next);
 							})
 							.then(function(next) {
-								pm2.start({name: app.config.name, script: paths.server + '/server.js'}, next);
+								pm2.start({name: app.config.name, script: paths.root + '/server.js'}, next);
 							})
 							.end(next);
 					} else if (err) {
