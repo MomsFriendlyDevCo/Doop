@@ -234,6 +234,16 @@ table.table td > .btn-group {
 }
 /* }}} */
 
+/* Theme override: action area with normal buttons {{{ */
+ul.actions > li > a.btn {
+	width: auto;
+}
+
+ul.actions > li > a.btn > i {
+	color: #333;
+	vertical-align: bottom;
+}
+/* }}} */
 /* Theme override: dashboard icons {{{ */
 .chart {
 	padding: 12px 0 5px 10px !important;

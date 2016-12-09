@@ -12,7 +12,7 @@ angular
 			user: '=',
 		},
 		template: `
-			<a href="#/users/{{$ctrl.user._id}}">
+			<a href="#/users/{{$ctrl.user._id}}" class="badge badge-info">
 				<i class="fa" ng-class="{'fa-user-circle': $ctrl.user.role == 'admin' || $ctrl.user.role == 'owner', 'fa-user': $ctrl.user.role == 'staff', 'fa-user-o': $ctrl.user.role == 'client'}"></i>
 				{{$ctrl.user.name}}
 				<span ng-if="$ctrl.user.email">({{$ctrl.user.email}})</span>

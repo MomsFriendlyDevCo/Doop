@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 app.register('preControllers', function(finish) {
 	// Enable this to temporarily lock down the server quickly
 	// app.use(express.basicAuth('user', 'letmein'));
@@ -6,7 +8,7 @@ app.register('preControllers', function(finish) {
 	if (app.config.access && app.config.access.lockdown) {
 		var basicAuth = require('basic-auth-connect');
 		app.use(basicAuth(function(user, pass) {
-			var usr = _.find(app.config.access.users, {user: usr});
+			var usr = _.find(app.config.access.users, {user: user});
 			return (usr && pass == usr.pass);
 		}, app.config.title + ' - Private'));
 	}
