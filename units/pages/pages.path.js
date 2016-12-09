@@ -5,6 +5,6 @@
 
 app.get('/', function(req, res) {
 	res.render('units/pages/main', {
-		theme: app.config.title,
+		theme: app.config.theme,
 	});
 });

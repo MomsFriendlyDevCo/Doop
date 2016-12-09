@@ -95,7 +95,8 @@ global.paths = {
 		'tests/client/specs/*.spec.js'
 	],
 	nodejs: [
-		'server/**/*.js'
+		'units/**/*.hook.js',
+		'units/**/*.path.js',
 	],
 	fonts: [
 		// Add any specific font dependencies here
@@ -107,7 +108,7 @@ global.paths = {
 	],
 	scenarios: {
 		defaults: [
-			'server/units/scenarios/defaults/**/*scenario.json'
+			'units/scenario/*.json'
 		],
 	}
 };
@@ -167,6 +168,6 @@ gulp.task('load:app.db', ['load:app'], function(finish) {
 * Launches a plain server without Nodemon
 */
 gulp.task('server', ['build'], function() {
-	require(paths.server + '/server.js');
+	require(paths.root + '/server.js');
 });
 // }}}

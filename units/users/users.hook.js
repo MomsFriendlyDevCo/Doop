@@ -7,7 +7,7 @@ app.register('postControllers', function(finish) {
 		save: app.middleware.ensure.admin,
 		get: app.middleware.ensure.login,
 		delete: app.middleware.ensure.admin,
-		meta: app.middleware.ensure.admin,
+		meta: app.middleware.ensure.login,
 	}));
 
 	finish();

@@ -4,6 +4,7 @@ console.log(colors.bold.red('RUNNING IN PRODUCTION MODE'));
 
 module.exports = {
 	isProduction: true,
+	port: 80,
 	gulp: {
 		debugJS: false,
 		minifyJS: true,

@@ -53,16 +53,15 @@ var defaults = {
 		cc: [],
 		signoff: 'Doop',
 	},
-	mailgun: {
-		apiKey: '{{FIXME.mailgun.apiKey}}',
-		domain: '{{FIXME.mailgun.domain}}',
-	},
 	gulp: {
 		debugJS: true,
 		minifyJS: false,
 		debugCSS: true,
 		minifyCSS: false,
-		minifyImages: false,
+	},
+	mailgun: {
+		apiKey: '{{FIXME.mailgun.apiKey}}',
+		domain: '{{FIXME.mailgun.domain}}',
 	},
 	mongo: {
 		uri: 'mongodb://localhost/doop', // FIXME: Repoint this at your database
@@ -85,6 +84,7 @@ var defaults = {
 		default: 'default',
 	},
 };
+
 
 var config = _.merge(
 	// Adopt defaults...
