@@ -72,7 +72,8 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/units/scenarios/defaults/`          |               | The default scenario file to use when no other is specified. The contents of this directory are processed when running `gulp db`
 | `/units/scenarios/`                   |               | Sample population data for all models, created by [Mongoose-Scenario](https://github.com/hash-bang/Node-Mongoose-Scenario). Each sub-directory should correspond with a scenario build profile with `defaults` being the default
 | `/units/theme/`                       |               | Front-end media and content assets related to the theme
-| `/units/**/*.ctrl.js`                 | `fooCtrl` (lower case, singular, suffix with `ctrl`) | Front-end Angular controllers -- where the front-end business logic is resides
+| `/units/**/*.ctrl.js`                 | `fooCtrl` (lower case, singular, suffix with `ctrl`) | Front-end Angular controllers -- where the front-end business logic is resides. These generally map onto Angular components
+| `/units/**/*.css`                     |                                                      | Front-end CSS files
 | `/units/**/*.dirv.js`                 | `foo` (lower case, singular)                         | Front-end Angular directives -- these are reuseable HTML components / custom HTML elements
 | `/units/**/*.fltr.js`                 | `foo` (lower case, singular)                         | Front-end Angular filters
 | `/units/**/*.gulp.js`                 |                                                      | Back-end Gulp files included into the gulp setup by individual units
@@ -83,7 +84,20 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/units/**/*.schm.js`                 | `Foos` (upper case first letter, plural)             | Back-end MongoDB Schema Models loaded by the DB unit. See [Back-end hooks](#back-end-hooks)
 | `/units/**/*.serv.js`                 | `$foo` (lower case all, prefix with `$`)             | Front-end services -- these are reuseable components for controllers
 | `/units/**/*.test.js`                 |                                                      | Back-end additional tests to run per-unit
+| `/units/**/*.tmpl.html`               |                                                      | Front-end HTML partials
+| `/units/core/`                        |                                                      | Bootstrapper front-end and back-end files
+| `/units/db/`                          |                                                      | The main database driver and schema loader
+| `/units/layouts/`                     |                                                      | Layout files used to serve the basic HTML page structure
+| `/units/middleware/`                  | `app.middleware.SOMETHING`                           | Middleware utility libraries
+| `/units/pages/`                       |                                                      | Page inserts used by the backend fot form the basic HTML page structure (a page loads inside a layout skeleton)
+| `/units/parsing/`                     |                                                      | Back-end parsing drivers. Includes components like cookie decoding
+| `/units/router/`                      |                                                      | Front-end router
 | `/units/theme/`                       |                                                      | Directory of default app CSS/Styling
+
+**NOTES**
+
+* Dotted notion in unit names generally means an extension to an existing unit. For example `units/companies` is the `Foo` unit but `units/companies.employees` signifies that the `employees` substructure is an extension of that unit. Generally extensions are used like this when the sub-unit structure becomes complex and needs to be separated.
+* Directive (`*.dirv.js`) and controller (`*.ctrl.js`) front-end files are all Angular Components and are more or less interchangeable. The naming convention is separated to signify that a controller should be a singleton whereas a directive can be used multiple times in a widget like invocation within code.
 
 
 Testing + Debugging
