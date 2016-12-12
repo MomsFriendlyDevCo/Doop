@@ -69,7 +69,6 @@ global.paths = {
 			'node_modules/angular-ui-loader/dist/ng-loader.js',
 			'node_modules/angular-ui-notification/dist/angular-ui-notification.{css,js}',
 			'node_modules/angular-ui-switch/angular-ui-switch.{css,js}',
-			'node_modules/animate.css/animate.css',
 			'node_modules/font-awesome/css/font-awesome.css',
 			'node_modules/node-waves/dist/waves.css',
 			'node_modules/node-waves/dist/waves.js',
@@ -109,7 +108,7 @@ global.paths = {
 	],
 	scenarios: {
 		defaults: [
-			'units/scenario/*.json'
+			'units/scenarios/defaults/**/*scenario.json'
 		],
 	}
 };

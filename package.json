@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "gulp build",
-    "start": "node server.js"
+    "start": "node ./server.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,6 @@
     "angular-bs-popover": "^1.0.1",
     "angular-bs-tooltip": "^1.0.0",
     "angular-gravatar": "^0.4.2",
-    "angular-messages": "^1.5.8",
     "angular-resource": "^1.5.8",
     "angular-sanitize": "^1.5.8",
     "angular-ui-loader": "^1.0.1",
