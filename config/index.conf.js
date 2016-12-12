@@ -90,10 +90,13 @@ var config = _.merge(
 	// Adopt defaults...
 	defaults,
 
-	// Which are overriden by private.conf.js if its present
+	// Which are overridden by gulp.conf.js if its present
+	fs.existsSync(__dirname + '/gulp.conf.js') ? require(__dirname + '/gulp.conf.js') : {},
+
+	// Which are overridden by private.conf.js if its present
 	fs.existsSync(__dirname + '/private.conf.js') ? require(__dirname + '/private.conf.js') : {},
 
-	// Which are overriden by the NODE_ENV.conf.js file if its present
+	// Which are overridden by the NODE_ENV.conf.js file if its present
 	fs.existsSync(__dirname + '/' + defaults.env + '.conf.js') ? require(__dirname + '/' + defaults.env + '.conf.js') : {}
 );
 
