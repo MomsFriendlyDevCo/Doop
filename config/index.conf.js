@@ -36,7 +36,7 @@ var defaults = {
 	url: 'http://localhost',
 	secret: "{{FIXME.random}}", // A quick way to populate this is with `cat /dev/urandom | base64 | head -n10`
 	theme: { // Variables passed to the HTML page renderer - do not put anything private in here
-		title: 0/*IMPORT: app.config.title*/,
+		title: 'Doop',
 	},
 	access: {
 		lockdown: false, // Set to true to lock the site with the below users

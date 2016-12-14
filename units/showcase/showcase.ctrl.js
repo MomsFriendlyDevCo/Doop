@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.run($router => $router.when('/showcase/:id?').component('showcaseCtrl'))
+	.run($router => $router.when('/showcase/:section?').title('Showcase').component('showcaseCtrl'))
 	.component('showcaseCtrl', {
 		templateUrl: '/units/showcase/showcase.tmpl.html',
 		controller: function($animate, $config, $loader, $router, $scope, $toast) {
@@ -11,12 +11,12 @@ angular
 			$ctrl.$toast = $toast;
 			$ctrl.$router = $router;
 
-			// Jump to the right object ID if the $router.params.id changes
-			$scope.$watch(_=> $router.params.id, function() {
-				if ($router.params.id) $(document).scrollTop($('#' + $router.params.id.replace(/[^a-z0-9-]+/g, '_')).position().top - 100);
+			// Jump to the right object ID if the $router.params.section changes
+			$scope.$watch(_=> $router.params.section, function() {
+				if ($router.params.section) $(document).scrollTop($('#' + $router.params.section.replace(/[^a-z0-9-]+/g, '_')).position().top - 100);
 			});
 
-			
+
 			// Form content
 			$ctrl.user = {
 				enabled: true,

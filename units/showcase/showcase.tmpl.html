@@ -153,6 +153,29 @@
 		<button class="btn btn-teal btn-default waves-effect waves-circle waves-float"><i class="fa fa-refresh"></i></button>
 		<button class="btn btn-orange btn-default waves-effect waves-circle waves-float"><i class="fa fa-check"></i></button>
 		<button class="btn btn-blue btn-default waves-effect waves-circle waves-float"><i class="fa fa-th"></i></button>
+
+		<br>
+
+	</div>
+</div>
+<div ng-init="$ctrl.showActionButton = false" class="card">
+	<div class="card-header"><h2>Big action buttons</h2></div>
+	<div class="card-body card-padding">
+		<p>Add this somewhere in the page header:</p>
+
+		<pre>
+		&lt;div class="btn-group-float text-bottom"&gt;
+			&lt;a class="btn btn-success btn-circle"&gt;&lt;i class="fa fa-check fa-2x"&gt;&lt;/i&gt;&lt;/a&gt;
+		&lt;/div&gt;
+		</pre>
+
+		<div ng-show="$ctrl.showActionButton" class="btn-group-float text-bottom">
+			<a class="btn btn-success btn-circle"><i class="fa fa-check fa-2x"></i></a>
+		</div>
+
+		<div class="text-center">
+			<switch ng-model="$ctrl.showActionButton"></switch> Show Action Button
+		</div>
 	</div>
 </div>
 <!-- }}} -->
@@ -160,7 +183,7 @@
 <!-- Cards {{{ -->
 <div id="cards" class="block-header"><h2>Cards</h2></div>
 <div class="row">
-	<div class="col-sm-4">
+	<div class="col-sm-8 col-sm-offset-2">
 		<div class="card">
 			<div class="card-header">
 				<h2>
@@ -183,9 +206,19 @@
 				</ul>
 			</div>
 			<div class="card-body card-padding">Cras leo sem, egestas a accumsan eget, euismod at nunc. Praesent vel mi blandit, tempus ex gravida, accumsan dui. Sed sed aliquam augue. Nullam vel suscipit purus, eu facilisis ante. Mauris nec commodo felis.</div>
+			<div class="card-footer text-center">
+				<div class="pull-right">
+					<a class="btn btn-danger waves-effect">Cancel</a>
+				</div>
+				<div class="pull-left">
+					<a class="btn btn-success waves-effect">Do something</a>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="col-sm-4">
+</div>
+<div class="row">
+	<div class="col-sm-6">
 		<div class="card">
 			<div class="card-header ch-alt">
 				<h2>
@@ -211,7 +244,7 @@
 			<div class="card-body card-padding">Cras leo sem, egestas a accumsan eget, euismod at nunc. Praesent vel mi blandit, tempus ex gravida, accumsan dui. Sed sed aliquam augue. Nullam vel suscipit purus, eu facilisis ante. Mauris nec commodo felis.</div>
 		</div>
 	</div>
-	<div class="col-sm-4">
+	<div class="col-sm-6">
 		<div class="card">
 			<div class="card-header bgm-red">
 				<h2>
@@ -488,6 +521,12 @@
 					<label class="col-sm-3 control-label">Switch</label>
 					<div class="col-sm-9 select">
 						<switch ng-model="$ctrl.user.enabled" class="green"></switch>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">File upload</label>
+					<div class="col-sm-9 select">
+						<file-upload></file-upload>
 					</div>
 				</div>
 			</div>
