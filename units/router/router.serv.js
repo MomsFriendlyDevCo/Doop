@@ -335,6 +335,9 @@ angular
 
 		/**
 		* Navigate to the given path if it exists
+		* NOTE: This is the internal router command to act 'as if' a route was triggered.
+		*       If you want to BOTH trigger a route AND update the URL use $location.path('/somewhere')
+		*
 		* @param {string} [rawPath] The path to navigate to. If path is falsy, '/' is assumed
 		* @return {Promise} A promise object for the navigation
 		*/
