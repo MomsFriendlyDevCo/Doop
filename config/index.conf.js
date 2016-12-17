@@ -73,6 +73,7 @@ var defaults = {
 	},
 	newrelic: {
 		enabled: false,
+		name: '{{FIXME.newrelic.name}}',
 		license: '{{FIXME.newrelic.license}}',
 	},
 	paths: {
