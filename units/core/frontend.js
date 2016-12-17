@@ -145,7 +145,7 @@ angular
 
 	// Page load animation {{{
 	.run(function($animate, $rootScope) {
-		$rootScope.$on('$routerSuccess', _=> {
+		$rootScope.$on('$routerStart', _=> {
 			var pageArea = angular.element('#content');
 			$animate.addClass(pageArea, 'fadeInUp')
 				.then(_=> $animate.removeClass(pageArea, 'fadeInUp'));
