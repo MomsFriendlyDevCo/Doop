@@ -37,9 +37,9 @@ gulp.task('css', ['load:app'], function() {
 		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.init()))
 		.pipe(concat('app.min.css'))
 		.pipe(bytediff.start())
-		.pipe(cleanCSS({
+		.pipe(gulpIf(app.config.gulp.minifyCSS, cleanCSS({
 			processImport: false, // Prevents 'Broken @import declaration' error during build task
-		}))
+		})))
 		// .pipe(gulpIf(app.config.gulp.minifyCSS, minifyCSS()))
 		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.write()))
 		.pipe(bytediff.stop(common.bytediffFormatter))
