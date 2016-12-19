@@ -1,0 +1,16 @@
+/* Prevent any hide animations when the page is still loading {{{ */
+/* This is an insane fix and I honestly can't believe its still an issue in angular-animat 1.5.x *
+/* See - http://stackoverflow.com/questions/15839479/nganimate-on-ngshow-preventing-animation-when-it-starts-first-time#25562457 */
+body.router-routing .animate {
+	animation-duration: 0s !important;
+}
+/* }}} */
+
+.form-group.ng-hide-add-active {animation: fadeOutUp 1s ease}
+.form-group.ng-hide-remove-active {animation: fadeInDown 1s ease}
+
+.animate-fade-down.ng-hide-add-active {animation: fadeOutUp 1s ease}
+.animate-fade-down.ng-hide-remove-active {animation: fadeInDown 1s ease}
+
+.animate-fade-up.ng-hide-add-active {animation: fadeOutDown 1s ease}
+.animate-fade-up.ng-hide-remove-active {animation: fadeInUp 1s ease}
