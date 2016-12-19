@@ -51,8 +51,8 @@ global.paths = {
 			// Dependencies maintain order so list pre-requisites first
 			// --- critical dependency parent packages below this line --- //
 			'node_modules/jquery/dist/jquery.js',
-			'node_modules/angular/angular.js',
 			'node_modules/lodash/lodash.js',
+			'node_modules/angular/angular.js',
 			'node_modules/moment/moment.js',
 			// --- packages with dependents below this line --- //
 			// NOTE: Don't need main bootstrap.css as the theme provides this
