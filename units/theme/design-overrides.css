@@ -87,6 +87,17 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 /* }}} */
 /* }}} */
 /* Cards {{{ */
+/* .card {{{ */
+.card {
+	box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.3) !important;
+}
+/* }}} */
+/* .card > img.img-responsive - cards with image headers {{{ */
+.card > img.img-responsive {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+/* }}} */
 /* .card-body > .btn-float {{{ */
 .card-body > .btn-float {
 	right: 10px;
@@ -123,17 +134,13 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 }
 /* }}} */
 /* Fix the weird checkbox symbol {{{ */
-.form-group .checkbox {
+.checkbox {
 	top: 8px;
 }
 
-.form-group .checkbox > label {
-	margin-top: -3px;
-}
-
-.form-group .checkbox i.input-helper:after {
+.checkbox i.input-helper:after {
 	top: 1px !important;
-	left: 1px !important;
+	left: 2px !important;
 
 	/* font-awesome > chevron-down */
 	font: normal normal normal 14px/1 FontAwesome;
@@ -162,6 +169,11 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 	margin-left: 5px;
 }
 /* }}} */
+/* }}} */
+/* Navbar {{{ */
+header .hi-menu .dropdown > .dropdown-menu-offset {
+	margin-top: 40px;
+}
 /* }}} */
 /* Scrollbars {{{ */
 /* Custom scrollbars {{{ */
@@ -313,5 +325,10 @@ header .hi-logo > a > img {
 
 .mini-charts .mini-charts-item {
 	margin-bottom: 0px;
+}
+/* }}} */
+/* Plugin override: Waves-Effect {{{ */
+.btn.waves-circle {
+	padding: 0;
 }
 /* }}} */
