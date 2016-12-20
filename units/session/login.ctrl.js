@@ -6,10 +6,11 @@ angular
 		controller: function($animate, $rootScope, $session) {
 			var $ctrl = this;
 
-			// Init scope variables
-			this.user = { username: '', password: '' };
+			$ctrl.user = {
+				username: '',
+				password: '',
+			};
 
-			// Messages
 			$ctrl.error;
 
 			$ctrl.login = function(isValid) {
@@ -17,15 +18,8 @@ angular
 
 				// Perform login
 				$session.login(this.user)
-					.then(_=> $rootScope.$broadcast('loginSuccess'))
 					.catch(err => {
-						$rootScope.$broadcast('loginFailure');
-						// Handle login-specifc errors the server may throw
-						if (err.error) {
-							$ctrl.error = res.error;
-						} else {
-							$ctrl.error = 'Could not login!';
-						}
+						$ctrl.error = _.get(err, 'data.error') || err.error || err || 'Could not login!';
 
 						$animate.addClass(angular.element('.lcb-form'), 'shake')
 							.then(_=> $animate.removeClass(angular.element('.lcb-form'), 'shake'))
