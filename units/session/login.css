@@ -1,0 +1,7 @@
+.login-content .lc-block:not(.lc-block-alt) .lcb-form {
+	padding: 25px !important;
+}
+
+.login-content .logo-brand-image {
+	margin-bottom: 20px;
+}
