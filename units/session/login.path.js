@@ -20,28 +20,9 @@ app.get('/login', app.middleware.ensure.nologin, function(req, res) {
 
 
 /**
-* Attempt login sequence with given login credentials - legacy FORM/POST method
-* @param {string} req.body.username The username to login with
-* @param {string} req.body.password The password to login with
-*/
-app.post('/login', passport.authenticate('local', {
-	successRedirect: '/',
-	failureRedirect: '/login',
-	failureFlash: true
-}), function(req, res){
-	if (req.user._token){
-		// User requested password reset but logs in with current password
-		req.user.save({_token: undefined}, function(err, doc) {
-			res.redirect('/');
-		});
-	} else {
-		res.redirect('/');
-	}
-});
-
-
-/**
 * Attempt login sequence with given login credentials - AJAX internal API based method
+* @param {string} req.body.username The username to login
+* @param {string} req.body.password The password to login with
 * @fires session.login
 */
 app.post('/api/session/login', function(req, res) {

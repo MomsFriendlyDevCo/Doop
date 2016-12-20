@@ -123,7 +123,9 @@ angular
 		*/
 		$session.login = function(user) {
 			return Users.login(user).$promise
-				.then(res => $session.update().then(res => $window.location = '/')); // Update local session then redirect to root
+				.then(_=> $rootScope.$broadcast('loginSuccess'))
+				.then(res => $session.update().then(res => $window.location = '/')) // Update local session then redirect to root
+				.catch(err => $rootScope.$broadcast('loginFailure'))
 		};
 
 		/**
