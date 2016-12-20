@@ -118,11 +118,21 @@ angular
 
 		/**
 		* Attempt to log in the user
+		* @param {Object} user The user object to login
 		* @return {Promise} The promise object for the server request
 		*/
 		$session.login = function(user) {
 			return Users.login(user).$promise
 				.then(res => $session.update().then(res => $window.location = '/')); // Update local session then redirect to root
+		};
+
+		/**
+		* Attempt to signup a new user
+		* @param {Object} user The user object to provide to the server
+		* @return {Promise} The promise object for the server request
+		*/
+		$session.signup = function(user) {
+			return Users.signup(user).$promise;
 		};
 
 		/**

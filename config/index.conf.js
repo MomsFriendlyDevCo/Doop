@@ -59,6 +59,11 @@ var defaults = {
 		debugCSS: true,
 		minifyCSS: false,
 	},
+	instances: {
+		enabled: false,// FIXME: Set this to true if you want to use profiles (you will also need to update units/theme/config.serv.js)
+		domain: 'localhost',
+		default: 'default',
+	},
 	mailgun: {
 		apiKey: '{{FIXME.mailgun.apiKey}}',
 		domain: '{{FIXME.mailgun.domain}}',
@@ -79,10 +84,14 @@ var defaults = {
 	paths: {
 		root: path.normalize(__dirname + '/..'),
 	},
-	instances: {
-		enabled: false,// FIXME: Set this to true if you want to use profiles (you will also need to update units/theme/config.serv.js)
-		domain: 'localhost',
-		default: 'default',
+	session: {
+		signup: {
+			loginImmediate: true, // Login the user immediately after signup
+			requireUsername: false, // NOTE: If disabled the email is substitured. users.username still needs to exist as a field
+			requireName: true,
+			validateEmail: false, // NOTE: If enabled the user needs to support users.status='unverified-email' in its enum
+			welcomeEmail: true, // Send units/emails/{signup-welcome.email.txt,signup-verify.email.html} depending on validateEmail
+		},
 	},
 };
 
