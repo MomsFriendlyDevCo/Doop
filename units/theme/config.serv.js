@@ -13,5 +13,8 @@ angular
 			isProduction: 0/*IMPORT: app.config.isProduction*/,
 			title: 0/*IMPORT: app.config.title*/,
 			instances: 0/*IMPORT: app.config.instances*/,
+			session: {
+				signup: 0/*IMPORT: app.config.session.signup*/,
+			},
 		};
 	});
