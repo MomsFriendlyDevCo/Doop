@@ -304,13 +304,6 @@ ul.actions > li > a.btn > i {
 }
 /* }}} */
 /* Theme override: login form {{{ */
-.lc-block:not(.lc-block-alt) .lcb-form {
-	padding: 25px !important;
-}
-
-.lc-block .logo-brand-image {
-	margin-bottom: 20px;
-}
 /* }}} */
 /* Theme override: navbar {{{ */
 header .hi-logo > a > img {
