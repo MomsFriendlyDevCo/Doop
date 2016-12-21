@@ -5,6 +5,7 @@ angular
 			// Session handling
 			login: { url: '/api/session/login', method: 'POST' },
 			logout: { url: '/api/session/logout', method: 'POST' },
+			signup: { url: '/api/session/signup', method: 'POST' },
 			profile: { url: '/api/session/profile' },
 			invite: {method: 'POST', url: '/api/users/invite'},
 			inviteAccept: {method: 'POST', url: '/api/sers/inviteAccept'},
