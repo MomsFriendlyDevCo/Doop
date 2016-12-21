@@ -62,7 +62,6 @@ var defaults = {
 	instances: {
 		enabled: false,// FIXME: Set this to true if you want to use profiles (you will also need to update units/theme/config.serv.js)
 		domain: 'localhost',
-		default: 'default',
 	},
 	mailgun: {
 		apiKey: '{{FIXME.mailgun.apiKey}}',

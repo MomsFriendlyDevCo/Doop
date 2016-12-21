@@ -56,10 +56,41 @@ angular
 
 		/**
 		* Alias of $session.promise.role(['admin', 'root'])
+		* @return {Promise}
 		* @see promise.role()
 		*/
 		$session.promise.admin = _=> $session.promise.role(['admin', 'root']);
 
+		/**
+		* Returns a promise that resolves if the user is not an admin OR the user is not logged in
+		* @return {Promise}
+		* @see promise.role()
+		*/
+		$session.promise.notAdmin = _=> {
+			return $q((resolve, reject) =>
+				$session.promise()
+					.then(user => {
+						if (!user.role || user.role == 'user') {
+							resolve(user);
+						} else {
+							reject(user);
+						}
+					}, resolve) // User is not logged in - which should resolve!
+					.catch(reject)
+			);
+		};
+
+		/**
+		* Returns a promise that resolves if we are currently in an instance profile
+		* @return {Promise}
+		*/
+		$session.promise.instance = function() {
+			if ($config.instances.name) {
+				return $q.resolve($config.instances.name);
+			} else {
+				return $q.reject();
+			}
+		};
 		// }}}
 
 		/**
