@@ -55,6 +55,11 @@ table.table tr:hover td.btn-context {
 	font-size: 20px;
 }
 /* }}} */
+/* .btn-group {{{ */
+.btn-group > .btn {
+	margin-bottom: 0 !important;
+}
+/* }}} */
 /* .btn-group-float {{{ */
 /* Hide when routing or animating */
 body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
@@ -72,8 +77,20 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 }
 
 .btn-group-float > .btn {
-	padding: 25px;
+	padding: 25px 28px;
 	border-radius: 100%;
+	line-height: 100%;
+}
+/* }}} */
+/* .btn-float {{{ */
+.btn.btn-circle.btn-float {
+	padding: 10px 15px;
+	line-height: 2em !important;
+}
+/* }}} */
+/* .btn-sm {{{ */
+.btn.btn-sm {
+	font-size: 10px;
 }
 /* }}} */
 /* Button peers are too close together {{{ */
@@ -173,6 +190,16 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 /* Navbar {{{ */
 header .hi-menu .dropdown > .dropdown-menu-offset {
 	margin-top: 40px;
+}
+
+header .hi-logo .navbar-brand > img {
+	filter: invert(1);
+	margin-right: 15px;
+}
+
+header .hi-logo .navbar-brand {
+	font-size: 30px;
+	text-transform: none;
 }
 /* }}} */
 /* Scrollbars {{{ */
@@ -303,12 +330,13 @@ ul.actions > li > a.btn > i {
 	margin: 0 !important;
 }
 /* }}} */
-/* Theme override: login form {{{ */
-/* }}} */
 /* Theme override: navbar {{{ */
 header .hi-logo > a > img {
+	margin-top: -15px;
 	margin-right: 10px;
 	padding-bottom: 2px;
+	width: 50px;
+	float: left;
 }
 /* }}} */
 /* Theme override: minicharts {{{ */
