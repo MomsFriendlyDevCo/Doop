@@ -133,7 +133,16 @@ angular
 
 	// Reattach 'waves' effect on every router reload {{{
 	.run(function($rootScope) {
-		$rootScope.$on('$routerSuccess', _=> Waves.init());
+		$rootScope.$on('$routerSuccess', _=> {
+			// NOTE: All the below attachment rules assumes `waves-effect` is applied anyway
+			$('.btn').addClass('waves-effect');
+			$('.btn-circle').addClass('waves-circle');
+			$('.input-group > .btn').addClass('waves-table-cell');
+			$('a.list-group-items, .dropdown-menu > li > a, .main-menu > li > a').addClass('waves-effect waves-block');
+
+			// Re-init
+			Waves.init();
+		});
 	})
 	// }}}
 

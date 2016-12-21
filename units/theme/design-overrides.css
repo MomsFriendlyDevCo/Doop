@@ -322,6 +322,11 @@ header .hi-logo > a > img {
 /* }}} */
 /* Plugin override: Waves-Effect {{{ */
 .btn.waves-circle {
-	padding: 0;
+	width: auto;
+	height: auto;
+}
+
+.waves-table-cell {
+	display: table-cell !important;
 }
 /* }}} */
