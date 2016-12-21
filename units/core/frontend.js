@@ -35,6 +35,24 @@ angular
 	})
 	// }}}
 
+	// Configure $location to not stupidly encode URLS {{{
+	.config(function($locationProvider) {
+		$locationProvider.hashPrefix(''); // URL Mode: http://domain/#/path
+	})
+	// }}}
+
+	// Add additional methods to $location - $location.redirect {{{
+	.config($provide => $provide.decorator('$location', $delegate => {
+		/**
+		* Add $location.redirect
+		* This is a very simple wrapper around window.location but keeps things consistant by providing it within the $location handler
+		* @param {string} url A full or partial URL to redirect to
+		*/
+		$delegate.redirect = url => window.location = url;
+		return $delegate;
+	}))
+	// }}}
+
 	// Add additional methods to $resource {{{
 	.config(function($resourceProvider) {
 		angular.extend($resourceProvider.defaults.actions, {
