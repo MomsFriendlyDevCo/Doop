@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.service('$session', function($rootScope, $location, $q, $window, Users) {
+	.service('$session', function($config, $location, $q, $rootScope, $window, Users) {
 		var $session = this;
 
 		$session.data = {}; // User session data
@@ -155,7 +155,7 @@ angular
 		$session.login = function(user) {
 			return Users.login(user).$promise
 				.then(_=> $rootScope.$broadcast('loginSuccess'))
-				.then(res => $session.update().then(res => $window.location = '/')) // Update local session then redirect to root
+				.then(res => $session.update().then(res => $location.redirect('/'))) // Update local session then redirect to root
 				.catch(err => $rootScope.$broadcast('loginFailure'))
 		};
 
