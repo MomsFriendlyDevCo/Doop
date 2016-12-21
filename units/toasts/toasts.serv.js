@@ -26,7 +26,7 @@ angular
 		$toast.clear = Notification.clearAll.bind(Notification);
 
 		$toast.catch = function(obj) {
-			console.log('$toasts.catch', obj);
+			console.warn('$toasts.catch', obj);
 			if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
 
 			$toast.error(
