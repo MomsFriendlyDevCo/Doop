@@ -441,9 +441,32 @@ angular
 				if (!$router.current.main) return; // Main route not loaded yet
 				switch ($router.current.main._action) {
 					case 'component':
-						var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
-						$element.html($compile('<' + componentName + '></' + componentName + '>')($scope));
-						$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current.main));
+						var createComponent = function() {
+							var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
+							$element.html($compile('<' + componentName + '></' + componentName + '>')($rootScope.$new()));
+							$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current.main));
+						};
+
+						// Destroy the previous component and call createComponent() when done {{{
+						var elementChild = $element.children();
+						if (elementChild.length > 0) {
+							elementChild = angular.element(elementChild[0]);
+							if (elementChild.scope) { // Destroy the previous component
+								$timeout(_=> {
+									var scope = elementChild.scope();
+									scope.$apply(_=> {
+										scope.$destroy();
+										createComponent();
+									});
+								});
+							} else {
+								createComponent();
+							}
+						} else {
+							createComponent();
+						}
+						// }}}
+
 						break;
 					case 'redirect':
 						$location.path($router.current.main._redirect);
