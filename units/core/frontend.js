@@ -183,7 +183,9 @@ angular
 	// }}}
 
 	// Theme {{{
+	// Configure Selectize {{{
 	.config(function(uiSelectConfig) {
 		uiSelectConfig.theme = 'selectize';
 	})
+	// }}}
 	// }}}
