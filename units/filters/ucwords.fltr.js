@@ -1,15 +1,13 @@
 /**
 * Provides a simple filter to transform text so that all first letters in words is in upper case
 *
-* For example:
+* @example
+* //In your controller:
+* $scope.foo = 'hello world'
 *
-* In your controller:
-*   $scope.foo = 'hello world'
-*
-* In your templating system:
-*   {{foo | ucwords}}
-*
-* Will output: 'Hello World'
+* // In your template:
+* {{foo | ucwords}}
+* // => "Hello World"
 */
 angular
 	.module('app')

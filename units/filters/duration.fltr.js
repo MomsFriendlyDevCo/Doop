@@ -22,4 +22,4 @@ angular
 
 			return out.join(' ');
 		};
-	});
+	})
