@@ -115,7 +115,7 @@ app.register('init', function(finish) {
 						.resize(task.size)
 						.write(task.dst, function(err) {
 							if (err) {
-								console.log(colors.blue('[middleware.service.images]'), colors.red('Error generating GraphicsMagik responsive image ', err.toString(), ' - using full image instead. This may be because you dont have GraphicsMagik setup'));
+								console.log(colors.blue('[app.middleware.service.images]'), colors.red('Error generating GraphicsMagik responsive image ', err.toString(), ' - using full image instead. This may be because you dont have GraphicsMagik setup'));
 								return next();
 							}
 
