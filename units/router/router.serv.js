@@ -7,15 +7,13 @@
 
 angular
 	.module('app')
-	.service('$router', function($q, $rootScope) {
+	.service('$router', function($location, $q, $rootScope) {
 		var $router = this;
 		$router.routes = [];
 		$router.path = null; // The current path portion of the route
 		$router.params = {}; // Extracted parameters based on the rule tokens
 		$router.query = {}; // Query portion of the URI
-		$router.current = {
-			main: null, // The main view - this will be the matched rule object
-		};
+		$router.current = null; // The current matching rule
 		$router.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
 		$router.sort = {
 			enabled: true,
@@ -78,7 +76,7 @@ angular
 		var RouterRule = function(path) {
 			this._path;
 			this._action = 'component'; // Action to take when the rule matches. ENUM: 'component', 'redirect'
-			this._component;
+			this._component = {main: null};
 			this._redirect;
 			this._segments = []; // The extracted capture groups for the rule in order. Each item has 'id', 'required' and an optional 'validator'
 			this._priority = 50;
@@ -87,12 +85,33 @@ angular
 
 			/**
 			* Set the component to use when the rule is satisfied
+			* @param {string} [id='main'] The ID of the component to set, if omitted 'main' is assumed
 			* @param {string} component The component to use
 			* @return {RouterRule} This chainable object
+			* @example
+			* // Set the main router-view to 'fooCtrl'
+			* Rule.component('fooCtrl');
+			* // OR
+			* Rule.component('main', 'fooCtrl');
+			*
+			* @example
+			* // Set the main router-view to 'fooCtrl' and the 'aside' router-view to 'barCtrl'
+			* Rule.component('fooCtrl');
+			* Rule.component('aside', 'barCtrl');
+			* // OR
+			* Rule.component({main: 'fooCtrl', aside: 'barCtrl'});
 			*/
-			this.component = component => {
+			this.component = function(id, component) {
 				this._action = 'component';
-				this._component = component;
+
+				if (_.isObject(id)) { // Form: (object)
+					this._component = id;
+				} else if (!component) { // Form: ([id='main'], component)
+					this._component['main'] = id;
+				} else if (id && component) { // Form: (id, component)
+					this._component[id] = component;
+				}
+
 				return this;
 			};
 
@@ -343,7 +362,7 @@ angular
 		*/
 		$router.go = function(rawPath) {
 			if (!rawPath) rawPath = '/';
-			$rootScope.$broadcast('$routerStart', $router.current.main);
+			$rootScope.$broadcast('$routerStart', $router.current);
 			return $q(function(resolve, reject) {
 				// Break the path into the path portion + query string
 				var urlInfo = /^(.*?)(\?.*)?$/.exec(rawPath);
@@ -352,9 +371,9 @@ angular
 
 				$router.resolve(path)
 					.then(rule => {
-						var previousRule = $router.current.main;
+						var previousRule = $router.current;
 						$router.path = path;
-						$router.current.main = rule;
+						$router.current = rule;
 						// We cant just set $router.params as that would break the references to it - so we have to empty it, then refill
 						Object.keys($router.params).forEach(k => delete $router.params[k]);
 						angular.extend($router.params, rule.extractParams(path));
@@ -364,7 +383,18 @@ angular
 						angular.extend($router.query, rule.extractQuery(query));
 
 						resolve(rule);
-						if (previousRule && previousRule._component == rule._component) $rootScope.$broadcast('$routerSuccess', $router.current.main); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
+						if (previousRule && _.isEqual(previousRule._component, rule._component)) $rootScope.$broadcast('$routerSuccess', $router.current); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
+
+						switch ($router.current._action) {
+							case 'component':
+								// Do nothing - $router.current should be detected as changed by the downstream router-view components which should then reconfigure themselves
+								break;
+							case 'redirect':
+								$location.path($router.current._redirect);
+								break;
+							default:
+								throw new Error('Unknown router action: ' + $router.current._action);
+						}
 					})
 					.catch(err => {
 						$rootScope.$broadcast('$routerError', err);
@@ -436,44 +466,44 @@ angular
 		});
 	})
 	.component('routerView', {
-		controller: function($compile, $element, $location, $rootScope, $router, $scope, $timeout) {
-			$scope.$watch(_=> $router.current.main, function() {
-				if (!$router.current.main) return; // Main route not loaded yet
-				switch ($router.current.main._action) {
-					case 'component':
-						var createComponent = function() {
-							var componentName = $router.current.main._component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
-							$element.html($compile('<' + componentName + '></' + componentName + '>')($rootScope.$new()));
-							$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current.main));
-						};
+		bindings: {
+			routeId: '@',
+		},
+		controller: function($compile, $element, $rootScope, $router, $scope, $timeout) {
+			var $ctrl = this;
+			$scope.$watch(()=> $router.current, function() {
+				if (!$router.current) return; // Main route not loaded yet
+				var id = $ctrl.routeId || 'main';
 
-						// Destroy the previous component and call createComponent() when done {{{
-						var elementChild = $element.children();
-						if (elementChild.length > 0) {
-							elementChild = angular.element(elementChild[0]);
-							if (elementChild.scope) { // Destroy the previous component
-								$timeout(_=> {
-									var scope = elementChild.scope();
-									scope.$apply(_=> {
-										scope.$destroy();
-										createComponent();
-									});
+				if (!$router.current._component[id]) {
+					return; // This ID isn't set
+				} else { // Assume this ID is set
+					var createComponent = function() {
+						var componentName = $router.current._component[id].replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
+						$element.html($compile('<' + componentName + '></' + componentName + '>')($rootScope.$new()));
+						$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current));
+					};
+
+					// Destroy the previous component and call createComponent() when done {{{
+					var elementChild = $element.children();
+					if (elementChild.length > 0) {
+						elementChild = angular.element(elementChild[0]);
+						if (elementChild.scope) { // Destroy the previous component
+							$timeout(_=> {
+								var scope = elementChild.scope();
+								scope.$apply(_=> {
+									scope.$destroy();
+									createComponent();
 								});
-							} else {
-								createComponent();
-							}
+							});
 						} else {
 							createComponent();
 						}
-						// }}}
-
-						break;
-					case 'redirect':
-						$location.path($router.current.main._redirect);
-						break;
-					default:
-						throw new Error('Unknown router action: ' + $router.current.main._action);
+					} else {
+						createComponent();
+					}
 				}
+				// }}}
 			});
 		},
 	})
