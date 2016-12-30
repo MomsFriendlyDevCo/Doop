@@ -114,7 +114,7 @@ For example if the rule has the path `/widgets/:id` and the current URL is `/wid
 
 $router.setQuery(key, [val])
 ----------------------------
-Set the query portion of the URL and trigger a renaviate operation.
+Return the current URL with the rewritten query portion of the URL.
 
 This parameter takes two parameters. If both are specified the key specified will be simply set in `$router.query`. If the second parameter is omitted the key is removed. If no parameters are passed the query is blanked.
 
@@ -150,7 +150,7 @@ A lookup object of different priority aliases - e.g. `lowest`, `normal` etc.
 
 $router.sort
 ------------
-Various configuration options to sort the `$router.routes` collection. This containes `$router.sort.enabled` which toggles whether to sort, `$router.sort.isSorted` which specifies the dirty flag of the routes being sorted, `$router.sort.keyOrder` which is a complex collection of how to sort the array (see the source code). The sorting function can be overrideen by subclassing / decorating `$router.sort.sorter`.
+Various configuration options to sort the `$router.routes` collection. This contains `$router.sort.enabled` which toggles whether to sort, `$router.sort.isSorted` which specifies the dirty flag of the routes being sorted, `$router.sort.keyOrder` which is a complex collection of how to sort the array (see the source code). The sorting function can be overridden by subclassing / decorating `$router.sort.sorter`.
 
 $router.warns
 -------------
@@ -197,9 +197,31 @@ Store data in the routers rule.
 This is a handy area to stash information about a route such as the page title.
 If passed a single entity the entire `RouterRule._data` element is overwritten, otherwise this function is treated like a key setter.
 
-RouterRule.component(name)
---------------------------
+RouterRule.component([id='main'], componentName)
+------------------------------------------------
 Configure the action of the rule to display the named component.
+
+If `id` is omitted `"main"` is assumed (i.e. you only have one `<router-view></router-view>` somewhere in your template.
+
+To use single or multiple views you can use any of the following component setting styles:
+
+```javascript
+// Sets only the 'main' router-view
+RouterRule.component('fooCtrl')
+
+// Same as above
+RouterRule.component('main', 'fooCtrl')
+
+// Set the main router-view to the 'fooCtrl' component and the `<router-view route-id="aside"></router-view>` to the 'barCtrl' component
+RouterRule
+	.component('main', 'fooCtrl')
+	.component('aside', 'barCtrl')
+
+// Same as above but using an object
+RouterRule
+	.component({main: 'fooCtrl', aside: 'barCtrl')
+```
+
 
 RouterRule.go(path) / RouterRule.redirect(path)
 -----------------------------------------------
@@ -250,3 +272,9 @@ Used in the main page template to indicate where to place the page content.
 ```html
 <router-view></router-view>
 ```
+
+Router view can also take the following options:
+
+| Option     | Type   | Default  | Description                                                                              |
+|------------|--------|----------|------------------------------------------------------------------------------------------|
+| `route-id` | String | `"main"` | The ID of the route to react to. Use `RouterRule.component()` to define this in the rule |
