@@ -88,7 +88,7 @@ angular
 
 	// Validate ':id' against a 24 bit hex string if seen in a URL {{{
 	.run(function($router) {
-		$router.tokenRule(':id', id => /^[0-9a-f]+$/.test(id));
+		$router.tokenRule(':id', id => /^[0-9a-f]{24}$/.test(id));
 	})
 	// }}}
 
