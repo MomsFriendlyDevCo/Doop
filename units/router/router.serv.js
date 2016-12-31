@@ -84,6 +84,21 @@ angular
 			this._data = {};
 
 			/**
+			* The current view state
+			* Each element key should correspond to a <router-view route-id="ID"></router-view> ID
+			* @var {Object}
+			*/
+			this.views = {
+				/*
+				example: { // ID should the router-view ID to react to
+					method: String, // ENUM: 'component', 'template',
+					component: String, // The component to render if method==component
+					template: String, // The template to render if method==template
+				},
+				*/
+			};
+
+			/**
 			* Set the component to use when the rule is satisfied
 			* @param {string} [id='main'] The ID of the component to set, if omitted 'main' is assumed
 			* @param {string} component The component to use
@@ -102,14 +117,15 @@ angular
 			* Rule.component({main: 'fooCtrl', aside: 'barCtrl'});
 			*/
 			this.component = function(id, component) {
-				this._action = 'component';
+				this._action = 'views';
 
 				if (_.isObject(id)) { // Form: (object)
-					this._component = id;
+					this.views = {};
+					_.forEach(id, (v, k) => this.views[k] = {action: 'component', component: v});
 				} else if (!component) { // Form: ([id='main'], component)
-					this._component['main'] = id;
+					this.views.main = {action: 'component', component: id};
 				} else if (id && component) { // Form: (id, component)
-					this._component[id] = component;
+					this.views[id] = {action: 'component', component: component};
 				}
 
 				return this;
@@ -383,11 +399,11 @@ angular
 						angular.extend($router.query, rule.extractQuery(query));
 
 						resolve(rule);
-						if (previousRule && _.isEqual(previousRule._component, rule._component)) $rootScope.$broadcast('$routerSuccess', $router.current); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
+						if (previousRule && _.isEqual(previousRule.views, rule.views)) $rootScope.$broadcast('$routerSuccess', $router.current); // If we're not changing the component but we ARE changing the params we need to fire $routerSuccess anyway
 
 						switch ($router.current._action) {
-							case 'component':
-								// Do nothing - $router.current should be detected as changed by the downstream router-view components which should then reconfigure themselves
+							case 'views':
+								// Do nothing - $router.views[id] should be detected as changed by the downstream router-view components which should then reconfigure themselves
 								break;
 							case 'redirect':
 								$location.path($router.current._redirect);
@@ -475,33 +491,37 @@ angular
 				if (!$router.current) return; // Main route not loaded yet
 				var id = $ctrl.routeId || 'main';
 
-				if (!$router.current._component[id]) {
-					return; // This ID isn't set
-				} else { // Assume this ID is set
-					var createComponent = function() {
-						var componentName = $router.current._component[id].replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
-						$element.html($compile('<' + componentName + '></' + componentName + '>')($rootScope.$new()));
-						$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current));
-					};
+				if (!$router.current.views[id])  return;
 
-					// Destroy the previous component and call createComponent() when done {{{
-					var elementChild = $element.children();
-					if (elementChild.length > 0) {
-						elementChild = angular.element(elementChild[0]);
-						if (elementChild.scope) { // Destroy the previous component
-							$timeout(_=> {
-								var scope = elementChild.scope();
-								scope.$apply(_=> {
-									scope.$destroy();
-									createComponent();
-								});
-							});
-						} else {
-							createComponent();
-						}
-					} else {
-						createComponent();
+				var createView = function() {
+					switch($router.current.views[id].action) {
+						case 'component':
+							var componentName = $router.current.views[id].component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
+							$element.html($compile('<' + componentName + '></' + componentName + '>')($rootScope.$new()));
+							$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current));
+							break;
+						default:
+							throw new Error('Unknown router view action: "' + $router.current.views[id].action + '"');
 					}
+				};
+
+				// Destroy the previous component (if any) and call createView() when done {{{
+				var elementChild = $element.children();
+				if (elementChild.length > 0) {
+					elementChild = angular.element(elementChild[0]);
+					if (elementChild.scope) { // Destroy the previous component
+						$timeout(()=> {
+							var scope = elementChild.scope();
+							scope.$apply(_=> {
+								scope.$destroy();
+								createView();
+							});
+						});
+					} else {
+						createView();
+					}
+				} else {
+					createView();
 				}
 				// }}}
 			});
