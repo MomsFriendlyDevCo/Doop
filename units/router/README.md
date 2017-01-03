@@ -231,6 +231,10 @@ RouterRule.matches(path)
 ------------------------
 Tests a given path against the rule. This will return a boolean if the rule matches.
 
+RouterRule.params(Object|id, [value])
+-------------------------------------
+Set additional parameters be to populated into `$router.params` if this rule matches.
+
 RouterRule.path(path)
 ---------------------
 Set the path of the rule. This can be a tokenized Ruby style path or a regular expression.
@@ -258,6 +262,18 @@ RouterRule.title(title)
 -----------------------
 A shorthand function to set the `title` element of `RouterRule._data`.
 In effect this calls `RouterRule.data('title', YOUR VALUE)` for you.
+
+
+RouterRule.template([id], html)
+-------------------------------
+Configure the action of the rule to display the given HTML string.
+
+
+RouterRule.templateUrl([id], url)
+---------------------------------
+Configure the action of the rule to display the given HTML string fetch from either the `$templateCache` object or via `$http`.
+
+**NOTE:** Can also be called as `templateURL()`
 
 
 RouterRule.extractParams(path)
