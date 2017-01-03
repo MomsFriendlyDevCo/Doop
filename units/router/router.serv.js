@@ -75,6 +75,7 @@ angular
 		* @param {string|RegExp} path An initial path value to set (internally calls .path())
 		*/
 		var RouterRule = function(path) {
+			this._id = 'route-' + $router.nextRuleId++;
 			this._path;
 			this._action = 'views'; // Action to take when the rule matches. ENUM: 'views' (let each view handle the action), 'redirect' ($router will redirect entire page)
 			this._component = {main: null};
@@ -84,7 +85,6 @@ angular
 			this._requires = [];
 			this._data = {};
 			this._params = {};
-			this._id = $router.nextRuleId++;
 
 			/**
 			* The current view state
@@ -98,6 +98,18 @@ angular
 					content: String, // The component to render if method==component, template if method==template or the templateUrl if method==templateUrl
 				},
 				*/
+			};
+
+
+			/**
+			* Set the ID of this rule
+			* Normally an ID is automatically generated - this allows an easier method to identify routes
+			* @param {string|number} A unique identifier for this rule
+			* @return {RouterRule} This chainable object
+			*/
+			this.id = function(newId) {
+				this._id = newId;
+				return this;
 			};
 
 
