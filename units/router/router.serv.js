@@ -15,6 +15,7 @@ angular
 		$router.query = {}; // Query portion of the URI
 		$router.current = null; // The current matching rule
 		$router.priorityAliases = {first: 100, highest: 100, normal: 50, default: 50, low: 25, lowest: 0, last: 0};
+		$router.nextRuleId = 0;
 		$router.sort = {
 			enabled: true,
 			isSorted: false,
@@ -75,13 +76,15 @@ angular
 		*/
 		var RouterRule = function(path) {
 			this._path;
-			this._action = 'component'; // Action to take when the rule matches. ENUM: 'component', 'redirect'
+			this._action = 'views'; // Action to take when the rule matches. ENUM: 'views' (let each view handle the action), 'redirect' ($router will redirect entire page)
 			this._component = {main: null};
 			this._redirect;
 			this._segments = []; // The extracted capture groups for the rule in order. Each item has 'id', 'required' and an optional 'validator'
 			this._priority = 50;
 			this._requires = [];
 			this._data = {};
+			this._params = {};
+			this._id = $router.nextRuleId++;
 
 			/**
 			* The current view state
@@ -92,15 +95,15 @@ angular
 				/*
 				example: { // ID should the router-view ID to react to
 					method: String, // ENUM: 'component', 'template',
-					component: String, // The component to render if method==component
-					template: String, // The template to render if method==template
+					content: String, // The component to render if method==component, template if method==template or the templateUrl if method==templateUrl
 				},
 				*/
 			};
 
+
 			/**
 			* Set the component to use when the rule is satisfied
-			* @param {string} [id='main'] The ID of the component to set, if omitted 'main' is assumed
+			* @param {string|Object} [id='main'] The ID of the component to set, if omitted 'main' is assumed
 			* @param {string} component The component to use
 			* @return {RouterRule} This chainable object
 			* @example
@@ -119,24 +122,98 @@ angular
 			this.component = function(id, component) {
 				this._action = 'views';
 
+				// Yes I know this string is pretty much unreadbable it translates to the code below
+				// Its like this so that this funciton doesn't blow out in size when we copy it three times (template() + templateUrl())
+				return this.view(_.isObject(id) ? id : 'main', 'component', _.isString(id) ? id : undefined);
+
+				/*
+				// Actual logic is as follows:
 				if (_.isObject(id)) { // Form: (object)
-					this.views = {};
-					_.forEach(id, (v, k) => this.views[k] = {action: 'component', component: v});
-				} else if (!component) { // Form: ([id='main'], component)
-					this.views.main = {action: 'component', component: id};
+					this.view(id, 'component');
+				} else if (!template) { // Form: ([id='main'], template)
+					this.view('main', 'component', id);
 				} else if (id && component) { // Form: (id, component)
-					this.views[id] = {action: 'component', component: component};
+					this.view(id, 'component', component);
+				}
+				*/
+			};
+
+
+			/**
+			* Set the template to use when the rule is satisfied
+			* A template can either be a HTML string or (if it begins with '/' a path)
+			* NOTE: This function obeys much the same functionality as RouterRule.component() so see its definition for examples to set single, multiple or all view contents
+			* @param {string} [id='main'] The ID of the component to set, if omitted 'main' is assumed
+			* @param {string} template The template or absolute template path to use
+			* @return {RouterRule} This chainable object
+			*/
+			this.template = function(id, template) {
+				this._action = 'views';
+
+				// See component() for why this expression is written like this
+				return this.view(_.isObject(id) ? id : 'main', 'template', _.isString(id) ? id : undefined);
+			};
+
+			/**
+			* Set the templateUrl to use when the rule is satisfied
+			* A template can either be a HTML string or (if it begins with '/' a path)
+			* NOTE: This function obeys much the same functionality as RouterRule.component() so see its definition for examples to set single, multiple or all view contents
+			* @param {string} [id='main'] The ID of the component to set, if omitted 'main' is assumed
+			* @param {string} url The template or absolute template path to use
+			* @return {RouterRule} This chainable object
+			*/
+			this.templateUrl = function(id, url) {
+				this._action = 'views';
+
+				// See component() for why this expression is written like this
+				return this.view(_.isObject(id) ? id : 'main', 'templateUrl', _.isString(id) ? id : undefined);
+			};
+
+			/**
+			* Alias of templateUrl
+			* @alias templateUrl
+			*/
+			this.templateURL = this.templateUrl;
+
+
+			/**
+			* Set all or a specific views actions
+			* This function can be called in a variety of ways
+			* @param {string|Object} id The ID of the view to set OR an object to set all
+			* @param {string} [method] Optional method to set if ID is an object, required if all parameters are strings
+			* @param {string} [content] Optional content to set if the ID is an object, required if all parameters are strings
+			* @return {RouterRule} This chainable object
+			* @example
+			* // Set all views - same as just setting RouterRule.views manually (Object)
+			* RouterRule.view({main: {method: 'component', content: 'fooCtrl'}})
+			* // Set all views, and define the method to set (Object, String)
+			* RouterRule.view({main: {content: 'fooCtrl'}, aside: {content: 'barCtrl'}}, 'component') // Sets action=component in each case
+			* // Set a specific view to a method with content (can be called multiple times; String, String, String)
+			* RouterRule.view('main', 'component', 'fooCtrl')
+			*/
+			this.view = function(id, method, content) {
+				this._action = 'views';
+				if (_.isObject(id)) { // Form: (object) - set everything all at once, trust that the user knows what its doing
+					this.views = _.mapValues(id, (v, k) => ({content: v}));
+					if (method) _.forEach(this.views, (v, k) => v.method = method); // Method also specified - set this in each object value
+				} else if (_.isString(id) && _.isObject(method)) { // Form: (string, object) - Set a specific view's object
+					this.views[id] = method;
+				} else if (_.isString(id) && _.isString(method) && _.isString(content)) { // Form: (string, string, string) - Set a specific ID's view, method and contents as strings
+					this.views[id] = {method: method, content: content};
+				} else {
+					throw new Error('Unknown call pattern. See docs for RouterRule.view() for permitted patterns');
 				}
 
 				return this;
 			};
+
 
 			/**
 			* Set the a path to redirect to if this rule is satisfied
 			* @param {string} component The component to use
 			* @return {RouterRule} This chainable object
 			*/
-			this.go = path => {
+			this.go = function(path) {
 				this._action = 'redirect';
 				this._redirect = path;
 				return this;
@@ -153,7 +230,7 @@ angular
 			* @param {number|string} The priority number or alias (see $router.priorityAliases)
 			* @return {RouterRule} This chainable object
 			*/
-			this.priority = priority => {
+			this.priority = function(priority) {
 				if (isFinite(priority)) {
 					this._priority = priority;
 				} else if ($router.priorityAliases.hasOwnProperty(priority)) {
@@ -171,11 +248,26 @@ angular
 			* @param {*} value If this is specified this function acts as a setter of the form `data(key, value)`
 			* @return {RouterRule} This chainable object
 			*/
-			this.data = (key, value) => {
+			this.data = function(key, value) {
 				if (value === undefined) {
 					this._data = data;
 				} else {
 					this._data[key] = value;
+				}
+				return this;
+			};
+
+			/**
+			* Inject additional parameters into the $router.params structure if this route matches
+			* @param {*} key The data element to set. If this is a single elemnt the entire data object is overwritten, this can also be a key along with the next value
+			* @param {*} value If this is specified this function acts as a setter of the form `params(key, value)`
+			* @return {RouterRule} This chainable object
+			*/
+			this.params = function(key, value) {
+				if (value === undefined) {
+					this._params = data;
+				} else {
+					this._params[key] = value;
 				}
 				return this;
 			};
@@ -393,6 +485,7 @@ angular
 						// We cant just set $router.params as that would break the references to it - so we have to empty it, then refill
 						Object.keys($router.params).forEach(k => delete $router.params[k]);
 						angular.extend($router.params, rule.extractParams(path));
+						angular.extend($router.params, rule._params); // Also glue any custom params from the rule
 
 						// Clear out + rebuild $router.query also
 						Object.keys($router.query).forEach(k => delete $router.query[k]);
@@ -485,23 +578,45 @@ angular
 		bindings: {
 			routeId: '@',
 		},
-		controller: function($compile, $element, $rootScope, $router, $scope, $timeout) {
+		controller: function($compile, $element, $http, $q, $rootScope, $router, $scope, $templateCache, $timeout) {
 			var $ctrl = this;
-			$scope.$watch(()=> $router.current, function() {
+			$ctrl.$router = $router;
+
+			$scope.$watch(()=> $router.current._id, function(newVer, oldVer) {
 				if (!$router.current) return; // Main route not loaded yet
 				var id = $ctrl.routeId || 'main';
 
 				if (!$router.current.views[id])  return;
 
 				var createView = function() {
-					switch($router.current.views[id].action) {
+					switch($router.current.views[id].method) {
 						case 'component':
-							var componentName = $router.current.views[id].component.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
+							var componentName = $router.current.views[id].content.replace(/([A-Z])/g, '_$1').toLowerCase(); // Convert to kebab-case
 							$element.html($compile('<' + componentName + '></' + componentName + '>')($rootScope.$new()));
-							$timeout(_=> $rootScope.$broadcast('$routerSuccess', $router.current));
+							$timeout(()=> $rootScope.$broadcast('$routerSuccess', $router.current));
+							break;
+						case 'template':
+							$element.html($compile($router.current.views[id].content)($rootScope.$new()));
+							$timeout(()=> $rootScope.$broadcast('$routerSuccess', $router.current));
+							break;
+						case 'templateUrl':
+							// Try to fetch from $templateCache then $http
+							$q((resolve, reject) => {
+								var template = $templateCache.get($router.current.views[id].content);
+								if (template) return resolve(template);
+
+								// No cache entry - use HTTP
+								$http.get($router.current.views[id].content, {cache: true})
+									.then(resolve)
+									.catch(reject)
+							})
+								.then(data => $element.html($compile(data)($rootScope.$new())))
+								.then(() => $timeout(()=> $rootScope.$broadcast('$routerSuccess', $router.current)))
 							break;
 						default:
-							throw new Error('Unknown router view action: "' + $router.current.views[id].action + '"');
+							// if ($router.current.views[id].method) { // Throw an error if !undefined (if undefined, just clear up and do nothing)
+								throw new Error('View "' + id + '" has unknown router view method: "' + $router.current.views[id].method + '"');
+							// }
 					}
 				};
 
