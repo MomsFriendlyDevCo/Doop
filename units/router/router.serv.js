@@ -478,9 +478,10 @@ angular
 		*       If you want to BOTH trigger a route AND update the URL use $location.path('/somewhere')
 		*
 		* @param {string} [rawPath] The path to navigate to. If path is falsy, '/' is assumed
+		* @param {Object} [params] Optional set of parameters to pass to the route (set into $router.params as low priority - i.e. the router rule can overwrite these in its path tokens or via RouterRule._params)
 		* @return {Promise} A promise object for the navigation
 		*/
-		$router.go = function(rawPath) {
+		$router.go = function(rawPath, params) {
 			if (!rawPath) rawPath = '/';
 			$rootScope.$broadcast('$routerStart', $router.current);
 			return $q(function(resolve, reject) {
@@ -496,8 +497,9 @@ angular
 						$router.current = rule;
 						// We cant just set $router.params as that would break the references to it - so we have to empty it, then refill
 						Object.keys($router.params).forEach(k => delete $router.params[k]);
-						angular.extend($router.params, rule.extractParams(path));
-						angular.extend($router.params, rule._params); // Also glue any custom params from the rule
+						if (_.isObject(params)) angular.extend($router.params, params); // Inject from this function call if passed any
+						angular.extend($router.params, rule.extractParams(path)); // Inject from the URL tokens
+						angular.extend($router.params, rule._params); // Inject from RouterRule._params object
 
 						// Clear out + rebuild $router.query also
 						Object.keys($router.query).forEach(k => delete $router.query[k]);
