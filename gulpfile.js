@@ -64,6 +64,7 @@ global.paths = {
 			'node_modules/angular-bs-popover/angular-bs-popover.js',
 			'node_modules/angular-bs-tooltip/angular-bs-tooltip.js',
 			'node_modules/angular-gravatar/build/angular-gravatar.js',
+			'node_modules/mfdc-router/dist/angular-mfdc-router.js',
 			'node_modules/angular-resource/angular-resource.js',
 			'node_modules/angular-sanitize/angular-sanitize.js',
 			'node_modules/angular-ui-loader/dist/ng-loader.js',
