@@ -10,6 +10,7 @@ angular
 		'angular-bs-popover',
 		'angular-bs-tooltip',
 		'angular-ui-loader',
+		'angular-mfdc-router',
 		'ngAnimate',
 		'ngResource',
 		'ngSanitize',
