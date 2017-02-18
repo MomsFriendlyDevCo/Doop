@@ -18,6 +18,7 @@ angular
 	.service('$toast', function($rootScope, Notification) {
 		var $toast = this;
 
+		// Alias all $toast.* -> Notification.* functions
 		$toast.primary = Notification.primary.bind(Notification);
 		$toast.info = Notification.info.bind(Notification);
 		$toast.success = Notification.success.bind(Notification);
@@ -25,6 +26,17 @@ angular
 		$toast.error = Notification.error.bind(Notification);
 		$toast.clear = Notification.clearAll.bind(Notification);
 
+
+		/**
+		* Catch and display an error message from a promise
+		* This funciton tries various methods to figure out what the human readable error message should actually be
+		* Its designed to be used in Promise callbacks
+		* @param {Object|string} obj The error object or string to display
+		* @example
+		* SomeComplexPromise
+		* 	.then(doStuffIfEverythingIsOK)
+		*	.catch($toast.catch)
+		*/
 		$toast.catch = function(obj) {
 			console.warn('$toasts.catch', obj);
 			if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
