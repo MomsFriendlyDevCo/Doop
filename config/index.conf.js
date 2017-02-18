@@ -92,6 +92,10 @@ var defaults = {
 			welcomeEmail: true, // Send units/emails/{signup-welcome.email.txt,signup-verify.email.html} depending on validateEmail
 		},
 	},
+	ssl: {
+		enabled: false,
+		port: 443,
+	},
 };
 
 
