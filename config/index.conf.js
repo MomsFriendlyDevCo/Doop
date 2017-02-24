@@ -60,7 +60,7 @@ var defaults = {
 		minifyCSS: false,
 	},
 	instances: {
-		enabled: false,// FIXME: Set this to true if you want to use profiles (you will also need to update units/theme/config.serv.js)
+		enabled: false, // FIXME: Set this to true if you want to use profiles (you will also need to update units/theme/config.serv.js)
 		domain: 'localhost',
 	},
 	mailgun: {
@@ -91,6 +91,10 @@ var defaults = {
 			validateEmail: false, // NOTE: If enabled the user needs to support users.status='unverified-email' in its enum
 			welcomeEmail: true, // Send units/emails/{signup-welcome.email.txt,signup-verify.email.html} depending on validateEmail
 		},
+	},
+	ssl: {
+		enabled: false,
+		port: 443,
 	},
 };
 
