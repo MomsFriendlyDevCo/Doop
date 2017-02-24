@@ -18,7 +18,7 @@ gulp.task('pm2-deploy', ['load:app'], function(finish) {
 	async()
 		// Sub-process config {{{
 		.use(asyncExec)
-		.execDefaults(app.config.execDefaults)
+		.execDefaults(app.config.execDefaults || {stdio: 'inherit'})
 		// }}}
 
 		// External execs required to refresh project {{{
