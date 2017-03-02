@@ -106,6 +106,7 @@ angular
 		* This is an array of strings or RegExps to match against
 		* @var {array}
 		*/
+		var compareSegment = 'hash'; // Which part of $window.location to examine for the below paths. ENUM: hash, pathname
 		var allowedPaths = [
 			'/login', '/logout',
 			'/signup', /^\/validate/i,
@@ -115,9 +116,11 @@ angular
 		$rootScope.$on('$routerStart', function(e, rule) {
 			if (!rule) return; // No route figured out yet
 
+			var segmentValue = '/' + _.trim($window.location[compareSegment], '/#'); // Crop rubbish from beginning + end of segment string
+
 			if (allowedPaths.find(i => // Allowed path - skip redirect
-				(_.isString(i) && _.trimEnd($window.location.pathname, '/') == i) // Match against strings
-				|| (_.isRegExp(i) && i.test($window.location.pathname)) // Match against RegExps
+				(_.isString(i) && segmentValue == i) // Match against strings
+				|| (_.isRegExp(i) && i.test(segmentValue)) // Match against RegExps
 			)) return;
 
 			$session.promise() // Ask session if we are logged in
