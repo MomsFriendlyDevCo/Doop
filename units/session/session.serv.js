@@ -35,6 +35,13 @@ angular
 		};
 
 		/**
+		* Alias of $session.promise
+		* This is maintained for uniformity with $session.promise.admin etc.
+		* @alias $session.promise
+		*/
+		$session.promise.login = $session.promise;
+
+		/**
 		* Similar to $session.promise but only resolves if the user is logged in AND that $session.data.role is equal to role (or any of the items in role if its an array)
 		* @param {string|array} role The role(s) to verify against
 		* @return {Promise} A promise which will resolve if the user is logged in and role matches
