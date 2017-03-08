@@ -21,8 +21,8 @@ angular
 	.controller('GlobalCtrl', function($config, $rootScope, $scope, $session) {
 		var $ctrl = this;
 		// Init user session object/data
-		$ctrl.config = $config;
-		$ctrl.session = $session;
+		$ctrl.$config = $config;
+		$ctrl.$session = $session;
 	})
 	// }}}
 
