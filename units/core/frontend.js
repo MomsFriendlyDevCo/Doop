@@ -3,14 +3,11 @@
  */
 angular
 	.module('app', [
-		/*
-		* External Angular modules
-		*/
 		'angular-bs-confirm',
 		'angular-bs-popover',
 		'angular-bs-tooltip',
-		'angular-ui-loader',
 		'angular-mfdc-router',
+		'angular-ui-loader',
 		'ngAnimate',
 		'ngResource',
 		'ngSanitize',

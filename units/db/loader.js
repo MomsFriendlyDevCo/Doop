@@ -4,11 +4,11 @@
 *
 * @example
 * // Access the database via a dumb module:
-* var db = require(config.paths.root + '/units/db/server/index')(function(db) { // db is now the modules loaded // })
+* var db = require(config.paths.root + '/units/db/loader')(function(db) { // db is now the modules loaded // })
 *
 * @exmaple
 * // Access the database via an emitter
-* require(config.paths.root + '/units/db/server/index')()
+* require(config.paths.root + '/units/db/loader')()
 * 	.on('end', (models) => { // Models is now the modules loaded // });
 */
 

@@ -12,4 +12,4 @@ angular
 			recover: {url: '/api/users/recover', method: 'POST' },
 			recoverAccept: {method: 'POST', url: '/api/users/recoverAccept'},
 		});
-	});
+	})

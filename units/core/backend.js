@@ -1,5 +1,5 @@
 /**
-* Server/App - loads a very basic version of the Doop framework for the backend
+* Loads a very basic version of the Doop framework for the backend
 * This file grantees the following items will exist:
 *
 *	- global.app
