@@ -144,7 +144,7 @@ gulp.on('stop', function() { process.exit(0); });
 /**
 * Loads main app configuration file into `app`
 * This also includes loading `app.config`
-* If you want `app.db` you must also call `load:db`
+* If you want `app.db` you must also call `load:app.db`
 */
 gulp.task('load:app', [], function(finish) {
 	require('./units/core/backend');
