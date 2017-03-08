@@ -27,6 +27,7 @@ build/Release
 .node_repl_history
 
 !.gitkeep
+~$*
 .~lock.*
 .DS_Store
 .idea
@@ -36,3 +37,5 @@ config/private.conf.js
 newrelic_agent.log
 node_modules/
 tmp
+uploads/
+.vscode
