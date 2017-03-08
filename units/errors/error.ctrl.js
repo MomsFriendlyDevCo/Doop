@@ -13,11 +13,15 @@
 */
 angular
 	.module('app')
-	.run($router => $router.when('/error/:type?').component('errorCtrl'))
+	.run($router => $router.when('/error/:type?')
+		.title('Error')
+		.component('errorCtrl')
+	)
 	.component('errorCtrl', {
 		templateUrl: '/units/errors/error.tmpl.html',
 		controller: function($router) {
 			var $ctrl = this;
+
 			$ctrl.types = {
 				'404': {title: '404', message: 'Page not found', allowBack: false},
 			};

@@ -8,7 +8,7 @@ app.register('postServer', function(finish) {
 
 			html: function() {
 				res.status(404).render('units/errors/404', {
-					theme: app.config.title,
+					theme: app.config.theme,
 				});
 			},
 
@@ -28,7 +28,7 @@ app.register('postServer', function(finish) {
 
 			html: function() {
 				res.status(500).render('units/errors/500', {
-					theme: app.config.title,
+					theme: app.config.theme,
 				});
 			},
 
