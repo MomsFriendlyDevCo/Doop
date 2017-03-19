@@ -114,6 +114,7 @@ angular
 			'/login', '/logout',
 			'/signup', /^\/validate/i,
 			'/recover-password', /^\/reset/i,
+			/^\/docs/i,
 		];
 
 		$rootScope.$on('$routerStart', function(e, rule) {
