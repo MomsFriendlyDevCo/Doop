@@ -82,7 +82,7 @@ global.app.register = function(hook, prereqs, callback) {
 global.app.fire = function(hook, callback) {
 	if (!_.has(global.app._registers, hook)) return _.isFunction(callback) ? callback() : null; // Hook never registered - dont bother
 
-	console.log('-', colors.grey('[fire]'), hook);
+	debug('Fire hook', hook);
 
 	// Work out arguments to pass to each task (func args minus first two, named vars)
 	var callbackArgs = Array.prototype.slice.call(arguments, 0);
@@ -236,13 +236,16 @@ async()
 	// Fire 'postServer' {{{
 	.then(next => app.fire('postServer', next))
 	// }}}
+	// Show status messages {{{
+	.then(function(next) {
+		console.log(colors.bold.green('Server boot complete'));
+		console.log('Web interface listening at', colors.cyan(app.config.url));
+		next();
+	})
+	// }}}
+	.then(next => app.fire('postFinish', next))
 	// End {{{
 	.end(function(err) {
-		if (err) {
-			console.log(colors.bold.red('Error loading core framework:'), err.toString());
-		} else {
-			console.log(colors.bold.green('Server boot complete'));
-			console.log('Web interface listening at', colors.cyan(app.config.url));
-		}
+		if (err) return console.log(colors.bold.red('Error loading core framework:'), err.toString());
 	});
 	// }}}
