@@ -1,0 +1,35 @@
+<!-- Header Navbar {{{ -->
+<header id="header" class="clearfix" data-ma-theme="blue">
+	<ul class="h-inner">
+		<li class="hi-trigger sidebar-toggle">
+			<div class="line-wrap">
+				<div class="line top"></div>
+				<div class="line center"></div>
+				<div class="line bottom"></div>
+			</div>
+		</li>
+
+		<li class="hi-logo hidden-xs">
+			<a href="/">{{::$global.config.title}}</a>
+		</li>
+
+		<notifications-header-widget-ctrl></notifications-header-widget-ctrl>
+	</ul>
+</header>
+<!-- }}} -->
+
+<!-- Content area -->
+<section id="main">
+	<aside id="sidebar" class="sidebar">
+		<docs-sidebar></docs-sidebar>
+	</aside>
+
+	<section id="content" class="animated animated-fast">
+		<router-view></router-view>
+	</section>
+</section>
+<!-- }}} -->
+
+<!-- Footer {{{ -->
+<footer id="footer"></footer>
+<!-- }}} -->
