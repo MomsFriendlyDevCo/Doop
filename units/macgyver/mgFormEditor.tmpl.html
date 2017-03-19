@@ -1,0 +1,79 @@
+<!-- Widget Add modal {{{ -->
+<div id="modal-mgFormEditor-add" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal"><i class="fa fa-times"></i></a>
+				<h4 class="modal-title">Add Widget</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<a ng-click="$ctrl.widgetAddSubmit({type: widget.id})" ng-repeat="widget in $ctrl.$macgyver.widgets track by widget.id" class="col-md-4 pad-top-sm">
+						<div class="btn btn-default btn-xlg btn-block text-center">
+							<div><i ng-class="widget.icon" class="fa-4x"></i></div>
+							<div class="pad-top-sm">{{widget.title}}</div>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- }}} -->
+
+<!-- Widget Edit modal {{{ -->
+<div id="modal-mgFormEditor-edit" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal"><i class="fa fa-times"></i></a>
+				<h4 class="modal-title">Edit Widget</h4>
+			</div>
+			<div class="modal-body form-horizontal">
+				<mg-form config="$ctrl.selectedWidgetForm" data="$ctrl.selectedWidgetData"></mg-form>
+			</div>
+			<div class="modal-footer">
+				<div class="pull-left">
+					<a ng-click="$ctrl.widgetDelete()" type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-trash"></i> Delete</a>
+				</div>
+				<div class="pull-right">
+					<a type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-check"></i> Close</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- }}} -->
+
+<!-- Form editing hover mask {{{ -->
+<div class="mgFormEditor-mask-background"></div>
+<div class="mgFormEditor-mask-verbs">
+	<div class="pull-right">
+		<div class="btn-group m-r-5">
+			<a ng-click="$ctrl.widgetAdd('above'); $event.stopPropagation()" class="btn btn-success btn-sm" tooltip="Insert new widget above" tooltip-container="body"><i class="fa fa-fw fa-arrow-up"></i></a>
+			<a ng-click="$ctrl.widgetAdd('below'); $event.stopPropagation()" class="btn btn-success btn-sm" tooltip="Insert new widget below" tooltip-container="body"><i class="fa fa-fw fa-arrow-down"></i></a>
+			<a ng-show="$ctrl.$macgyver.widgets[$ctrl.selectedWidget.type].isContainer" ng-click="$ctrl.widgetAdd('inside'); $event.stopPropagation()" class="btn btn-success btn-sm" tooltip="Insert new widget inside this container" tooltip-container="body"><i class="fa fa-fw fa-indent"></i></a>
+		</div>
+		<a ng-click="$ctrl.widgetDelete(); $event.stopPropagation()" class="btn btn-danger btn-sm" tooltip="Delete this widget" tooltip-container="body"><i class="fa fa-fw fa-trash"></i></a>
+		<a ng-click="$ctrl.widgetToggle('showTitle', true)" class="btn btn-default btn-sm" tooltip="Toggle the title visibility of this element" tooltip-container="body"><i class="fa fa-fw fa-arrows-h"></i></a>
+		<a ng-click="$ctrl.widgetEdit()" class="btn btn-default btn-sm" tooltip="Edit this widget" tooltip-container="body"><i class="fa fa-fw fa-pencil"></i></a>
+	</div>
+</div>
+<!-- }}} -->
+
+<!-- Widget context menu {{{ -->
+<ul id="mgFormEditor-dropdown-widget" class="dropdown-menu">
+	<li><a ng-click="$ctrl.widgetEdit()"><i class="fa fa-fw fa-pencil"></i> Edit</a></li>
+	<li class="dropdown-submenu">
+		<a tabindex="-1"><i class="fa fa-fw fa-plus"></i> Add widget...</a>
+		<ul class="dropdown-menu">
+			<li><a ng-click="$ctrl.widgetAdd('above')"><i class="fa fa-fw fa-arrow-up"></i> Above</a></li>
+			<li><a ng-click="$ctrl.widgetAdd('below')"><i class="fa fa-fw fa-arrow-down"></i> Below</a></li>
+		</ul>
+	</li>
+	<li class="divider"></li>
+	<li><a ng-click="$ctrl.widgetDelete()"><i class="fa fa-fw fa-trash"></i> Delete</a></li>
+</ul>
+<!-- }}} -->
+
+<mg-form config="$ctrl.config" data="$ctrl.data"></mg-form>
