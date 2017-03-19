@@ -117,7 +117,7 @@ angular
 		*/
 		$session.update = function() {
 			// Load session data from db
-			return Users.profile().$promise
+			return Users.profile({t: Date.now()}).$promise
 				.then(res => {
 					$session.data = res;
 
