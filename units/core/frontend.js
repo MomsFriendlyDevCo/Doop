@@ -90,6 +90,12 @@ angular
 	})
 	// }}}
 
+	// Ensure all pages have a trailing slash when using a hashpath (e.g. `http://something#/something` -> `http://something/#/something {{{
+	.run(function($window) {
+		if ($window.location.pathname != '/' && !$window.location.pathname.endsWith('/')) $window.location.pathname += '/';
+	})
+	// }}}
+
 	// If no route matches go to '/' {{{
 	.run(function($router) {
 		$router.rule().priority('lowest').redirect('/');
