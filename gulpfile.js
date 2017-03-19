@@ -75,6 +75,8 @@ global.paths = {
 			'node_modules/node-waves/dist/waves.js',
 			'node_modules/ui-select/dist/select.{css,js}',
 		],
+		docs: [ // Resources used by docs UI
+		],
 	},
 	css: [
 		'units/**/*.css',
