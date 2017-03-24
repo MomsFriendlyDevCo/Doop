@@ -96,6 +96,7 @@ angular
 			$ctrl.selectedWidget; // The currently selected widget (determined by mouseover)
 			$ctrl.selectedWidgetData;
 			$ctrl.selectedWidgetForm;
+			$ctrl.widgetName;
 
 			/**
 			* Begin editing a widget
@@ -104,6 +105,11 @@ angular
 			$ctrl.widgetEdit = function(widget) {
 				var node = widget || TreeTools.find($ctrl.config, {id: $ctrl.selectedWidget.id}, {childNode: 'items'});
 				if (!node) return; // Didn't find anything - do nothing
+
+				//Get Human Readable Name for the edit widget. If error jsut use vanilla display
+				if(node.type && typeof node.type == 'string'){
+					$ctrl.widgetName = ' - '+node.type.replace(/^mg+/i, '').replace(/([A-Z])/g, ' $1').trim()
+				}
 
 				// Select the Angular data element
 				$ctrl.selectedWidgetData = node;
