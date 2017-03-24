@@ -113,7 +113,7 @@ angular
 		var allowedPaths = [
 			'/login', '/logout',
 			'/signup', /^\/validate/i,
-			'/recover-password', /^\/reset/i,
+			'/recover-password', /^\/reset/i, '/login/recover',
 			/^\/docs/i,
 		];
 

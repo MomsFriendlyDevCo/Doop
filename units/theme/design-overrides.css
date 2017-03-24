@@ -250,6 +250,7 @@ table.table td > .btn-group {
 /* Text colors {{{ */
 .text-muted {color: #AAA !important;}
 .text-black {color: #4C4C4C !important;}
+.text-white {color: #FFF !important;}
 /* }}} */
 /* Text Sizes {{{ */
 .text-xs {font-size: 8pt;}
