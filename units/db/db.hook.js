@@ -2,6 +2,7 @@
 * Doop compatible wrapper for the `index.js` script
 * This is so that the index script can be used by dumb processes while this one is Doop framework aware
 */
+var _ = require('lodash');
 var colors = require('chalk');
 
 var databaseLoader = require('./loader');
@@ -17,7 +18,7 @@ app.register('preControllers', function(finish) {
 		})
 		.on('end', models => {
 			app.fire('postModels');
-			console.log('-', colors.grey('[schm]'), Object.keys(models).join(', '));
+			console.log('-', colors.grey('[schm]'), _.keys(models).map(i => colors.cyan(i)).join(', '));
 			app.db = global.db = models; // Setup global shortcut to models
 
 			finish();
