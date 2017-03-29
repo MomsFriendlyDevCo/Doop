@@ -5,13 +5,13 @@
 */
 
 var bytediff = require('gulp-bytediff');
+var cleanCSS = require('gulp-clean-css');
 var colors = require('chalk');
 var concat = require('gulp-concat');
 var gplumber = require('gulp-plumber');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gutil = require('gulp-util');
-var cleanCSS = require('gulp-clean-css');
 var notify = require('gulp-notify');
 var sourcemaps = require('gulp-sourcemaps');
 

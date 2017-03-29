@@ -16,11 +16,11 @@
     "url": "{{FIXME.git.repo}}"
   },
   "dependencies": {
+    "@momsfriendlydevco/angular-bs-tooltip": "^1.1.0",
     "angular": "^1.6.1",
     "angular-animate": "^1.6.0",
     "angular-bs-confirm": "^1.1.0",
     "angular-bs-popover": "^1.0.1",
-    "angular-bs-tooltip": "^1.0.0",
     "angular-gravatar": "^0.4.2",
     "angular-resource": "^1.6.0",
     "angular-sanitize": "^1.6.0",
