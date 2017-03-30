@@ -38,7 +38,7 @@ User
 	})
 	.method('encryptPass', function(salt, password) {
 		var saltBuffer = new Buffer(salt, 'base64');
-		return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64).toString('base64');
+		return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64, 'sha512').toString('base64');
 	})
 	.method('validPassword', function(candidate, next) {
 		return next(null, this.encryptPass(this._passsalt || '', candidate) == this._passhash);
