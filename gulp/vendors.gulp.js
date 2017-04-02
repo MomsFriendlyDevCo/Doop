@@ -137,7 +137,7 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 		})
 		.forEach('includes', function(next, path) {
 			fs.stat(path, function(err, stats) {
-				if (err) return next('Error loading dependency path "' + path + '". Maybe you should specify the file directly with file://PATH - ' + err.toString());
+				if (err) return next('Error loading dependency path "' + path + '" - ' + err.toString());
 				if (stats.isDirectory()) return next('Dependency path "' + path + '" is a directory. This should be a file');
 				next();
 			});
