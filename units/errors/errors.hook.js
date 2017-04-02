@@ -1,3 +1,6 @@
+var colors = require('chalk');
+var logPrinter = require('express-log-url');
+
 app.register('postServer', function(finish) {
 	// Handle 404
 	app.use(function(req, res) {
@@ -20,7 +23,11 @@ app.register('postServer', function(finish) {
 
 	// Handle 500
 	app.use(function(err, req, res, next) {
+		logPrinter(req, res, ()=> {});
+		console.log(colors.grey('--- error trace ---'));
 		console.error(err.stack);
+		console.log(colors.grey('--- end of error ---'));
+
 		res.format({
 			text: function() {
 				res.status(500).send('Something went wrong!');
