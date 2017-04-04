@@ -230,8 +230,18 @@ async()
 	// Fire 'preServer' {{{
 	.then(next => app.fire('preServer', next))
 	// }}}
-	// Load the server and start listening {{{
-	.then(next => global.app.server = app.listen(app.config.port, app.config.host, next))
+	// Attempt to load the app server and start listening {{{
+	.then(function(next) {
+		app.fire('preHTTPServer', function(err) {
+			if (err) {
+				console.log(colors.bold.yellow('Refusing to boot app HTTP server:', err.toString()));
+				return next();
+			}
+
+			// Start HTTP app server
+			global.app.server = app.listen(app.config.port, app.config.host, next);
+		});
+	})
 	// }}}
 	// Fire 'postServer' {{{
 	.then(next => app.fire('postServer', next))

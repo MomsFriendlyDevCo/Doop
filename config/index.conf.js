@@ -112,6 +112,13 @@ var config = _.merge(
 
 // Sanity checks {{{
 
+// Adjust port and url if SSL is enabled {{{
+if (config.ssl.enabled) {
+	config.url = 'https://' + url.parse(config.url).hostname;
+	config.port = config.ssl.port;
+}
+// }}}
+
 // If config.url doesn't contain a port append it {{{
 if (config.port != 80 && url.parse(config.url).port != config.port) {
 	var parsedURL = url.parse(config.url);
