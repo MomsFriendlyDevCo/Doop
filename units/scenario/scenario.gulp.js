@@ -20,7 +20,10 @@ gulp.task('scenario', ['load:app.db'], function(finish) {
 			connection: monoxide.connection,
 			getModels: () => Object.keys(app.db),
 			getCollection: collection => app.db[collection],
-			getCollectionSchema: collection => app.db[collection].$mongooseModel.schema,
+			getCollectionSchema: collection => {
+				if (!app.db[collection]) throw new Error('Scenario failed attempting to populate unknown database collection: ' + collection);
+				return app.db[collection].$mongooseModel.schema;
+			},
 		}))
 		.on('error', function(err) {
 			gutil.log('Error loading scenario'.red, err);
