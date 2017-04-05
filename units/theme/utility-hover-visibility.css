@@ -1,0 +1,25 @@
+/**
+* Utility class to hide an element with the property until the parent row is hovered
+*
+* @example
+* // Button will only become visible when the 'tr' has a hover event
+* <table><tr><td><a class="btn visible-parent-hover">Button!</a></td></tr></table>
+*
+* @example
+* // If there is no table / list-group wrapper a parent can be nominated using the `visible-parent-hover-target` class
+* <div class="visible-parent-hover-target"><div class="visible-parent-hover"></div></div>
+*/
+
+table tr td .visible-parent-hover,
+.list-group .list-group-item .visible-parent-hover,
+.visible-parent-hover-target .visible-parent-hover
+{
+	display: none;
+}
+
+table tr:hover td .visible-parent-hover,
+.list-group .list-group-item:hover .visible-parent-hover,
+.visible-parent-hover-target:hover .visible-parent-hover
+{
+	display: block;
+}
