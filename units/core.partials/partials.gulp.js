@@ -1,5 +1,5 @@
 /**
-* Aggregate app HTML partials (e.g: Angular template files)
+* Aggregate app HTML partials (e.g: Angular template files) into /build/partials.min.js
 */
 
 var ngTemplateCache = require('gulp-angular-templatecache');
