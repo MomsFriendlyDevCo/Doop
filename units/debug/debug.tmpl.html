@@ -10,16 +10,6 @@
 		</div>
 		<div class="col-md-6">
 			<div class="card">
-				<div class="card-header"><h4>$session.data</h4></div>
-				<div class="card-body card-padding">
-					<pre>{{$ctrl.$session.data | json}}</pre>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-6">
-			<div class="card">
 				<div class="card-header"><h4>$loader</h4></div>
 				<div class="list-group">
 					<a class="list-group-item" ng-click="$ctrl.$loader.start('debug1')">$loader.start("debug1")</a>
@@ -28,6 +18,14 @@
 					<a class="list-group-item" ng-click="$ctrl.$loader.stop('debug2')">$loader.stop("debug2")</a>
 					<a class="list-group-item" ng-click="$ctrl.$loader.start('debug3', false)">$loader.start("debug3", false)</a>
 					<a class="list-group-item" ng-click="$ctrl.$loader.stop('debug3')">$loader.stop("debug3")</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header"><h4>$session.data</h4></div>
+				<div class="card-body card-padding">
+					<pre>{{$ctrl.$session.data | json}}</pre>
 				</div>
 			</div>
 		</div>
@@ -76,6 +74,14 @@
 					<a class="list-group-item" ng-click="$ctrl.$tts.say('The quick brown fox jumps over the lazy dog')">$tts.say('The quick brown fox jumps over the lazy dog')</a>
 					<a class="list-group-item" ng-click="$ctrl.$tts.say('The wizard quickly jinxed the gnomes before they vaporized')">$tts.say('The wizard quickly jinxed the gnomes before they vaporized')</a>
 					<a class="list-group-item" ng-click="$ctrl.$tts.say('Five or six big jet planes zoomed quickly by the new tower')">$tts.say('Five or six big jet planes zoomed quickly by the new tower')</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header"><h4>Version info</h4></div>
+				<div class="card-body card-padding">
+					<pre>{{$ctrl.version | json}}</pre>
 				</div>
 			</div>
 		</div>
