@@ -92,7 +92,10 @@ angular
 
 	// Ensure all pages have a trailing slash when using a hashpath (e.g. `http://something#/something` -> `http://something/#/something {{{
 	.run(function($window) {
-		if ($window.location.pathname != '/' && !$window.location.pathname.endsWith('/')) $window.location.pathname += '/';
+		if ($window.location.pathname != '/' && $window.location.hash && !$window.location.pathname.endsWith('/')) {
+			console.log('Redirect due to page not ending in slash');
+			$window.location.pathname += '/';
+		}
 	})
 	// }}}
 
@@ -130,7 +133,10 @@ angular
 			)) return;
 
 			$session.promise() // Ask session if we are logged in
-				.catch(_=> $window.location = '/login') // Not logged in - redirect to /login
+				.catch(_=> { // Not logged in - redirect to /login
+					console.log('Hard redirect as the user is not logged in');
+					$window.location = '/login';
+				})
 		});
 	})
 	// }}}
