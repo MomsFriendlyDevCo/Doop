@@ -1,6 +1,9 @@
 angular
 	.module('app')
-	.run($router => $router.when('/signup').title('Signup').component('sessionSignupCtrl'))
+	.run($router => $router.when('/signup')
+		.title('Signup')
+		.component('sessionSignupCtrl')
+	)
 	.component('sessionSignupCtrl', {
 		templateUrl: '/units/session/signup.tmpl.html',
 		controller: function($config, $location, $session) {

@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var async = require('async-chainable');
 
 /**
 * API for active user profile data
@@ -39,9 +40,7 @@ app.post('/api/session/profile', app.middleware.ensure.login, function(req, res)
 		.then(function(next) {
 			if (!_.isObject(req.user.settings)) req.user.settings = {};
 			_.merge(req.user, _.pick(req.body, ['settings']));
-			req.user.save({
-				$data: {user: req.user._id},
-			}, next);
+			req.user.save(next);
 		})
 		// }}}
 		// End {{{
