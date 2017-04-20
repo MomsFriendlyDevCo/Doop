@@ -220,6 +220,7 @@ angular
 						if (fx.prop == 'animateOffsetY')
 							pageArea.css('transform', 'translateY(' + Math.floor(offsetY - val) + 'px)');
 					},
+					complete: ()=> pageArea.css({transform: '', opacity: ''}), // Remove mutated properties when we're done with them
 				});
 		});
 	})
@@ -232,5 +233,8 @@ angular
 	.config(function(uiSelectConfig) {
 		uiSelectConfig.theme = 'selectize';
 	})
+	// }}}
+	// Remove bootstraping body class now everything is ready {{{
+	.run($timeout => $timeout(()=> $('body').removeClass('bootstraping')))
 	// }}}
 	// }}}
