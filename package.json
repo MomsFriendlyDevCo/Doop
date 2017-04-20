@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@momsfriendlydevco/angular-bs-tooltip": "^1.2.3",
-    "@momsfriendlydevco/router": "^1.0.0",
+    "@momsfriendlydevco/router": "^1.0.1",
     "angular": "^1.6.3",
     "angular-animate": "^1.6.3",
     "angular-bs-confirm": "^1.1.1",

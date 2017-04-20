@@ -201,11 +201,26 @@ angular
 	// }}}
 
 	// Page load animation {{{
-	.run(function($animate, $rootScope) {
-		$rootScope.$on('$routerStart', _=> {
-			var pageArea = angular.element('#content');
-			$animate.addClass(pageArea, 'fadeInUp')
-				.then(_=> $animate.removeClass(pageArea, 'fadeInUp'));
+	.run(function($rootScope, $timeout) {
+		var offsetY = 150; // Max Y offset when transitioning the page animation
+
+		$rootScope.$on('$routerStart', ()=> angular.element('#content').css('opacity', 0));
+		$rootScope.$on('$routerSuccess', ()=> {
+			var pageArea = angular.element('#content')
+
+			pageArea
+				.css('animateOffsetY', 0)
+				.animate({
+					opacity: 1,
+					animateOffsetY: offsetY,
+				}, {
+					duration: 500,
+					easing: 'swing',
+					step: (val, fx) => {
+						if (fx.prop == 'animateOffsetY')
+							pageArea.css('transform', 'translateY(' + Math.floor(offsetY - val) + 'px)');
+					},
+				});
 		});
 	})
 	// }}}
