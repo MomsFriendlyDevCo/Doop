@@ -1,6 +1,9 @@
 angular
 	.module('app')
-	.run($router => $router.when('/login/recover/:token').title('Recover Password').component('sessionRecoverAcceptCtrl'))
+	.run($router => $router.when('/login/recover/:token')
+		.title('Recover Password')
+		.component('sessionRecoverAcceptCtrl')
+	)
 	.component('sessionRecoverAcceptCtrl', {
 		templateUrl: '/units/session/recoverAccept.tmpl.html',
 		controller: function($scope, $location, $router, $toast, Users) {

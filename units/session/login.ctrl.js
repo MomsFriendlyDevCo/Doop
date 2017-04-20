@@ -1,10 +1,14 @@
 angular
 	.module('app')
-	.run($router => $router.when('/login').title('Login').component('sessionLoginCtrl'))
+	.run($router => $router.when('/login')
+		.title('Login')
+		.component('sessionLoginCtrl')
+	)
 	.component('sessionLoginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
-		controller: function($animate, $rootScope, $session) {
+		controller: function($animate, $config, $rootScope, $session) {
 			var $ctrl = this;
+			$ctrl.$config = $config;
 
 			$ctrl.user = {
 				username: '',

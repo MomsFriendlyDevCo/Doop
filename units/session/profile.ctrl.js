@@ -1,6 +1,10 @@
 angular
 	.module('app')
-	.run($router => $router.when('/profile').title('Profile').component('sessionProfileCtrl'))
+	.run(($router, $session) => $router.when('/profile')
+		.title('Profile')
+		.requires($session.promise.login)
+		.component('sessionProfileCtrl')
+	)
 	.component('sessionProfileCtrl', {
 		templateUrl: '/units/session/profile.tmpl.html',
 		controller: function($scope, $location, $loader, $session, $timeout, $toast, Users) {
