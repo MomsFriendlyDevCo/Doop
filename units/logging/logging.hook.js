@@ -16,7 +16,7 @@ app.register('preControllers', function(finish) {
 		* @param {string} err The error to report
 		* @return {undefined} This function is fatal to express as it closes the outbound connection when it completes
 		*/
-		res.error = function(err) {
+		res.sendError = function(err) {
 			res.errorBody = err;
 			res.status(400).send(err).end();
 		};
