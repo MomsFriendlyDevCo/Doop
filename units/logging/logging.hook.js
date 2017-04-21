@@ -1,13 +1,13 @@
 /**
 * Error reporting hook
 * This module will add logging to express via the `express-log-url` NPM
-* It will also add the `res.error()` function which raises a 400, outputs text and also sets the res.errorBody header for debugging
+* It will also add the `res.sendError()` function which raises a 400, outputs text and also sets the res.errorBody header for debugging
 */
 
 app.register('preControllers', function(finish) {
 	app.use(require('express-log-url'));
 
-	// Extend the Res object so it contains the new res.error() reporting function
+	// Extend the Res object so it contains the new res.sendError() reporting function
 	app.use(function(req, res, next) {
 
 		/**
