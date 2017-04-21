@@ -20,6 +20,7 @@ var glob = require('glob');
 
 // Globals {{{
 global.app = express();
+app.isServer = true;
 app.config = require('./config/index.conf');
 app.middleware = {};
 // }}}

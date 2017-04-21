@@ -40,17 +40,17 @@ requestCaches.runConditional =  function(type, query, freshCallback, callback) {
 		.set('existingrequestCaches', false)
 		.then('callbackResponse', function(next) {
 			if (this.requestCaches && new Date() > this.requestCaches.expires) {
-				console.log(colors.blue('[requestCaches]'), 'cache for query', colors.cyan(this.hash), colors.grey('(' + type + ')'), 'has expired - making fresh request');
+				if (app.isServer) console.log(colors.blue('[requestCaches]'), 'cache for query', colors.cyan(this.hash), colors.grey('(' + type + ')'), 'has expired - making fresh request');
 				this.requestCaches.delete(function(err) { // Delete the existing record before continuing
 					if (err) return next(err);
 					freshCallback(next);
 				});
 			} else if (this.requestCaches) {
-				console.log(colors.blue('[requestCaches]'), 'using cached response for query', colors.cyan(this.hash), colors.grey('(' + type + ')'));
+				if (app.isServer) console.log(colors.blue('[requestCaches]'), 'using cached response for query', colors.cyan(this.hash), colors.grey('(' + type + ')'));
 				this.existingrequestCaches = true;
 				next(null, this.requestCaches.response);
 			} else {
-				console.log(colors.blue('[requestCaches]'), 'making fresh request for query', colors.cyan(this.hash), colors.grey('(' + type + ')'));
+				if (app.isServer) console.log(colors.blue('[requestCaches]'), 'making fresh request for query', colors.cyan(this.hash), colors.grey('(' + type + ')'));
 				freshCallback(next);
 			}
 		})
@@ -58,6 +58,7 @@ requestCaches.runConditional =  function(type, query, freshCallback, callback) {
 		// Store the new respnse {{{
 		.then(function(next) {
 			if (this.existingrequestCaches) return next(); // Used existing requestCaches - no need to create a new one
+
 			db.requestCaches.create({
 				$refetch: false,
 				hash: this.hash,
@@ -70,7 +71,7 @@ requestCaches.runConditional =  function(type, query, freshCallback, callback) {
 		.end(function(err) {
 			if (err) return callback(err);
 			callback(null, this.callbackResponse);
-		})
+		});
 		// }}}
 };
 
