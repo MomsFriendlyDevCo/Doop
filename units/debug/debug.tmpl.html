@@ -1,9 +1,9 @@
 <div class="container">
-	<div class="row pad-top-lg">
+	<div class="row">
 		<div class="col-md-6">
 			<div class="panel panel-default">
 				<div class="panel-heading"><h4>$config</h4></div>
-				<div class="panel-body panel panel-default-padding">
+				<div class="panel-body">
 					<pre>{{$ctrl.$config | json}}</pre>
 				</div>
 			</div>
@@ -18,6 +18,14 @@
 					<a class="list-group-item" ng-click="$ctrl.$loader.stop('debug2')">$loader.stop("debug2")</a>
 					<a class="list-group-item" ng-click="$ctrl.$loader.start('debug3', false)">$loader.start("debug3", false)</a>
 					<a class="list-group-item" ng-click="$ctrl.$loader.stop('debug3')">$loader.stop("debug3")</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="panel panel-default">
+				<div class="panel-heading"><h4>$screen</h4></div>
+				<div class="panel-body">
+					<pre>{{$ctrl.$screen | json}}</pre>
 				</div>
 			</div>
 		</div>
