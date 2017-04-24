@@ -3,12 +3,13 @@ angular
 	.run($router => $router.when('/debug').title('Debug').component('debugCtrl'))
 	.component('debugCtrl', {
 		templateUrl: '/units/debug/debug.tmpl.html',
-		controller: function($config, $loader, $http, $q, $router, $session, $scope, $toast, $tts, AssetTrees) {
+		controller: function($config, $loader, $http, $q, $router, $session, $scope, $screen, $toast, $tts) {
 			var $ctrl = this;
 			$ctrl.$config = $config;
 			$ctrl.$loader = $loader;
 			$ctrl.$router = $router;
 			$ctrl.$session = $session;
+			$ctrl.$screen = $screen;
 			$ctrl.$toast = $toast;
 			$ctrl.$tts = $tts;
 
