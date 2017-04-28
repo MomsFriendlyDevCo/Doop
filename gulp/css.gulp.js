@@ -44,7 +44,7 @@ gulp.task('css', ['load:app'], function() {
 		.pipe(bytediff.stop(common.bytediffFormatter))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
-			if (!hasErr)
+			if (!hasErr && app.config.gulp.notifications)
 				notify({
 					title: app.config.title + ' - CSS',
 					message: 'Rebuilt frontend CSS' + (++cssBootCount > 1 ? ' #' + cssBootCount : ''),

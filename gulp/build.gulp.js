@@ -32,10 +32,11 @@ gulp.task('build', function(finish) {
 * Notifies completion of build task, used for serial processing of build-related tasks
 */
 gulp.task('build:complete', function(finish) {
-	gulp.src('').pipe(notify({
-		onLast: true,
-		message: 'Deployed code!'
-	}));
+	if (app.config.gulp.notifications)
+		gulp.src('').pipe(notify({
+			onLast: true,
+			message: 'Deployed code!'
+		}));
 
 	finish();
 });

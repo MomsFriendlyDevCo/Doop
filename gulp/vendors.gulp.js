@@ -107,11 +107,12 @@ gulp.task('vendors-core', ['load:app'], function(finish) {
 			gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'core vendor JS scripts');
 			gutil.log('Compiled', gutil.colors.cyan(this.css.length), 'core vendor CSS files');
 
-			notify({
-				title: app.config.title + ' - Core vendors',
-				message: 'Rebuilt ' + (this.js.length + this.css.length) + ' core vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
-				icon: __dirname + '/icons/html5.png',
-			}).write(0);
+			if (app.config.gulp.notifications)
+				notify({
+					title: app.config.title + ' - Core vendors',
+					message: 'Rebuilt ' + (this.js.length + this.css.length) + ' core vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
+					icon: __dirname + '/icons/html5.png',
+				}).write(0);
 
 			finish();
 		});
@@ -170,11 +171,12 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 			gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'main vendor JS scripts');
 			gutil.log('Compiled', gutil.colors.cyan(this.css.length), 'main vendor CSS files');
 
-			notify({
-				title: app.config.title + ' - Main vendors',
-				message: 'Rebuilt ' + (this.js.length + this.css.length) + ' vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
-				icon: __dirname + '/icons/html5.png',
-			}).write(0);
+			if (app.config.gulp.notifications)
+				notify({
+					title: app.config.title + ' - Main vendors',
+					message: 'Rebuilt ' + (this.js.length + this.css.length) + ' vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
+					icon: __dirname + '/icons/html5.png',
+				}).write(0);
 
 			finish();
 		});

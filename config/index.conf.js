@@ -54,6 +54,7 @@ var defaults = {
 		signoff: 'Doop',
 	},
 	gulp: {
+		notifications: true,
 		debugJS: true,
 		minifyJS: false,
 		debugCSS: true,
