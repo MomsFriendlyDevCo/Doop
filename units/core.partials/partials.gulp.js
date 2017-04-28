@@ -23,7 +23,7 @@ gulp.task('partials', ['load:app'], function() {
 				notify({
 					title: app.config.title + ' - Partials',
 					message: 'Rebuilt angular template cache ' + (++templateBootCount > 1 ? ' #' + templateBootCount : ''),
-					icon: __dirname + '/icons/angular.png',
+					icon: app.config.paths.root + '/gulp/icons/angular.png',
 				}).write(0);
 		});
 });
