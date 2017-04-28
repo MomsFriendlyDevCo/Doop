@@ -60,7 +60,7 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(bytediff.stop(common.bytediffFormatter))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
-			if (!hasErr)
+			if (!hasErr && app.config.gulp.notifications)
 				notify({
 					title: app.config.title + ' - Scripts',
 					message: 'Rebuilt frontend scripts' + (++scriptBootCount > 1 ? ' #' + scriptBootCount : ''),

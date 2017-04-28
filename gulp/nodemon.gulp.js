@@ -37,19 +37,21 @@ gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 		})
 			.on('start', function() {
 				if (runCount > 0) return;
-				notify({
-					title: app.config.title + ' - Nodemon',
-					message: 'Server started',
-					icon: __dirname + '/icons/node.png',
-				}).write(0);
+				if (app.config.gulp.notifications)
+					notify({
+						title: app.config.title + ' - Nodemon',
+						message: 'Server started',
+						icon: __dirname + '/icons/node.png',
+					}).write(0);
 			})
 			.on('restart', function() {
 				runCount++;
-				notify({
-					title: app.config.title + ' - Nodemon',
-					message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
-					icon: __dirname + '/icons/nodemon.png',
-				}).write(0);
+				if (app.config.gulp.notifications)
+					notify({
+						title: app.config.title + ' - Nodemon',
+						message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
+						icon: __dirname + '/icons/nodemon.png',
+					}).write(0);
 			});
 
 		// Install secondary watches
