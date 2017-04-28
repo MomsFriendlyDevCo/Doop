@@ -58,13 +58,13 @@ global.paths = {
 			// NOTE: Don't need main bootstrap.css as the theme provides this
 			'node_modules/bootstrap/dist/js/bootstrap.js',
 			// --- less important vendors below this line (alphabetical) --- //
-			'node_modules/animate.css/animate.css',
+			'node_modules/@momsfriendlydevco/animate/dist/animate.css',
+			'node_modules/@momsfriendlydevco/angular-bs-tooltip/dist/angular-bs-tooltip.js',
+			'node_modules/@momsfriendlydevco/router/dist/angular-mfdc-router.js',
 			'node_modules/angular-animate/angular-animate.js',
 			'node_modules/angular-bs-confirm/angular-bs-confirm.js',
 			'node_modules/angular-bs-popover/angular-bs-popover.js',
-			'node_modules/angular-bs-tooltip/angular-bs-tooltip.js',
 			'node_modules/angular-gravatar/build/angular-gravatar.js',
-			'node_modules/mfdc-router/dist/angular-mfdc-router.js',
 			'node_modules/angular-resource/angular-resource.js',
 			'node_modules/angular-sanitize/angular-sanitize.js',
 			'node_modules/angular-ui-loader/dist/ng-loader.js',
