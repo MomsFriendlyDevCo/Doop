@@ -1,26 +1,15 @@
 /**
-* WARNING
-* This unit is only a proof of concept and has not yet had adequate testing in the wild
-* Remove this note when its verified as working
+* DOOP SSL Unit
+* Follow the instructions in README.md to set up
 *
-* @date 2017-03-29
-* @author Matt Carter <m@ttcarter.com>, Jake Skoric <jake@mfdc.biz>
-*/
-
-/**
-* Doop unit to setup an SSL listener
 * If this module is not disabled (by setting app.config.ssl.enabled=false) it will raise an error with instructions on how to init the certificate command
 *
 * Required Files:
 * 1. SSL Certificate file in `units/ssl/cert/fullchain.pem`
 * 2. Private key file in `units/ssl/cert/privkey.pem`
 *
-* As the above files are generally unique to the server, they should NOT be comitted to the VCS (Git)
-* 
-* Install:
-* 1. Install letsencrypt `sudo apt-get install letsencrypt`
-* 2. Setup the certificate - `sudo letsencrypt certonly --webroot -w ./units/ssl/cert -d <DOMAIN>`
-*
+* @date 2017-03-29
+* @author Matt Carter <m@ttcarter.com>, Jake Skoric <jake@mfdc.biz>
 */
 
 var async = require('async-chainable');
