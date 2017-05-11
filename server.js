@@ -254,7 +254,9 @@ async()
 		next();
 	})
 	// }}}
+	// Fire 'postFinish' {{{
 	.then(next => app.fire('postFinish', next))
+	// }}}
 	// End {{{
 	.end(function(err) {
 		if (err) return console.log(colors.bold.red('Error loading core framework:'), err.toString());

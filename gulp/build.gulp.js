@@ -34,6 +34,7 @@ gulp.task('build', function(finish) {
 gulp.task('build:complete', function(finish) {
 	if (app.config.gulp.notifications)
 		gulp.src('').pipe(notify({
+			title: app.config.title,
 			onLast: true,
 			message: 'Deployed code!'
 		}));
