@@ -95,6 +95,7 @@ var defaults = {
 	},
 	ssl: {
 		enabled: false,
+		redirect: false,
 		port: 443,
 	},
 };
