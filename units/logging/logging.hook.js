@@ -13,12 +13,17 @@ app.register('preControllers', function(finish) {
 		/**
 		* Report an error
 		* This is really just a convenience function to set all the weird headers in the event of an error
+		* @param {number} [code=400] Optional error code to use
 		* @param {string} err The error to report
 		* @return {undefined} This function is fatal to express as it closes the outbound connection when it completes
 		*/
-		res.sendError = function(err) {
+		res.sendError = function(code, err) {
 			res.errorBody = err;
-			res.status(400).send(err).end();
+			if (isFinite(code)) {
+				res.status(code).send(err).end();
+			} else {
+				res.status(400).send(code).end();
+			}
 		};
 
 		next();
