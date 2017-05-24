@@ -38,7 +38,7 @@ angular
 		*	.catch($toast.catch)
 		*/
 		$toast.catch = function(obj) {
-			throw obj;
+			console.warn('Promise chain threw error:', obj);
 			if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
 
 			$toast.error(
