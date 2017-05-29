@@ -234,7 +234,48 @@ angular
 		uiSelectConfig.theme = 'selectize';
 	})
 	// }}}
+
+	// Select any [autofocus] within a model after its finished animating {{{
+	.run(()=> $(document).on('shown.bs.modal', ()=> $('.modal.in .modal-body [autofocus]').focus()))
+	// }}}
+
+	// Modals matching `.modal.in .modal-body table > tbody > tr` should move focus with up/down keys {{{
+	// Any model with a table in its `modal-body` will move focus when the up/down arrow keys are pressed - this makes navigating lists in modals a little easier
+	.run(()=> {
+		$(document, '.modal').keydown(e => {
+			if (
+				!$('body').hasClass('modal-open') || // No model open
+				(e.which != 38 && e.which != 40) || // Not up / down
+				!$('.modal.in .modal-body > table').length // No table to select things from
+			) return;
+			e.preventDefault();
+
+			var scrollTable = $('.modal.in .modal-body > table');
+
+			var focusRow = scrollTable.find('tr:focus');
+
+			if (!focusRow.length) { // No focus - select first item
+				scrollTable.find('tbody').find('tr').first().focus();
+			} else if (e.which == 38) { // Existing focus - Move up
+				focusRow.prev().focus();
+			} else if (e.which == 40) { // Existing focus - Move down
+				focusRow.next().focus();
+			}
+		});
+	})
+	// }}}
+
+	// Date Dropdown {{{
+	// Configure Angualr Materials Date Dropdown {{{
+	.config(function($mdDateLocaleProvider) {
+		$mdDateLocaleProvider.formatDate = function(date) {
+			return moment(date).format('YYYY-MM-DD');
+		};
+	})
+	// }}}
+
 	// Remove bootstraping body class now everything is ready {{{
 	.run($timeout => $timeout(()=> $('body').removeClass('bootstraping')))
+	// }}}
 	// }}}
 	// }}}
