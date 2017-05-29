@@ -144,23 +144,23 @@ angular
 	// Add helper classes to the body element when were routing {{{
 	.run(function($rootScope, $timeout) {
 		// add .router-routing class to body when routing and remove it 1s after we have finished loading (i.e. everything has settled)
-		$rootScope.$on('$routerStart', _=> angular.element('body').addClass('router-routing'))
-		$rootScope.$on('$routerSuccess', _=> $timeout(_=> angular.element('body').removeClass('router-routing'), 1000));
-		$rootScope.$on('$routerError', _=> $timeout(_=> angular.element('body').removeClass('router-routing'), 1000));
+		$rootScope.$on('$routerStart', ()=> angular.element('body').addClass('router-routing'))
+		$rootScope.$on('$routerSuccess', ()=> $timeout(()=> angular.element('body').removeClass('router-routing'), 1000));
+		$rootScope.$on('$routerError', ()=> $timeout(()=> angular.element('body').removeClass('router-routing'), 1000));
 	})
 	// }}}
 
 	// Animate the page loader while navigating {{{
 	.run(function($loader, $rootScope) {
-		$rootScope.$on('$routerStart', _=> $loader.clear().start('routerNav'));
-		$rootScope.$on('$routerSuccess', _=> $loader.stop('routerNav'));
-		$rootScope.$on('$routerError', _=> $loader.stop('routerNav'));
+		$rootScope.$on('$routerStart', ()=> $loader.clear().start('routerNav'));
+		$rootScope.$on('$routerSuccess', ()=> $loader.stop('routerNav'));
+		$rootScope.$on('$routerError', ()=> $loader.stop('routerNav'));
 	})
 	// }}}
 
 	// Cleanup Bootstrap elements on navigation {{{
 	.run(function($rootScope) {
-		$rootScope.$on('$routerStart', _=> {
+		$rootScope.$on('$routerStart', ()=> {
 			// Destory any open Bootstrap modals
 			$('body > .modal-backdrop').remove();
 
@@ -175,13 +175,13 @@ angular
 
 	// Focus any input element post-navigation {{{
 	.run(function($rootScope) {
-		$rootScope.$on('$routerSuccess', _=> $('div[ui-view=main]').find('input[autofocus]').focus());
+		$rootScope.$on('$routerSuccess', ()=> $('div[ui-view=main]').find('input[autofocus]').focus());
 	})
 	// }}}
 
 	// Reattach 'waves' effect on every router reload {{{
 	.run(function($rootScope) {
-		$rootScope.$on('$routerSuccess', _=> {
+		$rootScope.$on('$routerSuccess', ()=> {
 			// NOTE: All the below attachment rules assumes `waves-effect` is applied anyway
 			$('.btn').addClass('waves-effect');
 			$('.btn-circle').addClass('waves-circle');
