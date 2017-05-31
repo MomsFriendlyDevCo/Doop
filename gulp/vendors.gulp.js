@@ -11,6 +11,7 @@ var async = require('async-chainable');
 var braceExpansion = require('brace-expansion');
 var cache = require('gulp-cache');
 var cleanCSS = require('gulp-clean-css');
+var colors = require('chalk');
 var concat = require('gulp-concat');
 var fs = require('fs');
 var fspath = require('path');
@@ -138,7 +139,7 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 		})
 		.forEach('includes', function(next, path) {
 			fs.stat(path, function(err, stats) {
-				if (err) return next('Error loading dependency path "' + path + '" - ' + err.toString());
+				if (err) return next('Cannot load vendor dependency - ' + path);
 				if (stats.isDirectory()) return next('Dependency path "' + path + '" is a directory. This should be a file');
 				next();
 			});
@@ -167,16 +168,19 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 			},
 		})
 		.end(function(err) {
-			if (err) return finish(err);
-			gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'main vendor JS scripts');
-			gutil.log('Compiled', gutil.colors.cyan(this.css.length), 'main vendor CSS files');
+			if (err) {
+				gutil.log(colors.red('ERROR'), err.toString());
+			} else {
+				gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'main vendor JS scripts');
+				gutil.log('Compiled', gutil.colors.cyan(this.css.length), 'main vendor CSS files');
 
-			if (app.config.gulp.notifications)
-				notify({
-					title: app.config.title + ' - Main vendors',
-					message: 'Rebuilt ' + (this.js.length + this.css.length) + ' vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
-					icon: __dirname + '/icons/html5.png',
-				}).write(0);
+				if (app.config.gulp.notifications)
+					notify({
+						title: app.config.title + ' - Main vendors',
+						message: 'Rebuilt ' + (this.js.length + this.css.length) + ' vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
+						icon: __dirname + '/icons/html5.png',
+					}).write(0);
+			}
 
 			finish();
 		});
