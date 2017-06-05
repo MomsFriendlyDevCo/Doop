@@ -4,6 +4,8 @@
 * This function will take any data structure and flatten all complex pointer objects (containing a `_id` key) into only the value of the ID key
 *
 * @param {*} i The item to remove OIDs from and clone
+* @param {Object} [options] Additional options to pass
+* @param {boolean} [optons.ignoreRoot=true] Ignore the first level of the first object passed (i.e. if being given an object don't flatten it into a string, but flatten its children)
 * @return {*} A deep-clone of the originally provided object
 * @author Matt Carter <m@ttcarter.com>
 * @date 2017-05-30
@@ -25,5 +27,15 @@ angular.module('app')
 		}
 	};
 
-	return item => _.cloneWith(item, cloner);
+	return function(item, options) {
+		var settings = _.defaults(options, {
+			ignoreTopMost: true,
+		});
+
+		if (settings.ignoreTopMost && _.isObject(item)) {
+			return _.cloneWith(_.omit(item, '_id'));
+		} else {
+			return _.cloneWith(item);
+		}
+	};
 });
