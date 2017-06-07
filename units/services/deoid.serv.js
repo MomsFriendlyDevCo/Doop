@@ -15,13 +15,20 @@
 */
 angular.module('app')
 .service('$deoid', function() {
+	var isUsable = (v, k) =>
+		(typeof k == 'string' && k.charAt(0) != '$') &&
+		typeof v != 'function'; // Value is not a function
+
 	var cloner = i => {
 		if (_.isArray(i)) {
 			return i.map(x => cloner(x));
 		} else if (_.isObject(i) && !_.isUndefined(i._id)) {
 			return _.clone(i._id);
 		} else if (_.isObject(i)) {
-			return _.mapValues(i, v => cloner(v));
+			return _(i)
+				.pickBy(isUsable)
+				.mapValues(v => cloner(v))
+				.value();
 		} else {
 			return _.clone(i);
 		}
@@ -32,10 +39,10 @@ angular.module('app')
 			ignoreTopMost: true,
 		});
 
-		if (settings.ignoreTopMost && _.isObject(item)) {
-			return _.cloneWith(_.omit(item, '_id'));
+		if (settings.ignoreTopMost && (!_.isArray(item) && _.isObject(item))) {
+			return _.cloneWith(_.omit(item, '_id'), cloner);
 		} else {
-			return _.cloneWith(item);
+			return _.cloneWith(item, cloner);
 		}
 	};
 });
