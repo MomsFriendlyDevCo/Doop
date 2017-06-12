@@ -12,7 +12,7 @@ angular
 			$ctrl.$router = $router;
 
 			// Jump to the right object ID if the $router.params.section changes
-			$scope.$watch(_=> $router.params.section, function() {
+			$scope.$watch(()=> $router.params.section, function() {
 				if ($router.params.section) $(document).scrollTop($('#' + $router.params.section.replace(/[^a-z0-9-]+/g, '_')).position().top - 100);
 			});
 
@@ -58,7 +58,7 @@ angular
 				var elem = angular.element('.animate-element');
 
 				$animate.addClass(elem, effect)
-					.then(_=> $animate.removeClass(elem, effect)) // Remove class again when we're done
+					.then(()=> $animate.removeClass(elem, effect)) // Remove class again when we're done
 			};
 		},
 	});

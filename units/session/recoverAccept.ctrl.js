@@ -26,8 +26,8 @@ angular
 					$ctrl.error = 'Your passwords do not match';
 				} else {
 					Users.recoverAccept(_.merge({}, $ctrl.user, {token: $router.params.token})).$promise
-						.then(_=> $toast.success('Your password has been saved'))
-						.then(_=> $location.path('/login'))
+						.then(()=> $toast.success('Your password has been saved'))
+						.then(()=> $location.path('/login'))
 						.catch($toast.catch)
 				}
 			};

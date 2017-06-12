@@ -7,7 +7,7 @@ var sha1 = require('sha1');
 
 var requestCaches = module.exports = monoxide.schema('requestCaches', {
 	created: {type: Date, default: Date.now},
-	expires: {type: Date, default: _=> moment().add(2, 'days').toDate()},
+	expires: {type: Date, default: ()=> moment().add(2, 'days').toDate()},
 	type: {type: 'string', index: true},
 	hash: {type: 'string', index: {unique: true}},
 	response: {type: 'mixed'},

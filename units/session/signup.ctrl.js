@@ -34,7 +34,7 @@ angular
 					$ctrl.password = 'A password is required';
 				} else {
 					$session.signup($ctrl.user)
-						.then(_=> {
+						.then(()=> {
 							if ($config.session.signup.loginImmediate) {
 								debugger;
 								return $session.login({

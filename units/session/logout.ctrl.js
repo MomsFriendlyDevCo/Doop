@@ -11,7 +11,7 @@ angular
 
 			$timeout(function() { // Wait a second for everything to settle then logout
 				$session.logout()
-					.then(_=> $location.redirect('/'));
+					.then(()=> $location.redirect('/'));
 			}, 1000);
 		},
 	});
