@@ -19,8 +19,8 @@ angular
 				Users.invite({
 					emails: $ctrl.user.email.split(/[\s\n,]+/),
 				}).$promise
-					.then(_=> $loader.stop($scope.$id))
-					.then(_=> $toast.success('Invites sent'))
+					.then(()=> $loader.stop($scope.$id))
+					.then(()=> $toast.success('Invites sent'))
 					.then(data => $location.path('/users'))
 					.catch(res => $ctrl.error = res.data.error);
 			};

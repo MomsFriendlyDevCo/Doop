@@ -34,8 +34,8 @@ angular
 			$ctrl.save = function() {
 				$loader.start($scope.$id);
 				Users.save({id: $router.params.id}, $ctrl.user).$promise
-					.then(_=> $toast.success('User details saved'))
-					.then(_=> $location.path('/users'))
+					.then(()=> $toast.success('User details saved'))
+					.then(()=> $location.path('/users'))
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
 			};
@@ -43,7 +43,7 @@ angular
 
 			// Password functionality {{{
 			$ctrl.passwordUnlock = false;
-			$ctrl.togglePasswordUnlock = _=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
+			$ctrl.togglePasswordUnlock = ()=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
 			$ctrl.passwordGenerate = function() {
 				$ctrl.passwordUnlock = true;
 				$ctrl.user.password =
@@ -53,7 +53,7 @@ angular
 
 			$ctrl.sendResetEmail = function() {
 				Users.recover({email: $ctrl.user.email}).$promise
-					.then(_=> $toast.success('Password reset email sent to ' + $ctrl.user.email))
+					.then(()=> $toast.success('Password reset email sent to ' + $ctrl.user.email))
 					.catch($toast.catch);
 			};
 			// }}}

@@ -26,7 +26,7 @@ angular
 						$ctrl.error = _.get(err, 'data.error') || err.error || err || 'Could not login!';
 
 						$animate.addClass(angular.element('.lcb-form'), 'shake')
-							.then(_=> $animate.removeClass(angular.element('.lcb-form'), 'shake'))
+							.then(()=> $animate.removeClass(angular.element('.lcb-form'), 'shake'))
 					});
 			};
 		},

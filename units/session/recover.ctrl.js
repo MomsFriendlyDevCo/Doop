@@ -15,8 +15,8 @@ angular
 				if (!isValid) return;
 
 				$session.recover(this.user.email)
-					.then(_=> $toast.success('Password recovery email sent'))
-					.then(_=> $location.path('/login'))
+					.then(()=> $toast.success('Password recovery email sent'))
+					.then(()=> $location.path('/login'))
 					.catch($toast.catch)
 			};
 		},

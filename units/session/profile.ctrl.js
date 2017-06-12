@@ -38,9 +38,9 @@ angular
 
 					$loader.start($scope.$id);
 					Users.save({id: $session.data._id}, $ctrl.user).$promise
-						.then(_=> $toast.success('Profile saved'))
-						.then(_=> $location.path('/'))
-						.then(_=> $session.update())
+						.then(()=> $toast.success('Profile saved'))
+						.then(()=> $location.path('/'))
+						.then(()=> $session.update())
 						.catch($toast.catch)
 						.finally(() => $loader.stop($scope.$id));
 				}
@@ -49,7 +49,7 @@ angular
 
 			// Password setting {{{
 			$ctrl.passwordUnlock = false;
-			$ctrl.togglePasswordUnlock = _=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
+			$ctrl.togglePasswordUnlock = ()=> $ctrl.passwordUnlock = !$ctrl.passwordUnlock;
 			// }}}
 
 			$scope.$evalAsync($ctrl.refresh);

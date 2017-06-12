@@ -26,7 +26,7 @@ angular
 					$ctrl.error = 'Your passwords do not match';
 				} else {
 					Users.inviteAccept(_.merge({}, $ctrl.user, {token: $router.params.token})).$promise
-						.then(_=> $window.location = '/')
+						.then(()=> $window.location = '/')
 						.catch($toast.catch)
 				}
 			};

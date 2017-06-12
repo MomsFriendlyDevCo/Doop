@@ -37,7 +37,7 @@ angular
 			};
 			// }}}
 
-			$scope.$watch(_=> $router.query, $ctrl.refresh, true);
+			$scope.$watch(()=> $router.query, $ctrl.refresh, true);
 			$scope.$evalAsync($ctrl.refresh);
 		},
 	});

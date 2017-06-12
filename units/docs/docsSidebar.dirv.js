@@ -6,7 +6,7 @@ angular
 			$ctrl.areas; // Array of each section of the route (seperated by -; e.g. '#/foo/bar' => [foo,bar])
 			$ctrl.area; // First segment of $scope.areas
 
-			$rootScope.$on('$routerSuccess', _=> {
+			$rootScope.$on('$routerSuccess', ()=> {
 				if (!$router.path) return; // Router not ready yet
 				$ctrl.areas = $router.path.split('/').slice(2); // Split into path segments (remove first empty element & '/docs' prefix)
 				$ctrl.area = this.areas[0];

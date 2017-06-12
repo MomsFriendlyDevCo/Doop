@@ -31,7 +31,7 @@ angular
 			$ctrl.save = function(fields) {
 				$loader.startBackground($scope.$id);
 				Notifications.save({id: $router.params.id}, fields).$promise
-					.then(_=> $location.path('/notifications'))
+					.then(()=> $location.path('/notifications'))
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
 			};

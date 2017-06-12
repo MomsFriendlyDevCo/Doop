@@ -19,7 +19,7 @@ angular
 				Notifications.count({status: 'active'}).$promise
 					.then(data => $ctrl.notificationCount = data.count)
 					.catch($toast.catch)
-					.finally(_=> {
+					.finally(()=> {
 						if ($ctrl.autoRefreshInterval) 
 							$ctrl.autoRefreshHandle = $timeout($ctrl.refreshCount, $ctrl.autoRefreshInterval)
 					});
@@ -41,7 +41,7 @@ angular
 				Notifications.query({status: 'active', limit: 5}).$promise
 					.then(data => $ctrl.notifications = data, 3000)
 					.catch($toast.catch)
-					.finally(_=> {
+					.finally(()=> {
 						$ctrl.notificationsLoading = false;
 						$ctrl.notificationsLoadedOnce = true;
 					});

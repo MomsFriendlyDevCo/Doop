@@ -57,7 +57,7 @@ angular
 							reject(user);
 						}
 					})
-					.catch(_=> reject());
+					.catch(()=> reject());
 			});
 		};
 
@@ -66,14 +66,14 @@ angular
 		* @return {Promise}
 		* @see promise.role()
 		*/
-		$session.promise.admin = _=> $session.promise.role(['admin', 'root']);
+		$session.promise.admin = ()=> $session.promise.role(['admin', 'root']);
 
 		/**
 		* Returns a promise that resolves if the user is not an admin OR the user is not logged in
 		* @return {Promise}
 		* @see promise.role()
 		*/
-		$session.promise.notAdmin = _=> {
+		$session.promise.notAdmin = ()=> {
 			return $q((resolve, reject) =>
 				$session.promise()
 					.then(user => {
@@ -102,6 +102,7 @@ angular
 
 		/**
 		* Save the current user details back to the server
+		* @param {Object} data User data to save
 		* @return {Promise} A promise object for the save request
 		*/
 		$session.save = function() {
@@ -196,5 +197,5 @@ angular
 		$session.getLocal();
 
 		// Fetch session data on service creation
-		$rootScope.$evalAsync(_=> $session.update());
+		$rootScope.$evalAsync(()=> $session.update());
 	});
