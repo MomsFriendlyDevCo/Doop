@@ -64,7 +64,7 @@ gulp.task('vendors-core', ['load:app'], function(finish) {
 		.set('includes', []) // Array of all JS / CSS files we need to include in the project
 		.forEach(paths.vendors.core, function(next, dep, depIndex) { // Process all strings into paths
 			// At the moment this doesn't surve a purpose but we could add extra properties here that do things like transpose individual files based on options
-			this.includes[depIndex] = paths.root + '/' + dep;
+			this.includes[depIndex] = fspath.resolve(paths.root, dep);
 			next();
 		})
 		.then('includes', function(next) {
@@ -125,7 +125,7 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 		.set('includes', []) // Array of all JS / CSS files we need to include in the project
 		.forEach(paths.vendors.main, function(next, dep, depIndex) { // Process all strings into paths
 			// At the moment this doesn't surve a purpose but we could add extra properties here that do things like transpose individual files based on options
-			this.includes[depIndex] = paths.root + '/' + dep;
+			this.includes[depIndex] = fspath.resolve(paths.root, dep);
 			next();
 		})
 		.then('includes', function(next) {
