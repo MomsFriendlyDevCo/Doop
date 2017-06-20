@@ -74,6 +74,16 @@ angular
 		});
 	})
 	// }}}
+
+        // Force $http headers via GET to not be cached {{{
+	.config($httpProvider => {
+		if (!$httpProvider.defaults.headers.get) $httpProvider.defaults.headers.get = {}; // Initialize get headers if not there
+
+		// Override all Cache-Control
+		$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
+		$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
+	})
+        // }}}
 	// }}}
 
 	// Router config {{{
