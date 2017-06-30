@@ -6,6 +6,8 @@ angular
 		$session.data = {}; // User session data
 		$session.isLoggedIn = false; // Whether the user is logged in according to the server
 		$session.isUpdated = false; // Have we tried to fetch the user info yet?
+		$session.postLoginUrl = '/'; // What URL to redirect to when logging in
+		$session.postLoginUrlOnce = undefined; // If set this is used as a replacement to postLoginUrl but then becomes unset again. Use this to temporarily override the postLoginUrl when the user specifies an original URL they tried to view, then got the login page
 
 		// Promise utilities {{{
 
@@ -40,6 +42,16 @@ angular
 		* @alias $session.promise
 		*/
 		$session.promise.login = $session.promise;
+
+		/**
+		* Alias of $session.promise.login that returns the reverse result
+		*/
+		$session.promise.notLogin = ()=> $q((resolve, reject) => {
+			$session.promise()
+				.then(()=> reject())
+				.catch(()=> resolve());
+		});
+
 
 		/**
 		* Similar to $session.promise but only resolves if the user is logged in AND that $session.data.role is equal to role (or any of the items in role if its an array)
@@ -162,9 +174,16 @@ angular
 		*/
 		$session.login = function(user) {
 			return Users.login(user).$promise
-				.then(_=> $rootScope.$broadcast('loginSuccess'))
-				.then(res => $session.update().then(res => $location.redirect('/'))) // Update local session then redirect to root
-				.catch(err => $rootScope.$broadcast('loginFailure'))
+				.then(()=> $rootScope.$broadcast('loginSuccess'))
+				.then(res => $session.update().then(res => {
+					if ($session.postLoginUrlOnce) {
+						$location.redirect($session.postLoginUrlOnce);
+						$session.postLoginUrlOnce = undefined;
+					} else {
+						$location.redirect($session.postLoginUrl);
+					}
+				})) // Update local session then redirect to root
+				.catch(err => $rootScope.$broadcast('loginFailure', err.data.error || err.data))
 		};
 
 		/**
