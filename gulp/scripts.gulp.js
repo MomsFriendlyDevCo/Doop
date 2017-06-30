@@ -3,7 +3,6 @@
 */
 
 var _ = require('lodash');
-var annotate = require('gulp-ng-annotate');
 var bytediff = require('gulp-bytediff');
 var cache = require('gulp-cache');
 var concat = require('gulp-concat');
@@ -39,6 +38,7 @@ gulp.task('scripts', ['load:app'], function() {
 		}))
 		.pipe(cache(babel({ // Cache output and pipe though Babel
 			presets: ['es2015'],
+			plugins: ['angularjs-annotate'],
 		}), {
 			key: function(file) {
 				return [file.contents.toString('utf8'), file.stat.mtime, file.stat.size].join('');
@@ -54,7 +54,6 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(bytediff.start())
 		.pipe(replace("\"app\/", "\"\/app\/")) // Rewrite all literal paths to relative ones
 		.pipe(replace(new RegExp('0\\s*\\/' + '\\*IMPORT: (.+)\\*\\/', 'g'), (junk, i) => JSON.stringify(_.get(global, i)))) // Import variables in units/theme/config.serv.js
-		.pipe(gulpIf(app.config.gulp.minifyJS, annotate()))
 		.pipe(gulpIf(app.config.gulp.minifyJS, uglify({mangle: false})))
 		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.write()))
 		.pipe(bytediff.stop(common.bytediffFormatter))
