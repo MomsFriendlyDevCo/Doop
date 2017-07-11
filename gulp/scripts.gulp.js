@@ -55,7 +55,7 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(replace("\"app\/", "\"\/app\/")) // Rewrite all literal paths to relative ones
 		.pipe(replace(new RegExp('0\\s*\\/' + '\\*IMPORT: (.+)\\*\\/', 'g'), (junk, i) => JSON.stringify(_.get(global, i)))) // Import variables in units/theme/config.serv.js
 		.pipe(gulpIf(app.config.gulp.minifyJS, uglify({mangle: false})))
-		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.write()))
+		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.write('.')))
 		.pipe(bytediff.stop(common.bytediffFormatter))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
