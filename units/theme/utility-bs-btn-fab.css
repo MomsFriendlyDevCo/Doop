@@ -1,0 +1,58 @@
+/**
+* Position several buttons in a floating group
+* Sizes are used to determine positioning:
+* - .btn-sm elements are 'tucked' under the next element in sequence
+* - .btn-lg elements are displayed as large, foreground buttons (there should only be one of these)
+*
+* @example
+* <div class="btn-group-float">
+* 	<a href="#/" class="btn btn-sm btn-danger btn-sm btn-circle animated animation-delay-3 bounceInUp" tooltip="Discard all changes"><i class="fa fa-fw fa-times"></i></a>
+* 	<button type="submit" class="btn btn-success btn-lg btn-circle animated bounceInUp" tooltip="Save changes"><i class="fa fa-check"></i></button>
+* </div>
+*/
+.btn-group-float {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	z-index: 10;
+
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+
+.btn-group-float > .btn {
+	font-size: 12pt;
+	padding: 15px;
+	width: 55px;
+	height: 55px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.btn-group-float > .btn-sm {
+	font-size: 12pt;
+	margin-right: -15px;
+	padding: 10px;
+	height: 40px;
+	width: 40px;
+}
+
+.btn-group-float > .btn-lg {
+	font-size: 16pt;
+	padding: 16px;
+	width: 70px;
+	height: 70px;
+}
+
+/* Shadowing (mainly fixes with .waves-circle) {{{ */
+.btn-group-float > .btn {
+	box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.5) !important;
+}
+
+.btn-group-float > .btn.waves-circle {
+	-webkit-mask-image: none !important;
+}
+/* }}} */
