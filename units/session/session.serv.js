@@ -113,6 +113,19 @@ angular
 		// }}}
 
 		/**
+		* Returns a promise that resolves if we are NOT currently in an instance profile
+		* @return {Promise}
+		*/
+		$session.promise.notInstance = function() {
+			if ($config.instances.name) {
+				return $q.reject();
+			} else {
+				return $q.resolve();
+			}
+		};
+		// }}}
+
+		/**
 		* Save the current user details back to the server
 		* @param {Object} data User data to save
 		* @return {Promise} A promise object for the save request
