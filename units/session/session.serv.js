@@ -185,8 +185,8 @@ angular
 		* @param {Object} user The user object to login
 		* @return {Promise} The promise object for the server request
 		*/
-		$session.login = function(user) {
-			return Users.login(user).$promise
+		$session.login = user =>
+			Users.login(user).$promise
 				.then(()=> $rootScope.$broadcast('loginSuccess'))
 				.then(res => $session.update().then(res => {
 					if ($session.postLoginUrlOnce) {
@@ -196,8 +196,7 @@ angular
 						$location.redirect($session.postLoginUrl);
 					}
 				})) // Update local session then redirect to root
-				.catch(err => $rootScope.$broadcast('loginFailure', err.data.error || err.data))
-		};
+				.catch(err => $rootScope.$broadcast('loginFailure', err.data.error || err.data));
 
 		/**
 		* Attempt to signup a new user
@@ -230,4 +229,4 @@ angular
 
 		// Fetch session data on service creation
 		$rootScope.$evalAsync(()=> $session.update());
-	});
+	})

@@ -52,7 +52,7 @@ app.post('/api/session/login', function(req, res) {
 			})(req, res, next);
 		})
 		.end(function(err) {
-			if (err) return res.status(400).send({error: 'Invalid username or password'});
+			if (err) return res.sendError('Invalid username or password');
 			res.redirect('/api/session/profile');
 		});
 });
