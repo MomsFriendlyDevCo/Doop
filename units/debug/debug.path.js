@@ -65,7 +65,7 @@ app.get('/api/debug/version', function(req, res) {
 			},
 		})
 		.end(function(err) {
-			if (err) return res.status(400).send(err.toString()).end();
+			if (err) return res.sendError(err);
 			_cachedVersion = {
 				package: this.package,
 				git: this.git,
