@@ -102,8 +102,12 @@ angular
 	// Router config {{{
 
 	// Disable developer warnings if we're in production {{{
-	.run(function($config, $router) {
-		if ($config.isProduction) $router.warnings(false);
+	.run(function($config, $rootScope, $router) {
+		if ($config.isProduction) {
+			$router.warnings(false);
+		} else { // We're not in production - attach to the debug handler just in cast thats enabled
+			$rootScope.$on('routerDebug', (e, ...args) => console.log('ROUTER DEBUG:', ...args));
+		}
 	})
 	// }}}
 
