@@ -250,17 +250,7 @@ angular
 	})
 	// }}}
 
-	// Date Dropdown {{{
-	// Configure Angualr Materials Date Dropdown {{{
-	.config(function($mdDateLocaleProvider) {
-		$mdDateLocaleProvider.formatDate = function(date) {
-			return moment(date).format('YYYY-MM-DD');
-		};
-	})
-	// }}}
-
 	// Remove bootstraping body class now everything is ready {{{
 	.run($timeout => $timeout(()=> $('body').removeClass('bootstraping')))
-	// }}}
 	// }}}
 	// }}}
