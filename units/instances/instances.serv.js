@@ -14,5 +14,6 @@ angular
 
 			var instanceName = $location.host().replace(mainDomain, '').replace(/\.$/, '');
 			if (instanceName) $config.instances.name = instanceName;
+			if ($location.port()) $config.instances.port = $location.port();
 		}
 	});
