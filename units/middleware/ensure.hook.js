@@ -7,7 +7,7 @@ app.register('preControllers', ['session'], function(finish) {
 
 			res.format({
 				'application/json': function() {
-					res.status(401).send({err: "Unauthorized"}).end();
+					res.sendError(403, 'Unauthorized');
 				},
 				'default': function() {
 					res.redirect('/');
@@ -24,7 +24,7 @@ app.register('preControllers', ['session'], function(finish) {
 			// Failed login - decide how to return
 			res.format({
 				'application/json': function() {
-					res.status(401).send({err: "Not logged in"}).end();
+					res.sendError(403, 'Not logged in');
 				},
 				'default': function() {
 					res.redirect('/login');
