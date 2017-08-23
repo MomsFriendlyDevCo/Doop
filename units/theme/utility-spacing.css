@@ -18,6 +18,7 @@
 
 .m-t--10 { margin-top: -10px; }
 .m-t--5 { margin-top: -5px; }
+.m-t-5 { margin-top: 5px; }
 .m-t-0 { margin-top: 0px; }
 .m-t-1 { margin-top: 1px; }
 .m-t-2 { margin-top: 2px; }
@@ -31,6 +32,7 @@
 
 .m-r--10 { margin-right: -10px; }
 .m-r--5 { margin-right: -5px; }
+.m-r-5 { margin-right: 5px; }
 .m-r-0 { margin-right: 0px; }
 .m-r-1 { margin-right: 1px; }
 .m-r-2 { margin-right: 2px; }
@@ -44,6 +46,7 @@
 
 .m-b-10 { margin-bottom: -10px; }
 .m-b--5 { margin-bottom: -5px; }
+.m-b-5 { margin-bottom: 5px; }
 .m-b-0 { margin-bottom: 0px; }
 .m-b-1 { margin-bottom: 1px; }
 .m-b-2 { margin-bottom: 2px; }
