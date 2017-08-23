@@ -22,7 +22,7 @@ app.register('init', function(finish) {
 			if (allowed[ext]) {
 				return next();
 			} else {
-				return res.status(404).end();
+				res.sendError(404, 'Not found');
 			}
 		};
 	};
