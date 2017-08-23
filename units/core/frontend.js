@@ -101,6 +101,10 @@ angular
 	// Force $http query encoding to use the jQuery like encoder (necessary to work with complex objects with a Monoxide backend) {{{
 	.config($httpProvider => $httpProvider.defaults.paramSerializer = '$httpParamSerializerJQLike')
 	// }}}
+
+	// Disable the annoying 'possibly unhandled error' prompt {{{
+	.config($qProvider => $qProvider.errorOnUnhandledRejections(false))
+	// }}}
 	// }}}
 
 	// Router config {{{
