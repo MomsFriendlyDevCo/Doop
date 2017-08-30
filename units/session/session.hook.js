@@ -1,6 +1,7 @@
 var colors = require('chalk');
 var connectFlash = require('connect-flash');
 var expressSession = require('express-session');
+var mongoSessionStore = require('connect-mongodb-session');
 var monoxide = require('monoxide');
 var passport = require('passport');
 var passportLocalStrategy = require('passport-local').Strategy;
@@ -8,10 +9,13 @@ var passportLocalStrategy = require('passport-local').Strategy;
 app.register('preControllers', ['db'], function(finish) {
 	app.use(connectFlash());
 
-	var mongoStore = require('connect-mongo')(expressSession);
+	var mongoStore = mongoSessionStore(expressSession);
 	app.use(expressSession({
 		secret: app.config.secret,
-		store: new mongoStore({mongooseConnection: monoxide.connection}),
+		store: new mongoStore({
+			uri: app.config.mongo.uri,
+			idField: 'sessionID',
+		}),
 		resave: false,
 		saveUninitialized: false,
 		cookie: {
