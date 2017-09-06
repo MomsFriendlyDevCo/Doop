@@ -188,14 +188,15 @@ angular
 		$session.login = user =>
 			Users.login(user).$promise
 				.then(()=> $rootScope.$broadcast('loginSuccess'))
-				.then(res => $session.update().then(res => {
+				.then(() => $session.update())
+				.then(()=> {
 					if ($session.postLoginUrlOnce) {
 						$location.redirect($session.postLoginUrlOnce);
 						$session.postLoginUrlOnce = undefined;
 					} else {
 						$location.redirect($session.postLoginUrl);
 					}
-				})) // Update local session then redirect to root
+				}) // Update local session then redirect to root
 				.catch(err => $rootScope.$broadcast('loginFailure', err.data.error || err.data));
 
 		/**

@@ -53,6 +53,7 @@ User
 	})
 	.hook('save', function(next, query) {
 		if (!query.username) query.username = query.email;
+		if (q.username) q.username = q.username.toLowerCase();
 		next();
 	});
 // }}}
