@@ -14,7 +14,7 @@ var scenario = require('gulp-mongoose-scenario');
 gulp.task('scenario', ['load:app.db'], function(finish) {
 	if (config.env == 'production') return finish('Refusing to reload database in production! If you REALLY want to do this use `NODE_ENV=something gulp db`');
 
-	gulp.src(__dirname + '/*.json')
+	gulp.src(`${app.config.paths.root}/units/**/*.scenario.json`)
 		.pipe(scenario({
 			nuke: true,
 			connection: monoxide.connection,
