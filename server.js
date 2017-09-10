@@ -240,7 +240,13 @@ async()
 			}
 
 			// Start HTTP app server
-			global.app.server = app.listen(app.config.port, app.config.host, next);
+			if (!global.app.server) {
+				// Create a server only if nothing else has created one
+				debug('Skipping HTTP server setup as some other unit has already done that');
+				global.app.server = app.listen(app.config.port, app.config.host, next);
+			} else {
+				return next();
+			}
 		});
 	})
 	// }}}
