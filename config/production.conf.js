@@ -17,7 +17,7 @@ module.exports = {
 		enabled: true,
 	},
 	ssl: {
-		enabled: true,
+		enabled: false,
 		port: 443
 	}
 };
