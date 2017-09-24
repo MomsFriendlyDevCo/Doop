@@ -22,14 +22,14 @@
 <section id="main">
 	<aside id="sidebar" class="sidebar">
 		<!-- Upper sidebar user profile tools {{{ -->
-		<div class="s-profile">
+		<div ng-if="$global.$session.isLoggedIn" class="s-profile">
 			<a data-toggle="collapse" data-target="#profile-links">
 				<div class="sp-pic">
-					<img gravatar-src="$global.session.data.email" gravatar-size="50" gravatar-default="identicon" class="img-circle img-user media-object">
+					<img gravatar-src="$global.$session.data.email" gravatar-size="50" gravatar-default="identicon" class="img-circle img-user media-object">
 				</div>
 
 				<div class="sp-info">
-					{{$global.session.data.name}}
+					{{$global.$session.data.name}}
 
 					<i class="fa fa-caret-down"></i>
 				</div>
@@ -39,6 +39,13 @@
 				<li><a href="#/profile"><i class="fa fa-user"></i> Your Profile</a></li>
 				<li><a href="#/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
 			</ul>
+		</div>
+		<div ng-if="!$global.$session.isLoggedIn" class="s-profile">
+			<a>
+				<div class="sp-pic">
+					<img class="img-circle img-user media-object">
+				</div>
+			</a>
 		</div>
 		<!-- }}} -->
 
