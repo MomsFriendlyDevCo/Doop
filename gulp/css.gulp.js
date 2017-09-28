@@ -28,7 +28,10 @@ gulp.task('css', ['load:app'], function() {
 		.pipe(gplumber({
 			errorHandler: function(err) {
 				gutil.log(colors.red('ERROR DURING CSS BUILD'));
-				notify({message: err.name + '\n' + err.message, title: app.config.title + ' - CSS Error'}).write(err);
+				notify(Object.assign(app.config.gulp.notifySettings, {
+					message: err.name + '\n' + err.message,
+					title: app.config.title + ' - CSS Error',
+				})).write(err);
 				process.stdout.write(err.stack);
 				hasErr = err;
 				this.emit('end');
@@ -45,10 +48,10 @@ gulp.task('css', ['load:app'], function() {
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
 			if (!hasErr && app.config.gulp.notifications)
-				notify({
+				notify(Object.assign(app.config.gulp.notifySettings, {
 					title: app.config.title + ' - CSS',
 					message: 'Rebuilt frontend CSS' + (++cssBootCount > 1 ? ' #' + cssBootCount : ''),
 					icon: __dirname + '/icons/css.png',
-				}).write(0);
+				})).write(0);
 		});
 });

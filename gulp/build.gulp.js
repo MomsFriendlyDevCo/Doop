@@ -33,11 +33,11 @@ gulp.task('build', function(finish) {
 */
 gulp.task('build:complete', function(finish) {
 	if (app.config.gulp.notifications)
-		gulp.src('').pipe(notify({
+		gulp.src('').pipe(notify(Object.assign(app.config.gulp.notifySettings, {
 			title: app.config.title,
 			onLast: true,
 			message: 'Deployed code!'
-		}));
+		})));
 
 	finish();
 });
