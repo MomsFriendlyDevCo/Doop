@@ -138,7 +138,7 @@ gulp.task('deploy', ['pm2-deploy']);
 gulp.task('fakes', ['fake-users']);
 gulp.task('serve', ['nodemon']);
 gulp.task('start', ['pm2-start']);
-gulp.on('stop', function() { process.exit(0); });
+gulp.on('stop', ()=> process.exit(0));
 // }}}
 
 // Loaders {{{

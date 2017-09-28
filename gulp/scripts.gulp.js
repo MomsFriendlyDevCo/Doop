@@ -60,11 +60,11 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
 			if (!hasErr && app.config.gulp.notifications)
-				notify({
+				notify(Object.assign(app.config.gulp.notifySettings, {
 					title: app.config.title + ' - Scripts',
 					message: 'Rebuilt frontend scripts' + (++scriptBootCount > 1 ? ' #' + scriptBootCount : ''),
 					icon: __dirname + '/icons/javascript.png',
-				}).write(0);
+				})).write(0);
 		});
 });
 

@@ -55,6 +55,9 @@ var defaults = {
 	},
 	gulp: {
 		notifications: true,
+		notifySettings: {
+			sound: false,
+		},
 		debugJS: true,
 		minifyJS: false,
 		debugCSS: true,
