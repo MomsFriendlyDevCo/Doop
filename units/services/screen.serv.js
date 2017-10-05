@@ -3,10 +3,11 @@
 * This service returns a number of simple variables such as:
 *
 * 	$screen.is{XS,SM,MD,LG} - Booleans indicating if this screen size corresponds to the minimum Bootstrap definition of width (e.g. isXS =~ mobile, isMD = is at least a small screen)
+*       $screen.isMobile - Shorthand accessor if the screen is XS
+*       $screen.isTablet - Shorthand accessor if the screen is SM - LG
+*       $screen.isDesktop - Shorthand accessor if the screen is LG
 *	$screen.size - String indicating the minimum Bootstrap definition of size (e.g. 'md', 'lg')
 *
-* @author Matt Carter <m@ttcarter.com>
-* @date 2017-04-22
 */
 angular
 	.module('app')
@@ -25,6 +26,10 @@ angular
 			$screen.isSM = width < 992;
 			$screen.isMD = width < 1200;
 			$screen.isLG = width >= 1200;
+
+			$screen.isMobile = $screen.isXS;
+			$screen.isTablet = $screen.isSM || $screen.isMD || $screen.isLG;
+			$screen.isDesktop = $screen.isLG;
 
 			$screen.size =
 				$screen.isXS ? 'xs'
