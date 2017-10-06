@@ -69,6 +69,12 @@ angular
 			var $ctrl = this;
 			$ctrl.$config = $config;
 
+			$ctrl.$config.layout = {
+				headerNavbar: false,
+				sidebar: false,
+				isImportant: true
+			}
+
 			$ctrl.user = {
 				username: '',
 				password: '',

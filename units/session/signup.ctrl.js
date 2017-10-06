@@ -10,6 +10,12 @@ angular
 			var $ctrl = this;
 			$ctrl.$config = $config;
 
+			$ctrl.$config.layout = {
+				headerNavbar: false,
+				sidebar: false,
+				isImportant: true
+			}
+
 			if ($session.data.isLoggedIn) return $location.path('/'); // Already logged in
 
 			$ctrl.error;

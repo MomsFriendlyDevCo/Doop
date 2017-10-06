@@ -6,10 +6,19 @@ angular
 	)
 	.component('sessionRecoverCtrl', {
 		templateUrl: '/units/session/recover.tmpl.html',
-		controller: function($rootScope, $location, $session, $toast) {
+		controller: function($rootScope, $config, $location, $session, $toast) {
 			var $ctrl = this;
+
+			$ctrl.$config = $config;
 			$ctrl.error;
 			$ctrl.user = {email: ''};
+
+			$ctrl.$config.layout = {
+				headerNavbar: false,
+				sidebar: false,
+				isImportant: true
+			}
+
 
 			$ctrl.recover = function(isValid) {
 				if (!isValid) return;
