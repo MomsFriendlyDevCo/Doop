@@ -65,7 +65,7 @@ angular
 	// }}}
 	.component('sessionLoginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
-		controller: function($animate, $config, $rootScope, $session) {
+		controller: function($animate, $config, $rootScope, $session, $loader) {
 			var $ctrl = this;
 			$ctrl.$config = $config;
 
