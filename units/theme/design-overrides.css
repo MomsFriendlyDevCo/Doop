@@ -364,3 +364,7 @@ header .hi-logo > a > img {
 	display: table-cell !important;
 }
 /* }}} */
+
+.panel-body {
+	padding: 25px !important;
+}
