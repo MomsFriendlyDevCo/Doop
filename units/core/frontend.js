@@ -187,6 +187,17 @@ angular
 	})
 	// }}}
 
+	// Reload default layout settings on every router reload {{{
+	.run(function($rootScope, $config) {
+		$rootScope.$on('$routerSuccess', ()=> {
+			if(!$config.layout.isImportant) {
+				$config.layout.headerNavbar = true;
+				$config.layout.sidebar = true;
+			}
+		});
+	})
+	// }}}
+
 	// Adjust page title when the page changes {{{
 	.run(function($config, $rootScope) {
 		$rootScope.$on('$routerSuccess', (e, rule) => document.title = $config.title + (_.has(rule, '_data.title') ? ' | ' + rule._data.title : ''));
