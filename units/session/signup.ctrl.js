@@ -1,6 +1,7 @@
 angular
 	.module('app')
-	.run($router => $router.when('/signup')
+	.run(($router, $session) => $router.when('/signup')
+		.require($session.promise.notLogin)
 		.title('Signup')
 		.component('sessionSignupCtrl')
 	)
