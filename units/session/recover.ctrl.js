@@ -1,6 +1,7 @@
 angular
 	.module('app')
-	.run($router => $router.when('/login/recover')
+	.run(($router, $session) => $router.when('/login/recover')
+		.requires($session.promise.notLogin)
 		.title('Recover Password')
 		.component('sessionRecoverCtrl')
 	)
