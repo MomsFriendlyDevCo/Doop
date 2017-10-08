@@ -168,7 +168,13 @@ angular
 
 	// Focus any input element post-navigation {{{
 	.run(function($rootScope) {
-		$rootScope.$on('$routerSuccess', ()=> $('div[ui-view=main]').find('input[autofocus]').focus());
+		$rootScope.$on('$routerSuccess', ()=>
+			$('div[ui-view=main]').find('input[autofocus]')
+				.each(function() {
+					this.selectionEnd = this.selectionStart = this.value.length;
+				})
+				.focus()
+		);
 	})
 	// }}}
 
