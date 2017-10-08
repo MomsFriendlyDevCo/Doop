@@ -234,6 +234,13 @@ angular
 	// }}}
 
 	// Theme {{{
+
+	// Disable animation effects on certain elements by default {{{
+	.config($animateProvider => {
+		$animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
+	})
+	// }}}
+
 	// Configure Selectize {{{
 	.config(function(uiSelectConfig) {
 		uiSelectConfig.theme = 'selectize';
