@@ -225,6 +225,12 @@ angular
 	})
 	// }}}
 
+	// Scroll to top of page when navigating {{{
+	.run(function($loader, $rootScope) {
+		$rootScope.$on('$routerSuccess', ()=> $('#content').scrollTop(0));
+	})
+	// }}}
+
 	// }}}
 
 	// Theme {{{
