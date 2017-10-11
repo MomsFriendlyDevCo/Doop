@@ -168,7 +168,13 @@ angular
 
 	// Focus any input element post-navigation {{{
 	.run(function($rootScope) {
-		$rootScope.$on('$routerSuccess', ()=> $('div[ui-view=main]').find('input[autofocus]').focus());
+		$rootScope.$on('$routerSuccess', ()=>
+			$('div[ui-view=main]').find('input[autofocus]')
+				.each(function() {
+					this.selectionEnd = this.selectionStart = this.value.length;
+				})
+				.focus()
+		);
 	})
 	// }}}
 
@@ -230,9 +236,22 @@ angular
 	})
 	// }}}
 
+	// Scroll to top of page when navigating {{{
+	.run(function($loader, $rootScope) {
+		$rootScope.$on('$routerSuccess', ()=> $('#content').scrollTop(0));
+	})
+	// }}}
+
 	// }}}
 
 	// Theme {{{
+
+	// Disable animation effects on certain elements by default {{{
+	.config($animateProvider => {
+		$animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
+	})
+	// }}}
+
 	// Configure Selectize {{{
 	.config(function(uiSelectConfig) {
 		uiSelectConfig.theme = 'selectize';
