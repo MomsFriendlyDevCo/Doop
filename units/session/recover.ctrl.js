@@ -1,15 +1,25 @@
 angular
 	.module('app')
-	.run($router => $router.when('/login/recover')
+	.run(($router, $session) => $router.when('/login/recover')
+		.requires($session.promise.notLogin)
 		.title('Recover Password')
 		.component('sessionRecoverCtrl')
 	)
 	.component('sessionRecoverCtrl', {
 		templateUrl: '/units/session/recover.tmpl.html',
-		controller: function($rootScope, $location, $session, $toast) {
+		controller: function($rootScope, $config, $location, $session, $toast) {
 			var $ctrl = this;
+
+			$ctrl.$config = $config;
 			$ctrl.error;
 			$ctrl.user = {email: ''};
+
+			$ctrl.$config.layout = {
+				headerNavbar: false,
+				sidebar: false,
+				isImportant: true
+			}
+
 
 			$ctrl.recover = function(isValid) {
 				if (!isValid) return;
