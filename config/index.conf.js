@@ -38,6 +38,11 @@ var defaults = {
 	theme: { // Variables passed to the HTML page renderer - do not put anything private in here
 		title: 'Doop',
 	},
+	layout: {
+		headerNavbar: false, // No header navigation bar
+		sidebar: false, // No side bar
+		isImportant: false
+	},
 	access: {
 		lockdown: false, // Set to true to lock the site with the below users
 		users: [{

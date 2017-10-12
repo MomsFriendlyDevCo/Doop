@@ -65,9 +65,15 @@ angular
 	// }}}
 	.component('sessionLoginCtrl', {
 		templateUrl: '/units/session/login.tmpl.html',
-		controller: function($animate, $config, $rootScope, $session) {
+		controller: function($animate, $config, $rootScope, $session, $loader) {
 			var $ctrl = this;
 			$ctrl.$config = $config;
+
+			$ctrl.$config.layout = {
+				headerNavbar: false,
+				sidebar: false,
+				isImportant: true
+			}
 
 			$ctrl.user = {
 				username: '',

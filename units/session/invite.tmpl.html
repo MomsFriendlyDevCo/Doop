@@ -1,19 +1,21 @@
 <div class="container">
-	<form ng-submit="$ctrl.invite()" class="panel panel-default">
-		<div class="panel-heading"><h3>Invite Users</h3></div>
-		<div class="panel-default form-horizontal">
-			<div class="form-group">
-				<p class="c-black">Email addresses</p>
-				<div ng-if="$ctrl.error" class="alert alert-danger">{{$ctrl.error}}</div>
+	<div class="block-header">
+		<h2>Invite Users</h2>
+	</div>
+	<form ng-submit="$ctrl.invite()" class="card">
+		<div class="card-body card-padding form-horizontal">
+			<div ng-if="$ctrl.error" class="alert alert-danger">{{$ctrl.error}}</div>
 
-				<small>Enter all the email addresses you want to invite. You can separate multiple email addresses using spaces, commas or put them on separate lines.</small>
+			<legend>Email addresses</legend>
+			<small>Enter all the email addresses you want to invite. You can separate multiple email addresses using spaces, commas or put them on separate lines.</small>
+
+			<div class="form-group">
 				<div class="col-sm-12 m-t-25">
-					<textarea ng-model="$ctrl.user.email" class="form-control" rows="10" autofocus></textarea>
+					<textarea ng-model="$ctrl.user.email" placeholder="Enter all the email addresses here..." class="form-control" rows="10" autofocus></textarea>
 				</div>
 			</div>
-		</div>
-		<div class="panel-footer">
-			<div class="pull-right">
+
+			<div class="text-right">
 				<button type="submit" class="btn btn-success waves-effect"><i class="fa fa-check"></i> Invite User</button>
 			</div>
 		</div>
