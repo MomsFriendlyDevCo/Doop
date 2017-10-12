@@ -1,6 +1,7 @@
 angular
 	.module('app')
-	.run($router => $router.when('/signup')
+	.run(($router, $session) => $router.when('/signup')
+		.require($session.promise.notLogin)
 		.title('Signup')
 		.component('sessionSignupCtrl')
 	)
@@ -9,6 +10,12 @@ angular
 		controller: function($config, $location, $session) {
 			var $ctrl = this;
 			$ctrl.$config = $config;
+
+			$ctrl.$config.layout = {
+				headerNavbar: false,
+				sidebar: false,
+				isImportant: true
+			}
 
 			if ($session.data.isLoggedIn) return $location.path('/'); // Already logged in
 

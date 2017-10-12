@@ -3,7 +3,7 @@
 */
 angular
 	.module('app')
-	.filter('date', function() {
+	.filter('doopDate', function() {
 		var formats = {
 			default: 'D/MM/YY HH:mm',
 			short: 'D/MM/YY HH:mm',

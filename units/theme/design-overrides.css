@@ -66,6 +66,11 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 	opacity: 0;
 }
 
+.layoutWithoutSidebar {
+	padding-left: 15px !important;
+	padding-right: 15px !important;
+}
+
 .btn-group-float {
 	display: block;
 	position: fixed;
@@ -359,3 +364,7 @@ header .hi-logo > a > img {
 	display: table-cell !important;
 }
 /* }}} */
+
+.panel-body {
+	padding: 25px !important;
+}
