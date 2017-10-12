@@ -1,5 +1,5 @@
 <!-- Header Navbar {{{ -->
-<header id="header" class="clearfix" data-ma-theme="blue">
+<header id="header" class="clearfix" data-ma-theme="blue" ng-if="$global.$config.layout.headerNavbar">
 	<ul class="h-inner">
 		<li class="hi-trigger sidebar-toggle">
 			<div class="line-wrap">
@@ -20,7 +20,7 @@
 
 <!-- Content area -->
 <section id="main">
-	<aside id="sidebar" class="sidebar">
+	<aside id="sidebar" class="sidebar" ng-if="$global.$config.layout.sidebar">
 		<!-- Upper sidebar user profile tools {{{ -->
 		<div ng-if="$global.$session.isLoggedIn" class="s-profile">
 			<a data-toggle="collapse" data-target="#profile-links">
@@ -52,7 +52,7 @@
 		<sidebar></sidebar>
 	</aside>
 
-	<section id="content" class="animated animated-fast">
+	<section id="content" class="animated animated-fast" ng-class="{'layoutWithoutSidebar': !$global.$config.layout.sidebar}">
 		<router-view></router-view>
 	</section>
 </section>
