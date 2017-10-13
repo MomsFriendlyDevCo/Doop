@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.factory('$prompt', function($interpolate, $q, $rootScope, $sce) {
+	.factory('$prompt', function($interpolate, $q, $rootScope, $sce, $timeout) {
 		var $prompt = {
 			/**
 			* Display a dialog with various customisations
@@ -9,6 +9,7 @@ angular
 			* @param {string} [options.title='Dialog'] The dialog title
 			* @param {string} [options.body='Body text'] The dialog body (usually the message to display)
 			* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
+			* @param {string} [options.bodyHeader] Additional HTML to render above the main body area (this is always HTML rendered)
 			* @param {string} [options.bodyFooter] Additional HTML to render under the main body area (this is always HTML rendered)
 			* @param {Object} [options.scope] Scope to use when interpolating HTML (if isHtml is truthy)
 			* @param {string} [options.dialogClose='reject'] How to handle the promise state if the dialog is closed. ENUM: 'resolve', 'reject', 'nothing'
@@ -46,6 +47,7 @@ angular
 					isHtml: false,
 					keyboard: true,
 					backdrop: true,
+					bodyHeader: undefined,
 					bodyFooter: undefined,
 					scope: undefined,
 					dialogClose: 'reject',
@@ -112,6 +114,7 @@ angular
 
 				// Setup body (if HTML) {{{
 				if ($prompt.$settings.isHtml) $prompt.$settings.$body = $sce.trustAsHtml($interpolate($prompt.$settings.body)($prompt.$settings.scope));
+				if ($prompt.$settings.bodyHeader) $prompt.$settings.$bodyHeader = $sce.trustAsHtml($interpolate($prompt.$settings.bodyHeader)($prompt.$settings.scope));
 				if ($prompt.$settings.bodyFooter) $prompt.$settings.$bodyFooter = $sce.trustAsHtml($interpolate($prompt.$settings.bodyFooter)($prompt.$settings.scope));
 				// }}}
 
@@ -131,6 +134,7 @@ angular
 			* @param {Promise} $promise The promise object for the current dialog
 			* @param {string} $promise.state Tracking of the promise status. ENUM: 'pending', 'resolved', 'rejected'
 			* @param {Object} $body The $sce compiled version of the dialog body if isHtml is truthy
+			* @param {Object} $bodyHeader The $sce compiled version of bodyHeader
 			* @param {Object} $bodyFooter The $sce compiled version of bodyFooter
 			* @param {function} $dialogClose Binding for dialogClose
 			* @param {string} $status The status of the dialog. ENUM: 'showing', 'shown', 'hiding', 'hidden'
@@ -279,6 +283,141 @@ angular
 
 
 			/**
+			* Display a list of entries and allow the user to select one of them
+			* This function inherits all properties from dialog() but sets various sane defaults for a list prompt
+			* @see $prompt.dialog()
+			* @param {Object|string} options Either an options object or the body text of prompt
+			* @param {string} [options.title='Select an item'] The title of the dialog
+			* @param {string} [options.body=''] The body of the dialog
+			* @param {array} [options.buttons=[]]
+			*
+			* @param {array|Object} [options.list] The list entries to display, this is assumed to either be a collection (with at least an ID) or something that will be marshelled into one
+			* @param {string} [options.default] The offset of the array to select by default, if this is a string it will be used as the ID of the item to match
+			*
+			* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
+			*/
+			list: function(options) {
+				// Argument mangling {{{
+				if (angular.isString(options)) {
+					options = {list: [options]};
+				} else if (angular.isArray(options)) {
+					options = {list: options};
+				}
+				// }}}
+
+				// Mangle list into something we can use {{{
+				options.list = _.map(options.list, (v, k) => {
+					if (_.isObject(v)) { // Already a collection
+						if (!v.id) v.id = k;
+						if (!v.title) v.title = _.startCase(k);
+					} else if (_.isString(v)) {
+						v = {title: v, id: k};
+					} else {
+						throw new Error('Unable to marshal into a collection: ' + (typeof v));
+					}
+					return v;
+				});
+				// }}}
+
+				return $prompt.dialog(_.defaults(options, {
+					$selectedIndex: 0, // The offset in the list that is currently selected
+					title: 'Select an item',
+					body: '',
+					bodyHeader: `
+						<div class="container-fluid text-center">
+							<form action="" class="form-horizontal">
+								<div class="form-group text-center">
+									<input type="text" class="form-control" autofocus/>
+								</div>
+							</form>
+						</div>
+					`,
+					bodyFooter: `
+						<ul class="list-group">` +
+							options.list.map((i, index) => `
+							<a class="list-group-item" data-prompt-index="${index}">
+								${i.title}
+							</a>
+							`).join('') + `
+						</ul>
+						<div class="hide text-muted">No items found</div>
+					`,
+					dialogClose: 'reject', // Reject if the user had second thoughts
+					buttons: [],
+					onShown: ()=> {
+						// Auto-focus autofocus items
+						angular.element('#modal-_prompt input[autofocus]')
+							.each(function() {
+								this.selectionEnd = this.selectionStart = this.value.length;
+							})
+							.focus()
+							.on('keyup', function(e) {
+								var items = angular.element('#modal-_prompt ul.list-group > .list-group-item').toArray();
+
+								// Re-render the list, applying hide classes {{{
+								var query = new RegExp(angular.element(this).val().toLowerCase().replace(/[^a-z0-9 ]+/g, ''), 'i');
+
+								$prompt.$settings.list.forEach((i, index) => {
+									i.visible = query.test(i.title);
+
+									angular.element(items[index])
+										.toggleClass('hide', !i.visible)
+										.removeClass('list-group-item-primary') // Gets added back later
+								});
+
+								angular.element('#modal-_prompt span.text-muted').toggleClass('hide', $prompt.$settings.list.every(i => !i.visible));
+								// }}}
+
+								// Move the selected item offset if necessary {{{
+								if (e.which == 38) { // Up
+									$prompt.$settings.$selectedIndex = _.findLastIndex($prompt.$settings.list, i => i.visible, $prompt.$settings.$selectedIndex - 1);
+								} else if (e.which == 40) { // Down
+									if ($prompt.$settings.$selectedIndex < $prompt.$settings.list.length -1) {
+										$prompt.$settings.$selectedIndex = _.findIndex($prompt.$settings.list, i => i.visible, $prompt.$settings.$selectedIndex + 1);
+									} else { // Set to undefined so we skip back to the start
+										$prompt.$settings.$selectedIndex = undefined;
+									}
+								}
+								// }}}
+
+								// Render the selected item {{{
+								if (
+									$prompt.$settings.$selectedIndex === undefined // Nothing selected
+									|| !$prompt.$settings.list[$prompt.$settings.$selectedIndex].visible // Active item is not visible
+								) {
+									// Select first visible instead
+									$prompt.$settings.$selectedIndex = $prompt.$settings.list.findIndex(i => i.visible);
+								}
+
+								if ($prompt.$settings.$selectedIndex !== undefined) angular.element(items[$prompt.$settings.$selectedIndex]).addClass('list-group-item-primary');
+								// }}}
+
+							})
+							.trigger('keyup') // Fire initial keyup handler
+
+						angular.element('#modal-_prompt ul.list-group > .list-group-item').on('click', function(e) {
+							$timeout(()=> {
+								$prompt.$settings.$promise.resolve($prompt.$settings.list[angular.element(this).data('prompt-index')].id);
+								$prompt.close();
+							});
+						});
+
+						// Bind form submission to also accept the form
+						angular.element('#modal-_prompt form').one('submit', e => {
+							e.stopPropagation();
+							e.preventDefault();
+
+							$timeout(()=> {
+								$prompt.$settings.$promise.resolve($prompt.$settings.list[$prompt.$settings.$selectedIndex].id);
+								$prompt.close();
+							});
+						});
+					},
+				}));
+			},
+
+
+			/**
 			* Dialogs queued to show
 			* This will only be populated if dialog gets called multiple times
 			* @var {array}
@@ -347,6 +486,7 @@ angular
 							<h4 class="modal-title">{{$ctrl.$prompt.$settings.title}}</h4>
 						</div>
 						<div class="modal-body">
+							<div ng-if="$ctrl.$prompt.$settings.bodyHeader" ng-bind-html="$ctrl.$prompt.$settings.$bodyHeader"></div>
 							<div ng-if="!$ctrl.$prompt.$settings.isHTML" class="text-center">
 								<h4>{{$ctrl.$prompt.$settings.body}}</h4>
 							</div>
