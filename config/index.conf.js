@@ -41,6 +41,7 @@ var defaults = {
 	layout: {
 		headerNavbar: false, // No header navigation bar
 		sidebar: false, // No side bar
+		footer: false,
 		isImportant: false
 	},
 	access: {
