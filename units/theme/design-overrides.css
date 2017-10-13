@@ -66,9 +66,13 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 	opacity: 0;
 }
 
-.layout-without-sidebar {
+.content-without-sidebar {
 	padding-left: 15px !important;
 	padding-right: 15px !important;
+}
+
+.footer-without-sidebar {
+	padding-left: 0 !important;
 }
 
 .btn-group-float {

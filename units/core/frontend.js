@@ -199,6 +199,7 @@ angular
 			if(!$config.layout.isImportant) {
 				$config.layout.headerNavbar = true;
 				$config.layout.sidebar = true;
+				$config.layout.footer = false;
 			}
 		});
 	})
