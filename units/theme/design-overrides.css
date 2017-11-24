@@ -372,3 +372,7 @@ header .hi-logo > a > img {
 .panel-body {
 	padding: 25px !important;
 }
+
+.logo {
+	width: 120px;
+}
