@@ -1,5 +1,5 @@
 <ul class="main-menu">
-	<li ng-class="$ctrl.area=='dashboard' && 'active'"><a href="#/"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+	<li ng-class="$ctrl.area=='' && 'active'"><a href="#/"><i class="fa fa-dashboard"></i> Dashboard</a></li>
 	<li ng-class="$ctrl.area=='notifications' && 'active'"><a href="#/notifications"><i class="fa fa-envelope"></i> Notifications</a></li>
 	<li ng-class="$ctrl.area=='users' && 'active'" ng-if="$ctrl.$session.data.isAdmin"><a href="#/users"><i class="fa fa-group"></i> Manage Users</a></li>
 	<li ng-class="$ctrl.area=='showcase' && 'active'" ng-if="$ctrl.$session.data.isRoot"><a href="#/showcase" data-toggle="collapse" data-target="#sidebar-showcase"><i class="fa fa-paint-brush"></i> Doop Material Showcase</a></li>
