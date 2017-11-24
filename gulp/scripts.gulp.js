@@ -37,7 +37,7 @@ gulp.task('scripts', ['load:app'], function() {
 			},
 		}))
 		.pipe(cache(babel({ // Cache output and pipe though Babel
-			presets: ['es2015'],
+			presets: ['env'],
 			plugins: ['angularjs-annotate'],
 		}), {
 			key: function(file) {
