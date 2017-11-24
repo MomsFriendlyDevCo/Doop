@@ -42,7 +42,7 @@ global.paths = {
 		core: [
 			// Core vendor dependencies - these should be as minimal as possible
 			// Injected as a <script/> at the start of the <head/>
-			'node_modules/angular-ui-loader/dist/loader.{js,css}',
+			'node_modules/@momsfriendlydevco/angular-ui-loader/dist/loader.{js,css}',
 			'units/theme/loader.css',
 		],
 		main: [
@@ -60,6 +60,7 @@ global.paths = {
 			// --- less important vendors below this line (alphabetical) --- //
 			'node_modules/@momsfriendlydevco/animate/dist/animate.css',
 			'node_modules/@momsfriendlydevco/angular-bs-tooltip/dist/angular-bs-tooltip.js',
+			'node_modules/@momsfriendlydevco/angular-ui-loader/dist/ng-loader.js',
 			'node_modules/@momsfriendlydevco/router/dist/angular-mfdc-router.js',
 			'node_modules/angular-animate/angular-animate.js',
 			'node_modules/angular-bs-confirm/angular-bs-confirm.js',
@@ -67,7 +68,6 @@ global.paths = {
 			'node_modules/angular-gravatar/build/angular-gravatar.js',
 			'node_modules/angular-resource/angular-resource.js',
 			'node_modules/angular-sanitize/angular-sanitize.js',
-			'node_modules/angular-ui-loader/dist/ng-loader.js',
 			'node_modules/angular-ui-notification/dist/angular-ui-notification.{css,js}',
 			'node_modules/angular-ui-switch/angular-ui-switch.{css,js}',
 			'node_modules/font-awesome/css/font-awesome.css',
