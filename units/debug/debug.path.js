@@ -2,6 +2,7 @@ var async = require('async-chainable');
 var asyncExec = require('async-chainable-exec');
 var email = require('mfdc-email');
 var fs = require('fs');
+var os = require('os');
 
 /**
 * Test email sending
@@ -72,4 +73,18 @@ app.get('/api/debug/version', function(req, res) {
 			};
 			res.send(_cachedVersion);
 		});
+});
+
+
+/**
+* Server live data
+*/
+app.get('/api/debug/live', app.middleware.ensure.login, function(req, res) {
+	res.send({
+		epoch: Date.now(),
+		freemem: os.freemem(),
+		totalmem: os.totalmem(),
+		uptime: os.uptime(),
+		load: os.loadavg(),
+	});
 });

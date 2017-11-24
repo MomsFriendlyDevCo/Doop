@@ -19,6 +19,9 @@ angular
 				$loader.startBackground($scope.$id);
 
 				$q.all([
+					$http.get('/api/debug/live')
+					.then(res => $ctrl.live = res.data),
+
 					// Fetch version info
 					$http.get('/api/debug/version')
 						.then(res => $ctrl.version = res.data),
