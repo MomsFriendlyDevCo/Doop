@@ -1,25 +1,27 @@
-#page-error {
+.page-error {
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: #607D8B;
 	height: 100vh;
 	text-align: center;
-	color: #ECF0F1;
 }
 
-#page-error > div {
-	background: #557382;
+.page-error > div {
+	background: #fff;
 	border-radius: 2px;
 	padding: 25px;
 	margin-top: 30vh;
 }
 
-#page-error > div > h2 {
+.page-error > div > h2 {
 	font-size: 130px;
 	line-height: 100%;
-	color: #ECF0F1;
 	font-weight: 100;
+}
+
+.page-error > div > h3 {
+	/* color: #ECF0F1; */
+	margin-bottom: 20px;
 }
