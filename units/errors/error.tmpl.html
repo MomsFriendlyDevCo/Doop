@@ -1,8 +1,10 @@
-<div id="page-error">
+<div class="page-error">
 	<div class="col-md-4 col-md-offset-4">
-		<h2>{{$ctrl.error.title}}</h2>
+		<h2>{{$ctrl.error.code}}</h2>
+		<h3>{{$ctrl.error.title}}</h3>
 		<p>{{$ctrl.error.message}}</p>
-		<a ng-if="$ctrl.error.allowBack" href="javascript: history.back()" class="btn btn-lg waves-effect waves-circle bgm-bluegray" tooltip="Go back" tooltip-position="bottom" tooltip-container="body"><i class="fa fa-arrow-left"></i></a>
-		<a ng-if="$ctrl.error.allowHome" href="#/" class="btn btn-lg waves-effect waves-circle bgm-bluegray" tooltip="Go back to the home page" tooltip-position="bottom" tooltip-container="body"><i class="fa fa-home"></i></a>
+
+		<a ng-if="$ctrl.error.allowBack" href="javascript: history.back()" class="btn btn-lg btn-primary"><i class="fa fa-arrow-left"></i> Go Back</a>
+		<a ng-if="$ctrl.error.allowHome" href="#/" class="btn btn-lg btn-primary"><i class="fa fa-home"></i> Home Page</a>
 	</div>
 </div>

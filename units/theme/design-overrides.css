@@ -23,7 +23,7 @@ a, [ng-click] {
 .badge {border-radius: 10px !important;}
 .badge-muted {background-color: #AAA !important;}
 .badge-default {background-color: #777 !important;}
-.badge-primary {background-color:  !important;}
+.badge-primary {background-color: #3f51b5 !important;}
 .badge-success {background-color: #5cb85c !important;}
 .badge-info {background-color: #5bc0de !important;}
 .badge-warning {background-color: #f0ad4e !important;}
@@ -66,9 +66,13 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 	opacity: 0;
 }
 
-.layoutWithoutSidebar {
+.content-without-sidebar {
 	padding-left: 15px !important;
 	padding-right: 15px !important;
+}
+
+.footer-without-sidebar {
+	padding-left: 0 !important;
 }
 
 .btn-group-float {
@@ -367,4 +371,8 @@ header .hi-logo > a > img {
 
 .panel-body {
 	padding: 25px !important;
+}
+
+.logo {
+	width: 120px;
 }

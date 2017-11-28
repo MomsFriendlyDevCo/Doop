@@ -52,12 +52,12 @@
 		<sidebar></sidebar>
 	</aside>
 
-	<section id="content" class="animated animated-fast" ng-class="{'layoutWithoutSidebar': !$global.$config.layout.sidebar}">
+	<section id="content" class="animated animated-fast" ng-class="{'content-without-sidebar': !$global.$config.layout.sidebar}">
 		<router-view></router-view>
 	</section>
 </section>
 <!-- }}} -->
 
 <!-- Footer {{{ -->
-<footer id="footer"></footer>
+<footer id="footer" ng-if="$global.$config.layout.footer" ng-class="{'footer-without-sidebar': !$global.$config.layout.sidebar}"></footer>
 <!-- }}} -->

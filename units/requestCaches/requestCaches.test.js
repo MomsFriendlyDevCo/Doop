@@ -18,7 +18,7 @@ describe('requestCaches - expiring requestCaches', function() {
 	it('should not have any expiring objects within the requestCaches post-clean', function(done) {
 		db.requestCaches.find({expires: {$lt: new Date()}, $errNotFound: false}, function(err, res) {
 			expect(err).to.not.be.ok;
-			expect(res).to.be.an.array;
+			expect(res).to.be.an('array');
 			expect(res).to.have.length(0);
 			done();
 		});
@@ -46,7 +46,7 @@ describe('requestCaches.runConditional()', function() {
 			},
 			function(err, res) {
 				expect(err).to.be.not.ok;
-				expect(res).to.be.a.number;
+				expect(res).to.be.a('number');
 				done();
 			}
 		);
@@ -63,7 +63,7 @@ describe('requestCaches.runConditional()', function() {
 			},
 			function(err, res) {
 				expect(err).to.be.not.ok;
-				expect(res).to.be.a.number;
+				expect(res).to.be.a('number');
 				expect(res).to.be.equal(lastWorker);
 				done();
 			}

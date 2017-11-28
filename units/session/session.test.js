@@ -29,11 +29,11 @@ describe('Session Unit', function() {
 		expect(user).to.have.property('name');
 		expect(user).to.have.property('role');
 		expect(user).to.have.property('isAdmin');
-		expect(user.isAdmin).to.be.a.boolean;
+		expect(user.isAdmin).to.be.a('boolean');
 		expect(user).to.have.property('isRoot');
-		expect(user.isRoot).to.be.a.boolean;
+		expect(user.isRoot).to.be.a('boolean');
 		expect(user).to.have.property('settings');
-		expect(user.settings).to.be.an.object;
+		expect(user.settings).to.be.an('object');
 	});
 
 });

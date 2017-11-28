@@ -193,12 +193,23 @@ angular
 	})
 	// }}}
 
-	// Reload default layout settings on every router reload {{{
+	// Set layout.isImportant = false on every router start
+	// Work around to prevent no header, no sidebar after reloading database
+	//{{{
+	.run(function($rootScope, $config) {
+		$rootScope.$on('$routerStart', ()=> {
+			$config.layout.isImportant = false;
+		});
+	})
+	// }}}
+
+	// Reload default layout settings on every router success {{{
 	.run(function($rootScope, $config) {
 		$rootScope.$on('$routerSuccess', ()=> {
 			if(!$config.layout.isImportant) {
 				$config.layout.headerNavbar = true;
 				$config.layout.sidebar = true;
+				$config.layout.footer = false;
 			}
 		});
 	})
