@@ -5,7 +5,7 @@
   "main": "server.js",
   "private": true,
   "engines": {
-    "node": "4.x.x"
+    "node": ">4.0.0"
   },
   "scripts": {
     "build": "gulp build",
@@ -16,7 +16,7 @@
     "url": "{{FIXME.git.repo}}"
   },
   "dependencies": {
-    "@momsfriendlydevco/angular-bs-tooltip": "^1.2.4",
+    "@momsfriendlydevco/angular-bs-tooltip": "^1.2.6",
     "@momsfriendlydevco/angular-ui-loader": "^1.1.0",
     "@momsfriendlydevco/animate": "^0.0.5",
     "@momsfriendlydevco/router": "^1.1.9",
@@ -64,7 +64,6 @@
     "gulp-clean-css": "^3.7.0",
     "gulp-concat": "^2.6.1",
     "gulp-filter": "^5.0.1",
-    "gulp-git-watch": "^0.1.0",
     "gulp-if": "^2.0.2",
     "gulp-jshint": "^2.0.4",
     "gulp-minify-html": "^1.0.6",
@@ -105,6 +104,7 @@
     "sha1": "^1.1.1",
     "string-sort": "^1.2.0",
     "superagent": "^3.8.1",
+    "tether": "^1.4.3",
     "ui-select": "^0.19.8",
     "uuid": "^3.1.0"
   }

@@ -54,6 +54,7 @@ global.paths = {
 			'node_modules/lodash/lodash.js',
 			'node_modules/angular/angular.js',
 			'node_modules/moment/moment.js',
+			'node_modules/tether/dist/js/tether.js',
 			// --- packages with dependents below this line --- //
 			// NOTE: Don't need main bootstrap.css as the theme provides this
 			'node_modules/bootstrap/dist/js/bootstrap.js',
@@ -159,6 +160,9 @@ gulp.task('load:app', [], function(finish) {
 * Connects to the database and loads all models into `app.db` + `db`
 */
 gulp.task('load:app.db', ['load:app'], function(finish) {
+	// Load the app.middleware.logging.db middleware - needed by schemas to log their state
+	_.set(app, 'middleware.logging.db', require(app.config.paths.root + '/units/middleware.logging.db/logging'));
+
 	require(config.paths.root + '/units/db/loader')(function(err, models) {
 		if (err) return finish(err);
 		global.db = app.db = models;

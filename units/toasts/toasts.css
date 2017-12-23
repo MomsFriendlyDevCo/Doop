@@ -1,0 +1,10 @@
+.ui-notification.ui-notification-save {
+	width: 100px;
+	border-radius: 50px;
+}
+
+.ui-notification.ui-notification-save > .message {
+	font-size: 15px;
+	margin: 5px;
+	text-align: center;
+}

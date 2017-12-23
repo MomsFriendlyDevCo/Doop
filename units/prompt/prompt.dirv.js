@@ -34,9 +34,9 @@ angular
 			dialog: function(options) {
 				// If we're already showing a dialog - defer showing the next dialog until this one has finished {{{
 				if ($prompt.$settings) {
-					options.$promise = $q.defer();
+					options.$defer = $q.defer();
 					$prompt.$dialogQueue.push(options)
-					return options.$promise;
+					return options.$defer.promise;
 				}
 				// }}}
 
@@ -56,15 +56,15 @@ angular
 						title: 'Close',
 						method: 'resolve',
 					}],
-					$promise: $q.defer(),
+					$defer: $q.defer(),
 				});
 				// }}}
 
 				// Attach to promise to add a status property (why $q doesnt have this is beyond me - MC) {{{
-				$prompt.$settings.$promise.state = 'pending';
-				$prompt.$settings.$promise.promise.then(
-					()=> $prompt.$settings.$promise.state = 'resolved',
-					()=> $prompt.$settings.$promise.state = 'rejected'
+				$prompt.$settings.$defer.state = 'pending';
+				$prompt.$settings.$defer.promise.then(
+					()=> $prompt.$settings.$defer.state = 'resolved',
+					()=> $prompt.$settings.$defer.state = 'rejected'
 				);
 				// }}}
 
@@ -72,12 +72,12 @@ angular
 				if (!$prompt.$settings.$dialogClose) {
 					if (angular.isUndefined($prompt.$settings.dialogClose) || $prompt.$settings.dialogClose == 'resolve') {
 						$prompt.$settings.$dialogClose = ()=> {
-							$prompt.$settings.$promise.resolve();
+							$prompt.$settings.$defer.resolve();
 							$prompt.close();
 						};
 					} else if ($prompt.$settings.dialogClose == 'reject') {
 						$prompt.$settings.$dialogClose = ()=> {
-							$prompt.$settings.$promise.reject();
+							$prompt.$settings.$defer.reject();
 							$prompt.close();
 						};
 					}
@@ -88,10 +88,10 @@ angular
 				$prompt.$settings.buttons = $prompt.$settings.buttons.map(b => {
 					if (!b.click) b.click = ()=> { // Compute a click event from the method
 						if (angular.isUndefined(b.method) || b.method == 'resolve') {
-							$prompt.$settings.$promise.resolve(b.id);
+							$prompt.$settings.$defer.resolve(b.id);
 							$prompt.close();
 						} else if (b.method == 'reject') {
-							$prompt.$settings.$promise.reject(b.id);
+							$prompt.$settings.$defer.reject(b.id);
 							$prompt.close();
 						}
 
@@ -122,7 +122,7 @@ angular
 				$rootScope.$broadcast('$prompt.open');
 				// }}}
 
-				return $prompt.$settings.$promise;
+				return $prompt.$settings.$defer.promise;
 			},
 
 
@@ -131,8 +131,8 @@ angular
 			* This is usually a 1:1 mapping for the dialog options
 			* @see dialog()
 			* @var {Object}
-			* @param {Promise} $promise The promise object for the current dialog
-			* @param {string} $promise.state Tracking of the promise status. ENUM: 'pending', 'resolved', 'rejected'
+			* @param {Promise} $defer The promise object for the current dialog
+			* @param {string} $defer.state Tracking of the promise status. ENUM: 'pending', 'resolved', 'rejected'
 			* @param {Object} $body The $sce compiled version of the dialog body if isHtml is truthy
 			* @param {Object} $bodyHeader The $sce compiled version of bodyHeader
 			* @param {Object} $bodyFooter The $sce compiled version of bodyFooter
@@ -230,6 +230,7 @@ angular
 			*/
 			text: function(options) {
 				if (angular.isString(options)) options = {body: options};
+				if (!options) options = {};
 				return $prompt.dialog(_.defaults(options, {
 					title: 'Input required',
 					body: '',
@@ -254,9 +255,9 @@ angular
 						{
 							id: 'confirm',
 							title: 'Confirm',
-							method: 'resolve',
 							class: 'btn btn-success',
 							icon: 'fa fa-check',
+							click: ()=> $prompt.close(), // When closing force the confirm button just to hide - resolve is handled in onHide
 						},
 					],
 					onShown: ()=> {
@@ -269,14 +270,15 @@ angular
 
 						// Bind form submission to also accept the form
 						angular.element('#modal-_prompt form').one('submit', e => {
+							e.preventDefault();
 							e.stopPropagation();
 							$prompt.$settings.buttons.filter(b => b.id == 'confirm')[0].click();
 						});
 					},
-					onHide: () => {
+					onHide: ()=> {
 						var gotVal = angular.element('#modal-_prompt input.form-control').val();
-						if (!gotVal && !$prompt.$settings.allowBlank) return $prompt.$settings.$promise.reject();
-						$prompt.$settings.$promise.resolve(gotVal);
+						if (!gotVal && !$prompt.$settings.allowBlank) return $prompt.$settings.$defer.reject();
+						$prompt.$settings.$defer.resolve(gotVal);
 					},
 				}));
 			},
@@ -289,10 +291,11 @@ angular
 			* @param {Object|string} options Either an options object or the body text of prompt
 			* @param {string} [options.title='Select an item'] The title of the dialog
 			* @param {string} [options.body=''] The body of the dialog
-			* @param {array} [options.buttons=[]]
+			* @param {array} [options.buttons=[]] The buttons to display, defaults to 'Confirm' + 'Cancel' if in multiple mode, blank otherwise
 			*
-			* @param {array|Object} [options.list] The list entries to display, this is assumed to either be a collection (with at least an ID) or something that will be marshelled into one
-			* @param {string} [options.default] The offset of the array to select by default, if this is a string it will be used as the ID of the item to match
+			* @param {array|Object} [options.list] The list entries to display, this is assumed to either be a collection (with `id` + `title` keys) or something that will be marshelled into one
+			* @param {boolean} [options.multiple=false] Whether to accept multiple values, if true the return will be an array of all selected items
+			* @param {number|string} [options.default] If numeric this is the offset of the array to select by default, if this is a string it will be used as the ID of the item to match
 			*
 			* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
 			*/
@@ -322,6 +325,8 @@ angular
 				return $prompt.dialog(_.defaults(options, {
 					$selectedIndex: 0, // The offset in the list that is currently selected
 					title: 'Select an item',
+					list: [],
+					default: options.multiple ? [] : undefined,
 					body: '',
 					bodyHeader: `
 						<div class="container-fluid text-center">
@@ -331,19 +336,55 @@ angular
 								</div>
 							</form>
 						</div>
-					`,
-					bodyFooter: `
-						<ul class="list-group">` +
-							options.list.map((i, index) => `
-							<a class="list-group-item" data-prompt-index="${index}">
-								${i.title}
-							</a>
-							`).join('') + `
-						</ul>
-						<div class="hide text-muted">No items found</div>
-					`,
+					` + (options.multiple ?
+						`
+							<div class="container-fluid text-center">
+								Select:
+								<a data-action="prompt-select-all">All</a>,
+								<a data-action="prompt-select-none">None</a>
+							</div>
+						`
+					: ''),
+					bodyFooter: options.multiple
+						? `
+							<ul class="list-group">` +
+								options.list.map((i, index) => `
+								<label class="list-group-item" data-prompt-index="${index}">
+									<input type="checkbox"/>
+									${i.title}
+								</label>
+								`).join('') + `
+							</ul>
+							<div class="hide text-muted">No items found</div>
+						`
+						: `
+							<ul class="list-group">` +
+								options.list.map((i, index) => `
+								<a class="list-group-item" data-prompt-index="${index}">
+									${i.title}
+								</a>
+								`).join('') + `
+							</ul>
+							<div class="hide text-muted">No items found</div>
+						`,
 					dialogClose: 'reject', // Reject if the user had second thoughts
-					buttons: [],
+					buttons: options.multiple
+						? [
+							{
+								id: 'cancel',
+								title: 'Cancel',
+								method: 'reject',
+								class: 'btn btn-danger',
+								icon: 'fa fa-times',
+							},
+							{
+								id: 'confirm',
+								title: 'Confirm',
+								class: 'btn btn-success',
+								icon: 'fa fa-check',
+								click: ()=> angular.element('#modal-_prompt form').trigger('submit'),
+							},
+						] : [],
 					onShown: ()=> {
 						// Auto-focus autofocus items
 						angular.element('#modal-_prompt input[autofocus]')
@@ -395,23 +436,115 @@ angular
 							})
 							.trigger('keyup') // Fire initial keyup handler
 
-						angular.element('#modal-_prompt ul.list-group > .list-group-item').on('click', function(e) {
-							$timeout(()=> {
-								$prompt.$settings.$promise.resolve($prompt.$settings.list[angular.element(this).data('prompt-index')].id);
-								$prompt.close();
-							});
-						});
+						if (options.multiple) {
+							// Ensure default exists and is an array
+							if (!angular.isArray($prompt.$settings.default)) $prompt.$settings.default = [$prompt.$settings.default];
 
-						// Bind form submission to also accept the form
-						angular.element('#modal-_prompt form').one('submit', e => {
-							e.stopPropagation();
-							e.preventDefault();
+							// For multiple select list - select all the default items
+							angular.element('#modal-_prompt ul.list-group > .list-group-item')
+								.each(function() {
+									var me = angular.element(this);
+									angular.element(me)
+										.find('input[type=checkbox]')
+										.prop('checked', $prompt.$settings.default.some(x => x == $prompt.$settings.list[me.data('prompt-index')].id))
+								})
 
-							$timeout(()=> {
-								$prompt.$settings.$promise.resolve($prompt.$settings.list[$prompt.$settings.$selectedIndex].id);
-								$prompt.close();
+							// Bind form submission to also accept the form
+							angular.element('#modal-_prompt form').one('submit', e => {
+								e.stopPropagation();
+								e.preventDefault();
+
+								$timeout(()=> {
+									$prompt.$settings.$defer.resolve(
+										$prompt.$settings.list
+											.filter((v, k) => {
+												var listItem = angular.element('#modal-_prompt ul.list-group > .list-group-item[data-prompt-index=' + k + ']');
+												if (!listItem) throw Error('Cannot find multiple choice item by index: ' + k);
+												return listItem.find('input[type=checkbox]').is(':checked');
+											})
+											.map(i => i.id)
+									)
+									$prompt.close();
+								});
 							});
-						});
+
+							angular.element('#modal-_prompt [data-action="prompt-select-all"]').on('click', e => {
+								angular.element('#modal-_prompt ul.list-group > .list-group-item input[type=checkbox]').prop('checked', true);
+							});
+
+							angular.element('#modal-_prompt [data-action="prompt-select-none"]').on('click', e => {
+								angular.element('#modal-_prompt ul.list-group > .list-group-item input[type=checkbox]').prop('checked', false);
+							});
+						} else {
+							// Clicking an item in single mode should select it and close
+							angular.element('#modal-_prompt ul.list-group > .list-group-item').on('click', function(e) {
+								$timeout(()=> {
+									$prompt.$settings.$defer.resolve($prompt.$settings.list[angular.element(this).data('prompt-index')].id);
+									$prompt.close();
+								});
+							});
+
+							// Bind form submission to also accept the form
+							angular.element('#modal-_prompt form').one('submit', e => {
+								e.stopPropagation();
+								e.preventDefault();
+
+								$timeout(()=> {
+									$prompt.$settings.$defer.resolve($prompt.$settings.list[$prompt.$settings.$selectedIndex].id);
+									$prompt.close();
+								});
+							});
+						}
+					},
+				}));
+			},
+
+
+			/**
+			* Display a MacGyver form in a modal and return the result in a promise
+			* This function inherits all properties from dialog() but sets various sane defaults for a MacGyver form
+			* @see $prompt.dialog()
+			* @param {Object|array} options Either an options object or the body text of prompt. If passed as an array that will be used as options.form
+			* @param {string} [options.title='Form input required'] The title of the dialog
+			* @param {string} [options.body=''] The body of the dialog
+			* @param {array} [options.buttons=OK + Cancel]
+			*
+			* @param {array|Object} [options.form] The MacGyver form configuration. If an array is given the contents will automaticallty be enclosed in an mgContainer
+			* @param {string} [options.data] The MacGyver form data
+			*
+			* @returns {Promise} A promise representing the MacGyver dialog
+			*/
+			macgyver: function(options) {
+				// Mangle the form into a container if given an array
+				if (angular.isArray(options)) options = {form: options};
+				if (angular.isArray(options.form)) options.form = {type: 'mgContainer', items: options.form};
+
+				return $prompt.dialog(_.defaults(options, {
+					$isMacgyver: true,
+					title: 'Form input required',
+					body: '',
+					dialogClose: 'reject', // Reject if the user had second thoughts
+					buttons: [
+						{
+							id: 'cancel',
+							title: 'Cancel',
+							method: 'reject',
+							class: 'btn btn-danger',
+							icon: 'fa fa-times',
+						},
+						{
+							id: 'confirm',
+							title: 'Confirm',
+							method: 'resolve',
+							class: 'btn btn-success',
+							icon: 'fa fa-check',
+						},
+					],
+					form: {},
+					data: {},
+					onHide: ()=> {
+						console.log('FIXME: RESOLVE MGFORM AS', $prompt.$settings.data);
+						$prompt.$settings.$defer.resolve($prompt.$settings.data);
 					},
 				}));
 			},
@@ -442,7 +575,7 @@ angular
 			var $ctrl = this;
 			$ctrl.$prompt = $prompt;
 
-			$scope.$on('$prompt.open', ()=> {
+			$scope.$on('$prompt.open', ()=> $timeout(()=> {
 				$element.find('.modal')
 					.one('show.bs.modal', ()=> $timeout(()=> {
 						$prompt.$settings.$status = 'showing';
@@ -457,7 +590,7 @@ angular
 					.one('hide.bs.modal', ()=> $timeout(()=> {
 						$prompt.$settings.$status = 'hiding';
 						if ($prompt.$settings.onHide) $prompt.$settings.onHide();
-						if ($prompt.$settings.$promise.state == 'pending') { // Promise not yet resolved - yet we are closing, user probably pressed escape or clicked the background
+						if ($prompt.$settings.$defer.state == 'pending') { // Promise not yet resolved - yet we are closing, user probably pressed escape or clicked the background
 							$prompt.$settings.$dialogClose();
 						}
 					}))
@@ -471,7 +604,7 @@ angular
 						show: true,
 						backdrop: $prompt.$settings.backdrop,
 					})
-			});
+			}, 100));
 
 			$scope.$on('$prompt.close', ()=> {
 				$element.find('.modal').modal('hide');
@@ -487,10 +620,11 @@ angular
 						</div>
 						<div class="modal-body">
 							<div ng-if="$ctrl.$prompt.$settings.bodyHeader" ng-bind-html="$ctrl.$prompt.$settings.$bodyHeader"></div>
-							<div ng-if="!$ctrl.$prompt.$settings.isHTML" class="text-center">
+							<div ng-if="!$ctrl.$prompt.$settings.isHtml" class="text-center">
 								<h4>{{$ctrl.$prompt.$settings.body}}</h4>
 							</div>
-							<div ng-if="$ctrl.$prompt.$settings.isHTML" ng-bind-html="$ctrl.$prompt.$settings.$body"></div>
+							<mg-form ng-if="$ctrl.$prompt.$settings.$isMacgyver" config="$ctrl.$prompt.$settings.form" data="$ctrl.$prompt.$settings.data"></mg-form>
+							<div ng-if="$ctrl.$prompt.$settings.isHtml" ng-bind-html="$ctrl.$prompt.$settings.$body"></div>
 							<div ng-if="$ctrl.$prompt.$settings.bodyFooter" ng-bind-html="$ctrl.$prompt.$settings.$bodyFooter"></div>
 						</div>
 						<div class="modal-footer">

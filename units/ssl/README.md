@@ -28,4 +28,8 @@ If there is no known package install the PPA via
 
 3. Setup the certificate from the root of the site:
 
-	sudo letsencrypt certonly --webroot -w ./units/ssl/cert -d <DOMAIN>
+	sudo letsencrypt certonly --manual -d <DOMAIN> --preferred-challenges dns
+
+4. Follow the instructions given. If prompted for an email address and you work for MFDC use `daemons@mfdc.biz`. If prompted to perform DNS verification either speak to [Matt](matt@mfdc.biz) or alter the DNS as instructed to insert your TXT records.
+
+5. If this is single server setup (i.e. no subdomains) copy the `fullchain.pem` + `privkey.pem` files from `/etc/letsencrypt/live/<DOMAIN>` into `units/ssl/cert/`. Or alternatively make that directory accessible by the Node process and add the full paths to those files in the config object as `cert` + `key`

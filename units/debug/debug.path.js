@@ -8,7 +8,7 @@ var os = require('os');
 * Test email sending
 * This dispatches the '/units/emails/debug.tmpl.txt' email to the email address stored in app.config.email.from
 */
-app.get('/api/debug/test/email', app.middleware.ensure.root, function(req, res) {
+app.get('/api/debug/test/email', app.middleware.ensure.login, function(req, res) {
 	email()
 		.to(app.config.email.from)
 		.subject('Debug Email')
@@ -38,7 +38,7 @@ app.get('/api/debug/version', function(req, res) {
 			git: function(next) {
 				async()
 					.use(asyncExec)
-					.exec('git', ['git', 'log', '-1', `--pretty=format:%H|%h|%cI|%cn|%s`])
+					.exec('git', ['git', 'log', '-1', `--pretty=format:%H|%h|%cI|%cn|%s`], {cwd: app.config.paths.root})
 					.then('git', function(next) {
 						var gitInfo = this.git[0].split('|');
 						next(null, {
@@ -87,4 +87,12 @@ app.get('/api/debug/live', app.middleware.ensure.login, function(req, res) {
 		uptime: os.uptime(),
 		load: os.loadavg(),
 	});
+});
+
+app.post('/api/debug/403', function(req, res) {
+	res.status(403).send('You are forbidden from doing that. Forbidden I say!');
+});
+
+app.get('/api/debug/500', function(req, res) {
+	throw new Error('Intentional test error');
 });

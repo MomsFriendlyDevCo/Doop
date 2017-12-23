@@ -39,3 +39,4 @@ node_modules/
 tmp
 uploads/
 .vscode
+package-lock.json

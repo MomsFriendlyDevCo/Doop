@@ -20,7 +20,7 @@ var monoxide = require('monoxide');
 
 /**
 * Load the database and all models
-* @param {function} callback Optional callback to fire on exit
+* @param {function} callback Optional callback to fire on exit. Called as (err, models)
 * @return {EventEmitter}
 */
 module.exports = function databaseLoader(callback) {

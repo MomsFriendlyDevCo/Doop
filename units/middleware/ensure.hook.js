@@ -1,7 +1,8 @@
+var _ = require('lodash');
 var colors = require('chalk');
 
 app.register('preControllers', ['session'], function(finish) {
-	app.middleware.ensure = {
+	_.merge(app.middleware, {ensure: {
 		authFail: function(req, res, next) {
 			console.log(colors.red('UNAUTHORIZED'), colors.cyan(req.url));
 
@@ -75,7 +76,7 @@ app.register('preControllers', ['session'], function(finish) {
 				app.middleware.ensure.authFail(req, res, next);
 			}
 		},
-	};
+	}});
 
 	finish();
 });

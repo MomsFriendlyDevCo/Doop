@@ -1,21 +1,6 @@
 {
 	"users": [
 		{
-			"_ref": "users.js",
-			"username": "js",
-			"password": "qwaszx",
-			"name": "Jake Skoric",
-			"email": "jake@mfdc.biz",
-			"role": "root",
-			"address": {
-				"street": "4 First Avenue",
-				"city": "Burleigh Heads",
-				"state": "Queensland",
-				"country": "Australia",
-				"postcode": "4220"
-			}
-		},
-		{
 			"_ref": "users.mc",
 			"username": "mc",
 			"password": "qwaszx",
@@ -25,36 +10,6 @@
 			"address": {
 				"street": "27 Burleigh Street",
 				"city": "Burleigh Heads",
-				"state": "Queensland",
-				"country": "Australia",
-				"postcode": "4220"
-			}
-		},
-		{
-			"_ref": "users.ms",
-			"username": "ms",
-			"password": "qwaszx",
-			"name": "Michael Schembri",
-			"email": "michael@mfdc.biz",
-			"role": "root",
-			"address": {
-				"street": "44 Evendale Street",
-				"city": "Burleigh Heads",
-				"state": "Queensland",
-				"country": "Australia",
-				"postcode": "4220"
-			}
-		},
-		{
-			"_ref": "users.vm",
-			"username": "vm",
-			"password": "qwaszx",
-			"name": "Vandy Mau",
-			"email": "vandy@mfdc.biz",
-			"role": "root",
-			"address": {
-				"street": "20 Watts Drive",
-				"city": "Varsity Lakes",
 				"state": "Queensland",
 				"country": "Australia",
 				"postcode": "4220"

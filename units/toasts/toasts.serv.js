@@ -28,6 +28,20 @@ angular
 
 
 		/**
+		* Display a brief message to indicate that something has just been saved
+		*/
+		$toast.save = ()=>
+			Notification({
+				templateUrl: 'angular-ui-notification-save.html',
+				message: 'Saved',
+				delay: 1000,
+				type: 'success',
+				positionY: 'top',
+				positionX: 'right',
+			});
+
+
+		/**
 		* Catch and display an error message from a promise
 		* This funciton tries various methods to figure out what the human readable error message should actually be
 		* Its designed to be used in Promise callbacks
@@ -79,4 +93,15 @@ angular
 		});
 
 		return $toast;
-	});
+	})
+	.run(function($templateCache) {
+		$templateCache.put('angular-ui-notification-save.html', `
+			<div class="ui-notification ui-notification-save">
+				<h3 ng-show="title" ng-bind-html="title"></h3>
+				<div class="message">
+					<i class="fa fa-check"></i>
+					<span ng-bind-html="message"></span>
+				</div>
+			</div>
+		`);
+	})

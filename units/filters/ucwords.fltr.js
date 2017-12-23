@@ -15,8 +15,6 @@ angular
 		return function(value) {
 			if (!value)
 				return;
-			return value.replace(/\b([a-z])/g, function(all, first) {
-				return first.toUpperCase();
-			});
+			return _.startCase(value);
 		};
 	});

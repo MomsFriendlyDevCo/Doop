@@ -24,7 +24,7 @@ app.register('postServer', function(finish) {
 	// Handle 500
 	app.use(function(err, req, res, next) {
 		logPrinter(req, res, ()=> {});
-		console.log(colors.grey('--- error trace ---'));
+		console.log(colors.grey(`--- error trace (${req.method} ${req.path}) ---`));
 		console.error(err.stack);
 		console.log(colors.grey('--- end of error ---'));
 
