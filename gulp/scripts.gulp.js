@@ -3,7 +3,6 @@
 */
 
 var _ = require('lodash');
-var bytediff = require('gulp-bytediff');
 var cache = require('gulp-cache');
 var concat = require('gulp-concat');
 var babel = require('gulp-babel');
@@ -17,8 +16,6 @@ var notify = require('gulp-notify');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
-
-var common = require('./common.gulp.lib');
 
 /**
 * Compile all JS files into the build directory
@@ -51,12 +48,10 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(replace(/^'use strict';\n$/m, ''))
 		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.init()))
 		.pipe(concat('app.min.js'))
-		.pipe(bytediff.start())
 		.pipe(replace("\"app\/", "\"\/app\/")) // Rewrite all literal paths to relative ones
 		.pipe(replace(new RegExp('0\\s*\\/' + '\\*IMPORT: (.+)\\*\\/', 'g'), (junk, i) => JSON.stringify(_.get(global, i)))) // Import variables in units/theme/config.serv.js
 		.pipe(gulpIf(app.config.gulp.minifyJS, uglify({mangle: false})))
 		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.write('.')))
-		.pipe(bytediff.stop(common.bytediffFormatter))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
 			if (!hasErr && app.config.gulp.notifications)

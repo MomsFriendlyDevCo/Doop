@@ -10,8 +10,6 @@ var nodemon = require('gulp-nodemon');
 var notify = require('gulp-notify');
 var watch = require('gulp-watch');
 
-var common = require('./common.gulp.lib');
-
 /**
 * Launch a server and watch the local file system for changes (restarting the server if any are detected)
 * This task independently watches the client side files dir (inc. Angular) for changes and only rebuilds those without rebooting the server if a change is detected

@@ -118,11 +118,6 @@ global.paths = {
 };
 // }}}
 
-/**
-* Use project's common gulp utils lib
-*/
-var common = require('./gulp/common.gulp.lib');
-
 // Pull in gulp remaining gulp files (i.e. tasks)
 glob.sync(__dirname + '/**/*.gulp.js').forEach(path => require(path));
 
