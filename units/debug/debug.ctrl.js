@@ -3,7 +3,7 @@ angular
 	.run($router => $router.when('/debug').title('Debug').component('debugCtrl'))
 	.component('debugCtrl', {
 		templateUrl: '/units/debug/debug.tmpl.html',
-		controller: function($config, $loader, $http, $prompt, $q, $router, $session, $scope, $screen, $timeout, $toast, $tts, $filter, AssetTrees) {
+		controller: function($config, $loader, $http, $prompt, $q, $router, $session, $scope, $screen, $timeout, $toast, $tts, $filter) {
 			var $ctrl = this;
 			$ctrl.$config = $config;
 			$ctrl.$loader = $loader;
