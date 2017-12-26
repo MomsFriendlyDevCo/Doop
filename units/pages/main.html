@@ -13,7 +13,8 @@
 			<a href="/">{{::$global.config.title}}</a>
 		</li>
 
-		<notifications-header-widget-ctrl></notifications-header-widget-ctrl>
+		<notifications-header-widget></notifications-header-widget>
+		<session-header-widget></session-header-widget>
 	</ul>
 </header>
 <!-- }}} -->
@@ -21,34 +22,6 @@
 <!-- Content area -->
 <section id="main">
 	<aside id="sidebar" class="sidebar" ng-if="$global.$config.layout.sidebar">
-		<!-- Upper sidebar user profile tools {{{ -->
-		<div ng-if="$global.$session.isLoggedIn" class="s-profile">
-			<a data-toggle="collapse" data-target="#profile-links">
-				<div class="sp-pic">
-					<img gravatar-src="$global.$session.data.email" gravatar-size="50" gravatar-default="identicon" class="img-circle img-user media-object">
-				</div>
-
-				<div class="sp-info">
-					{{$global.$session.data.name}}
-
-					<i class="fa fa-caret-down"></i>
-				</div>
-			</a>
-
-			<ul id="profile-links" class="collapse">
-				<li><a href="#/profile"><i class="fa fa-user"></i> Your Profile</a></li>
-				<li><a href="#/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
-			</ul>
-		</div>
-		<div ng-if="!$global.$session.isLoggedIn" class="s-profile">
-			<a>
-				<div class="sp-pic">
-					<img class="img-circle img-user media-object">
-				</div>
-			</a>
-		</div>
-		<!-- }}} -->
-
 		<sidebar></sidebar>
 	</aside>
 

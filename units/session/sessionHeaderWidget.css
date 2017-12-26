@@ -1,0 +1,10 @@
+session-header-widget .dropdown-toggle > .username {
+	color: #FFF;
+	float: left;
+	margin-top: 10px;
+	opacity: 0.9;
+}
+
+session-header-widget .dropdown-toggle > img {
+	float: right;
+}
