@@ -1,28 +1,23 @@
 angular
 	.module('app')
-	// Match /login {{{
-	.run(($router, $session) => $router.when('/login') // User not logged in - allow /login route
+	// Route: /login {{{
+	.run($router => $router.when('/login')
 		.title('Login')
-		.requires($session.promise.notLogin)
 		.component('sessionLoginCtrl')
 	)
-	.run(($router, $session) => $router.when('/login') // User IS logged in - redirect to /
-		.title('Login')
-		.requires($session.promise.login)
-		.redirect('/')
-	)
 	// }}}
-	// If no route matches + user is not logged in go to '/login' {{{
-	.run(($router, $session, $window) => $router.rule()
-		.priority('lowest')
-		.requires($session.promise.notLogin)
-		.requires(()=> {
-			// Tell $session to redirect to the originally requested hash code if we have one
-			if ($window.location.hash && $window.location.hash != '/#/login') $session.postLoginUrlOnce = '/' + $window.location.hash;
-			return true;
-		})
-		.redirect('/login')
-	)
+	// Route: Post login redirect to originally requested page {{{
+	.run(($router, $session) => {
+		$router.rule()
+			.priority('lowest')
+			.requires($session.promise.notLogin)
+			.requires(()=> {
+				// Tell $session to redirect to the originally requested hash code if we have one
+				if (location.hash) $session.postLoginUrlOnce = '/' + location.hash;
+				return true;
+			})
+			.redirect('/');
+	})
 	// }}}
 	// Redirect any page navigation (that is not in an array of approved ones) to /login if the user is not logged in {{{
 	.run(function($location, $rootScope, $session, $window) {
@@ -41,9 +36,7 @@ angular
 			/^\/error\//,
 		];
 
-		$rootScope.$on('$routerStart', function(e, rule) {
-			if (!rule) return; // No route figured out yet
-
+		$rootScope.$on('$routerStart', ()=> {
 			var segmentValue = '/' + _.trim($window.location[compareSegment], '/#'); // Crop rubbish from beginning + end of segment string
 
 			if (allowedPaths.find(i => // Allowed path - skip redirect
