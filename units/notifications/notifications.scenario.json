@@ -13,10 +13,10 @@
 			"body": "From Root!"
 		},
 		{
-			"from": "users.vm",
+			"from": "users.mc",
 			"to": "users.mc",
-			"subject": "From VM!",
-			"body": "From VM!"
+			"subject": "From MC!",
+			"body": "From MC!"
 		}
 	]
 }
