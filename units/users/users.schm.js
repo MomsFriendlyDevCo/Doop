@@ -1,9 +1,3 @@
-/**
-* Users model
-*
-* @description Server-side user model
-*/
-
 var monoxide = require('monoxide');
 
 var User = module.exports = monoxide.schema('users', {

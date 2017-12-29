@@ -37,6 +37,5 @@ config/private.conf.js
 newrelic_agent.log
 node_modules/
 tmp
-uploads/
 .vscode
 package-lock.json
