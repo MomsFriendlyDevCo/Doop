@@ -223,7 +223,7 @@ angular
 
 	// Page load animation {{{
 	.run(function($rootScope, $timeout) {
-		var offsetY = 150; // Max Y offset when transitioning the page animation
+		var offsetY = 10; // Max Y offset when transitioning the page animation
 
 		$rootScope.$on('$routerStart', ()=> angular.element('#content').css('opacity', 0));
 		$rootScope.$on('$routerSuccess', ()=> {
@@ -235,7 +235,7 @@ angular
 					opacity: 1,
 					animateOffsetY: offsetY,
 				}, {
-					duration: 500,
+					duration: 200,
 					easing: 'swing',
 					step: (val, fx) => {
 						if (fx.prop == 'animateOffsetY')
