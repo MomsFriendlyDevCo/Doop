@@ -7,20 +7,26 @@ var async = require('async-chainable');
 app.get('/api/session/profile', function(req, res) {
 	if (!req.user) return res.status(200).send({});
 
-	// Decide what gets exposed to the front-end
-	var user = {
-		_id: req.user._id,
-		username: req.user.username,
-		email: req.user.email,
-		name: req.user.name,
-		role: req.user.role,
-		address: req.user.address,
-		settings: req.user.settings || null,
-		isAdmin: (req.user.role == 'admin' || req.user.role == 'root'),
-		isRoot: (req.user.role == 'root'),
-	};
-
-	res.send(user);
+	async()
+		.then('user', function(next){
+			// Decide what gets exposed to the front-end
+			var user = {
+				_id: req.user._id,
+				username: req.user.username,
+				email: req.user.email,
+				name: req.user.name,
+				bio: req.user.bio,
+				role: req.user.role,
+				isAdmin: (req.user.role == 'admin' || req.user.role == 'root'),
+				isRoot: (req.user.role == 'root'),
+				settings: (req.user.settings || null),
+				permissions: (req.user.permissions || {}),
+			};
+			next(null, user);
+		})
+		.end(function(){
+			res.send(this.user);
+		})
 });
 
 

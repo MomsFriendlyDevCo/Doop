@@ -18,13 +18,17 @@ var User = module.exports = monoxide.schema('users', {
 	name: {type: String},
 	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
-	settings: {type: 'object', default: {}},
+	settings: {
+		historyOrder: {type: 'string', enum: ['recentFirst', 'oldestFirst'], default: 'oldestFirst'},
+	},
 	address: {
 		street: String,
 		city: String,
 		state: String,
 		country: {type: String, default: "Australia"},
 		postcode: String,
+	},
+	permissions: {
 	},
 });
 
