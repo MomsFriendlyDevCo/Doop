@@ -15,13 +15,6 @@ var User = module.exports = monoxide.schema('users', {
 	settings: {
 		historyOrder: {type: 'string', enum: ['recentFirst', 'oldestFirst'], default: 'oldestFirst'},
 	},
-	address: {
-		street: String,
-		city: String,
-		state: String,
-		country: {type: String, default: "Australia"},
-		postcode: String,
-	},
 	permissions: {
 	},
 });
