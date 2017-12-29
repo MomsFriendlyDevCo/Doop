@@ -67,3 +67,10 @@ User
 		};
 	});
 // }}
+
+// Force username to ALWAYS be lower case {{{
+User.hook('save', function(done, q) {
+	if (q.username) q.username = q.username.toLowerCase();
+	done();
+});
+// }}}
