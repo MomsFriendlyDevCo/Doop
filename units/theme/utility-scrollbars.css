@@ -1,0 +1,36 @@
+::-webkit-scrollbar {
+	width: 12px;
+	height: 18px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #8d8f90;
+	border: 4px solid rgba(0, 0, 0, 0);
+	background-clip: padding-box;
+	-webkit-border-radius: 7px;
+	-webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #8d8f90;
+}
+
+
+/* Main sidebar tweaks {{{ */
+#mainnav-container::-webkit-scrollbar-track {
+	margin-top: 40px;
+	background: #2d3c4b;
+}
+
+#mainnav-container {
+	overflow: hidden;
+	min-height: auto !important;
+	height: 100vh !important;
+}
+
+#mainnav-container:hover {
+    /* 'auto' rather than 'scroll' so it only shows scrollbar
+    when hovered over and is absolutely necessary */
+    overflow-y: auto;
+}
+/* }}} */

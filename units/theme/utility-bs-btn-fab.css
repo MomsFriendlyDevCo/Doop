@@ -6,8 +6,8 @@
 *
 * @example
 * <div class="btn-group-float">
-* 	<a href="#/" class="btn btn-sm btn-danger btn-sm btn-circle animated animation-delay-3 bounceInUp" tooltip="Discard all changes"><i class="fa fa-fw fa-times"></i></a>
-* 	<button type="submit" class="btn btn-success btn-lg btn-circle animated bounceInUp" tooltip="Save changes"><i class="fa fa-check"></i></button>
+* 	<a href="#/" class="btn btn-icon btn-circle btn-danger btn-sm animated animation-delay-3 bounceInUp" tooltip="Discard all changes"><i class="fa fa-fw fa-times"></i></a>
+* 	<button type="submit" class="btn btn-icon btn-circle btn-success btn-lg animated bounceInUp" tooltip="Save changes"><i class="fa fa-check"></i></button>
 * </div>
 */
 .btn-group-float {
@@ -19,6 +19,16 @@
 	display: flex;
 	justify-content: flex-end;
 	align-items: flex-end;
+}
+
+#container.mainnav-lg .btn-group-float.pull-left {
+	left: 240px;
+	right: auto;
+}
+
+#container.mainnav-sm .btn-group-float.pull-left {
+	left: 70px;
+	right: auto;
 }
 
 .btn-group-float > .btn {
@@ -45,6 +55,18 @@
 	padding: 16px;
 	width: 70px;
 	height: 70px;
+}
+
+@media (max-width: 767px) {
+	#container.mainnav-lg .btn-group-float.pull-left,
+	#container.mainnav-sm .btn-group-float.pull-left {
+		left: 10px;
+	}
+
+	/* Hide floated button group while side is opened on small sizes */
+	#container.mainnav-in .btn-group-float.pull-left {
+		display: none;
+	}
 }
 
 /* Shadowing (mainly fixes with .waves-circle) {{{ */
