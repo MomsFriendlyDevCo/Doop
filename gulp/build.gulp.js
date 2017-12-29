@@ -19,6 +19,7 @@ gulp.task('build', function(finish) {
 
 	// FIXME: This is a temporary work around until Gulp 4 - https://github.com/OverZealous/run-sequence
 	runSequence(
+		'npm:update',
 		['css', 'partials', 'scripts', 'vendors'],
 		'build:includes',
 		'build:complete',

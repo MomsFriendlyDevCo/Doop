@@ -73,6 +73,11 @@ gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 			gulp.start('vendors');
 		});
 
+		watch('package.json', function() {
+			gutil.log('Check NPM installs...');
+			gulp.start('npm:update');
+		});
+
 		watch([
 			paths.root + '/units/pages/**/*.html',
 			paths.root + '/units/layouts/**/*.html',

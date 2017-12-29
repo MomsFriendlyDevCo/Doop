@@ -147,6 +147,7 @@ gulp.on('stop', ()=> process.exit(0));
 gulp.task('load:app', [], function(finish) {
 	require('./units/core/backend');
 	global.config = app.config;
+	gutil.log('Using application env', gutil.colors.cyan(config.env));
 
 	finish();
 });
