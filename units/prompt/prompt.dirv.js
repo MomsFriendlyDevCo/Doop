@@ -476,6 +476,13 @@ angular
 								angular.element('#modal-_prompt ul.list-group > .list-group-item input[type=checkbox]').prop('checked', false);
 							});
 						} else {
+							// Select the default item (if there is one)
+							if ($prompt.$settings.default) {
+								$prompt.$settings.$selectedIndex = $prompt.$settings.list.findIndex(i => i.id == $prompt.$settings.default);
+								angular.element('#modal-_prompt ul.list-group > .list-group-item').removeClass('list-group-item-primary');
+								angular.element(angular.element('#modal-_prompt ul.list-group > .list-group-item')[$prompt.$settings.$selectedIndex]).addClass('list-group-item-primary');
+							}
+
 							// Clicking an item in single mode should select it and close
 							angular.element('#modal-_prompt ul.list-group > .list-group-item').on('click', function(e) {
 								$timeout(()=> {
