@@ -19,7 +19,7 @@
     "@momsfriendlydevco/angular-bs-tooltip": "^1.2.6",
     "@momsfriendlydevco/angular-ui-loader": "^1.1.0",
     "@momsfriendlydevco/animate": "^0.0.5",
-    "@momsfriendlydevco/express-middleware-cache": "^1.0.0",
+    "@momsfriendlydevco/express-middleware-cache": "^1.0.1",
     "@momsfriendlydevco/router": "^1.1.9",
     "angular": "^1.6.8",
     "angular-animate": "^1.6.8",

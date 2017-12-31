@@ -14,6 +14,13 @@ app.register('init', function(finish) {
 	app.middleware.cache = cache;
 	app.middleware.cache.invalidate = cache.invalidate;
 
+	var shownMethod;
+	cache.events.on('routeCacheCacher', mod => {
+		if (shownMethod) return; // Already advertised what module we are using
+		shownMethod = true;
+		console.log('-', colors.grey('[middleware.cache]'), 'Using cache module', colors.cyan(mod));
+	});
+
 	cache.events.on('routeCacheHashError', (err, req) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache Error + ${err.toString()}`}))
 	cache.events.on('routeCacheEtag', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Validated against existing etag hash ${info.hash}`}))
 	cache.events.on('routeCacheExisting', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cached using existing hash ${info.hash}`}))
