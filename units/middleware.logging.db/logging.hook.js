@@ -31,7 +31,7 @@ app.register('postModels', function(finish) {
 			app.db[model].use(app.middleware.logging.db.setup, nextModel);
 		})
 		.then(function(next) {
-			console.log(colors.grey('[middleware.logging]'), 'Attached to:', app.config.logging.collections.map(i => colors.cyan(i)).join(', '));
+			console.log('-', colors.grey('[middleware.logging]'), 'Attached to:', app.config.logging.collections.map(i => colors.cyan(i)).join(', '));
 			next();
 		})
 		.end(finish);
