@@ -309,6 +309,10 @@ angular
 				// }}}
 
 				// Mangle list into something we can use {{{
+				if (_.isObject(options.list)) { // Remove all Angular crap before we start
+					options.list = _.pickBy(options.list, (v, k) => !k.startsWith('$') && options.list.hasOwnProperty(k));
+				}
+
 				options.list = _.map(options.list, (v, k) => {
 					if (_.isObject(v)) { // Already a collection
 						if (!v.id) v.id = k;
