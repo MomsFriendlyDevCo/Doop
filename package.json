@@ -51,7 +51,7 @@
     "express": "^4.16.2",
     "express-ejs-layouts": "^2.3.1",
     "express-list-endpoints": "^3.0.1",
-    "express-log-url": "^1.2.1",
+    "express-log-url": "^1.2.2",
     "express-session": "^1.15.6",
     "font-awesome": "^4.7.0",
     "glob": "^7.1.2",
