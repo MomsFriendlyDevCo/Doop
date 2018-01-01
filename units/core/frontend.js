@@ -223,25 +223,27 @@ angular
 
 	// Page load animation {{{
 	.run(function($rootScope, $timeout) {
-		var offsetY = 10; // Max Y offset when transitioning the page animation
+		var previousRule;
 
-		$rootScope.$on('$routerStart', ()=> angular.element('#content').css('opacity', 0));
-		$rootScope.$on('$routerSuccess', ()=> {
+		$rootScope.$on('$routerStart', (e, rule) => {
+			previousRule = rule;
+			angular.element('#content').css('opacity', 0);
+		});
+
+		$rootScope.$on('$routerSuccess', (e, rule) => {
+			if (previousRule && previousRule._id && rule._id == previousRule._id) { // Navigating to self - skip animation
+				angular.element('#content').css('opacity', 1);
+				return;
+			}
+
 			var pageArea = angular.element('#content')
-
 			pageArea
-				.css('animateOffsetY', 0)
 				.animate({
 					opacity: 1,
-					animateOffsetY: offsetY,
 				}, {
-					duration: 200,
+					duration: 400,
 					easing: 'swing',
-					step: (val, fx) => {
-						if (fx.prop == 'animateOffsetY')
-							pageArea.css('transform', 'translateY(' + Math.floor(offsetY - val) + 'px)');
-					},
-					complete: ()=> pageArea.css({transform: '', opacity: ''}), // Remove mutated properties when we're done with them
+					complete: ()=> pageArea.css({opacity: ''}), // Remove mutated properties when we're done with them
 				});
 		});
 	})
