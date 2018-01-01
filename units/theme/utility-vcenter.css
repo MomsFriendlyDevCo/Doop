@@ -1,0 +1,14 @@
+.vcenter-inner img {
+	width: 100%;
+}
+
+.vcenter-outer {
+	display: table;
+	height: 100%;
+	width: 100%;
+}
+
+.vcenter-inner {
+	display: table-cell;
+	vertical-align: middle;
+}
