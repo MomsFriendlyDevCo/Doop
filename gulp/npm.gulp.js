@@ -64,7 +64,7 @@ gulp.task('npm:update', ['load:app'], function(finish) {
 			gutil.log('Project requires NPM update', gutil.colors.grey(`(Package Hash: ${this.git.shortHash}, latest update: ${_.get(this.stamps, ['package.json', 'shortHash']) || 'NONE'})`));
 			async()
 				.use(asyncExec)
-				.exec(['npm', 'install'], {passthru: true})
+				.exec(['npm', 'install', '--no-progress'], {passthru: true})
 				.end(next);
 		})
 		// }}}
