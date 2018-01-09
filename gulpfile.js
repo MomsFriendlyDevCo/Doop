@@ -159,7 +159,7 @@ gulp.task('load:app.db', ['load:app'], function(finish) {
 	// Load the app.middleware.logging.db middleware - needed by schemas to log their state
 	_.set(app, 'middleware.logging.db', require(app.config.paths.root + '/units/middleware.logging.db/logging'));
 
-	require(config.paths.root + '/units/db/loader')(function(err, models) {
+	require(config.paths.root + '/units/core.db/loader')(function(err, models) {
 		if (err) return finish(err);
 		global.db = app.db = models;
 		finish();
