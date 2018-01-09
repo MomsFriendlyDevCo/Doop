@@ -6,7 +6,7 @@ var monoxide = require('monoxide');
 var passport = require('passport');
 var passportLocalStrategy = require('passport-local').Strategy;
 
-app.register('preControllers', ['db'], function(finish) {
+app.register('preControllers', ['core.db'], function(finish) {
 	app.use(connectFlash());
 
 	var mongoStore = mongoSessionStore(expressSession);
