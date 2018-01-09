@@ -36,6 +36,25 @@ a, [ng-click] {
 }
 /* }}} */
 /* }}} */
+/* Breadcrumbs {{{ */
+/* Breadcrumbs are way too indented */
+@media (min-width: 1280px) {
+	#content #content-header > .breadcrumb {
+		padding: 10px !important;
+		margin: -40px -20px 20px !important;
+	}
+}
+
+/* Remove stupid padding theme adds to breadcrumbs */
+.breadcrumb {
+	padding: 0 !important;
+	margin: 0 15px !important;
+}
+
+.card .breadcrumb {
+	border-bottom: none !important;
+}
+/* }}} */
 /* Buttons {{{ */
 /* .btn-context - display a dropdown context menu {{{ */
 /* See the users list for an example in a table */
@@ -148,6 +167,12 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 }
 /* }}} */
 /* }}} */
+/* Dropdowns {{{ */
+/* Dropdown icons should be spaced out more */
+.dropdown-menu a > i {
+	margin-right: 5px;
+}
+/* }}} */
 /* Forms {{{ */
 /* .form-control {{{ */
 /* Fix the weird dropdown button for the material theme {{{ */
@@ -188,6 +213,11 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 	width: 300px;
 }
 /* }}} */
+/* Avatar styles {{{ */
+.img-circle {
+	border-radius: 50% !important;
+}
+/* }}} */
 /* }}} */
 /* Label {{{ */
 /* Label peers are too close together {{{ */
@@ -209,6 +239,13 @@ header .hi-logo .navbar-brand > img {
 header .hi-logo .navbar-brand {
 	font-size: 30px;
 	text-transform: none;
+}
+
+header a.btn {
+	height: 40px;
+	padding-top: 8px;
+	margin: 0 10px;
+	box-shadow: none !important;
 }
 /* }}} */
 /* Scrollbars {{{ */
@@ -235,6 +272,16 @@ header .hi-logo .navbar-brand {
 	background: rgba( 0, 0, 0, 0.4 );
 }
 /* }}} */
+/* }}} */
+/* Sidebar {{{ */
+/* Replace weird theme iconset with FA */
+.sub-menu > a:before {
+	display: inline-block;
+	font-family: FontAwesome !important;
+	content: "\f078" !important;
+	font-size: 14px !important;
+	color: #989898;
+}
 /* }}} */
 /* Tables {{{ */
 /* All A links should display as normal text {{{ */
@@ -268,6 +315,93 @@ table.table td > .btn-group {
 .text-lg {font-size: 16pt;}
 .text-xlg {font-size: 20pt;}
 /* }}} */
+/* }}} */
+/* Toggles {{{ */
+/* Designed to be used with the ui-toggle element
+<div class="toggle">
+	<ui-toggle></ui-toggle>
+	<label>Some text</label>
+</div>
+*/
+.toggle {
+	display: flex;
+	margin-top: 6px;
+	align-items: center;
+}
+
+.toggle + .toggle {
+	margin-bottom: 12px;
+}
+
+.toggle > label {
+	margin: 2px 0 0 5px;
+}
+/* }}} */
+/* Tabs {{{ */
+/* Tabs shouldn't necessarily always be uppercase */
+.tab-nav > li > a {
+	text-transform: none !important;
+}
+
+/* Normal bootstrap tabs should work the same as material-design tabs */
+.nav.nav-tabs {
+	list-style: none;
+	padding: 0;
+	white-space: nowrap;
+	margin: 0;
+	overflow: auto;
+	box-shadow: inset 0 -2px 0 0 #eee;
+	width: 100%;
+}
+
+.nav.nav-tabs > li > a {
+	transition: all;
+	transition-duration: 250ms;
+}
+
+.nav.nav-tabs > li > a,
+.nav.nav-tabs > li:hover > a {
+	display: inline-block;
+	color: #7a7a7a;
+	position: relative;
+	width: 100%;
+	border-bottom: 3px solid #eee;
+}
+
+.nav.nav-tabs > li.active > a,
+.nav.nav-tabs > li.active:hover > a {
+	cursor: pointer;
+	color: #000;
+	border-bottom: 3px solid #2196F3;
+}
+
+.nav.nav-tabs > li.active:hover > a {
+	background: #eee;
+}
+/* }}} */
+/* Justified tabs {{{ */
+.nav.nav-tabs.nav-tabs-justified {
+	display: flex;
+	justify-content: space-evenly;
+	overflow: hidden;
+}
+
+.nav.nav-tabs.nav-tabs-justified > li {
+	float: none;
+	order: 1;
+	flex-grow: 1;
+	justify-content: center;
+	align-content: stretch;
+	text-align: center;
+}
+
+.nav.nav-tabs.nav-tabs-justified > li > a {
+	height: 100%;
+}
+
+.nav.nav-tabs.nav-tabs-justified > li.col-sm {
+	flex-grow: 0;
+}
 /* }}} */
 
 /* Page: Login {{{ */
@@ -352,10 +486,6 @@ header .hi-logo > a > img {
 /* Theme override: minicharts {{{ */
 .mini-charts {
 	padding: 0 10px;
-}
-
-.mini-charts .mini-charts-item {
-	margin-bottom: 0px;
 }
 /* }}} */
 /* Plugin override: Waves-Effect {{{ */

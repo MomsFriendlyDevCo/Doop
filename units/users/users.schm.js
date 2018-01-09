@@ -17,6 +17,14 @@ var User = module.exports = monoxide.schema('users', {
 	},
 	permissions: {
 	},
+	stars: [{
+		link: {type: 'string'}, // The actual hashbang path of the page
+		breadcrumbs: [{ // Inhertied from $router.page._breadcrumbs
+			link: {type: 'string'},
+			title: {type: 'string'},
+		}],
+		title: {type: 'string'}, // Inherited from $router.page._title
+	}],
 });
 
 // Deal with logins + user passwords {{{
@@ -40,11 +48,12 @@ User
 User
 	.hook('create', function(next, query) {
 		if (!query.username) query.username = query.email;
+		if (query.username) query.username = query.username.toLowerCase(); // Username should always be lower case
 		next();
 	})
 	.hook('save', function(next, query) {
-		if (!query.username) query.username = query.email;
-		if (query.username) query.username = query.username.toLowerCase();
+		if (!query.username && query.email) query.username = query.email; // Username should be the email address if we have email but not the username
+		if (query.username) query.username = query.username.toLowerCase(); // Username should always be lower case
 		next();
 	});
 // }}}
@@ -59,7 +68,7 @@ User
 			other: nameBits.length > 2 ? nameBits.slice(1, -1).join(' ') : null,
 		};
 	});
-// }}
+// }}}
 
 // Force username to ALWAYS be lower case {{{
 User.hook('save', function(done, q) {

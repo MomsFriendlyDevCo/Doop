@@ -16,7 +16,7 @@ var requestCaches = module.exports = monoxide.schema('requestCaches', {
 /**
 * Searches the database for a hashed version of query and if not found uses `freshCallback(next)` to return the value. All subsequent values will be requestCaches.
 * The handler is then expected to perform an async request and return the result that should be requestCaches as its response
-* This function can be thought of as a `if(requestCachesExists) { callback(response) } else { freshCallback(callback) }` wrapper
+* This function can be thought of as a `if (requestCachesExists) { callback(response) } else { freshCallback(callback) }` wrapper
 * If the requestCaches response is found callback is called instead, bypassing the request
 * NOTE: This function will also check the expiry of the request
 * @param {string} type The identifiable type of request

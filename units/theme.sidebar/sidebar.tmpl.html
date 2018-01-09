@@ -1,8 +1,8 @@
 <ul class="main-menu">
-	<li ng-class="$ctrl.area=='' && 'active'"><a href="#/"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-	<li ng-class="$ctrl.area=='notifications' && 'active'"><a href="#/notifications"><i class="fa fa-envelope"></i> Notifications</a></li>
-	<li ng-class="$ctrl.area=='users' && 'active'" ng-if="$ctrl.$session.data.isAdmin"><a href="#/users"><i class="fa fa-group"></i> Manage Users</a></li>
-	<li ng-class="$ctrl.area=='showcase' && 'active'" ng-if="$ctrl.$session.data.isRoot"><a href="#/showcase" data-toggle="collapse" data-target="#sidebar-showcase"><i class="fa fa-paint-brush"></i> Doop Material Showcase</a></li>
+	<li ng-class="$ctrl.areas[0]=='' && 'active'"><a href="#/"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+	<li ng-class="$ctrl.areas[0]=='notifications' && 'active'"><a href="#/notifications"><i class="fa fa-envelope"></i> Notifications</a></li>
+	<li ng-class="$ctrl.areas[0]=='users' && 'active'" ng-if="$ctrl.$session.data.isAdmin"><a href="#/users"><i class="fa fa-group"></i> Manage Users</a></li>
+	<li ng-class="$ctrl.areas[0]=='showcase' && 'active'" ng-if="$ctrl.$session.data.isRoot"><a href="#/showcase" data-toggle="collapse" data-target="#sidebar-showcase"><i class="fa fa-paint-brush"></i> Doop Material Showcase</a></li>
 	<ul id="sidebar-showcase" class="collapse main-menu" ng-class="$ctrl.area=='showcase' && 'in'">
 		<li><a href="#/showcase/$config"><i class="fa fa-angle-double-right"></i> $config Service</a></li>
 		<li><a href="#/showcase/$loader"><i class="fa fa-angle-double-right"></i> $loader Service</a></li>
@@ -17,5 +17,5 @@
 		<li><a href="#/showcase/tables"><i class="fa fa-angle-double-right"></i> Tables</a></li>
 	</ul>
 
-	<li ng-class="$ctrl.area=='debug' && 'active'"><a href="#/debug"><i class="fa fa-heartbeat"></i> Debugging</a></li>
+	<li ng-class="$ctrl.areas[0]=='debug' && 'active'"><a href="#/debug"><i class="fa fa-heartbeat"></i> Debugging</a></li>
 </ul>

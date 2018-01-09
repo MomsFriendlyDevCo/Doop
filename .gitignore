@@ -34,7 +34,7 @@ build/Release
 *.swp
 build/
 config/private.conf.js
-newrelic_agent.log
+data/
 node_modules/
 tmp
 .vscode

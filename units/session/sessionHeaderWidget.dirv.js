@@ -7,7 +7,7 @@ angular
 		},
 		template: `
 			<li class="pull-right dropdown">
-				<a data-toggle="dropdown" class="dropdown-toggle">
+				<a data-toggle="dropdown" class="dropdown-toggle btn-block">
 					<div class="username">{{$ctrl.$session.data.name}}</div>
 					<img gravatar-src="$ctrl.$session.data.email" gravatar-size="40" gravatar-default="monsterid" class="img-circle img-user media-object">
 				</a>

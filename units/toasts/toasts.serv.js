@@ -54,17 +54,19 @@ angular
 		$toast.catch = function(obj) {
 			console.warn('Promise chain threw error:', obj);
 			if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
+			if (obj === 'cancel') return; // Silently ignore user cancelled actions
 
 			$toast.error(
-				_.isUndefined(obj) ? 'An error has occured' :
-				_.isString(obj) ? obj :
-				_.has(obj, 'error') && obj.error ? obj.error :
-				_.has(obj, 'data') && _.isString(obj.data) ? obj.data :
-				_.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg :
-				_.has(obj, 'data.error') && obj.data.error ? obj.data.error :
-				_.has(obj, 'statusText') && obj.statusText ? obj.statusText :
-				_.has(obj, 'status') && obj.status === -1 ? 'Server connection failed' :
-				_.isFunction(obj.toString) && obj.toString() !== '[object Object]' ? obj.toString() :
+				_.isUndefined(obj) ? 'An error has occured'
+				: _.isString(obj) ? obj
+				: _.has(obj, 'error') && obj.error ? obj.error
+				: _.has(obj, 'data') && _.isString(obj.data) ? obj.data
+				: _.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg
+				: _.has(obj, 'data.error') && obj.data.error ? obj.data.error
+				: _.has(obj, 'statusText') && obj.statusText ? obj.statusText
+				: _.has(obj, 'status') && obj.status === -1 ? 'Server connection failed'
+				: _.has(obj, 'message') && /Received: ".+"/.test(obj.message) ? (function(text) { var matches = /^.+Received: "(.+?)"/.exec(text); return matches[1]; }(obj.message))
+				: _.isFunction(obj.toString) && obj.toString() !== '[object Object]' ? obj.toString() :
 				'An error has occured'
 			);
 		};

@@ -26,8 +26,22 @@
 	</aside>
 
 	<section id="content" class="animated animated-fast" ng-class="{'content-without-sidebar': !$global.$config.layout.sidebar}">
+		<div id="content-header" ng-if="$global.$router.page._breadcrumbs.length">
+			<div class="pull-right">
+				<star></star>
+			</div>
+			<ol class="breadcrumb">
+				<li><a href="#/"><i class="fa fa-home"></i></a></li>
+				<li ng-repeat="breadcrumb in $global.$router.page._breadcrumbs">
+					<a href="/#{{breadcrumb.link}}">{{breadcrumb.title}}</a>
+				</li>
+			</ol>
+		</div>
+
 		<prompt-helper></prompt-helper>
-		<router-view></router-view>
+
+
+		<router-view route-id="main"></router-view>
 	</section>
 </section>
 <!-- }}} -->

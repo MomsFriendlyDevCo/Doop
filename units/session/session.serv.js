@@ -157,7 +157,7 @@ angular
 				.catch(err => {
 					console.error('Could not update user session', err.data);
 				})
-				.finally(() => {
+				.finally(()=> {
 					$session.isUpdated = true;
 					$session.isLoggedIn = ($session.data && $session.data._id);
 					$rootScope.$broadcast('session.updated', $session.data);

@@ -1,0 +1,11 @@
+star a i.star-outer {
+	color: #EEE;
+}
+
+star a.active i.star-outer, star-list i.star-outer {
+	color: yellow;
+}
+
+star a.active i.star-inner, star-list i.star-inner {
+	color: goldenrod;
+}

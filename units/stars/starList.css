@@ -1,0 +1,20 @@
+star-list > ul {
+	display: block !important;
+}
+
+star-list > ul > li a {
+	padding: 5px 20px;
+}
+
+star-list > ul > li a .breadcrumb {
+	display: inline;
+	border-bottom: none;
+}
+
+star-list > ul > li a .fa-stack {
+	width: 1em;
+	height: 1em;
+	margin-right: 5px;
+	line-height: 1em;
+	font-size: 1.8em;
+}

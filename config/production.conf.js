@@ -13,9 +13,6 @@ module.exports = {
 		debugCSS: false,
 		minifyCSS: true,
 	},
-	newrelic: {
-		enabled: true,
-	},
 	ssl: {
 		enabled: false,
 		port: 443

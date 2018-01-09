@@ -4,6 +4,25 @@ var cache = require('@momsfriendlydevco/express-middleware-cache');
 var logger = require('express-log-url');
 
 app.register('init', function(finish) {
+	// If caching is disabled {{{
+	if (!app.config.middleware.cache.enabled) {
+		app.middleware.cache = function(options) { // Factory function
+			return function(req, res, next) {
+				logger.log({method: req.method, code: 'CSH', path: req.path, info: 'Would be cached' + (_.isString(options) ?  ` for ${options}` : '')});
+				next();
+			};
+		};
+
+		app.middleware.invalidate = (...tags) => {
+			console.log(colors.grey(`Invalidate cache tag '${tag}' (hash ${hash}) (but caching is disabled)`));
+		};
+
+		console.log('-', colors.grey('[middleware.cache]'), 'Cache is disabled');
+
+		return finish();
+	}
+	// }}}
+
 	cache.defaults.cache = _.defaults(app.config.middleware.cache, {
 		mongodb: {
 			url: app.config.mongo.uri,
