@@ -10,7 +10,7 @@ app.register('postServer', function(finish) {
 			},
 
 			html: function() {
-				res.status(404).render('units/errors/404', {
+				res.status(404).render('units/core.errors/404', {
 					theme: app.config.theme,
 				});
 			},
@@ -34,7 +34,7 @@ app.register('postServer', function(finish) {
 			},
 
 			html: function() {
-				res.status(500).render('units/errors/500', {
+				res.status(500).render('units/core.errors/500', {
 					theme: app.config.theme,
 				});
 			},
