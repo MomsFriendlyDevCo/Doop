@@ -1,0 +1,11 @@
+#!/bin/bash
+# Deploy a generic server
+
+# Stop on errors
+set -euo pipefail
+
+echo "Stopping all PM2 child processes..."
+pm2 kill
+
+echo "Booting server..."
+pm2 start /home/ubuntu/mysite.com/server.js --name server -- -e production

@@ -1,0 +1,25 @@
+#!/bin/bash
+# Re-Deploy an existing server, pulling in the latest Git patches
+
+# Stop on errors
+set -euo pipefail
+
+cd /home/ubuntu/mysite.com
+export NODE_ENV=production
+
+echo "Pulling latest Git repo..."
+git pull
+
+echo "Installing NPM packages..."
+npm install
+
+echo "Cleaning up dead NPM packages..."
+npm prune
+
+echo "Building via Gulp..."
+sudo -E gulp build
+
+echo "Rebooting PM2 process..."
+pm2 restart server
+
+echo "done."
