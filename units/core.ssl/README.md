@@ -1,6 +1,6 @@
 DOOP SSL Unit
 =============
-* Doop unit to setup an SSL listener on port 443.
+Doop unit to setup an SSL listener on port 443.
 
 Required Files:
 1. SSL Certificate file in `units/ssl/cert/fullchain.pem`
@@ -12,9 +12,9 @@ As the above files are generally unique to the server, they should NOT be commit
 Installation and Setup
 ----------------------
 
-1. (Possibly optional). Most Linux distros already ship with the `letsencrypt` package. To check this use:
+1. (Optional). Most Linux distros already ship with the `letsencrypt` package. To check this use:
 
-	apt-get policy letsencrypt
+	apt-cache policy letsencrypt
 
 If there is no known package install the PPA via
 
@@ -28,7 +28,7 @@ If there is no known package install the PPA via
 
 3. Setup the certificate from the root of the site:
 
-	sudo letsencrypt certonly --manual -d <DOMAIN> --preferred-challenges dns
+	sudo letsencrypt certonly --manual -d <DOMAIN>
 
 4. Follow the instructions given. If prompted for an email address and you work for MFDC use `daemons@mfdc.biz`. If prompted to perform DNS verification either speak to [Matt](matt@mfdc.biz) or alter the DNS as instructed to insert your TXT records.
 
