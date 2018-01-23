@@ -8,3 +8,7 @@
 	margin: 5px;
 	text-align: center;
 }
+
+.ui-notification.ui-notification-progress > .message > span + .progress {
+	margin-top: 5px;
+}

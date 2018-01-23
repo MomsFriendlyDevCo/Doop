@@ -15,7 +15,7 @@ angular
 			positionY: 'bottom',
 		});
 	})
-	.service('$toast', function($rootScope, Notification) {
+	.service('$toast', function($rootScope, $timeout, Notification) {
 		var $toast = this;
 
 		// Alias all $toast.* -> Notification.* functions
@@ -25,6 +25,7 @@ angular
 		$toast.warning = Notification.warning.bind(Notification);
 		$toast.error = Notification.error.bind(Notification);
 		$toast.clear = Notification.clearAll.bind(Notification);
+		$toast.notification = Notification; // Access to the underlying notification call
 
 
 		/**
@@ -39,6 +40,46 @@ angular
 				positionY: 'top',
 				positionX: 'right',
 			});
+
+
+		/**
+		* Display the progress of an action
+		* The item will be unclosable until it has completed
+		* @param {string} id The ID of the action to show / update
+		* @param {string} [message] Text to display for the action (may only need to be updated once)
+		* @param {number} [progress] The percentage complete of an action
+		*/
+		$toast.progress = (id, message, progress) => {
+			// Argument mangling {{{
+			if (angular.isNumber(message)) {
+				progress = message;
+				message = null;
+			}
+			// }}}
+
+			if (!$toast.progressActive[id]) { // Create the notifcation
+				Notification({
+					templateUrl: 'angular-ui-notification-progress.html',
+					delay: false,
+					type: 'primary',
+					message,
+				})
+					.then(scope => {
+						$toast.progressActive[id] = scope;
+						$toast.progressActive[id].progress = progress;
+					})
+			} else if (angular.isNumber(progress) && progress < 100) { // Update the percentage complete?
+				$toast.progressActive[id].progress = progress;
+			} else if ((angular.isNumber(progress) && progress >= 100) || angular.isBoolean(progress)) { // Hide the notification after a timeout
+				$toast.progressActive[id].progress = 100;
+				$timeout(()=> {
+					$toast.progressActive[id].kill();
+					delete $toast.progressActive[id];
+				}, 1500);
+			}
+		};
+
+		$toast.progressActive = {};
 
 
 		/**
@@ -103,6 +144,19 @@ angular
 				<div class="message">
 					<i class="fa fa-check"></i>
 					<span ng-bind-html="message"></span>
+				</div>
+			</div>
+		`);
+	})
+	.run(function($templateCache) {
+		$templateCache.put('angular-ui-notification-progress.html', `
+			<div class="ui-notification ui-notification-progress">
+				<h3 ng-show="title" ng-bind-html="title"></h3>
+				<div class="message">
+					<span ng-bind-html="message"></span>
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped active" style="width: {{progress || 0}}%;"></div>
+					</div>
 				</div>
 			</div>
 		`);
