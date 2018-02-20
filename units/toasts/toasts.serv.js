@@ -67,6 +67,12 @@ angular
 					.then(scope => {
 						$toast.progressActive[id] = scope;
 						$toast.progressActive[id].progress = progress;
+
+						if (progress >= 100) // Notification starts completed? Kill the notify after a pause
+							$timeout(()=> {
+								$toast.progressActive[id].kill();
+								delete $toast.progressActive[id];
+							}, 1500);
 					})
 			} else if (angular.isNumber(progress) && progress < 100) { // Update the percentage complete?
 				$toast.progressActive[id].progress = progress;
