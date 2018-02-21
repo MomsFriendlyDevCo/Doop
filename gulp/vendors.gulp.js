@@ -13,6 +13,7 @@ var cache = require('gulp-cache');
 var cleanCSS = require('gulp-clean-css');
 var colors = require('chalk');
 var concat = require('gulp-concat');
+var filesize = require('filesize');
 var fs = require('fs');
 var fspath = require('path');
 var gulp = require('gulp');
@@ -76,16 +77,19 @@ gulp.task('vendors-core', ['load:app'], function(finish) {
 				.value()
 			);
 		})
-		.forEach('includes', function(next, path) {
+		.map('includes', 'includes', function(next, path) {
 			fs.stat(path, function(err, stats) {
 				if (err) return next('Error loading dependency path "' + path + '" - ' + err.toString());
 				if (stats.isDirectory()) return next('Dependency path "' + path + '" is a directory. This should be a file');
-				next();
+				next(null, {path, ...stats});
 			});
 		})
 		.parallel({
 			js: function(next) {
-				var sources = this.includes.filter(i => /\.js$/.test(i));
+				var sources = this.includes
+					.map(i => i.path)
+					.filter(i => /\.js$/.test(i));
+
 				return gulp.src(sources)
 					.pipe(concat('vendors-core.min.js'))
 					.pipe(uglify())
@@ -93,7 +97,10 @@ gulp.task('vendors-core', ['load:app'], function(finish) {
 					.on('end', () => next(null, sources));
 			},
 			css: function(next) {
-				var sources = this.includes.filter(i => /\.css$/.test(i));
+				var sources = this.includes
+					.map(i => i.path)
+					.filter(i => /\.css$/.test(i));
+
 				return gulp.src(sources)
 					.pipe(concat('vendors-core.min.css'))
 					.pipe(cleanCSS({
@@ -103,6 +110,29 @@ gulp.task('vendors-core', ['load:app'], function(finish) {
 					.on('end', () => next(null, sources));
 			},
 		})
+		// Show stats about include sizes {{{
+		.then(function(next) {
+			gutil.log(colors.bold('Vendors-Core files:'));
+			_(this.includes)
+				.sortBy('size')
+				.reverse()
+				.forEach(file => {
+					gutil.log(
+						colors.cyan(_.padStart(filesize(file.size), 10)),
+						file.path.substr(app.config.paths.root.length),
+					);
+				});
+
+			gutil.log(
+				colors.cyan(_.padStart(filesize(_.sumBy(this.includes, 'size')), 10)),
+				colors.bold('TOTAL Vendors-Core'),
+			);
+
+			gutil.log();
+
+			next();
+		})
+		// }}}
 		.end(function(err) {
 			if (err) return finish(err);
 			gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'core vendor JS scripts');
@@ -137,16 +167,19 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 				.value()
 			);
 		})
-		.forEach('includes', function(next, path) {
+		.map('includes', 'includes', function(next, path) {
 			fs.stat(path, function(err, stats) {
 				if (err) return next('Cannot load vendor dependency - ' + path);
 				if (stats.isDirectory()) return next('Dependency path "' + path + '" is a directory. This should be a file');
-				next();
+				next(null, {path, ...stats});
 			});
 		})
 		.parallel({
 			js: function(next) {
-				var sources = this.includes.filter(i => /\.js$/.test(i));
+				var sources = this.includes
+					.map(i => i.path)
+					.filter(i => /\.js$/.test(i));
+
 				return gulp.src(sources)
 					.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.init()))
 					.pipe(concat('vendors-main.min.js'))
@@ -157,7 +190,10 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 					.on('end', () => next(null, sources));
 			},
 			css: function(next) {
-				var sources = this.includes.filter(i => /\.css$/.test(i));
+				var sources = this.includes
+					.map(i => i.path)
+					.filter(i => /\.css$/.test(i));
+
 				return gulp.src(sources)
 					.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.init()))
 					.pipe(concat('vendors-main.min.css'))
@@ -167,6 +203,29 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 					.on('end', () => next(null, sources));
 			},
 		})
+		// Show stats about include sizes {{{
+		.then(function(next) {
+			gutil.log(colors.bold('Vendors-Main files:'));
+			_(this.includes)
+				.sortBy('size')
+				.reverse()
+				.forEach(file => {
+					gutil.log(
+						colors.cyan(_.padStart(filesize(file.size), 10)),
+						file.path.substr(app.config.paths.root.length),
+					);
+				});
+
+			gutil.log(
+				colors.cyan(_.padStart(filesize(_.sumBy(this.includes, 'size')), 10)),
+				colors.bold('TOTAL Vendors-Main'),
+			);
+
+			gutil.log();
+
+			next();
+		})
+		// }}}
 		.end(function(err) {
 			if (err) {
 				gutil.log(colors.red('ERROR'), err.toString());
