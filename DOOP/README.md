@@ -86,7 +86,7 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/units/**/*.test.js`                 |                                                      | Back-end additional tests to run per-unit
 | `/units/**/*.tmpl.html`               |                                                      | Front-end HTML partials
 | `/units/core/`                        |                                                      | Bootstrapper front-end and back-end files
-| `/units/db/`                          |                                                      | The main database driver and schema loader
+| `/units/core.db/`                     |                                                      | The main database driver and schema loader
 | `/units/layouts/`                     |                                                      | Layout files used to serve the basic HTML page structure
 | `/units/middleware/`                  | `app.middleware.SOMETHING`                           | Middleware utility libraries
 | `/units/pages/`                       |                                                      | Page inserts used by the backend fot form the basic HTML page structure (a page loads inside a layout skeleton)
