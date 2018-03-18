@@ -17,7 +17,6 @@ var runSequence = require('run-sequence');
 gulp.task('build', function(finish) {
 	gutil.log('Building the optimized app');
 
-	// FIXME: This is a temporary work around until Gulp 4 - https://github.com/OverZealous/run-sequence
 	runSequence(
 		'npm:update',
 		['css', 'partials', 'scripts', 'vendors'],

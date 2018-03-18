@@ -62,6 +62,4 @@ gulp.task('scripts', ['load:app'], function() {
 });
 
 
-gulp.task('scripts:clean', function(next) {
-	cache.clearAll(next);
-});
+gulp.task('clean:scripts', done => cache.clearAll(done));

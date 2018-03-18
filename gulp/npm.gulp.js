@@ -7,6 +7,10 @@ var gutil = require('gulp-util');
 
 gulp.task('npm:update', ['load:app'], function(finish) {
 	if (app.config.isProduction) return finish(); // Skip if production
+	if (!_.get(app, 'config.gulp.npmUpdate')) {
+		gutil.log('NPM auto-update is disabled');
+		return finish();
+	}
 
 	async()
 		.use(asyncExec)
