@@ -20,19 +20,8 @@ app.register('preControllers', function(finish) {
 			.value();
 
 		return function(req, res, next) {
-			if (!req.user) {
-				res.format({
-					'application/json': ()=> res.sendError(403, 'Unauthorized - user not logged in to do a permissions check'),
-					'default': ()=> res.redirect('/'),
-				});
-			} else if (!validPerms.every(p => req.user.permissions[p])) {
-				res.format({
-					'application/json': ()=> res.sendError(403, 'Unauthorized - user does not have the permissions: ' + validPerms.filter(p => !req.user.permissions[p]).join(', ')),
-					'default': ()=> res.redirect('/'),
-				});
-			} else {
-				next();
-			}
+			if (!req.user || !validPerms.every(p => req.user.permissions[p])) return app.middleware.ensure.authFail(req, res);
+			next();
 		};
 	});
 
