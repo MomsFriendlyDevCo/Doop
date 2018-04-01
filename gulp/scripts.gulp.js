@@ -37,7 +37,7 @@ gulp.task('scripts', ['load:app'], function() {
 			presets: ['env'],
 			plugins: ['angularjs-annotate'],
 		}), {
-			key: file => [file.contents.toString('utf8'), file.stat.mtime, file.stat.size].join(','),
+			key: file => [app.config.name, file.contents.toString('utf8'), file.stat.mtime, file.stat.size].join(','),
 			success: file => {
 				gutil.log(gutil.colors.blue('[Babel]'), 'compile', colors.cyan(file.relative));
 				return true;
