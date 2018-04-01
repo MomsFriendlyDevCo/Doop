@@ -1,7 +1,7 @@
 var monoxide = require('monoxide');
 
 module.exports = monoxide.schema('logs', {
-	created: {type: Date, default: Date.now},
+	created: {type: Date, default: Date.now, index: true},
 	user: {type: 'pointer', ref: 'users', index: true},
 	type: {type: 'string', index: true, enum: [
 		// NOTE: if this list gets extended remember to add the translation to units/middleware.logging.db/logs.path.js +/switch (log.type)
