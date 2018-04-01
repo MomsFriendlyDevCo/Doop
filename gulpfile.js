@@ -74,6 +74,7 @@ global.paths = {
 			'node_modules/font-awesome/css/font-awesome.css',
 			'node_modules/node-waves/dist/waves.css',
 			'node_modules/node-waves/dist/waves.js',
+			'node_modules/tree-tools/dist/ngTreeTools.js',
 			'node_modules/ui-select/dist/select.{css,js}',
 		],
 		docs: [ // Resources used by docs UI
