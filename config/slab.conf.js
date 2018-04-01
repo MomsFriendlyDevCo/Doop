@@ -5,6 +5,10 @@ module.exports = {
 	access: {
 		lockdown: false,
 	},
+	gulp: {
+		notifications: true,
+		npmUpdate: false,
+	},
 	instances: {
 		domain: 'slab',
 	},
