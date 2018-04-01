@@ -1,8 +1,10 @@
+var _ = require('lodash');
 var async = require('async-chainable');
-var asyncExec = require('async-chainable-exec');
+var hashedReleaseName = require('hashed-release-name');
 var email = require('mfdc-email');
 var fs = require('fs');
 var os = require('os');
+var spawn = require('child_process').spawn;
 
 /**
 * Test email sending
@@ -37,17 +39,31 @@ app.get('/api/debug/version', function(req, res) {
 		.parallel({
 			git: function(next) {
 				async()
-					.use(asyncExec)
-					.exec('git', ['git', 'log', '-1', `--pretty=format:%H|%h|%cI|%cn|%s`], {cwd: app.config.paths.root})
+					.then('gitHistoryRaw', function(next) {
+						var buffer = '';
+						var proc = spawn('git', ['log', '--pretty=format:%H|%h|%cI|%cn|%s'], {cwd: app.config.paths.root});
+						proc.stdout.on('data', data => buffer += data.toString());
+						proc.on('close', ()=> next(null, buffer.split(/\n/g)));
+					})
 					.then('git', function(next) {
-						var gitInfo = this.git[0].split('|');
-						next(null, {
-							hash: gitInfo[0],
-							shortHash: gitInfo[1],
-							date: gitInfo[2],
-							committer: gitInfo[3],
-							subject: gitInfo[4],
-						});
+						next(null, this.gitHistoryRaw
+							.slice(0, 30)
+							.map(line => {
+								var gitInfo = line.split('|');
+								return {
+									release: hashedReleaseName({
+										alliterative: true,
+										hash: gitInfo[0],
+										transformer: phrase => _.startCase(phrase),
+									}),
+									hash: gitInfo[0],
+									shortHash: gitInfo[1],
+									date: gitInfo[2],
+									committer: gitInfo[3],
+									subject: gitInfo[4],
+								};
+							})
+						);
 					})
 					.end(function(err) {
 						if (err) return next(err);
@@ -69,7 +85,7 @@ app.get('/api/debug/version', function(req, res) {
 			if (err) return res.sendError(err);
 			_cachedVersion = {
 				package: this.package,
-				git: this.git,
+				gitHistory: this.git,
 			};
 			res.send(_cachedVersion);
 		});
@@ -89,10 +105,27 @@ app.get('/api/debug/live', app.middleware.ensure.login, function(req, res) {
 	});
 });
 
-app.post('/api/debug/403', function(req, res) {
+
+/**
+* Debugger for the pending UI
+* This controller will return a 404 until the 25th attempt
+*/
+app.get('/debug/pending', function(req, res) {
+	if (req.query.pendingTry == 25) {
+		res.send({foo: 'bar'});
+	} else {
+		res.status(404).end();
+	}
+});
+
+app.all('/api/debug/200', function(req, res) {
+	res.send('Everything is ok, relax');
+});
+
+app.all('/api/debug/403', function(req, res) {
 	res.status(403).send('You are forbidden from doing that. Forbidden I say!');
 });
 
-app.get('/api/debug/500', function(req, res) {
+app.all('/api/debug/500', function(req, res) {
 	throw new Error('Intentional test error');
 });

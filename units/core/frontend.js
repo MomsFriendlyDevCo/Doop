@@ -11,6 +11,7 @@ angular
 		'ngAnimate',
 		'ngResource',
 		'ngSanitize',
+		'ngTreeTools',
 		'ui.gravatar',
 		'ui.select',
 		'ui-notification',
