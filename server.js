@@ -220,7 +220,7 @@ async()
 				loaded.push(app.unit);
 				require(path);
 			});
-			console.log('-', colors.grey('[path]'), loaded.map(l => colors.cyan(l.id)).join(', '));
+			if (debug.enabled) debug('Loaded paths', loaded.map(l => colors.cyan(l.id)).join(', '));
 			next();
 		});
 	})
