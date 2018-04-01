@@ -1,0 +1,14 @@
+filekit-upload-status > .row:last-child {
+	margin-bottom: 20px;
+}
+
+filekit-upload-status .card {
+	margin-bottom: 4px;
+}
+
+filekit-upload-status .progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}

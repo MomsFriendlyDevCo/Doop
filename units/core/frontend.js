@@ -104,6 +104,28 @@ angular
 	.config($httpProvider => $httpProvider.defaults.paramSerializer = '$httpParamSerializerJQLike')
 	// }}}
 
+	// Filekit config {{{
+	.run(function($filekit, $loader, $prompt, $rootScope, $toast) {
+		// Setup FileKit to use the $toast error catcher
+		$filekit.settings.errorHandler = (err, files) => $toast.catch(err);
+
+		// Setup FileKit to use $prompt.text() as a text prompt
+		$filekit.settings.prompter = options => $prompt.text({
+			title: options.title,
+			body: options.body,
+			default: options.default,
+		});
+
+		// Make $loader trigger when uploads start / end
+		$rootScope.$on('filekitTaskBegin', (e, id) => $loader.startBackground(id));
+		$rootScope.$on('filekitTaskEnd', (e, id) => $loader.stop(id));
+
+		// Make $toast.progress handle file progression
+		$rootScope.$on('filekitProgress', (e, data) => $toast.progress(`filekit-upload-${data.file.name}`, `Uploading ${data.file.name}...`, data.progress));
+		$filekit.settings.uploadStatus.enabled = false; // Disable the filekit method of showing status as the $toast.progress() function now handles it
+	})
+	// }}}
+
 	// Disable the annoying 'possibly unhandled error' prompt {{{
 	.config($qProvider => $qProvider.errorOnUnhandledRejections(false))
 	// }}}

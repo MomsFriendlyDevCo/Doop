@@ -1,0 +1,14 @@
+filekit-drop-area .droparea {
+	display: none;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	border: 10px dashed #AAA;
+	background: #FFF;
+	opacity: 0.8;
+	z-index: 100000;
+	font-size: 24px;
+	color: #AAA;
+}
