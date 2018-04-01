@@ -12,6 +12,7 @@
 * @param {string} [lazyDisable='.modal'] jQuery compatible string which, if matched disables lazy loading (defaults to inside modals by default)
 * @param {string} [classValid] Apply this class to the element if the returned value is truthy
 * @param {string} [classInvalid] Apply this class to the element if the return value is falsy
+* @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into $toast.catch
 *
 * @example Fetch the title of a worklot and display it when loaded
 * <digest collection="worklots" id="thisItem.worklot"></digest>
@@ -33,6 +34,7 @@ angular
 			lazyDisable: '@?',
 			classValid: '@?',
 			classInvalid: '@?',
+			ignoreErrors: '@?',
 		},
 		controller: function($element, $filter, $http, $scope, $timeout, $toast) {
 			var $ctrl = this;
@@ -74,6 +76,8 @@ angular
 								$ctrl.value = val;
 						}
 						// }}}
+					}, err => {
+						if (!$ctrl.ignoreErrors) $toast.catch(err);
 					})
 					// Apply classing {{{
 					.then(()=> {

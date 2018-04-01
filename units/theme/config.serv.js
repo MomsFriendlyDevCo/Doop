@@ -10,6 +10,7 @@ angular
 	.module('app')
 	.service('$config', function($rootScope) {
 		return {
+			url: 0/*IMPORT: app.config.publicUrl*/,
 			isProduction: 0/*IMPORT: app.config.isProduction*/,
 			title: 0/*IMPORT: app.config.title*/,
 			layout: 0/*IMPORT: app.config.layout*/,
@@ -17,5 +18,6 @@ angular
 			session: {
 				signup: 0/*IMPORT: app.config.session.signup*/,
 			},
+			git: 0/*IMPORT: app.config.git*/,
 		};
 	});
