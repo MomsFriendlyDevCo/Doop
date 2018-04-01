@@ -1,26 +1,14 @@
-var _ = require('lodash');
-var async = require('async-chainable');
 var cache = require('@momsfriendlydevco/express-middleware-cache');
 var gulp = require('gulp');
-var gutil = require('gulp-util');
 
-gulp.task('load:cache', ['load:app'], ()=> {
-	cache.defaults.cache = _.defaults(app.config.middleware.cache, {
-		mongodb: {
-			url: app.config.mongo.uri,
-			collection: 'routeCache',
-		},
-	});
+/**
+* Clear out anything held by app.middleware.cache()
+* NOTE: We have to ask gulp to bring in the DB in case the cache is setup to use that as its storage
+*/
+gulp.task('load:cache', ['load:app.db'], function(done) {
+	cache.setup(app.config.middleware.cache, done);
 });
 
-gulp.task('clean:cache', ['load:cache'], finish => {
-	async()
-		.forEach([ // Place all known cache tags here to be cleaned
-			'docTree',
-		], function(next, tag) {
-			cache.invalidate(tag);
-			gutil.log('cleaned cache tag:', tag);
-			next();
-		})
-		.end(finish);
+gulp.task('clean:cache', ['load:cache'], function(done) {
+	cache.invalidate(['assetTree', 'area'], done);
 });
