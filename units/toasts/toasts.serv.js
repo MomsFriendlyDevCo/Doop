@@ -107,7 +107,7 @@ angular
 				_.isUndefined(obj) ? 'An error has occured'
 				: _.isString(obj) ? obj
 				: _.has(obj, 'error') && obj.error ? obj.error
-				: _.has(obj, 'data') && _.isString(obj.data) ? obj.data
+				: _.has(obj, 'data') && _.isString(obj.data) && obj.data ? obj.data
 				: _.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg
 				: _.has(obj, 'data.error') && obj.data.error ? obj.data.error
 				: _.has(obj, 'statusText') && obj.statusText ? obj.statusText
