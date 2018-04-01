@@ -8,6 +8,10 @@ var colors = require('chalk');
 var databaseLoader = require('./loader');
 
 app.register('preControllers', function(finish) {
+	_.merge(app, {dbSettings: {
+		hooks: true, // Enable high level hooks for DOOP interfaces
+	}});
+
 	app.fire('preModels');
 
 	databaseLoader()
