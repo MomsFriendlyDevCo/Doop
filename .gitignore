@@ -35,6 +35,7 @@ build/Release
 build/
 config/private.conf.js
 data/
+newrelic_agent.log
 node_modules/
 tmp
 .vscode
