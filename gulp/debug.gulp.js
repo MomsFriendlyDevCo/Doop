@@ -12,7 +12,7 @@ var util = require('util');
 * This is similar to `gulp config` but dumps the stub `app` structure also
 */
 gulp.task('app', ['load:app'], function() {
-	gutil.log(util.inspect(app, {depth: null, colors: true}))
+	gutil.log(util.inspect(app, {depth: null, colors: true}));
 });
 
 
@@ -20,7 +20,7 @@ gulp.task('app', ['load:app'], function() {
 * Dump the current app.config subtree to the console
 */
 gulp.task('app.config', ['load:app'], function() {
-	gutil.log(util.inspect(app.config, {depth: null, colors: true}))
+	gutil.log(util.inspect(app.config, {depth: null, colors: true}));
 });
 
 
