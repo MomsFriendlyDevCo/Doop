@@ -20,6 +20,9 @@ app.register('init', function(finish) {
 	if (app.config.papertrail.enabled) {
 		var winstonPT = require('winston-papertrail').Papertrail;
 
+		// Force colors to be enabled when logging
+		colors.enabled = true;
+
 		if (!app.config.papertrail.host || !app.config.papertrail.port) return finish('Papertrail enabled but no host or port specified in app.config.papertrail');
 
 		app.logger.add(winston.transports.Papertrail, {

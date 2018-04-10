@@ -8,14 +8,14 @@ var async = require('async-chainable');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 
-gulp.task('fix', ['fix:adminPermissions']);
+gulp.task('fix', ['fix:users:adminPermissions']);
 
 
 /**
 * Patch all admins to have all permissions
 * Effectively switches all booleans in users.permissions{} on
 */
-gulp.task('fix:adminPermissions', ['load:app.db'], function(done) {
+gulp.task('fix:users:adminPermissions', ['load:app.db'], function(done) {
 	async()
 		.set('fixCount', 0)
 		.then('users', function(next) {

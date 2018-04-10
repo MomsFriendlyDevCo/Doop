@@ -10,5 +10,8 @@
 global.app = {
 	quiet: true,
 	config: require('../../config/index.conf'),
+	dbSettings: {
+		hooks: false, // Disable loading complex hooks (this is overriden when the full stack loads)
+	},
 };
 // }}}

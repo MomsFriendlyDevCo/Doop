@@ -78,25 +78,12 @@ angular
 	// }}}
 
 	// Force $http headers via GET to not be cached {{{
-	.config(($httpProvider, $provide) => {
+	.config($httpProvider => {
 		if (!$httpProvider.defaults.headers.get) $httpProvider.defaults.headers.get = {}; // Initialize get headers if not there
 
 		// Override all Cache-Control
-		$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+		$httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
 		$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
-
-		// Horrible hack to force IE11 to always reload GET requests {{{
-		// This hack works by gluing `t=${Date.now()}` to all outgoing queries (but only for IE11)
-		if (!(window.ActiveXObject) && "ActiveXObject" in window) { // Is IE11?
-			$provide.provider('overrideIESerializer', function() {
-				this.$get = function($httpParamSerializer) {
-					return params => $httpParamSerializer(_.assign({t: Date.now()}, params || {}));
-				};
-			});
-
-			$httpProvider.defaults.paramSerializer = 'overrideIESerializer';
-		}
-		// }}}
 	})
 	// }}}
 
@@ -207,7 +194,7 @@ angular
 		$rootScope.$on('$routerSuccess', ()=> {
 			// NOTE: All the below attachment rules assumes `waves-effect` is applied anyway
 			$('.btn').addClass('waves-effect');
-			$('.btn-circle').addClass('waves-circle');
+			$('.btn-circle, .btn-ellipsis').addClass('waves-circle');
 			$('.input-group > .btn').addClass('waves-table-cell');
 			$('a.list-group-items, .dropdown-menu > li > a, .main-menu > li > a').addClass('waves-effect waves-block');
 
