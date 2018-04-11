@@ -206,6 +206,30 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 }
 /* }}} */
 /* }}} */
+/* Icons {{{ */
+.icon-wrap {
+	display: inline-block;
+	padding: 10px;
+	border-radius: 2px;
+}
+
+.icon-wrap.icon-circle {
+	border-radius: 50%;
+}
+
+.icon-wrap.icon-wrap-sm {
+	padding: 12px;
+}
+
+.icon-wrap i {
+	display: block;
+	line-height: 1em;
+	text-align: center;
+	position: relative;
+	width: 1em;
+	vertical-align: middle;
+}
+/* }}} */
 /* Images {{{ */
 /* Thumbnail sizes {{{ */
 /* NOTE: Set the width NOT the max-width as that is used by Bootstrap to ensure the image doesnt go outside the width of the device when in mobile mode */
@@ -225,6 +249,12 @@ body.router-routing .btn-group-float, #content.ng-animate .btn-group-float {
 	margin-left: 5px;
 }
 /* }}} */
+/* }}} */
+/* Media {{{ */
+.media .media-left {
+	float: left;
+	margin: 0 5px;
+}
 /* }}} */
 /* Navbar {{{ */
 header .hi-menu .dropdown > .dropdown-menu-offset {
@@ -246,6 +276,23 @@ header a.btn {
 	padding-top: 8px;
 	margin: 0 10px;
 	box-shadow: none !important;
+}
+/* }}} */
+/* Panels {{{ */
+.panel.panel-clip-sm {
+	height: 64px;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	padding: 2px;
+}
+
+a > .panel {
+	transition: box-shadow .5s ease-in;
+}
+
+a > .panel:hover {
+	box-shadow: 0 0 10px 2px rgba(0,0,0,.2);
 }
 /* }}} */
 /* Scrollbars {{{ */
@@ -468,10 +515,6 @@ ul.actions > li > a.btn > i {
 	width: 25px;
 	text-align: center;
 	padding: 13px 0;
-}
-
-.main-menu .main-menu {
-	margin: 0 !important;
 }
 /* }}} */
 /* Theme override: navbar {{{ */
