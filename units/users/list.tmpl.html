@@ -7,7 +7,7 @@
 	</div>
 	<div class="card">
 		<div class="card-body">
-			<a ng-if="$ctrl.$session.data.isAdmin" class="btn btn-success btn-circle btn-float" tooltip="Invite new user" href="#/users/invite"><i class="fa fa-paper-plane"></i></a>
+			<a ng-if="$ctrl.$session.data.isAdmin" class="btn btn-success btn-circle btn-float" tooltip="Invite new user" href="#/admin/users/invite"><i class="fa fa-paper-plane"></i></a>
 			<table ng-show="$ctrl.users.length" class="table table-hover">
 				<thead>
 					<tr>
@@ -19,12 +19,12 @@
 				</thead>
 				<tbody>
 					<tr ng-repeat="u in found = ($ctrl.users | filter:$ctrl.query) track by u._id">
-						<td class="text-center"><a href="#/users/{{u._id}}">
+						<td class="text-center"><a href="#/admin/users/{{u._id}}">
 							<i ng-if="u.role=='admin' || u.role=='root'" class="fa fa-lg fa-user-circle" tooltip="User is an admin" tooltip-position="left" tooltip-container="body"></i>
 							<i ng-if="u.status=='deleted'" class="fa fa-lg fa-trash" tooltip="User has been deleted" tooltip-position="left" tooltip-container="body"></i>
 						</a></td>
-						<td><a href="#/users/{{u._id}}">{{u.username == u.email ? u.email : u.email + ' (user: ' + u.username + ')'}}</a></td>
-						<td><a href="#/users/{{u._id}}">{{u.name}}</a></td>
+						<td><a href="#/admin/users/{{u._id}}">{{u.username == u.email ? u.email : u.email + ' (user: ' + u.username + ')'}}</a></td>
+						<td><a href="#/admin/users/{{u._id}}">{{u.name}}</a></td>
 						<td class="btn-context">
 							<div class="btn-group">
 								<a class="btn btn-context dropdown-toggle" data-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></a>

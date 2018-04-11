@@ -1,7 +1,7 @@
 angular
 	.module('app')
-	.run(($router, $session) => $router.when('/users/:id').require($session.promise.admin).title('Edit User').component('usersEditCtrl'))
-	.run(($router, $session) => $router.when('/users/create').require($session.promise.admin).title('Create User').component('usersEditCtrl'))
+	.run(($router, $session) => $router.when('/admin/users/:id').require($session.promise.admin).title('Edit User').component('usersEditCtrl'))
+	.run(($router, $session) => $router.when('/admin/users/create').require($session.promise.admin).title('Create User').component('usersEditCtrl'))
 	.component('usersEditCtrl', {
 		templateUrl: '/units/users/edit.tmpl.html',
 		controller: function($location, $loader, $q, $router, $scope, $session, $toast, Users) {
@@ -20,7 +20,7 @@ angular
 							data.dob = new Date(data.dob);
 							$ctrl.user = data;
 						})
-						.catch(e => { if (e.status && e.status == 404) $location.path('/users') }),
+						.catch(e => { if (e.status && e.status == 404) $location.path('/admin/users') }),
 				])
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
@@ -35,7 +35,7 @@ angular
 				$loader.start($scope.$id);
 				Users.save({id: $router.params.id}, $ctrl.user).$promise
 					.then(()=> $toast.success('User details saved'))
-					.then(()=> $location.path('/users'))
+					.then(()=> $location.path('/admin/users'))
 					.catch($toast.catch)
 					.finally(() => $loader.stop($scope.$id));
 			};
