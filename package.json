@@ -66,7 +66,6 @@
     "gulp-concat": "^2.6.1",
     "gulp-eol": "^0.1.2",
     "gulp-filter": "^5.0.1",
-    "gulp-git-watch": "^0.1.0",
     "gulp-if": "^2.0.2",
     "gulp-jshint": "^2.0.4",
     "gulp-minify-html": "^1.0.6",
