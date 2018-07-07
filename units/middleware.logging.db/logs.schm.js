@@ -18,4 +18,5 @@ module.exports = monoxide.schema('logs', {
 	content: {type: 'string'}, // Human readable change
 	payload: {type: 'object'}, // Change payload (the changed fields with the values as the new values)
 	changes: {type: 'object'}, // Change list (keys are the changed keys, each value is an array of [newValue, oldValue])
+	tags: [{type: 'string', index: true}],
 })

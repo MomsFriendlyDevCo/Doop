@@ -4,27 +4,55 @@ var fs = require('fs');
 var humanize = require('humanize');
 var mkdirp = require('mkdirp');
 var monoxide = require('monoxide');
-var multer = require('multer');
 
 
 /**
 * Return the contents of a db.logs query in a format compatible with angular-ui-history
 * @param {string} req.params.model The database model to query
 * @param {string} req.params.id The ID of the enity to query
-* @param {string} req.query.type Filter by a given type (see logs.type)
+* @param {array|string} [req.query.type] Filter by a given type or types
+* @param {array|string} [req.query.tags] Filter by an array of tags
+* @param {boolean} [req.query.noTags] Include items without a tag
+* @param {number} [req.query.skip] Skip the given number of records
+* @param {number} [req.query.limit] Limit data to the given number of records
+* @param {string} [req.query.sort='created'] How to sort the data
 * @return {array} An array of changes in the form of an angular-ui-history feed
 */
 app.get('/api/logs/:model/:id', app.middleware.ensure.login, function(req, res) {
 	async()
+		// Sanity checks {{{
+		.then(function(next) {
+			if (req.query.type && !_.isArray(req.query.type)) req.query.type = _.castArray(req.query.type);
+			if (req.query.tags && !_.isArray(req.query.tags)) req.query.tags = _.castArray(req.query.tags);
+
+			next();
+		})
+		// }}}
 		// Fetch data {{{
 		.then('logs', function(next) {
-			db.logs.find({
-				model: req.params.model,
-				docId: req.params.id,
-			})
-				.find(req.query.type ? {type: req.query.type} : undefined) // Only include type if its a valid string
-				.sort('created')
+			db.logs
+				.find({ // Mandatory query to filter by
+					model: req.params.model,
+					docId: req.params.id,
+				})
+				.limit(req.query.limit || undefined)
+				.skip(req.query.skip || 0)
+				.sort(req.query.sort || 'created')
 				.exec(next);
+		})
+		// }}}
+		// Filter logs {{{
+		.then('logs', function(next) {
+			next(null,
+				this.logs.filter(l =>
+					(!req.query.type || req.query.type.includes(l.type)) // Match type
+					&& ( // Match tags or noTags
+						!req.query.tags
+						|| l.tags.some(tag => req.query.tags.includes(tag))
+						|| (req.query.noTags && (!l.tags || !l.tags.length))
+					)
+				)
+			);
 		})
 		// }}}
 		// Fetch all required users {{{
@@ -123,10 +151,71 @@ app.get('/api/logs/:model/:id', app.middleware.ensure.login, function(req, res) 
 			}
 		})
 		// }}}
+		// Sort {{{
+		.then('logs', function(next) {
+			if (!req.query.sort || req.query.sort == 'created') {
+				req.query.sort = 'date';
+			} else if (req.query.sort == '-created') {
+				req.query.sort = '-date';
+			}
+
+			var sortReverse = false;
+			if (req.query.sort.startsWith == '-') {
+				req.query.sort = req.query.sort.substr(1);
+				sortReverse = true;
+			}
+
+			this.logs = _.sortBy(this.logs, req.query.sort);
+			if (sortReverse) _.reverse(this.logs);
+
+			next(null, this.logs);
+		})
+		// }}}
 		// End {{{
 		.end(function(err) {
 			if (err) return res.sendError(err);
 			res.send(this.logs);
+		});
+		// }}}
+});
+
+
+/**
+* Sweep and return all tags used in all available posts for a discussion
+* This returns the unique contents of logs.tags[]
+* @param {string} req.params.model The database model to query
+* @param {string} req.params.id The ID of the enity to query
+* @return {array} An array of tags found
+*/
+app.get('/api/logs/:modal/:id/tags', app.middleware.ensure.login, function(req, res) {
+	async()
+		// Fetch data {{{
+		.then('logs', function(next) {
+			db.logs
+				.find({
+					model: req.params.model,
+					docId: req.params.id,
+				})
+				.select('tags')
+				.exec(next);
+		})
+		// }}}
+		// Extract tags {{{
+		.then('tags', function(next) {
+			next(null,
+				_(this.logs)
+					.map(l => l.tags)
+					.flatten()
+					.sort()
+					.uniq()
+					.value()
+			);
+		})
+		// }}}
+		// End {{{
+		.end(function(err) {
+			if (err) return res.sendError(err);
+			res.send(this.tags);
 		});
 		// }}}
 });
@@ -139,7 +228,7 @@ app.get('/api/logs/:model/:id', app.middleware.ensure.login, function(req, res) 
 * @param {string} req.body.body The HTML body of the comment to post
 * @return {void} Whether the posting succeded
 */
-app.post('/api/logs/:model/:id', app.middleware.ensure.login, multer().any(), function(req, res) {
+app.post('/api/logs/:model/:id', app.middleware.ensure.login, app.middleware.uploads.any(), function(req, res) {
 	async()
 		// Sanity checks {{{
 		.then(function(next) {
@@ -157,7 +246,7 @@ app.post('/api/logs/:model/:id', app.middleware.ensure.login, multer().any(), fu
 			mkdirp(this.uploadPath, next);
 		})
 		.forEach(req.files || [], function(next, file) {
-			fs.writeFile(`${this.uploadPath}/${file.originalname}`, file.buffer, next);
+			fs.rename(file.path, `${this.uploadPath}/${file.originalname}`, next);
 		})
 		.then(function(next) {
 			if (!this.uploadPath) return next();
