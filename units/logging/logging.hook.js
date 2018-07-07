@@ -20,9 +20,9 @@ app.register('preControllers', function(finish) {
 		res.sendError = function(code, err) {
 			res.errorBody = err;
 			if (isFinite(code)) {
-				res.status(code).send(err).end();
+				res.status(code).send(err);
 			} else {
-				res.status(400).send(code).end();
+				res.status(400).send(code);
 			}
 		};
 

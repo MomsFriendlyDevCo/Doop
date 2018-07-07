@@ -3,7 +3,9 @@
 * Permission strings can also be any valid brace-expansion (Bash syntax) like string (See https://www.npmjs.com/package/brace-expansion)
 *
 * NOTE: This function is actually a middleware factory which returns the compiled function
+* NOTE: All permission strings are relative to the req.user.permissions object
 * @param {string|array} perms A permission or array of permissions. If an array is used ALL permissions must pass to continue
+*
 * @example
 * app.get('/some/url', app.middleware.ensure.can('somePermission'), (req, res) => res.send('OK'));
 */

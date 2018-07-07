@@ -4,6 +4,7 @@ angular
 	.component('debugServerGitCtrl', {
 		controller: function($config, $filter, $http, $loader, $q, $scope, $timeout, $toast) {
 			var $ctrl = this;
+			$ctrl.$loader = $loader;
 
 			// Data refresher {{{
 			$ctrl.history;

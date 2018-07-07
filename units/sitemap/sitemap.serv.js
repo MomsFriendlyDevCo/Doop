@@ -1,6 +1,6 @@
 angular
 	.module('app')
-	.service('$sitemap', function($injector, $q, $rootScope, $router, $session, TreeTools) {
+	.service('$sitemap', function($injector, $http, $q, $rootScope, $router, $session, $toast, TreeTools) {
 		var $sitemap = this;
 
 		// Sidebar links & structure {{{
@@ -32,12 +32,17 @@ angular
 				title: 'Admin',
 				href: '#/admin',
 				icon: 'fa fa-fw fa-user',
-				show: $session => $session.data.isAdmin,
 				// Sub-items {{{
 				children: [
 					{
 						title: 'Users',
 						href: '#/admin/users',
+						icon: 'fa fa-user',
+						show: $session => $session.data.permissions.usersEdit,
+						anchor: {
+							model: 'users',
+							query: docId => $http.get(`/api/users/${docId}?select=username`).then(res => ({link: `/admin/users/${docId}`, title: res.data.username})),
+						},
 					},
 				],
 				// }}}
@@ -45,8 +50,7 @@ angular
 			{
 				title: 'Debugging',
 				href: '#/debug',
-				icon: 'far fa-fw fa-heartbeat',
-				show: $session => $session.data.isAdmin || $session.data.permissions.debugging,
+				icon: 'fa fa-fw fa-heartbeat',
 				// Sub-items {{{
 				children: [
 					{
@@ -76,10 +80,12 @@ angular
 					{
 						title: 'Server',
 						href: '#/debug/server',
+						show: $session => $session.data.permissions.debugServer,
+						icon: 'fa fa-wrench',
 						// Sub-items {{{
 						children: [
 							{
-								title: 'Git state',
+								title: 'Git history',
 								href: '#/debug/server/git',
 							},
 							{
@@ -92,11 +98,17 @@ angular
 					{
 						title: 'Services',
 						href: '#/debug/services',
+						icon: 'fa fa-cogs',
+						show: $session => $session.data.permissions.debugServices,
 						// Sub-items {{{
 						children: [
 							{
 								title: '$config',
 								href: '#/debug/services/config',
+							},
+							{
+								title: '$filekit',
+								href: '#/debug/services/filekit',
 							},
 							{
 								title: '$http',
@@ -125,22 +137,6 @@ angular
 							{
 								title: '$tts',
 								href: '#/debug/services/tts',
-							},
-						],
-						// }}}
-					},
-					{
-						title: 'Rockjaw Specific',
-						href: '#/debug/rockjaw',
-						// Sub-items {{{
-						children: [
-							{
-								title: 'Pending',
-								href: '#/debug/rockjaw/pending',
-							},
-							{
-								title: 'Pickers',
-								href: '#/debug/rockjaw/pickers',
 							},
 						],
 						// }}}
@@ -182,6 +178,12 @@ angular
 		// }}}
 
 		// Data refresher (active items) {{{
+
+		/**
+		* Refresh the sitemap to indicate which items are active based on the current path
+		* @emits $sitemapChange Emitted when a sitemap change is detected. Called as (parents) where parents is a top-down array of all sitemap elements that are marked as active
+		* @emits $sitemapChangeGuess Emitted as with $sitemapChange but only for a best-guess (i.e. rule matching is not exact).
+		*/
 		$rootScope.$on('$routerSuccess', ()=> {
 			if (!$sitemap.map) return; // Not yet ready
 
@@ -190,15 +192,12 @@ angular
 				.forEach(node => node.active = false);
 
 			// Bottom-up search through the tree, marking each node as active
-			var selectedCount = 0;
-			TreeTools.parents($sitemap.map, item => item.href && $router.path == item.href.replace(/^#/, '').replace(/\?.*$/, ''))
-				.forEach(node => {
-					node.active = true;
-					selectedCount++;
-				});
+			var parents = TreeTools.parents($sitemap.map, item => item.href && $router.path == item.href.replace(/^#/, '').replace(/\?.*$/, ''));
 
-			// Nothing was seleted? Try the best guess
-			if (!selectedCount) {
+			if (parents && parents.length) { // Found something
+				parents.forEach(node => node.active = true);
+				$rootScope.$broadcast('$sitemapChange', parents);
+			} else { // Nothing was seleted? Try the best guess
 				var bestGuess = _(TreeTools.flatten($sitemap.map))
 					.filter(item => item.href && item.href + '/' == '#' + $router.path.substr(0, item.href.length))
 					.map(item => _.set(item, 'length', item.href.length))
@@ -207,8 +206,10 @@ angular
 					.first();
 
 				if (bestGuess) {
-					TreeTools.parents($sitemap.map, {id: bestGuess.id})
-						.forEach(node => node.active = true);
+					parents = TreeTools.parents($sitemap.map, {id: bestGuess.id});
+					parents.forEach(node => node.active = true);
+
+					$rootScope.$broadcast('$sitemapChangeGuess', parents);
 				} else {
 					console.warn('Sitemap - Cannot find location within tree', 'Router path:', $router.path);
 				}
@@ -223,6 +224,7 @@ angular
 		* @param {Object|array} nodes The nodes to decorate
 		*/
 		$sitemap.decorateNodes = nodes => {
+			// First pass - calculate show, href, children and ids
 			TreeTools.flatten(nodes).forEach(node => {
 				// Calculate .show
 				node.show = node.show ? node.show($session) : true;
@@ -238,6 +240,15 @@ angular
 
 				// Add .id if missing
 				if (!node.id) node.id = (node.href || node.title).replace(/[^a-z0-9]+/ig, '');
+			});
+
+			// Second pass - disable showing nodes where all children are also hidden
+			TreeTools.flatten(nodes).forEach(node => {
+				if (
+					node.children && node.children.length // Has children
+					&& node.children.every(c => !c.show) // Every child is hidden
+				)
+					node.show = false;
 			});
 		};
 		// }}}

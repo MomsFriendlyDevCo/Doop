@@ -5,7 +5,7 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var monoxide = require('monoxide');
-var notify = require('gulp-notify');
+var notifier = require('node-notifier');
 var scenario = require('gulp-mongoose-scenario');
 
 /**
@@ -29,12 +29,12 @@ gulp.task('scenario', ['load:app.db'], function(finish) {
 			gutil.log('Error loading scenario'.red, err);
 		})
 		.on('end', function(err) {
-			if (app.config.gulp.notifications)
-				notify({
-					title: config.title + ' - Scenario',
-					message: 'Build database',
-					icon: app.config.paths.root + '/gulp/icons/mongodb.png',
-				}).write(0);
+			if (app.config.gulp.notifications) notifier.notify({
+				title: config.title + ' - Scenario',
+				message: 'Build database',
+				icon: app.config.paths.root + '/gulp/icons/mongodb.png',
+				...app.config.gulp.notifySettings,
+			});
 
 			finish(err);
 		});

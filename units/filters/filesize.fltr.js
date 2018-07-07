@@ -5,5 +5,5 @@
 */
 angular.module('app')
 .filter('filesize', function() {
-	return filesize;
+	return size => filesize(size || 0);
 })
