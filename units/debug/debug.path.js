@@ -118,14 +118,37 @@ app.get('/debug/pending', function(req, res) {
 	}
 });
 
+
+/**
+* Test response with a 200 response code
+*/
 app.all('/api/debug/200', function(req, res) {
 	res.send('Everything is ok, relax');
 });
 
+
+/**
+* Test response with a 403 response code
+*/
 app.all('/api/debug/403', function(req, res) {
 	res.status(403).send('You are forbidden from doing that. Forbidden I say!');
 });
 
+
+/**
+* Test response with a 500 response code throwing an intentional error
+*/
 app.all('/api/debug/500', function(req, res) {
 	throw new Error('Intentional test error');
+});
+
+
+/**
+* Test internal request proxying
+*/
+app.all('/api/debug/proxy', (req, res) => {
+	app.proxy('/api/debug/live', {req}, (err, data) => {
+		if (err) return res.sendError(err);
+		res.send({proxied: data});
+	});
 });
