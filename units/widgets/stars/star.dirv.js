@@ -42,7 +42,7 @@ angular
 			<a ng-click="$ctrl.toggleStar()" class="pull-right btn btn-link" ng-class="$ctrl.star.isStarred ? 'active' : ''">
 				<span class="fa-stack fa-lg">
 					<i ng-if="$ctrl.star" class="fa fa-stack-1x fa-star star-outer"></i>
-					<i class="fa fa-stack-1x fa-star-o star-inner"></i>
+					<i class="far fa-stack-1x fa-star star-inner"></i>
 				</span>
 			</a>
 		`,

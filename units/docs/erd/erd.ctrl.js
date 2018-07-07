@@ -25,7 +25,7 @@ angular
 						<ul class="nav nav-tabs">
 							<li class="active"><a data-target="#erd" data-toggle="tab">Diagram</a></li>
 							<li><a data-target="#markdown" data-toggle="tab">UML Schema</a></li>
-							<li class="pull-right"><a ng-click="$ctrl.refresh"><i class="fa fa-refresh"></i></a></li>
+							<li class="pull-right"><a ng-click="$ctrl.refresh"><i class="fa fa-sync"></i></a></li>
 						</ul>
 						<div class="tab-content" style="overflow: auto">
 							<div class="tab-pane active" id="erd">

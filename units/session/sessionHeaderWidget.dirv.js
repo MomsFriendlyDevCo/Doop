@@ -14,7 +14,7 @@ angular
 				<ul class="dropdown-menu pull-right">
 					<li><a href="#/profile"><i class="fa fa-user"></i> Your Profile</a></li>
 					<li class="divider"></li>
-					<li><a href="#/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+					<li><a href="#/logout"><i class="fa fa-sign-out-alt"></i> Logout</a></li>
 				</ul>
 			</li>
 		`,

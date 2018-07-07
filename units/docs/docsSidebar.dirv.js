@@ -16,7 +16,7 @@ angular
 			<ul class="main-menu">
 				<li ng-class="!$ctrl.area && 'active'">
 					<a href="#/">
-						<i class="fa fa-fw fa-dashboard"></i>
+						<i class="fa fa-fw fa-tachometer-alt"></i>
 						Docs Home
 					</a>
 				</li>

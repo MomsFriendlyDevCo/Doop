@@ -43,7 +43,7 @@ angular
 					<a href="#{{star.link}}">
 						<span ng-click="$event.preventDefault(); $ctrl.removeStar(star.link)" class="fa-stack fa-lg">
 							<i class="fa fa-stack-1x fa-star star-outer"></i>
-							<i class="fa fa-stack-1x fa-star-o star-inner"></i>
+							<i class="far fa-stack-1x fa-star star-inner"></i>
 						</span>
 						<span ng-if="star.breadcrumbs">
 							<ol class="breadcrumb">
