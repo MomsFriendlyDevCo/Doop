@@ -50,6 +50,30 @@ angular
 				// Sub-items {{{
 				children: [
 					{
+						title: 'Directives',
+						href: '#/debug/directives',
+						// Sub-items {{{
+						children: [
+							{
+								title: 'digest',
+								href: '#/debug/directives/digest',
+							},
+							{
+								title: 'reveal',
+								href: '#/debug/directives/reveal',
+							},
+							{
+								title: 'selectFrom',
+								href: '#/debug/directives/selectFrom',
+							},
+							{
+								title: 'shortcut',
+								href: '#/debug/directives/shortcut',
+							},
+						],
+						// }}}
+					},
+					{
 						title: 'Server',
 						href: '#/debug/server',
 						// Sub-items {{{
