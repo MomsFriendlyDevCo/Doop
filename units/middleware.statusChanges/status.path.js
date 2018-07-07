@@ -6,10 +6,14 @@ var monoxide = require('monoxide');
 * Retrieve the status schema for a given collection
 * If no status schema is specified one is constructed where every status can change to every other status
 * @param {string} req.params.collection The monoxide collection to retrieve / generate the schema for
-* @param {string} [req.params.format='schema'] The expected output format. ENUM: 'schema', 'mermaid'
+* @param {string} [req.params.format='schema'] The expected output format. ENUM: 'schema', 'mermaid', 'mermaidText'
 * @param {string} [req.query.highlight] Optional status to highlight
 */
 app.get('/api/middleware.statusChanges/:collection/:format?', app.middleware.ensure.login, function(req, res) {
+	// Utility functions {{{
+	var tidyId = id => id.replace(/[^0-9a-z\-]+/gi, '_');
+	// }}}
+
 	async()
 		// Sanity checks {{{
 		.then(function(next) {
@@ -101,9 +105,9 @@ app.get('/api/middleware.statusChanges/:collection/:format?', app.middleware.ens
 		// }}}
 		// Mangle into mermaid format if requested {{{
 		.then('schema', function(next) {
-			if (!req.params.format && req.params.format != 'mermaid') return next(null, this.schema);
+			if (!req.params.format && !['mermaid', 'mermaidText'].includes(req.params.format)) return next(null, this.schema);
 
-			next(null,
+			var lines =
 				[].concat(
 					// Header
 					['graph TD'],
@@ -111,19 +115,20 @@ app.get('/api/middleware.statusChanges/:collection/:format?', app.middleware.ens
 					// Styling
 					_(this.schema)
 						.pickBy((s, id) => id == req.query.highlight)
-						.map((s, id) => `\tstyle ${id} fill:#579ddb,stroke:#5fa2dd`)
+						.map((s, id) => `\tstyle ${tidyId(id)} fill:#579ddb,stroke:#5fa2dd`)
 						.value(),
 
 					// Base ID + entity definitions
-					_.map(this.schema, (s, id) => `\t${id}(${_.startCase(id)})`),
+					_.map(this.schema, (s, id) => `\t${tidyId(id)}(${_.startCase(id)})`),
 
 					// Linkages
 					_(this.schema)
-						.map((s, id) => s.changeTo.map(c => `\t${id} --> ${c.id}`))
+						.map((s, id) => s.changeTo.map(c => `\t${tidyId(id)} --> ${tidyId(c.id)}`))
 						.flatten()
 						.value()
-				)
-			);
+				);
+
+			next(null, req.params.format == 'mermaidText' ? lines.join('\n') : lines);
 		})
 		// }}}
 		// End {{{

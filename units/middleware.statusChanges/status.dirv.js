@@ -15,7 +15,7 @@
 * @param {boolean} [config.changeTo.*.comments] Prompt the user for comments when changing the status
 * @param {string|boolean} [config.changeTo.*.confirm] Check with the user when changing to this status. If the value is a string that will be used as a prompt, otherwise if truthy text will be generated
 * @param {function} [config.changeTo.*.enabled] Whether the button should be enabled. This differs from validate in that it is run on load. Called as (dataModel, $session)
-* @param {Object} [config.changeTo.*.permissions] Compare a Mongo style expression (using `sift`) against the `$session.data` object. (e.g. `['permissions.perm1', 'permissions.perm2']`, `{$and: [{'permissions.perm3': true}], [{'permissions.perm4': true}]}}`, `{$or: [{'permissions.perm5': false}, {'permissions.perm6': true}]}`)
+* @param {Object} [config.changeTo.*.permissions] Compare a Mongo style expression (using `sift`) against the `$session.data.permissions` object. (e.g. `['perm1', 'perm2']`, `{$and: [{perm3: true}], [{perm4: true}]}}`, `{$or: [{perm5: false}, {perm6: true}]}`)
 * @param {string} [config.changeTo.*.tooltip] Display the given string as a tooltip on the choice button
 * @param {Promise|function} [config.changeTo.*.validate] Only allow this option if the promise resolves. This differs from validate in that it is run when the status is being changed. Function is called as (dataModel, $session)
 */
@@ -121,13 +121,13 @@ angular
 
 
 			/**
-			* Compares the current user (`$session.data`) against a given Sift expression as a shortname
+			* Compares the current user permissions (`$session.data.permissions`) against a given Sift expression as a shortname
 			* @param {Object} expression Sift compatible matcher to compare against $session.data.permissions
 			*/
 			$ctrl.evalPermissions = (expression) => {
 				if (_.isArray(expression)) throw new Error('Cannot use an array as a Sift expression:', expression, 'See https://github.com/crcn/sift.js for examples');
-				var res = sift(expression, [$session.data]).length > 0;
-				console.log('SIFT', expression, $session.data.permissions, '?', res);
+				var res = sift(expression, [$session.data.permissions]).length > 0;
+				// console.log('SIFT', expression, $session.data.permissions, '?', res);
 				return res;
 			};
 
@@ -147,7 +147,7 @@ angular
 			$ctrl.current; // Inherited as $ctrl.schema[$ctrl.entity.status]
 
 			// Watch the main status key + schema changes and react to them
-			$scope.$watchGroup(['$ctrl.ngModel.status', '$ctrl.schema'], ()=> {
+			$scope.$watchGroup(['$ctrl.ngModel.status', '$ctrl.schema', '$ctrl.$session.data.permissions'], ()=> {
 				if (!$ctrl.ngModel || !$ctrl.ngModel.status || !$ctrl.schema) return; // Not yet ready
 
 				$ctrl.current = _.clone($ctrl.schema[$ctrl.ngModel.status]);
@@ -183,9 +183,13 @@ angular
 							`,
 						});
 						$ctrl.current = _.clone($ctrl.schema[schemaDefault]);
-					} else {
-						console.warn(`Unknown status "${$ctrl.ngModel.status}" for "${$ctrl.collection}" collection. No valid default is available!`);
-						$ctrl.current = undefined;
+					} else { // No fallback - pick the first key instead
+						schemaDefault = _($ctrl.schema)
+							.keys()
+							.first();
+
+						console.warn(`Unknown status "${$ctrl.ngModel.status}" for "${$ctrl.collection}" collection. No valid default is available! Setting to first item in status enum "${schemaDefault}"`);
+						$ctrl.current = _.clone($ctrl.schema[schemaDefault]);
 					}
 				}
 				// }}}
