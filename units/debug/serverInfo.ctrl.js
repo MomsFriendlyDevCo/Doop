@@ -46,7 +46,7 @@ angular
 								Auto
 							</a>
 							<a ng-click="$ctrl.refresh()" class="btn btn-sm" ng-class="$ctrl.$loader.loading ? 'btn-warning' : 'btn-success'">
-								<i class="fa fa-refresh" ng-class="$ctrl.$loader.loading && 'fa-spin'"></i>
+								<i class="fa fa-sync" ng-class="$ctrl.$loader.loading && 'fa-spin'"></i>
 							</a>
 						</div>
 						<h3 class="panel-title">Server data</h3>

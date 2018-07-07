@@ -103,16 +103,16 @@ app.get('/api/logs/:model/:id', app.middleware.ensure.login, function(req, res) 
 						size: humanize.filesize(f.size),
 						icon:
 							// Very abridged list of mimetypes -> font-awesome lookup {{{
-							/^audio\//.test(f.mimetype) ? 'fa fa-file-audio-o' :
-							/^image\//.test(f.mimetype) ? 'fa fa-file-image-o' :
-							/^text\//.test(f.mimetype) ? 'fa fa-file-text-o' :
-							/^video\//.test(f.mimetype) ? 'fa fa-file-video-o' :
-							f.mimetype == 'application/vnd.ms-excel' || f.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || f.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.template' ? 'fa fa-file-excel-o' :
-							f.mimetype == 'application/msword' || f.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || f.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.template' ? 'fa fa-file-word-o' :
-							f.mimetype == 'application/vnd.ms-powerpoint' || f.mimetype == 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || f.mimetype == 'application/vnd.openxmlformats-officedocument.presentationml.slideshow' || f.mimetype == 'application/vnd.openxmlformats-officedocument.presentationml.template' ? 'fa fa-file-word-o' :
-							f.mimetype == 'application/pdf' ? 'fa fa-file-pdf-o' :
-							f.mimetype == 'application/zip' || f.mimetype == 'application/x-compressed-zip' || f.mimetype == 'application/x-tar' || f.mimetype == 'application/x-bzip2' ? 'fa fa-file-archive-o' :
-							'fa fa-file-o',
+							/^audio\//.test(f.mimetype) ? 'fa fa-file-audio' :
+							/^image\//.test(f.mimetype) ? 'fa fa-file-image' :
+							/^text\//.test(f.mimetype) ? 'fa fa-file-alt-o' :
+							/^video\//.test(f.mimetype) ? 'fa fa-file-video' :
+							f.mimetype == 'application/vnd.ms-excel' || f.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || f.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.template' ? 'fa fa-file-excel' :
+							f.mimetype == 'application/msword' || f.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || f.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.template' ? 'fa fa-file-word' :
+							f.mimetype == 'application/vnd.ms-powerpoint' || f.mimetype == 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || f.mimetype == 'application/vnd.openxmlformats-officedocument.presentationml.slideshow' || f.mimetype == 'application/vnd.openxmlformats-officedocument.presentationml.template' ? 'fa fa-file-word' :
+							f.mimetype == 'application/pdf' ? 'fa fa-file-pdf' :
+							f.mimetype == 'application/zip' || f.mimetype == 'application/x-compressed-zip' || f.mimetype == 'application/x-tar' || f.mimetype == 'application/x-bzip2' ? 'fa fa-file-archive' :
+							'fa fa-file',
 							// }}}
 					}));
 					next(null, post);

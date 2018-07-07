@@ -21,7 +21,7 @@ angular
 			{
 				title: 'Dashboard',
 				href: '#/',
-				icon: 'fa fa-fw fa-dashboard',
+				icon: 'fa fa-fw fa-tachometer-alt',
 			},
 			{
 				title: 'Notifications',
@@ -45,7 +45,7 @@ angular
 			{
 				title: 'Debugging',
 				href: '#/debug',
-				icon: 'fa fa-fw fa-heartbeat',
+				icon: 'far fa-fw fa-heartbeat',
 				show: $session => $session.data.isAdmin || $session.data.permissions.debugging,
 				// Sub-items {{{
 				children: [

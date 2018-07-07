@@ -244,3 +244,14 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 			finish();
 		});
 });
+
+
+gulp.task('vendors-fonts', ['load:app'], ()=>
+	gulp.src(`${app.config.paths.root}/units/fonts.fa5/fa-pro/css/*.css`)
+		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.init()))
+		.pipe(concat('vendors-fonts.min.css'))
+		.pipe(replace('../webfonts/', '/webfonts/'))
+		.pipe(gulpIf(app.config.gulp.minifyCSS, cleanCSS()))
+		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.write('.')))
+		.pipe(gulp.dest(paths.build))
+);

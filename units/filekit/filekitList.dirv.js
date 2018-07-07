@@ -135,10 +135,10 @@ angular
 						<td ng-if="$ctrl.canDelete" class="text-center">
 							<div class="btn-group">
 								<a ng-click="$ctrl.rename(file)" class="btn btn-xs btn-default" tooltip="Rename the file">
-									<i class="fa fa-pencil"></i>
+									<i class="fa fa-pencil-alt"></i>
 								</a>
 								<a ng-click="$ctrl.delete(file)" class="btn btn-xs btn-danger" tooltip="Delete the file">
-									<i class="fa fa-trash-o"></i>
+									<i class="fa fa-trash-alt"></i>
 								</a>
 							</div>
 						</td>
@@ -152,7 +152,7 @@ angular
 									{{$ctrl.filesSelected.length | number}} files selected
 								</a>
 								<a ng-if="$ctrl.canDelete" ng-click="$ctrl.deleteSelected()" class="btn btn-danger">
-									<i class="fa fa-trash"></i>
+									<i class="fa fa-trash-alt"></i>
 									Delete
 								</a>
 							</div>

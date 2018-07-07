@@ -54,7 +54,6 @@
     "express-log-url": "^1.2.2",
     "express-session": "^1.15.6",
     "filesize": "^3.6.0",
-    "font-awesome": "^4.7.0",
     "glob": "^7.1.2",
     "gm": "^1.23.0",
     "gulp": "^3.9.1",
