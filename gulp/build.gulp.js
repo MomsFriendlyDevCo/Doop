@@ -6,7 +6,7 @@
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var notify = require('gulp-notify');
+var notifier = require('node-notifier');
 var rimraf = require('rimraf');
 var runSequence = require('run-sequence');
 
@@ -30,12 +30,13 @@ gulp.task('build', function(finish) {
 * Notifies completion of build task, used for serial processing of build-related tasks
 */
 gulp.task('build:complete', function(finish) {
-	if (app.config.gulp.notifications)
-		gulp.src('').pipe(notify(Object.assign(app.config.gulp.notifySettings, {
-			title: app.config.title,
-			onLast: true,
-			message: 'Deployed code!'
-		})));
+	if (app.config.gulp.notifications) notifier.notify({
+		title: app.config.title,
+		onLast: true,
+		message: 'Deployed code!',
+		icon: `${app.config.paths.root}/gulp/icons/doop.png`,
+		...app.config.gulp.notifySettings,
+	});
 
 	finish();
 });

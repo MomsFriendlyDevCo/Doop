@@ -8,7 +8,6 @@ var _ = require('lodash');
 var glob = require('glob');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var notify = require('gulp-notify');
 var path = require('path');
 var runSequence = require('run-sequence');
 var taskListing = require('gulp-task-listing');

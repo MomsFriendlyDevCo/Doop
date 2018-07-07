@@ -12,7 +12,7 @@ var gplumber = require('gulp-plumber');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gutil = require('gulp-util');
-var notify = require('gulp-notify');
+var notifier = require('node-notifier');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
@@ -27,7 +27,14 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(gplumber({
 			errorHandler: err => {
 				gutil.log(colors.red('ERROR DURING JS BUILD'));
-				notify({message: err.name + '\n' + err.message, title: app.config.title + ' - JS Error'}).write(err);
+
+				if (app.config.gulp.notifications) notifier.notify({
+					message: err.name + '\n' + err.message,
+					title: app.config.title + ' - JS Error',
+					icon: `${app.config.paths.root}/gulp/icons/error.png`,
+					...app.config.gulp.notifySettings,
+				});
+
 				process.stdout.write(err.stack);
 				hasErr = err;
 				this.emit('end');
@@ -52,12 +59,12 @@ gulp.task('scripts', ['load:app'], function() {
 		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.write('.')))
 		.pipe(gulp.dest(paths.build))
 		.on('end', ()=> {
-			if (!hasErr && app.config.gulp.notifications)
-				notify(Object.assign(app.config.gulp.notifySettings, {
-					title: app.config.title + ' - Scripts',
-					message: 'Rebuilt frontend scripts' + (++scriptBootCount > 1 ? ' #' + scriptBootCount : ''),
-					icon: __dirname + '/icons/javascript.png',
-				})).write(0);
+			if (!hasErr && app.config.gulp.notifications) notifier.notify({
+				title: app.config.title + ' - Scripts',
+				message: 'Rebuilt frontend scripts' + (++scriptBootCount > 1 ? ' #' + scriptBootCount : ''),
+				icon: `${app.config.paths.root}/gulp/icons/javascript.png`,
+				...app.config.gulp.notifySettings,
+			});
 		});
 });
 

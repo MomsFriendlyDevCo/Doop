@@ -19,7 +19,7 @@ var fspath = require('path');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gutil = require('gulp-util');
-var notify = require('gulp-notify');
+var notifier = require('node-notifier');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
@@ -53,7 +53,7 @@ var readJSON = function(path, callback) {
 };
 // }}}
 
-gulp.task('vendors', ['vendors-core', 'vendors-main', 'vendors-fonts']);
+gulp.task('vendors', ['vendors-core', 'vendors-main']);
 
 /**
 * Load 'core' vendor files
@@ -138,12 +138,12 @@ gulp.task('vendors-core', ['load:app'], function(finish) {
 			gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'core vendor JS scripts');
 			gutil.log('Compiled', gutil.colors.cyan(this.css.length), 'core vendor CSS files');
 
-			if (app.config.gulp.notifications)
-				notify(Object.assign(app.config.gulp.notifySettings, {
-					title: app.config.title + ' - Core vendors',
-					message: 'Rebuilt ' + (this.js.length + this.css.length) + ' core vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
-					icon: __dirname + '/icons/html5.png',
-				})).write(0);
+			if (app.config.gulp.notifications) notifier.notify({
+				title: app.config.title + ' - Core vendors',
+				message: 'Rebuilt ' + (this.js.length + this.css.length) + ' core vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
+				icon: `${app.config.paths.root}/gulp/icons/html5.png`,
+				...app.config.gulp.notifySettings,
+			});
 
 			finish();
 		});
@@ -233,12 +233,12 @@ gulp.task('vendors-main', ['load:app'], function(finish) {
 				gutil.log('Compiled', gutil.colors.cyan(this.js.length), 'main vendor JS scripts');
 				gutil.log('Compiled', gutil.colors.cyan(this.css.length), 'main vendor CSS files');
 
-				if (app.config.gulp.notifications)
-					notify(Object.assign(app.config.gulp.notifySettings, {
-						title: app.config.title + ' - Main vendors',
-						message: 'Rebuilt ' + (this.js.length + this.css.length) + ' vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
-						icon: __dirname + '/icons/html5.png',
-					})).write(0);
+				if (app.config.gulp.notifications) notifier.notify({
+					title: app.config.title + ' - Main vendors',
+					message: 'Rebuilt ' + (this.js.length + this.css.length) + ' vendor files' + (++vendorBootCount > 1 ? ' #' + vendorBootCount : ''),
+					icon: `${app.config.paths.root}/gulp/icons/html5.png`,
+					...app.config.gulp.notifySettings,
+				});
 			}
 
 			finish();

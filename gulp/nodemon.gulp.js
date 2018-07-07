@@ -10,7 +10,7 @@ var domain = require('domain');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var nodemon = require('gulp-nodemon');
-var notify = require('gulp-notify');
+var notifier = require('node-notifier');
 var watch = require('gulp-watch');
 
 /**
@@ -38,21 +38,21 @@ gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 		})
 			.on('start', function() {
 				if (runCount > 0) return;
-				if (app.config.gulp.notifications)
-					notify(Object.assign(app.config.gulp.notifySettings, {
-						title: app.config.title + ' - Nodemon',
-						message: 'Server started',
-						icon: __dirname + '/icons/node.png',
-					})).write(0);
+				if (app.config.gulp.notifications) notifier.notify({
+					title: app.config.title + ' - Nodemon',
+					message: 'Server started',
+					icon: `${app.config.paths.root}/gulp/icons/node.png`,
+					...app.config.gulp.notifySettings,
+				});
 			})
 			.on('restart', function() {
 				runCount++;
-				if (app.config.gulp.notifications)
-					notify(Object.assign(app.config.gulp.notifySettings, {
-						title: app.config.title + ' - Nodemon',
-						message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
-						icon: __dirname + '/icons/nodemon.png',
-					})).write(0);
+				if (app.config.gulp.notifications) notifier.notify({
+					title: app.config.title + ' - Nodemon',
+					message: 'Server restart' + (++runCount > 1 ? ' #' + runCount : ''),
+					icon: `${app.config.paths.root}/gulp/icons/nodemon.png`,
+					...app.config.gulp.notifySettings,
+				});
 			});
 
 		// Install secondary watches

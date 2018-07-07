@@ -11,7 +11,7 @@ var gplumber = require('gulp-plumber');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gutil = require('gulp-util');
-var notify = require('gulp-notify');
+var notifier = require('node-notifier');
 var sourcemaps = require('gulp-sourcemaps');
 
 /**
@@ -25,10 +25,13 @@ gulp.task('css', ['load:app'], function() {
 		.pipe(gplumber({
 			errorHandler: function(err) {
 				gutil.log(colors.red('ERROR DURING CSS BUILD'));
-				notify(Object.assign(app.config.gulp.notifySettings, {
+
+				if (app.config.gulp.notifications) notifier.notify({
 					message: err.name + '\n' + err.message,
 					title: app.config.title + ' - CSS Error',
-				})).write(err);
+					...app.config.gulp.notifySettings,
+				});
+
 				process.stdout.write(err.stack);
 				hasErr = err;
 				this.emit('end');
@@ -42,11 +45,11 @@ gulp.task('css', ['load:app'], function() {
 		.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.write()))
 		.pipe(gulp.dest(paths.build))
 		.on('end', function() {
-			if (!hasErr && app.config.gulp.notifications)
-				notify(Object.assign(app.config.gulp.notifySettings, {
-					title: app.config.title + ' - CSS',
-					message: 'Rebuilt frontend CSS' + (++cssBootCount > 1 ? ' #' + cssBootCount : ''),
-					icon: __dirname + '/icons/css.png',
-				})).write(0);
+			if (!hasErr && app.config.gulp.notifications) notifier.notify({
+				title: app.config.title + ' - CSS',
+				message: 'Rebuilt frontend CSS' + (++cssBootCount > 1 ? ' #' + cssBootCount : ''),
+				icon: `${app.config.paths.root}/gulp/icons/css.png`,
+				...app.config.gulp.notifySettings,
+			});
 		});
 });
