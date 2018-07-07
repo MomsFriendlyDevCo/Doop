@@ -61,6 +61,17 @@ angular
 				params: {
 					id: 'count',
 				},
+				paramSerializer: params => {
+					return $().serialize( // NOTE: We are using JQ's serializer
+						_.omit(params, [ // Remove meta directives from request
+							'limit',
+							'populate',
+							'select',
+							'skip',
+							'sort',
+						])
+					);
+				},
 			},
 			create: {
 				method: 'POST',
