@@ -133,7 +133,7 @@ app.get('/api/logs/:model/:id', app.middleware.ensure.login, function(req, res) 
 							// Very abridged list of mimetypes -> font-awesome lookup {{{
 							/^audio\//.test(f.mimetype) ? 'fa fa-file-audio' :
 							/^image\//.test(f.mimetype) ? 'fa fa-file-image' :
-							/^text\//.test(f.mimetype) ? 'fa fa-file-alt-o' :
+							/^text\//.test(f.mimetype) ? 'fa fa-file-alt' :
 							/^video\//.test(f.mimetype) ? 'fa fa-file-video' :
 							f.mimetype == 'application/vnd.ms-excel' || f.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || f.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.template' ? 'fa fa-file-excel' :
 							f.mimetype == 'application/msword' || f.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || f.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.template' ? 'fa fa-file-word' :
