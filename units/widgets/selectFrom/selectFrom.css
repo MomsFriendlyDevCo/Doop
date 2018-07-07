@@ -1,0 +1,101 @@
+select-from > .btn-group {
+	display: block;
+}
+
+select-from > .btn-group > a {
+	border: 0;
+	display: block;
+	padding: 0;
+	width: 100%;
+}
+
+select-from input {
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	height: 34px;
+	margin: 0;
+	outline: none;
+	padding: 6px 12px;
+	/* extra padding to account for caret (12 + 20) */
+	padding-right: 32px;
+	width: 100%;
+}
+	/* Focused state */
+	select-from input:focus {
+		border-color: #66afe9;
+		box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075),
+			0 0 8px rgba(102, 175, 233, .6)
+	}
+	/* Caret */
+	select-from > .btn-group > a::after {
+		border: 4px solid transparent;
+		border-top: 4px solid #888;
+		content: '';
+		display: block;
+		position: absolute;
+		right: 12px;
+		top: calc(50% - 2px);
+		width: 8px;
+	}
+	/* 'Caret' while loading */
+	select-from > .btn-group.loading > a::after {
+		animation: rotate 500ms infinite linear;
+		border: 2px solid #ccc;
+		border-bottom-color: transparent;
+		border-left-color: transparent;
+		border-radius: 50%;
+		height: 14px;
+		right: 10px;
+		top: calc(50% - 7px);
+		width: 14px;
+	}
+	@keyframes rotate {
+		0% {
+			transform: rotate(0deg);
+		}
+		50% {
+			transform: rotate(180deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+select-from .clear {
+	background-color: #aaa;
+	border: 0;
+	border-radius: 50%;
+	height: 20px;
+	padding: 0;
+	position: absolute;
+	right: 30px;
+	text-align: center;
+	top: calc(50% - 10px);
+	width: 20px;
+}
+	select-from .clear::after {
+		color: white;
+		content: '✕';
+		font-weight: bold;
+		line-height: 20px;
+	}
+	select-from .clear:hover {
+		background-color: #888;
+	}
+
+select-from .dropdown-menu {
+	border-bottom-color: #66afe9;
+	border-left-color: #66afe9;
+	border-right-color: #66afe9;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	min-width: 0;
+	padding: 5px 0;
+	width: 100%
+}
+	select-from .dropdown-menu > li {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+	}

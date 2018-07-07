@@ -22,6 +22,64 @@
 */
 angular
 	.module('app')
+	.service('digestService', function($http, $q, $timeout) {
+		var digestService = this;
+
+		/**
+		* Object of pending digests
+		* Keys are constructed via digestService.queryKey()
+		* @var {Object}
+		*/
+		digestService.pendingQueries = {};
+
+
+		/**
+		* Take a URL + query object and return an indexable key
+		* @param {string} url The URL to index
+		* @param {Object} query The query Object to index
+		* @returns {string} The hashed url + query
+		*/
+		digestService.queryKey = (url, query) => url + '?' + JSON.stringify(query);
+
+
+		/**
+		* The timeout we should wait before expiring a query result
+		* @var {number}
+		*/
+		digestService.timeout = 3000;
+
+
+		/**
+		* Wrapper for $http.get() which returns an existing promise structure if one is already ongoing
+		* If multiple requests come in at the same time for the same resource they are merged into one
+		* @param {string} url The URL to make the GET request on
+		* @param {Object} query The query object to pass to the GET request
+		* @returns {Promise} Either a new or merged promise for the $http request
+		*/
+		digestService.get = (url, query) => {
+			var key = digestService.queryKey(url, query);
+
+			if (!digestService.pendingQueries[key]) { // No existing query is ongoing - create one
+				digestService.pendingQueries[key] = {
+					waitingDefers: [],
+					promise: $http.get(url, {params: query})
+						.then(res => { // Resolve all defers with the data we got in this promise
+							digestService.pendingQueries[key].waitingDefers.forEach(def => def.resolve(res));
+						})
+						.then(()=> $timeout(()=> { // Expire this request after a given timeout
+							delete digestService.pendingQueries[key];
+						}), digestService.timeout),
+				};
+			} else if (digestService.pendingQueries[key].promise.$$state.status == 1) { // Already fulfilled, but not yet expired promise
+				return $q.resolve(digestService.pendingQueries[key].promise.value);
+			}
+
+			// If we got to here we now have a pendingQuery waiting that we can attach to
+			var myDefer = $q.defer();
+			digestService.pendingQueries[key].waitingDefers.push(myDefer);
+			return myDefer.promise;
+		};
+	})
 	.component('digest', {
 		bindings: {
 			collection: '@?',
@@ -36,7 +94,7 @@ angular
 			classInvalid: '@?',
 			ignoreErrors: '@?',
 		},
-		controller: function($element, $filter, $http, $scope, $timeout, $toast) {
+		controller: function($element, $filter, $scope, $timeout, $toast, digestService) {
 			var $ctrl = this;
 
 			// Data fetcher {{{
@@ -47,8 +105,9 @@ angular
 				if (!$ctrl.url && !$ctrl.collection && !$ctrl.id) return; // Required data not yet ready
 				if ((angular.isUndefined($ctrl.lazy) || $ctrl.lazy) && !$ctrl.isVisible) return; // Don't bother to fetch if we're not actually visible
 
+
 				$ctrl.loading = true;
-				$http.get($ctrl.url || `/api/${$ctrl.collection}/${$ctrl.id}`, {
+				digestService.get($ctrl.url || `/api/${$ctrl.collection}/${$ctrl.id}`, {
 					select: $ctrl.key || 'title',
 				})
 					.then(res => {

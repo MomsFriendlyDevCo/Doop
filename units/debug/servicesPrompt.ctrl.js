@@ -31,8 +31,27 @@ angular
 						])">$prompt.macgyver(example-form)</a>
 						<a class="list-group-item" ng-click="$ctrl.$prompt.macgyver({form: [{id: 'content', type: 'mgWysiwyg', showTitle: false}]})">$prompt.macgyver(WYSIWYG)</a>
 						<a class="list-group-item" ng-click="$ctrl.$prompt.alert('One'); $ctrl.$prompt.alert('Two'); $ctrl.$prompt.alert('Three')">$prompt.alert() x 3</a>
+						<a class="list-group-item" ng-click="$ctrl.$prompt.modal('#modal-prompt-1')">$prompt.modal('#modal-prompt-1') + nesting test</a>
 					</div>
 				</div>
 			</div>
+			<!-- Modal tests {{{ -->
+			<div ng-repeat="n in [].constructor(10) track by $index" id="modal-prompt-{{$index}}" class="modal fade">
+				<div class="modal-dialog" style="margin-top: {{$index * 100}}px">
+					<div class="modal-content">
+						<div class="modal-header">
+							<a class="close" data-dismiss="modal"><i class="fa fa-times"></i></a>
+							<h4 class="modal-title">Modal {{$index}}</h4>
+						</div>
+						<div class="modal-body">
+							<p>This is Modal #1</p>
+							<div class="row">
+								<a ng-click="$ctrl.$prompt.modal('#modal-prompt-' + ($index+1))" class="btn btn-default">Spawn Modal #{{$index + 1}}</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- }}} -->
 		`,
 	});
