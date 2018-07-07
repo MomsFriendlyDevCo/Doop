@@ -1,0 +1,116 @@
+#!/usr/bin/node
+
+/**
+* Run an indexer by ID
+* Usage: run-indexer <indexer-id>
+*      : INDEXER=<indexer-id> run-indexer
+*
+* @param {string} [process.env.INDEXER] The ID of the indexer to run
+* @param {string} [process.env.INDEXER_SETTINGS] JSON encoded object to pass to the indexer to process
+*/
+
+
+require('./units/core/backend');
+var colors = require('chalk');
+var indexer = require('./units/indexer/indexer');
+var fs = require('fs');
+var program = require('commander');
+var promisify = require('util').promisify;
+var util = require('util');
+
+program
+	.version(require('./package.json').version)
+	.usage('[indexer-id]')
+	.option('-e, --enclose', 'Dont return errors, instead wrap the error inside the return value (implied when using the env INDEXER)')
+	.option('-f, --fork', 'Fork indexer into a PM2 task and wait for response (useful for deep testing)')
+	.option('-s, --settings [json]', 'Provide settings to the indexer')
+	.option('-o, --output [file]', 'Output the result to a file')
+	.option('-p, --print', 'Output the result of the indexer to STDOUT')
+	.option('-r, --pretty', 'Pretty print the output')
+	.option('-v, --verbose', 'Be verbose')
+	.parse(process.argv)
+
+
+Promise.resolve()
+	// Process arguments / environment variables {{{
+	.then(()=> {
+		if (!program.args.length && process.env.INDEXER) {
+			program.index = process.env.INDEXER;
+
+			// Enable various inline options:
+			colors.enabled = true;
+			program.verbose = 10;
+			program.enclose = true;
+		} else if (program.args.length == 1) {
+			program.index = program.args.pop();
+		} else if (program.args.length > 1) {
+			throw new Error('Only one index can be run at a time');
+		} else {
+			throw new Error('No index-id given!');
+		}
+
+		if (!program.settings && process.env.INDEXER_SETTINGS) {
+			program.settings = JSON.parse(process.env.INDEXER_SETTINGS);
+		} else if (program.settings) {
+			program.settings = JSON.parse(program.settings);
+		} else if (!program.settings) {
+			program.settings = {};
+		}
+
+		if (program.enclose) program.settings.enclose = true;
+
+		// Override the indexing method otherwise this script will try to spawn itself again
+		app.config.indexer.method = program.fork ? 'pm2' : 'inline';
+		app.config.indexer.allowImmediate = false;
+	})
+	// }}}
+	// Load app units that we will need {{{
+	.then(()=> Promise.all([
+		// Load the DB
+		promisify(require('./units/core.db/loader'))()
+			.then(models => global.db = app.db = models),
+
+		// Load the cache
+		promisify(require('./units/middleware.cache/loader'))(),
+	]))
+	// }}}
+	// Setup the indexer {{{
+	.then(()=> indexer._autoInstall = false)
+	.then(()=> promisify(indexer.setup)())
+	.then(()=> {
+		if (!indexer.has(program.index)) throw new Error(`Invalid index-id: "${program.index}"`);
+	})
+	// }}}
+	// Run the indexer {{{
+	.then(()=> {
+		if (program.verbose) {
+			console.log(colors.blue('[indexer]'), 'Going to run the indexer', colors.cyan(program.index));
+			console.log(colors.blue('[indexer]'), 'With settings:', util.inspect(program.settings, {depth: null, colors: true}))
+			console.log(colors.blue('[indexer]'), 'And saving as the key', colors.cyan(program.settings.cacheKey || program.index));
+		}
+	})
+	.then(()=> promisify(indexer.run)(program.index, program.settings))
+	// }}}
+	// Output the result (if --print || --output) {{{
+	.then(result => {
+		if (program.print) console.log(result);
+		if (program.output) {
+			if (program.verbose > 1) console.log(colors.blue('[indexer]'), 'Outputting to', colors.cyan(program.output));
+			return promisify(fs.writeFile)(program.output, program.pretty ? JSON.stringify(result, null, '\t') : JSON.stringify(result));
+		}
+	})
+	// }}}
+	// Flush cache {{{
+	.then(()=> promisify(app.middleware.cache.destroy)())
+	// }}}
+	// End {{{
+	.catch(e => {
+		console.log(colors.blue('[indexer]'), colors.red.bold('ERROR'), 'Indexer error while generating the index', colors.cyan(program.index));
+		console.log(e);
+		process.exit(1);
+	})
+	.then(()=> {
+		console.log(colors.blue('[indexer]'), 'Finished generating index', colors.cyan(program.index));
+		process.exit(0);
+	})
+	// }}}
