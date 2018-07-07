@@ -562,6 +562,78 @@ angular
 
 
 			/**
+			* General helper for Bootstrap modals
+			* This adds a promise structure around modals which makes them easier to handle
+			* NOTE: The promise will also fire notifications with each status update
+			*
+			* @param {Object} settings Settings structure to pass OR the jQuery selected modal to display
+			* @param {Object} settings.element The modal object (usualy selected as `angular.element('.modal')` or something), this is populated from 'settings' if its passed in as the only argument
+			* @param {function} [settings.onShow] Optional callback to fire when the modal animation begins. Called as (settings)
+			* @param {function} [settings.onShown] Optional callback to fire when the modal animation finishes and the modal is fully shown. Called as (settings)
+			* @param {function} [settings.onHide] Optional callback to fire when the modal hide animation starts. Called as (settings)
+			* @param {function} [settings.onHidden] Optional callback to fire when the modal hide animation finishes and the modal is fully hidden. Called as (settings)
+			* @param {boolean} [settings.keyboard=false] React to the escape key to close the modal
+			* @param {boolean} [settings.backdrop=true] Show a backdrop when displaying the modal
+			* @param {Object} [settings.defer] The defer object to track against, if omitted one is created automatically
+			* @param {string} [settings.status='showing'] A read-only property showing the current status of the modal when the settings object is passed to a callback
+			* @returns {Promise} Promise that is fired when the modal closes
+			*
+			* @example Show a simple modal and react when it closes
+			* $prompt.modal(angular.element('#myModal')).then(()=> console.log('Closed'))
+			* @example Pass in options
+			* $prompt.modal({element: angular.element('#myModal'), onShow: ()=> {...}})
+			* @example Use the promise notfier to update the modal status
+			* $prompt.modal(angular.element('#myModal')).then(()=> {...}, ()=> {...}, settings => console.log(`Modal Status: ${settings.status}`))
+			*/
+			modal: function(options) {
+				if (!_.isPlainObject(options)) options = {element: options};
+
+				var settings = _.defaults(options, {
+					status: 'showing',
+					onShow: ()=> {},
+					onShown: ()=> {},
+					onHide: ()=> {},
+					onHidden: ()=>{},
+					defer: $q.defer(),
+					keyboard: false,
+					backdrop: true,
+				});
+
+				$timeout(()=> {
+				settings.element
+					.one('show.bs.modal', ()=> $timeout(()=> {
+						settings.status = 'showing';
+						settings.onShow(settings);
+						settings.defer.notify(settings);
+					}))
+					.one('shown.bs.modal', ()=> $timeout(()=> {
+						settings.status = 'shown';
+						settings.onShow(settings);
+						settings.defer.notify(settings);
+					}))
+					.one('hide.bs.modal', ()=> $timeout(()=> {
+						settings.status = 'hiding';
+						settings.onShow(settings);
+						settings.defer.notify(settings);
+					}))
+					.one('hidden.bs.modal', ()=> $timeout(()=> {
+						settings.status = 'hidden';
+						settings.onShow(settings);
+						settings.defer.notify(settings);
+						settings.defer.resolve();
+					}))
+					.modal({
+						keyboard: settings.keyboard,
+						show: true,
+						backdrop: settings.backdrop,
+					})
+				}, 100)
+
+				return options.defer.promise;
+			},
+
+
+			/**
 			* Dialogs queued to show
 			* This will only be populated if dialog gets called multiple times
 			* @var {array}
