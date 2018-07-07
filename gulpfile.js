@@ -71,7 +71,6 @@ global.paths = {
 			'node_modules/angular-resource/angular-resource.js',
 			'node_modules/angular-sanitize/angular-sanitize.js',
 			'node_modules/angular-ui-notification/dist/angular-ui-notification.{css,js}',
-			'node_modules/font-awesome/css/font-awesome.css',
 			'node_modules/node-waves/dist/waves.css',
 			'node_modules/node-waves/dist/waves.js',
 			'node_modules/tree-tools/dist/ngTreeTools.js',
