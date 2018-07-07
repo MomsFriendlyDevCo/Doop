@@ -1,39 +1,22 @@
-var _ = require('lodash');
-var colors = require('chalk');
-var cache = require('@momsfriendlydevco/express-middleware-cache');
-var logger = require('express-log-url');
+/**
+* Provides a middleware cache for routes
+* @param {string} [time] @momsfriendlydevco/express-middleware-cache compatible time string
+* @param {Object} [options] Additional options to pass to the caching middleware
+* @param {string|array} [options.tag] Tag or tags to mark a middleware hook as - invalidate with cache.invalidate(tags
+* @see https://github.com/MomsFriendlyDevCo/express-middleware-cache
+*
+* @example Cache an endpoint for 3 hours
+* app.get('/endpoint', app.middleware.cache('3h'))
+* @example Cache something with a tag for 2 minutes
+* app.get('/endpoint', app.middleware.cache('2h', {tag: 'someTag'}))
+* @example Invalidate a the above tag
+* app.middleware.cache.invalidate('someTag')
+* @example Store a value
+* app.middleware.cache.set('someKey', cb)
+* @example Retrieve a value
+* app.middleware.cache.get('someKey', cb)
+*/
 
 app.register('preControllers', function(finish) {
-	// If caching is disabled {{{
-	if (!app.config.middleware.cache.enabled) {
-		app.middleware.cache = function(options) { // Factory function
-			return function(req, res, next) {
-				logger.log({method: req.method, code: 'CSH', path: req.path, info: 'Would be cached' + (_.isString(options) ?  ` for ${options}` : '')});
-				next();
-			};
-		};
-
-		app.middleware.invalidate = (...tags) => {
-			console.log(colors.grey(`Invalidate cache tag '${tag}' (hash ${hash}) (but caching is disabled)`));
-		};
-
-		console.log('-', colors.grey('[middleware.cache]'), 'Cache is disabled');
-
-		return finish();
-	}
-	// }}}
-
-	app.middleware.cache = cache;
-
-	cache.events.on('routeCacheHashError', (err, req) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache Error + ${err.toString()}`}))
-	cache.events.on('routeCacheEtag', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Validated against existing etag hash ${info.hash}`}))
-	cache.events.on('routeCacheExisting', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cached using existing hash ${info.hash}`}))
-	cache.events.on('routeCacheFresh', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache generate new hash ${info.hash}`}))
-	cache.events.on('routeCacheInvalidate', (tag, hash) => console.log(colors.grey(`Invalidate cache tag '${tag}' (hash ${hash})`)));
-
-	cache.setup(app.config.middleware.cache, err => {
-		if (err) return finish(err);
-		console.log('-', colors.grey('[middleware.cache]'), 'Using', colors.cyan(cache.cache.activeModule.id), 'caching driver');
-		finish();
-	});
+	require('./loader')(finish);
 });
