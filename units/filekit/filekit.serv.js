@@ -3,7 +3,7 @@
 */
 angular
 	.module('app')
-	.factory('$filekit', function($http, $rootScope, $timeout) {
+	.factory('$filekit', function($http, $q, $rootScope, $timeout) {
 		var $filekit = this;
 
 		/**
@@ -56,10 +56,30 @@ angular
 
 
 		/**
+		* Prompt the user for a file(s) to upload and return a promise
+		* @param {string} url The URL to upload to
+		* @param {boolean} [multiple=false] Ask for multiple files
+		* @returns {array} An array of promises, one for each file that is being uploaded
+		* @see $filekit.upload()
+		*/
+		$filekit.prompt = (url, multiple=false) => {
+			return $q((resolve, reject) => {
+				var fileControl = angular.element('<input type="file" style="display: none" ' + (multiple ? 'multiple' : '') + '/>')
+					.on('change', function(e) {
+						fileControl.remove();
+						resolve($filekit.upload(url, this.files));
+					})
+					.appendTo('body')
+					.trigger('click')
+			});
+		};
+
+
+		/**
 		* Upload a list of files (the fileList must be a compatible FileList object provided by the browser)
 		* All uploading files are available in $filekit.uploading
 		* @param {string} url URL endpoint to upload to
-		* @param {FileList} files The files to upload
+		* @param {FileList} files The files to upload, if you dont have a list of files and instead want to prompt a user for a file use $filekit.prompt()
 		* @return {array} An array of promises, one for each file that is being uploaded
 		*
 		* @emits filekitUploaded Emitted as (file) when a single file item finishes uploading
@@ -67,6 +87,8 @@ angular
 		* @emits filekitProgress Emitted as (filekitObject) when a files upload progress updates
 		*/
 		$filekit.upload = (url, files) => {
+			if (!files || !files.length) throw new Error('No files provided');
+
 			return _.toArray(files).map(file => {
 				let formData = new FormData();
 				let uploadId = `upload-${$filekit.nextId++}`;

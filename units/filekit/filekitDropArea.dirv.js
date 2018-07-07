@@ -2,6 +2,8 @@
 * File upload drop area which uses the $filekit upload service
 *
 * @param {string} [element] The jQuery element to bind to, if omitted the document body is used (be careful to only use one of these elements on a page if the body is the drop area)
+* @param {function} [onStart] Optional function to run as ({files}) when the upload(s) start
+* @param {function} [onComplete] Optional function to run as ({files}) when the upload(s) complete
 * @param {string} url URL endpoint to upload to
 *
 * @example Create a drop area which automatically uploads when the user drops a file on the page
@@ -12,9 +14,11 @@ angular
 	.component('filekitDropArea', {
 		bindings: {
 			element: '@',
+			onComplete: '&?',
+			onStart: '&?',
 			url: '@',
 		},
-		controller: function($element, $filekit, $scope, $timeout) {
+		controller: function($element, $filekit, $q, $scope, $timeout) {
 			var $ctrl = this;
 
 			$ctrl.dropAreaTimer;
@@ -41,7 +45,13 @@ angular
 					.on('drop', e => {
 						e.stopPropagation();
 						e.preventDefault();
-						$filekit.upload($ctrl.url, e.originalEvent.dataTransfer.files);
+
+						var uploadPromise = $q.resolve();
+						var files = e.originalEvent.dataTransfer.files;
+						if (_.isFunction($ctrl.onStart)) uploadPromise.then(()=> $ctrl.onStart({files}));
+						uploadPromise.then(()=> $filekit.upload($ctrl.url, files))
+						if (_.isFunction($ctrl.onComplete)) $q.all(uploadPromise).then(upload => $ctrl.onComplete({files}));
+
 						$ctrl.showDropArea(false);
 					});
 			};
