@@ -1,5 +1,8 @@
 /**
-* nodemon gulp tasks
+* Nodemon gulp task
+* Watch various file types firing off rebuild tasks as changes are detected
+*
+* @param {boolean} [process.env.WATCH_MODULES] If present the node_modules folder will also be watched for changes. This is extremely costly and should only be done when devloping in that directory
 */
 
 var colors = require('chalk');
@@ -78,9 +81,19 @@ gulp.task('nodemon', ['load:app', 'build'], function(finish) {
 			gulp.start('npm:update');
 		});
 
+		if (process.env.WATCH_MODULES) {
+			watch([
+				`${app.config.paths.root}/node_modules/**/*.js`,
+				`${app.config.paths.root}/node_modules/**/*.css`,
+			], function() {
+				gutil.log('Rebuild Vendors (due to node_modules)...');
+				gulp.start('vendors');
+			});
+		}
+
 		watch([
-			paths.root + '/units/pages/**/*.html',
-			paths.root + '/units/layouts/**/*.html',
+			`${app.config.paths.root}/units/pages/**/*.html`,
+			`${app.config.paths.root}/units/layouts/**/*.html`,
 		], function() {
 			gutil.log('Rebuild pages / layouts...');
 			monitor.emit('restart');
