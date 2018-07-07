@@ -188,6 +188,18 @@ angular
 	})
 	// }}}
 
+	// When scrolling - kill BS location contextual elements
+	// NOTE: To listen for scroll events use $scope.on('contentScroll')
+	.run(function($rootScope) {
+		var initWatcherUnbind = $rootScope.$on('$routerSuccess', ()=> { // Only register on first page load then destory
+			angular.element('#content')[0].addEventListener('scroll', _.throttle(()=> { // Setup a throttled lister against scroll
+				angular.element('body > .tooltip, body > .popover').remove();
+				$rootScope.$apply(()=> $rootScope.$emit('contentScroll'));
+			}, 100, {leading: true, trailing: false}), true);
+			initWatcherUnbind();
+		});
+	})
+
 	// Focus any input element post-navigation {{{
 	.run(function($rootScope) {
 		$rootScope.$on('$routerSuccess', ()=>
