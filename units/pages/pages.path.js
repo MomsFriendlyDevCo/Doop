@@ -21,3 +21,11 @@ app.get('/', function(req, res) {
 		theme: app.config.theme,
 	});
 });
+
+
+app.get('/robots.txt', function(req, res) {
+	res.send(
+		'User-agent: *\n'
+		+ 'Disallow: /\n'
+	);
+});

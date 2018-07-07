@@ -275,7 +275,7 @@ angular
 					<a
 						ng-repeat="option in $ctrl.current.changeTo track by option.id"
 						ng-click="$ctrl.setStatus(option.id)"
-						ng-class="[option.class, !option.$enabled && 'disabled']"
+						ng-class="[option.class, !option.$enabled ? 'disabled' : '']"
 						tooltip="{{option.tooltip}}"
 						tooltip-position="bottom"
 						tooltip-tether="true"

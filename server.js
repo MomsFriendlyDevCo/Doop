@@ -181,7 +181,7 @@ app.getCaller = function() {
 
 
 async()
-	// Initial boot
+	// Initial boot {{{
 	.then(next => {
 		console.log(colors.bold.blue('⚝  Doop! ⚝'));
 		console.log('-', colors.grey('[env]'), colors.cyan(app.config.env));

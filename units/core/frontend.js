@@ -162,7 +162,7 @@ angular
 	})
 	// }}}
 
-	// Cleanup Bootstrap elements on navigation {{{
+	// Cleanup Bootstrap elements on navigation / tooltips + popovers on scroll {{{
 	.run(function($rootScope) {
 		$rootScope.$on('$routerStart', ()=> {
 			// Destory any open Bootstrap modals
@@ -355,6 +355,7 @@ angular
 
 	// Remove bootstraping body class now everything is ready {{{
 	.run($timeout => $timeout(()=> $('body').removeClass('bootstraping')))
+	// }}}
 	// }}}
 
 	// }}}

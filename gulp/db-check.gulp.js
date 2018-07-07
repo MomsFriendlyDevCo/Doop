@@ -3,6 +3,8 @@ var async = require('async-chainable');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 
+gulp.task('db:check', ['db:check:indexes']);
+
 gulp.task('db:check:indexes', ['load:app.db'], function(done) {
 	async()
 		.limit(1)

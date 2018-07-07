@@ -35,7 +35,7 @@ angular
 			Notification({
 				templateUrl: 'angular-ui-notification-save.html',
 				message: 'Saved',
-				delay: 1000,
+				delay: 2000,
 				type: 'success',
 				positionY: 'top',
 				positionX: 'right',

@@ -53,7 +53,7 @@ var readJSON = function(path, callback) {
 };
 // }}}
 
-gulp.task('vendors', ['vendors-core', 'vendors-main']);
+gulp.task('vendors', ['vendors-core', 'vendors-main', 'vendors-fonts']);
 
 /**
 * Load 'core' vendor files
