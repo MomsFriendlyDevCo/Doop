@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@momsfriendlydevco/angular-bs-tooltip": "^1.2.6",
+    "@momsfriendlydevco/angular-ui-history": "^1.1.7",
     "@momsfriendlydevco/angular-ui-loader": "^1.1.0",
+    "@momsfriendlydevco/angular-ui-query-builder": "^1.1.8",
     "@momsfriendlydevco/angular-ui-toggle": "^1.0.2",
     "@momsfriendlydevco/animate": "^0.0.5",
     "@momsfriendlydevco/express-middleware-cache": "^1.1.1",
