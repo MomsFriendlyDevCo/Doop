@@ -336,7 +336,7 @@ angular
 
 	// Disable animation effects on certain elements by default {{{
 	.config($animateProvider => {
-		$animateProvider.classNameFilter(/^((?!(fa-spinner|btn|brand-icon|modal)).)*$/);
+		$animateProvider.classNameFilter(/^((?!(fa-spinner|btn|brand-icon|modal|no-animate)).)*$/);
 	})
 	// }}}
 
