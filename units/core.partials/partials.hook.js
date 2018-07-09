@@ -14,7 +14,7 @@ app.register('postControllers', function(finish) {
 			.map(t => t.substr((`${app.config.paths.root}/units/`).length))
 			.forEach(t => app.get(`/units/${t}`, (req, res) => res.sendFile(`${app.config.paths.root}/units/${t}`)))
 
-		console.log('-', colors.grey('[partials]'), 'serving', templates.length, 'partial template files');
+		console.log('-', colors.grey('[partials]'), 'serving', colors.cyan(templates.length), 'partial template files');
 
 		finish();
 	});
