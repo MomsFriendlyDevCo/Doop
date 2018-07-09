@@ -54,24 +54,23 @@ angular
 	// }}}
 
 	// Add additional methods to $resource {{{
-	.config(function($resourceProvider) {
+	.config(function($injectorProvider, $resourceProvider) {
+		var $httpParamSerializerJQLike = $injectorProvider.$get().get('$httpParamSerializerJQLike');
 		angular.extend($resourceProvider.defaults.actions, {
 			count: {
 				method: 'GET',
 				params: {
 					id: 'count',
 				},
-				paramSerializer: params => {
-					return $().serialize( // NOTE: We are using JQ's serializer
-						_.omit(params, [ // Remove meta directives from request
-							'limit',
-							'populate',
-							'select',
-							'skip',
-							'sort',
-						])
-					);
-				},
+				paramSerializer: params => $httpParamSerializerJQLike(
+					_.omit(params, [ // Remove meta directives from request
+						'limit',
+						'populate',
+						'select',
+						'skip',
+						'sort',
+					])
+				),
 			},
 			create: {
 				method: 'POST',
@@ -188,7 +187,7 @@ angular
 	})
 	// }}}
 
-	// When scrolling - kill BS location contextual elements
+	// When scrolling - kill BS location contextual elements {{{
 	// NOTE: To listen for scroll events use $scope.on('contentScroll')
 	.run(function($rootScope) {
 		var initWatcherUnbind = $rootScope.$on('$routerSuccess', ()=> { // Only register on first page load then destory
@@ -199,6 +198,7 @@ angular
 			initWatcherUnbind();
 		});
 	})
+	// }}}
 
 	// Focus any input element post-navigation {{{
 	.run(function($rootScope) {
