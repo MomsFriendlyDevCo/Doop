@@ -188,9 +188,9 @@ indexer.get = argy('string [object] [function]', function(id, settings, finish) 
 * @param {Object} [settings] Optional settings structure
 */
 indexer.getKey = function(id, settings) {
-	var hashable = _(hashable)
+	var hashable = _(settings)
 		.keyArrangeDeep()
-		.omit(settings || {}, ['cacheKey', 'enclose'])
+		.omit(['cacheKey', 'enclose'])
 		.value()
 
 	return _.isEmpty(hashable)
