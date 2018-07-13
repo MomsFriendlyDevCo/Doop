@@ -63,6 +63,10 @@ angular
 								href: '#/debug/directives/digest',
 							},
 							{
+								title: 'Icons',
+								href: '#/debug/directives/icons',
+							},
+							{
 								title: 'reveal',
 								href: '#/debug/directives/reveal',
 							},
