@@ -89,6 +89,10 @@ angular
 								href: '#/debug/server/git',
 							},
 							{
+								title: 'Indexer',
+								href: '#/debug/server/indexer',
+							},
+							{
 								title: 'Server info',
 								href: '#/debug/server/info',
 							},

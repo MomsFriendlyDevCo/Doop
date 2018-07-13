@@ -418,3 +418,41 @@ indexer.run = argy('string [object] [function]', function(id, settings, finish) 
 			// }}}
 		});
 });
+
+
+/**
+* Retrieve a list of all indexers with meta information
+* NOTE: The index ID's returned are stipped of the prefix / suffixs added by the caching module
+* @param {function} finish Callback to call as (err, res)
+*/
+indexer.list = argy('function', function(finish) {
+	async()
+		.parallel({
+			indexers: function(next) {
+				next(null, indexer._indexers);
+			},
+			cacheContents: function(next) {
+				app.middleware.cache.list(next);
+			},
+		})
+		.map('indexers', 'indexers', function(next, indexer) {
+			// Create basic return
+			var cacheKey = app.config.middleware.cache.keyMangle(indexer.id);
+			var res = {
+				id: indexer.id,
+				cacheKey: cacheKey,
+				timing: indexer.timing,
+			};
+
+			if (res.timing) res.timingString = cronTranslate(res.timing);
+
+			var matchingCache = this.cacheContents.find(cc => cc.id == cacheKey);
+			if (matchingCache) _.assign(res, _.omit(matchingCache, 'id'));
+
+			next(null, res);
+		})
+		.end(function(err) {
+			if (err) return finish(err);
+			finish(null, _.values(this.indexers));
+		});
+});
