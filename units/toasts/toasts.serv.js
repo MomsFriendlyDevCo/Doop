@@ -47,9 +47,9 @@ angular
 		* The item will be unclosable until it has completed
 		* @param {string} id The ID of the action to show / update
 		* @param {string} [message] Text to display for the action (may only need to be updated once)
-		* @param {number} [progress] The percentage complete of an action
+		* @param {number} [progress] The percentage complete of an action, if boolean false (default) a generic 'waiting' progress bar is shown
 		*/
-		$toast.progress = (id, message, progress) => {
+		$toast.progress = (id, message, progress = false) => {
 			// Argument mangling {{{
 			if (angular.isNumber(message)) {
 				progress = message;
@@ -76,7 +76,9 @@ angular
 					})
 			} else if (angular.isNumber(progress) && progress < 100) { // Update the percentage complete?
 				$toast.progressActive[id].progress = progress;
-			} else if ((angular.isNumber(progress) && progress >= 100) || angular.isBoolean(progress)) { // Hide the notification after a timeout
+			} else if (progress === false) { // Change to a generic holding progress bar
+				$toast.progressActive[id].progress = false;
+			} else if ((angular.isNumber(progress) && progress >= 100) || progress === true) { // Hide the notification after a timeout
 				$toast.progressActive[id].progress = 100;
 				$timeout(()=> {
 					$toast.progressActive[id].kill();
@@ -161,7 +163,7 @@ angular
 				<div class="message">
 					<span ng-bind-html="message"></span>
 					<div class="progress">
-						<div class="progress-bar progress-bar-striped active" style="width: {{progress || 0}}%;"></div>
+						<div class="progress-bar progress-bar-striped active" style="width: {{progress === false ? 100 : progress || 0}}%;"></div>
 					</div>
 				</div>
 			</div>

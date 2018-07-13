@@ -25,9 +25,10 @@ angular
 						<a class="list-group-item" ng-click="$ctrl.$toast.error('Hello World')">$toast.error('Hello World')</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.save()">$toast.save()</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.catch()">$toast.catch()</a>
+						<a class="list-group-item" ng-click="$ctrl.$toast.progress('debug', 'Thinking...')">$toast.progress('debug', 'Thinking...')</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.progress('debug', 'Thinking...', 25)">$toast.progress('debug', 'Thinking...', 25)</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.progress('debug', 50)">$toast.progress('debug', 50)</a>
-						<a class="list-group-item" ng-click="$ctrl.$toast.progress('debug', 100)">$toast.progress('debug', 100)</a>
+						<a class="list-group-item" ng-click="$ctrl.$toast.progress('debug', 'Finished', 100)">$toast.progress('debug', 'Finished', 100)</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.catch({error: 'Hello World'})">$toast.catch({error: 'Hello World'})</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.offline(true)">$toast.offline()</a>
 						<a class="list-group-item" ng-click="$ctrl.$toast.offline(false)">$toast.offline(false)</a>
