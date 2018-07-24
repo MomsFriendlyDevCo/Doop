@@ -60,6 +60,15 @@ angular
 					})
 					// }}}
 					.then(data => $ctrl.optionsFiltered = $ctrl.options = data)
+					// If we are in multiple selection mode, and already have a list of selected items - correctly set them to selected {{{
+					.then(() => {
+						if (!$ctrl.multiple || !angular.isArray($ctrl.ngModel)) return;
+
+						$ctrl.options
+							.filter(i => $ctrl.ngModel.includes(i.id))
+							.forEach(i => $ctrl.setSelected(i))
+					})
+					// }}}
 					// Convert $ctrl.selected from a scalar into an object {{{
 					.then(()=> {
 						if (!angular.isObject($ctrl.selected)) {
@@ -147,10 +156,11 @@ angular
 			};
 			// }}}
 
-			// Watch: $ctrl.ngModel - incomming data {{{
+			// Watch: $ctrl.ngModel - calculate search string {{{
 			$scope.$watch('$ctrl.ngModel', ()=> {
-				$ctrl.searchString = angular.isObject($ctrl.ngModel)
-					? $ctrl.ngModel.title
+				$ctrl.searchString =
+					angular.isArray($ctrl.ngModel) ? $ctrl.ngModel.join(', ')
+					: angular.isObject($ctrl.ngModel) ? $ctrl.ngModel.title
 					: $ctrl.ngModel
 			});
 			// }}}
