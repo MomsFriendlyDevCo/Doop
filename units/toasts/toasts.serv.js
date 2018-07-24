@@ -108,6 +108,7 @@ angular
 			$toast.error(
 				_.isUndefined(obj) ? 'An error has occured'
 				: _.isString(obj) ? obj
+				: _.isError(obj) ? obj.toString().replace(/^Error: /, '')
 				: _.has(obj, 'error') && obj.error ? obj.error
 				: _.has(obj, 'data') && _.isString(obj.data) && obj.data ? obj.data
 				: _.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg
