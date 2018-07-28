@@ -80,6 +80,7 @@ global.paths = {
 	},
 	css: [
 		'units/**/*.css',
+		'!units/fonts.fa5/**/*.css', // We handle FA5 CSS seperately
 	],
 	scripts: [
 		'units/core/frontend.js',
