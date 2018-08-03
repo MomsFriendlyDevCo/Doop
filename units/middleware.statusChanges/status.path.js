@@ -65,7 +65,7 @@ app.get('/api/middleware.statusChanges/:collection/:format?', app.middleware.ens
 					if (!s.changeTo) {
 						s.changeTo = [];
 					} else if (s.changeTo === '*') { // Meta mapping where every option should be exposed
-						s.changeTo = _.map(this.schema, k => ({
+						s.changeTo = _.map(this.schema, (v, k) => ({
 							id: k,
 							title: _.startCase(k),
 						}));
