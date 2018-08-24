@@ -118,7 +118,8 @@ var defaults = {
 			db: {
 				safe: true,
 			}
-		}
+		},
+		plugins: ['iterators', 'rest'],
 	},
 	page: {
 		headInject: [], // Aditional HTML compliant content to inject into the page header
