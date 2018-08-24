@@ -25,29 +25,53 @@ var monoxide = require('monoxide');
 */
 module.exports = function databaseLoader(callback) {
 	var self = new events.EventEmitter();
+	self.emit('start');
 
-	// Queue the actual work for the next execute cycle so we can return immediately (otherwise we cant return an emitter);
-	setTimeout(function() {
-		if (!app.config) throw new Error('Attempted to load database before app.config was provided!');
-
-		self.emit('start');
-
-		monoxide.connect(app.config.mongo.uri)
-			.on('error', err => self.emit('error', err));
-
-		self.emit('connected');
-
-		glob(app.config.paths.root + '/units/**/*.schm.js', function(err, files) {
-			if (err) return next(err);
-			files.forEach(path => {
+	async()
+		// Setup plugins + emitter bindings {{{
+		.then(function(next) {
+			monoxide.use(app.config.mongo.plugins, next)
+		})
+		// }}}
+		.parallel({
+			// Attempt to connect {{{
+			connection: function(next) {
+				try {
+					monoxide.connect(app.config.mongo.uri, next);
+				} catch (err) {
+					next(err);
+				}
+			},
+			// }}}
+			// Fetch list of schema files {{{
+			schemas: function(next) {
+				glob(`${app.config.paths.root}/units/**/*.schm.js`, next);
+			},
+			// }}}
+		})
+		// Load schemas {{{
+		.forEach('schemas', function(next, path) {
+			try {
 				self.emit('model', path);
 				require(path);
-			});
-
-			self.emit('end', monoxide.models);
-			if (_.isFunction(callback)) callback(null, monoxide.models);
+				next();
+			} catch (err) {
+				next(err);
+			}
+		})
+		// }}}
+		// End {{{
+		.end(function(err) {
+			if (err) {
+				self.emit('error', err);
+				if (callback) callback(err);
+			} else {
+				self.emit('end', monoxide.models);
+				self.emit('connected');
+				if (callback) callback(null, monoxide.models);
+			}
 		});
-	});
+		// }}}
 
 	return self;
 };
