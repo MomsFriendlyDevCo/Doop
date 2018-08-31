@@ -41,7 +41,7 @@ gulp.task('scripts', ['load:app'], function() {
 			},
 		}))
 		.pipe(cache(babel({ // Cache output and pipe though Babel
-			presets: ['env'],
+			presets: ['@babel/env'],
 			plugins: ['angularjs-annotate'],
 		}), {
 			key: file => [app.config.name, file.contents.toString('utf8'), file.stat.mtime, file.stat.size].join(','),
