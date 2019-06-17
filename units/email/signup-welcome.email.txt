@@ -1,9 +1,0 @@
-Hi {{{user.name}}},
-
-Welcome to {{app.config.title}}!
-
-Your account has been activated so please login in via the below URL using the details you provided during signup.
-
-{{{url}}}
-
-{{app.config.email.signoff}}
