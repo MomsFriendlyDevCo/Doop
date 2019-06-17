@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="https://github.com/MomsFriendlyDevCo/Doop/raw/master/DOOP/assets/doop.png">
+	<img src="https://github.com/MomsFriendlyDevCo/Doop/raw/master/assets/doop.png">
 </p>
 <br><br>
 
