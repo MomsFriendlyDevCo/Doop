@@ -220,6 +220,37 @@ Differences from standard Vue
 * Watching a group of local properties (but only firing *once*) is available via `vm.$watchAll(props[], callback, options)`
 
 
+Importing front-end resources
+-----------------------------
+There are three major methods to import external resources into a Doop frontend project:
+
+
+1. **Import via CommonJS** - This is the fastest, most atomic and easiest to transpile
+
+Include external resources within `<import/>` tags. Include other initialization scripts within `<script/>` tags.
+
+```javascript
+<import>
+./node_modules/node-waves/dist/waves.min.js
+</import>
+
+<script>
+window.Waves.init();
+</script>
+```
+
+
+2. **Import via ES6 syntax** - This is 'prettiest' and most modern at the expense of being the slowest due to its web of dependency resolution
+
+Include all ES6 syntax within `<script repack/>` tags. The code is resolved by Rollup and compiled into one large dependency graph. Other external resources can be resolved with `<import/>` tags if needed.
+
+```javascript
+<script repack>
+import ToggleButton from 'vue-js-toggle-button';
+Vue.use(ToggleButton);
+</script>
+```
+
 
 Testing + Debugging
 ===================
