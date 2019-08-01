@@ -1,0 +1,106 @@
+<endpoint>
+var _ = require('lodash');
+var async = require('async-chainable');
+var colors = require('chalk');
+var crypto = require('crypto');
+var fs = require('fs');
+var fspath = require('path');
+var superagent = require('superagent');
+
+/**
+* Serve a users Gravatar icon
+*
+* Process:
+*     1. Does ./data/avatars/generated/${user.username}.png exist? - if so use that
+*     2. Does ./data/avatars/override/${user.username}.png exist? - if so use that
+*     3. Generate / fetch the icon from gravatar.com
+*
+* This is really just a local-caching proxy for the Gravatar service
+* The icon size is always app.config.session.avatar.size (default: 100)
+* NOTE: For caching reasons you must ALWAYS specify the user ID, even if the user you want is already logged in
+*       If multiple people are logged in on the same box, they would get one-anothers avatars
+* @param {string} req.params.user The user ID to return
+*/
+app.get('/api/users/:user/avatar', function(req, res) {
+	async()
+		// Fetch the basic user info {{{
+		.then('user', ()=> app.db.users.findOneByID(req.params.user))
+		// }}}
+		// Generate source paths {{{
+		.parallel({
+			filePathGenerated: function(next) { next(null, `${app.config.paths.data}/avatars/generated/${this.user.username}.png`) },
+			filePathOverride: function(next) { next(null, `${app.config.paths.data}/avatars/override/${this.user.username}.png`) },
+		})
+		// }}}
+		.parallel({
+			// Check that the hash file already exists {{{
+			fileExistsGenerated: function(next) {
+				fs.access(this.filePathGenerated, err => next(null, err ? false : true));
+			},
+			// }}}
+			// Check that an override file already exists {{{
+			fileExistsOverride: function(next) {
+				fs.access(this.filePathOverride, err => next(null, err ? false : true));
+			},
+			// }}}
+			// Check the avatar cache dir exists {{{
+			mkdirpGenerated: ()=> fs.promises.mkdir(fspath.dirname(this.filePathGenerated), {recursive: true}),
+			// }}}
+		})
+		// Grab the icon from the Gravatar server {{{
+		.then('filePath', function(next) {
+			if (!this.user || !this.user.email) return next(null, null);
+			if (this.fileExistsOverride) return next(null, this.filePathOverride);
+			if (this.fileExistsGenerated) return next(null, this.filePathGenerated);
+			var hash = crypto.createHash('md5').update(this.user.email.toLowerCase()).digest('hex');
+			app.log('Requesting Gravatar for user', colors.cyan(this.user.username));
+			var tries = 0;
+
+			/**
+			* Repeatedly try to download a Gravatar until we are either successful or give in
+			* @returns {Promise <Response>} The eventually successful response
+			*/
+			var tryDownload = ()=>
+				Promise.resolve()
+					.then(()=> superagent
+						.get(`https://www.gravatar.com/avatar/${hash}`)
+						.query({
+							size: _.get(app, 'config.session.avatar.size', 100),
+							default: _.get(app, 'config.session.avatar.set', 'identicon'),
+							r: _.get(app, 'config.session.avatar.rating', 'g'),
+						})
+						.buffer()
+						.catch(res => Promise.resolve({status: 500})) // Rewrite all errors as 500 so we can try in next step
+					)
+					.then(res => {
+						if (res.status != 200 && ++tries < _.get(app, 'config.session.avatar.retries', 10)) { // Failed and we can try again
+							app.log('Failed fetching Gravatar for user', colors.cyan(this.user.username), `try #${tries}`);
+							return Promise.timeout(tries * 500) // Wait for a bit then...
+								.then(()=> tryDownload()) // Try again
+						} else if (res.status != 200) {
+							app.log('Failed fetching Gravatar for user - giving up');
+							return Promise.reject(`400: Cannot retrieve Gravatar from https://www.gravatar.com/avatar/${hash}`);
+						} else { // Success
+							return res;
+						}
+					});
+
+			tryDownload()
+				.then(res => fs.promises.writeFile(this.filePathGenerated, res.body))
+				.then(()=> next(null, this.filePathGenerated))
+				.catch(next);
+		})
+		// }}}
+		// End {{{
+		.end(function(err) {
+			if (err) {
+				return res.sendError(err);
+			} else if (this.filePath) {
+				res.sendFile(this.filePath);
+			} else {
+				res.sendStatus(404);
+			}
+		})
+		// }}}
+});
+</endpoint>

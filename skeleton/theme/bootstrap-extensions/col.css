@@ -1,0 +1,10 @@
+/* Various custom "ideal" column sizes for tables */
+th.col-status, td.col-status { width: 16px; text-align: center }
+th.col-icon { width: 20px }
+
+th.col-date { width: 280px }
+body.screen-xs th.col-date { width: 130px }
+
+th.col-filesize { width: 100px }
+
+th.col-button { width: 50px }

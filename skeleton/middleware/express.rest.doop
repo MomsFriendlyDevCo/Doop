@@ -1,0 +1,20 @@
+<server on="middleware">
+/**
+* Wrapper around monoxide that provides a ReST interface on a named model with options
+*
+* @example expose the widgets collection as a ReST interface
+* app.use('/api/widgets/:id?', app.middleware.express.rest('templates', {
+*   data: req => req.user ? {user: req.user._id} : undefined,
+*   get: app.middleware.express.hasLogin,
+*   query: app.middleware.express.hasLogin,
+*   count: app.middleware.express.hasLogin,
+*   create: app.middleware.express.hasLogin,
+*   save: app.middleware.express.hasLogin,
+*   meta: app.middleware.express.hasLogin,
+*   delete: app.middleware.express.hasLogin,
+* }));
+*/
+var monoxide = require('monoxide');
+
+app.middleware.express.rest = monoxide.express.middleware;
+</server>

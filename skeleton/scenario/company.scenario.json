@@ -1,0 +1,9 @@
+{
+	"companies": [
+		{
+			"_ref": "companies.acme",
+			"name": "ACME INC",
+			"manager":"users.mc"
+		}
+	]
+}

@@ -1,0 +1,25 @@
+<schema>
+app.middleware.db.schema('companies', {
+	companyId: {type: 'oid', index: 'primary'},
+	created: {type: 'date', default: Date.now},
+	edited: {type: 'date', default: Date.now},
+	status: {type: 'string', enum: ['active', 'deleted'], default: 'active'},
+	name: {type: 'string'},
+	emails: [{
+		user: {type: 'pointer', ref: 'users'}, // System recognised user OR...
+		email: {type: 'string'}, // Raw email string
+	}],
+});
+</schema>
+
+<endpoint>
+app.use('/api/companies/:id?', app.middleware.express.rest('companies', {
+	get: true,
+	query: true,
+	count: true,
+	create: app.middleware.express.hasPermission('companiesCreate'),
+	save: app.middleware.express.hasPermission('companiesEdit'),
+	meta: true,
+	delete: false,
+}));
+</endpoint>

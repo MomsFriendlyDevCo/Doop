@@ -1,0 +1,505 @@
+<service singleton>
+module.exports = function() {
+	var $prompt = this;
+
+	// $prompt.modal() {{{
+	/**
+	* General helper for Bootstrap modals
+	* This adds a promise structure around modals which makes them easier to handle
+	*
+	* Advantages over handling modal popups with $element.modal('show'):
+	*
+	* 	* Uses promises instead of weird callbacks
+	*	* Fires notification promises with each status update
+	*	* Handles nesting automatically
+	*
+	* @param {Object} settings Settings structure to pass OR the jQuery selected modal to display
+	* @param {Object|string} settings.element The modal object (usualy selected as `$('.modal')` or something), this is populated from 'settings' if its passed in as the only argument
+	* @param {function} [settings.onShow] Optional callback to fire when the modal animation begins. Called as (settings)
+	* @param {function} [settings.onShown] Optional callback to fire when the modal animation finishes and the modal is fully shown. Called as (settings)
+	* @param {function} [settings.onHide] Optional callback to fire when the modal hide animation starts. Called as (settings)
+	* @param {function} [settings.onHidden] Optional callback to fire when the modal hide animation finishes and the modal is fully hidden. Called as (settings)
+	* @param {boolean} [settings.keyboard=false] React to the escape key to close the modal
+	* @param {boolean} [settings.backdrop=true] Show a backdrop when displaying the modal
+	* @param {Object} [settings.defer] The defer object to track against, if omitted one is created automatically
+	* @param {string} [settings.status='showing'] A read-only property showing the current status of the modal when the settings object is passed to a callback
+	* @param {boolean} [settings.nesting=true] Automatically determine if this modal is nested and apply a background in front of existing modals
+	* @param {number} [settings.nestingZStart=10000] What Z-index to start numbering from if settings.nesting is enabled
+	* @param {number} [settings.nestingZStep=10] What Z-index incrementor to use for each successive modal
+	* @returns {Promise} Promise that is fired when the modal closes
+	*
+	* @example Show a simple modal and react when it closes
+	* $prompt.modal($('#myModal')).then(()=> console.log('Closed'))
+	* @example Pass in options
+	* $prompt.modal({element: $('#myModal'), onShow: ()=> {...}})
+	* @example Use the promise notfier to update the modal status
+	* $prompt.modal($('#myModal')).then(()=> {...}, ()=> {...}, settings => console.log(`Modal Status: ${settings.status}`))
+	*/
+	$prompt.modal = options => {
+		if (!_.isPlainObject(options)) options = {element: options};
+
+		var settings = {
+			status: 'showing',
+			onShow: ()=> {},
+			onShown: ()=> {},
+			onHide: ()=> {},
+			onHidden: ()=> {},
+			defer: Promise.defer(),
+			keyboard: false,
+			backdrop: true,
+			nesting: true,
+			nestingZStart: 10000,
+			nestingZStep: 10,
+			...options,
+		};
+
+		// Expand expression into object if passed a string
+		if (_.isString(settings.element)) settings.element = $(settings.element);
+
+		setTimeout(()=> {
+			if (settings.nesting) { // Detect existing modals and attempt to nest?
+				var existingModals = $('.modal.in').length;
+
+				// Rank existing modals in z-index order (if they don't already have a z-index applied)
+				$('.modal.in').each((i, elem) => {
+					var $elem = $(elem);
+					if (!$elem.css('z-index')) $elem.css('z-index', settings.nestingZStart + (settings.nestingZStep * i));
+				});
+
+				// Apply a z-index bias to this modal
+				settings.element.css('z-index', settings.nestingZStart + (settings.nestingZStep * (existingModals + 1)));
+			}
+
+			settings.element
+				.one('show.bs.modal', ()=> {
+					if (settings.nesting) { // Set appearing backdrop overlay's correct z-index
+						// Rank existing backdrops in z-index order (ignoring if they z-index applied, as they are just dumb covering elements)
+						$('body > .modal-backdrop.in').each((i, elem) => {
+							var $elem = $(elem);
+							$elem.css('z-index', settings.nestingZStart + (settings.nestingZStep * i));
+						});
+					}
+					if (settings.backdrop) $('body > .modal-backdrop').addClass('shown'); // Add the shown class late to the backdrop - allows the CSS transition to apply if fading / bluring etc.
+
+					settings.status = 'showing';
+					settings.onShow(settings);
+					settings.defer.notify(settings);
+				})
+				.one('shown.bs.modal', ()=> {
+					settings.status = 'shown';
+					settings.onShown(settings);
+					settings.defer.notify(settings);
+				})
+				.one('hide.bs.modal', ()=> {
+					settings.status = 'hiding';
+					settings.onHide(settings);
+					settings.defer.notify(settings);
+				})
+				.one('hidden.bs.modal', ()=> {
+					// Stop BS from removing the body.modal-open class if we still have modals on the screen
+					if (settings.nesting && $('.modal.in').length) $('body').addClass('modal-open');
+
+					settings.status = 'hidden';
+					settings.onHidden(settings);
+					settings.defer.notify(settings);
+					settings.defer.resolve();
+				})
+				.modal({
+					keyboard: settings.keyboard,
+					show: true,
+					backdrop: settings.backdrop,
+				})
+		});
+
+		return settings.defer.promise;
+	};
+	// }}}
+
+	// $prompt.dialog() {{{
+	/**
+	* Current holder for dialog options
+	* This is usually a 1:1 mapping for the dialog options
+	* @see dialog()
+	* @var {Object}
+	* @param {Promise} $defer The promise object for the current dialog
+	* @param {string} $defer.state Tracking of the promise status. ENUM: 'pending', 'resolved', 'rejected'
+	* @param {Object} $body The $sce compiled version of the dialog body if isHtml is truthy
+	* @param {Object} $bodyHeader The $sce compiled version of bodyHeader
+	* @param {Object} $bodyFooter The $sce compiled version of bodyFooter
+	* @param {function} $dialogClose Binding for dialogClose
+	* @param {string} $status The status of the dialog. ENUM: 'showing', 'shown', 'hiding', 'hidden'
+	*/
+	$prompt.$settings = undefined;
+
+
+	/**
+	* Display a dialog with various customisations
+	* This is the main $prompt worker - all the below helper functions are really just remappings of this function
+	* @param {Object} options Dialog options to use
+	* @param {string} [options.title='Dialog'] The dialog title
+	* @param {string} [options.body='Body text'] The dialog body (usually the message to display)
+	* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
+	* @param {string} [options.bodyHeader] Additional HTML to render above the main body area (this is always HTML rendered)
+	* @param {string} [options.bodyFooter] Additional HTML to render under the main body area (this is always HTML rendered)
+	* @param {Object} [options.component] Vue component object to render as the modal body (under options.body if present)
+	* @param {string|array} [options.modalClass] Optional modal class items to add (e.g. 'modal-lg')
+	* @param {Object} [options.scope] Scope to use when interpolating HTML (if isHtml is truthy)
+	* @param {string} [options.dialogClose='reject'] How to handle the promise state if the dialog is closed. ENUM: 'resolve', 'reject', 'nothing'
+	* @param {boolean} [options.backdrop=true] Whether to display a dimmed backdrop when drawing the dialog
+	* @param {boolean} [options.keyboard=true] Close the dialog when the escape key is pressed. Uses dialogClose to work out what to do
+	*
+	* @param {array} [options.buttons.{}] Buttons to display (the promise will be resolved with the clicked button.id) has the subkeys {left, right, center}
+	* @param {string} [options.buttons.{}.[].id] The ID of the button to resolve the promise with
+	* @param {string} [options.buttons.{}.[].title] The text to display on the button
+	* @param {string} [options.buttons.{}.[].class='btn btn-success'] The button class to apply (default is 'btn btn-success' for buttons that resolve, 'btn btn-danger' for ones that reject and 'btn btn-default' otherwise)
+	* @param {string} [options.buttons.{}.[].method='resolve'] How to close the promise. ENUM: 'resolve', 'reject'. False or null will only close the dialog
+	* @param {function} [options.buttons.{}.[].click] Function to run when the button is clicked, this will be automatically formed from 'method' if present. Call $prompt.close() to terminate the dialog. Callback is called as `(settings)`
+	*
+	* @param {function} [options.onShow] Function to execute when the dialog is being shown
+	* @param {function} [options.onShown] Function to execute when the dialog is ready
+	* @param {function} [options.onHide] Function to execute when the dialog is hiding
+	* @param {function} [options.onHidden] Function to execute when the dialog is completely hidden
+	*
+	* @return {Promise} Promise that is triggered when the dialog closes. The responses are determined by the button methods as well as dialogClose
+	* @emits $prompt.open Message to PromptHelper component to display the dialog
+	*/
+	$prompt.dialog = options => {
+		// If we're already showing a dialog - defer showing the next dialog until this one has finished {{{
+		if ($prompt.$settings) {
+			options.$defer = Promise.defer();
+			$prompt.$dialogQueue.push(options)
+			return options.$defer.promise;
+		}
+		// }}}
+
+		// Setup defaults {{{
+		var settings = {
+			title: 'Dialog',
+			body: 'Body text',
+			isHtml: false,
+			component: undefined,
+			keyboard: true,
+			backdrop: true,
+			bodyHeader: undefined,
+			bodyFooter: undefined,
+			scope: undefined,
+			dialogClose: 'reject',
+			buttons: {
+				left: [],
+				center: [{
+					id: 'close',
+					title: 'Close',
+					method: 'resolve',
+				}],
+				right: [],
+			},
+			$defer: Promise.defer(),
+			...options,
+		};
+		// }}}
+
+		// Attach to promise to add a status property {{{
+		settings.$defer.state = 'pending';
+		settings.$defer.promise.then(
+			()=> settings.$defer.state = 'resolved',
+			()=> settings.$defer.state = 'rejected'
+		);
+		// }}}
+
+		// Setup dialogClose {{{
+		if (!settings.$dialogClose) {
+			if (_.isUndefined(settings.dialogClose) || settings.dialogClose == 'resolve') {
+				settings.$dialogClose = ()=> settings.$defer.resolve();
+			} else if (settings.dialogClose == 'reject') {
+				settings.$dialogClose = ()=> settings.$defer.reject();
+			}
+		}
+		// }}}
+
+		// Setup buttons {{{
+		if (!_.isObject(settings.buttons)) throw new Error('$prompt.dialog({buttons}) must be an object');
+		['left', 'right', 'center'].forEach(align => {
+			if (!settings.buttons[align]) settings.buttons[align] = [];
+			settings.buttons[align] = settings.buttons[align].map(b => {
+				if (!b.click) b.click = ()=> { // Compute a click event from the method
+					if (_.isUndefined(b.method) || b.method == 'resolve') {
+						settings.$defer.resolve(b.id);
+						$prompt.close(true);
+					} else if (b.method == 'reject') {
+						settings.$defer.reject(b.id);
+						$prompt.close(false);
+					}
+
+					$prompt.close();
+				};
+
+				if (!b.class) {
+					if (b.method == 'resolve') {
+						b.class = 'btn btn-success';
+					} else if (b.method = 'reject') {
+						b.class = 'btn btn-danger';
+					} else {
+						b.class = 'btn btn-default';
+					}
+				}
+
+				return b;
+			});
+		});
+		// }}}
+
+		// Open the dialog (via Bootstrap) {{{
+		this.$emit.broadcast('$prompt.open', settings);
+		// }}}
+
+		return settings.$defer.promise;
+	};
+
+
+	/**
+	* Close the dialog if open
+	* This may trigger another dialog to open if one is queued
+	* NOTE: This does not resolve the dialog promise
+	* @param {boolean} [ok=false] Whether the dialog contents we're accepted - this is used to determine whether resolve/reject should be called on close
+	* @emits $prompt.close Message to the promptHelper that it should close the dialog
+	*/
+	$prompt.close = ok => {
+		if ($prompt.$settings && $prompt.$settings.$dialogClose) $prompt.$settings.$dialogClose();
+		$prompt.$settings = undefined;
+		this.$emit.broadcast('$prompt.close', ok);
+	};
+
+
+	/**
+	* Shorthand function to resolve the current prompt and close the dialog
+	* @param {*} [value] Optional payload to pass as a resolved value
+	*/
+	$prompt.resolve = value => {
+		$prompt.$settings.$defer.resolve(value);
+		$prompt.close();
+	};
+
+	/**
+	* Shorthand function to reject the current prompt and close the dialog
+	* @param {*} [value] Optional payload to pass as a rejected value
+	*/
+	$prompt.reject = value => {
+		$prompt.$settings.$defer.reject(value);
+		$prompt.close();
+	};
+	// }}}
+
+	// Basic messaging - $prompt.alert(), $prompt.confirm() {{{
+	/**
+	* Display a general alert dialog
+	* This function inherits all properties from dialog() but sets various sane defaults suitable for a simple message
+	* @see $prompt.dialog()
+	* @param {Object|string} options Either an options object or the body text of the alert
+	* @param {string} [options.title='Alert'] The title of the alert
+	* @param {string} [options.body='Be alerted'] The body of the alert message
+	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
+	*/
+	$prompt.alert = options => {
+		if (_.isString(options)) options = {title: options};
+		return $prompt.dialog({
+			title: 'Alert',
+			body: 'Be alerted',
+			dialogClose: 'resolve', // Alerts dont ever reject
+			buttons: {
+				center: [{
+					id: 'close',
+					title: 'Close',
+					method: 'resolve',
+				}],
+			},
+			...options,
+		});
+	};
+
+	/**
+	* Prompt with confirm / cancel buttons
+	* This function inherits all properties from dialog() but sets various sane defaults suitable for a confirmation prompt
+	* @see $prompt.dialog()
+	* @param {Object|string} options Either an options object or the body text of the confirmation
+	* @param {string} [options.title='Confirm action'] The title of the dialog
+	* @param {string} [options.body='Are you sure you want to do this?'] The body of the dialog
+	* @param {array} [options.buttons=Confirm + Cancel]
+	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
+	*/
+	$prompt.confirm = options => {
+		if (_.isString(options)) options = {body: options};
+		return $prompt.dialog({
+			title: 'Confirm action',
+			body: 'Are you sure you want to do this?',
+			dialogClose: 'reject', // Reject if the user had second thoughts
+			buttons: {
+				left: [{
+					id: 'cancel',
+					title: 'Cancel',
+					method: 'reject',
+					class: 'btn btn-danger',
+					icon: 'fa fa-times',
+				}],
+				right: [{
+					id: 'confirm',
+					title: 'Confirm',
+					method: 'resolve',
+					class: 'btn btn-success',
+					icon: 'fa fa-check',
+				}],
+			},
+			...options,
+		});
+	};
+	// }}}
+
+	return $prompt;
+};
+</service>
+
+<component>
+module.exports = {
+	route: '/debug/prompt',
+	methods: {
+		testPrompt(method, ...args) {
+			this.$prompt[method](...args)
+				.then(res => console.log(`$prompt.${method} response =`, res))
+				.catch(res => console.log(`$prompt.${method} REJECTION =`, res))
+		},
+	},
+};
+</component>
+
+<template>
+	<div>
+		<div id="modal-test" class="modal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Modal header</h4>
+						<a class="close" data-dismiss="modal"><i class="fa fa-times"></i></a>
+					</div>
+					<div class="modal-body">
+						<p>Modal Body</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card">
+			<div class="list-group">
+				<a class="list-group-item" @click="testPrompt('modal', '#modal-test')">vm.$prompt.modal("#modal-test")</a>
+				<a class="list-group-item" @click="testPrompt('alert', 'Hello World')">vm.$prompt.alert("Hello World")</a>
+				<a class="list-group-item" @click="testPrompt('confirm', {content: 'This is a question'})">vm.$prompt.confirm({content: "This is a question"})</a>
+				<a class="list-group-item" @click="testPrompt('list', {list: [{_id: 1, title: 'Foo'}, {_id: 2, title: 'Bar'}, {_id: 3, title: 'Baz'}]})">vm.$prompt.list({list: [...]})</a>
+				<a class="list-group-item" @click="testPrompt('list', {url: '/api/users', field: 'name'})">vm.$prompt.list({url: '/api/users'})</a>
+			</div>
+		</div>
+	</div>
+</template>
+
+<component name="prompt-injector">
+module.exports = {
+	data: ()=> ({
+		isShowing: false,
+	}),
+	created() {
+		this.$on('$prompt.open', settings => this.openModal(settings));
+		this.$on('$prompt.close', ok => this.closeModal(ok));
+	},
+	methods: {
+		openModal(settings) {
+			this.isShowing = true;
+			this.$prompt.$settings = settings;
+
+			this.$prompt.modal({
+				element: '#modal-_prompt',
+				onShow: ()=> {
+					if (settings.onShow) settings.onShow();
+
+					if (settings.backdrop) $('body > .modal-backdrop').addClass('shown'); // Add the shown class late to the backdrop - allows the CSS transition to apply if fading / bluring etc.
+				},
+				onHide: ()=> {
+					if (settings.onHide) settings.onHide();
+
+					if (settings.$defer.state == 'pending') { // Promise not yet resolved - yet we are closing, user probably pressed escape or clicked the background
+						this.$prompt.close();
+					}
+				},
+			})
+		},
+		closeModal(ok) {
+			this.isShowing = false;
+			$('#modal-_prompt').modal('hide');
+		},
+	},
+};
+</component>
+
+<template name="prompt-injector">
+	<div>
+		<div id="modal-_prompt" class="modal">
+			<div v-if="isShowing" class="modal-dialog" :class="$prompt.$settings.modalClass">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">{{$prompt.$settings.title}}</h4>
+						<a class="close" @click="$prompt.close()"><i class="far fa-times fa-lg"/></a>
+					</div>
+					<div class="modal-body">
+						<div v-if="$prompt.$settings.bodyHeader" v-html="$prompt.$settings.$bodyHeader"/>
+						<div v-if="!$prompt.$settings.isHtml" class="text-center">
+							<h4>{{$prompt.$settings.body}}</h4>
+						</div>
+						<mg-form v-if="$prompt.$settings.$isMacgyver" form="promptMacGyver" :config="$prompt.$settings.form" :data="$prompt.$settings.data"/>
+						<div v-if="$prompt.$settings.isHtml" v-html="$prompt.$settings.body"/>
+						<div v-if="$prompt.$settings.bodyFooter" v-html="$prompt.$settings.$bodyFooter"/>
+						<component v-if="$prompt.$settings.component" :is="$prompt.$settings.component"/>
+					</div>
+					<div v-if="$prompt.$settings.buttons.left.length || $prompt.$settings.buttons.right.length || $prompt.$settings.buttons.center.length" class="modal-footer">
+						<div class="align-left">
+							<a v-for="button in $prompt.$settings.buttons.left" :key="button.id" @click="button.click()" :class="button.class">
+								<i v-if="button.icon" :class="button.icon"/>
+								{{button.title}}
+							</a>
+						</div>
+						<div class="align-center">
+							<a v-for="button in $prompt.$settings.buttons.center" :key="button.id" @click="button.click()" :class="button.class">
+								<i v-if="button.icon" :class="button.icon"/>
+								{{button.title}}
+							</a>
+						</div>
+						<div class="align-right">
+							<a v-for="button in $prompt.$settings.buttons.right" :key="button.id" @click="button.click()" :class="button.class">
+								<i v-if="button.icon" :class="button.icon"/>
+								{{button.title}}
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<style>
+/* Adds a scale effect to modals */
+.modal > .modal-dialog {
+	transform: scale(0.7);
+	opacity: 0;
+	transition: all .3s;
+}
+
+.modal.show > .modal-dialog {
+	opacity: 1;
+	transform: scale(1);
+}
+
+/* Add a fade out effect when the backdrop appears */
+.modal-backdrop {
+	opacity: 0 !important;
+	transition: all 5s;
+}
+
+.modal-backdrop.show {
+	opacity: 0.6 !important;
+}
+</style>

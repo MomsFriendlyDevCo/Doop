@@ -1,0 +1,22 @@
+/**
+* Hierarchically disable all functionality below this element
+* @example
+* <form class="disabled">
+*   Everything below here should be uneditable
+* </form>
+*/
+.disabled .card-actions {
+	display: none;
+}
+
+.disabled input.form-control,
+.disabled textarea.form-control {
+	pointer-events: none;
+	border: none;
+	background: none;
+}
+
+.disabled .input-group .input-group-text {
+	background: none;
+	border: none;
+}

@@ -1,0 +1,37 @@
+/**
+* Tasks to populate db with specific scenario data - either default or test scenarios
+*/
+
+var gulp = require('gulp');
+var monoxide = require('monoxide');
+var scenario = require('gulp-mongoose-scenario');
+var runSequence = require('run-sequence');
+
+gulp.task('db', ['scenario']);
+
+
+/**
+* Setup the local Mongo DB with all the files located in ./*.json
+* NOTE: To prevent cached data screwing with state, this task will also clear the cache
+*/
+gulp.task('scenario', ['load:app.db'], ()=> {
+	if (process.env.SCENARIO && process.env.SCENARIO == 'FORCE') return;
+	if (app.config.env == 'production') throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export SCENARIO=FORCE`');
+
+	return gulp.src([
+		`${app.config.paths.root}/**/*.scenario.json`,
+		'!dist/**/*',
+		'!node_modules/**/*',
+	])
+		.pipe(scenario({
+			nuke: true,
+			connection: monoxide.connection,
+			getModels: ()=> Object.keys(app.db),
+			getCollection: collection => app.db[collection],
+			getCollectionSchema: collection => {
+				if (!app.db[collection]) throw new Error('Scenario failed attempting to populate unknown database collection: ' + collection);
+				return app.db[collection].$mongooseModel.schema;
+			},
+		}))
+		.on('error', err => finish('Error loading scenario:' + err.toString()));
+});

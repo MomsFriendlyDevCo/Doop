@@ -1,0 +1,7 @@
+/**
+* Force all links with td elements to display as block so the entire cell is clickable
+*/
+
+table.table td > a:not(.btn) {
+	display: block;
+}

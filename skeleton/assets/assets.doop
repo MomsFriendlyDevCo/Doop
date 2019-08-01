@@ -1,0 +1,3 @@
+<endpoint>
+app.use('/assets', app.middleware.express.static(`${app.config.paths.root}/assets`, {fallback: true}));
+</endpoint>

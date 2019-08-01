@@ -1,0 +1,4 @@
+/* <li class="danger"/> {{{ */
+.dropdown-menu .dropdown-item-danger:hover {background-color: var(--danger)}
+.dropdown-menu .dropdown-item-danger:hover > a {color: var(--white)}
+/* }}} */

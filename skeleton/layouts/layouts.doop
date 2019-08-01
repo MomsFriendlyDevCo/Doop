@@ -1,0 +1,25 @@
+<server on="postEndpoints">
+/**
+* Expose the main layouts HTML page as a static resource
+* ... adding basic Lodash templating of strings
+*/
+
+var _ = require('lodash');
+var fs = require('fs').promises;
+
+exports = ()=>
+	fs.readFile(`${app.config.paths.root}/layouts/main.html`, 'utf-8')
+		.then(contents => _.template(contents))
+		.then(template => app.get('/', (req, res) =>
+			res.send(template({app}))
+		))
+</server>
+
+<server on="postPaths">
+app.get('/robots.txt', (req, res) =>
+	res.send(
+		'User-agent: *\n'
+		+ 'Disallow: /\n'
+	)
+);
+</server>

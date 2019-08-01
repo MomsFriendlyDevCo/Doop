@@ -1,0 +1,23 @@
+<server on="init">
+/**
+* Loads and provides the current git release in app.git
+*
+* @example Access the current git shortHash
+* var hash = app.git.shortHash
+*/
+
+var git = require('.');
+
+exports = ()=> git.current()
+	.then(gitInfo => app.git = gitInfo)
+</server>
+
+<endpoint>
+var git = require('.');
+
+app.get('/api/git/history', (req, res) => {
+	git.history({limit: 30})
+		.then(data => res.send(data))
+		.catch(res.sendError)
+});
+</endpoint>

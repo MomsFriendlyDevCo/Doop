@@ -1,0 +1,17 @@
+<server on="middleware">
+/**
+* Middleware layer to resolve a task only if a given set of permissions resolve
+* @param {string} permission... The permission or permissions the user requires to resolve the middleware
+* @return {function} Express middleware
+*/
+
+app.middleware.express.hasPermission = (...permissions) => {
+	return function(req, res, next) {
+		if (!req.user || !req.user.permissions || permissions.every(p => req.user.permissions[p])) {
+			next();
+		} else {
+			res.sendError(403, 'Insufficient permissions');
+		}
+	};
+};
+</server>

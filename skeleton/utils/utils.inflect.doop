@@ -1,0 +1,27 @@
+<server on="init, dbInit">
+var _ = require('lodash');
+var natural = require('natural');
+
+/**
+* Text inflection tools
+*/
+
+app.utils.inflect = {};
+var nounInflector = new natural.NounInflector();
+
+
+/**
+* Return the singular of a possiblly camel cased or otherwise mangled term
+* @param {string} input The string to return the singular of
+* @returns {string} The singular version of input
+*/
+app.utils.inflect.singular = input => nounInflector.singularize(_.startCase(input));
+
+
+/**
+* Return the plural of a possiblly camel cased or otherwise mangled term
+* @param {string} input The string to return the plural of
+* @returns {string} The plural version of input
+*/
+app.utils.inflect.singular = input => nounInflector.singularize(_.startCase(input));
+</server>

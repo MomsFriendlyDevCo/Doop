@@ -1,0 +1,17 @@
+/**
+* Remove all page furniture and maximize the content area
+* This style is mainly used for the login screens
+*/
+body.minimal .topbar, body.minimal .side-menu {
+	display: none;
+}
+
+body.minimal #wrapper > .content-page {
+	display: block;
+	margin: 0;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}

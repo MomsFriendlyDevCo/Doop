@@ -1,0 +1,4 @@
+/* Buttons with icons look squished */
+.btn > i {
+	margin-right: 3px;
+}

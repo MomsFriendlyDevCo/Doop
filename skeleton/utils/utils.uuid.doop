@@ -1,0 +1,66 @@
+<server on="init, dbInit">
+/**
+* UUID generation tools
+*/
+
+
+var crypto = require('crypto');
+var promisify = require('util').promisify;
+var uuid = require('uuid/v4');
+
+var cryptoRandomBytes = promisify(crypto.randomBytes);
+app.utils.uuid = {};
+
+
+/**
+* Generate a UUID/v4 in a sane-promise compatible way
+*
+* This function exists because:
+*
+*      - The fact that Crypto doesn't return a promise
+*      - UUID/v4 doesn't have microsecond differences (i.e. two ID's created in the same tick will be the same)
+*
+* @param {Object} options Additional options to use when generating
+* @param {string} [options.prefix=""] Optional prefix of the UUID
+* @param {string} [options.suffix=""] Optional suffix of the UUID
+* @returns {Promise} A promise which will resolve with the requested UUID/v4
+*/
+app.utils.uuid.generate = options => {
+	var settings = {
+		prefix: '',
+		suffix: '',
+		...options,
+	};
+
+	return Promise.resolve()
+		.then(()=> cryptoRandomBytes(16))
+		.then(random => uuid({random}))
+		.then(uuid => settings.prefix + uuid + settings.suffix);
+};
+
+
+/**
+* Validate a UUID string using similar options to app.utils.uuid.generate
+* @param {string} input The input UUID to examine
+* @param {Object} options Additional options to use when validating
+* @param {string} [options.prefix=""] Optional prefix of the UUID, this can also be a RegExp in string form
+* @param {string} [options.suffix=""] Optional suffix of the UUID, this can also be a RegExp in string form
+* @returns {boolean} Whether the input UUID is valid
+*/
+app.utils.uuid.validate = (input, options) => {
+	var settings = {
+		prefix: '',
+		suffix: '',
+		...options,
+	};
+
+	var re = new RegExp(''
+		+ '^'
+		+ settings.prefix
+		+ '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+		+ '$'
+	);
+
+	return re.test(input);
+};
+</server>

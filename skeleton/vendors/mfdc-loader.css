@@ -1,0 +1,60 @@
+/* Bootstrapping overlay {{{ */
+body.bootstrapping #app {
+	display: none;
+}
+
+.splash {
+	display: none;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+}
+
+.splash-init {
+	background: #CCC;
+}
+
+body.bootstrapping .splash.splash-init {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+}
+
+body.bootstrapping .splash.splash-init > img {
+	width: 50vw;
+	max-width: 700px;
+}
+/* }}} */
+/* Loader bar styles {{{ */
+.loader-bar {
+	height: 5px !important;
+	z-index: 1 !important;
+}
+
+.loader-bar::before, .loader-bar::after {
+	background: #3264d5 !important;
+}
+
+body.loading-foreground .loader-spinner {
+	display: none; /* Don't display smaller spinner when we are already foreground loading */
+}
+
+.loading-background .loader-spinner {
+	opacity: 0.7;
+}
+
+.loader-spinner {
+	top: auto;
+	left: auto;
+	right: 10px !important;
+	bottom: 5px !important;
+	height: 85px;
+	width: 85px;
+}
+
+.loader-spinner::before {
+	display: none;
+}
+/* }}} */

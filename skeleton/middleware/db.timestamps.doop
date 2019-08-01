@@ -1,0 +1,32 @@
+<server on="middleware, dbMiddleware">
+var _ = require('lodash');
+
+/**
+* Simple Database middleware to store the date that a timestramp changed in the object
+* @param {string} [key='status'] The key to monitor for changes
+* @param {string|function} [path] The path to save the timestamp as or a promise factory which returns the path. Called as `(doc, settings)`
+* @returns {function} Database middleware
+*
+* @example Attach to the widgets schema to add timestamps on change
+*   app.middleware.db.schema('widgets', { ... })
+*     .hook('save', app.middleware.db.timestamps())
+*/
+app.middleware.db.timestamps = options => {
+	// Settings {{{
+	var settings = {
+		key: 'status',
+		path: doc => `timestamps.${doc.status}`,
+		...options,
+	};
+	// }}}
+
+	return function(done, doc) {
+		if (!doc[settings.key]) return done(); // Not changing status
+
+		Promise.resolve(settings.path(doc, settings))
+			.then(path => _.set(doc, path, new Date()))
+			.then(()=> done())
+			.catch(done)
+	};
+};
+</server>

@@ -1,0 +1,55 @@
+<server on="init">
+/**
+* Loader for Winston + Papertrail logging
+*/
+
+var _ = require('lodash');
+var winston = require('winston');
+
+if (app.config.papertrail.enabled && (!app.config.papertrail.host || !app.config.papertrail.port)) return Promise.reject('Papertrail enabled but no host or port specified in app.config.papertrail');
+
+if (app.config.papertrail.enabled) {
+	require('winston-papertrail').Papertrail;
+
+	var papertrailTransport = new winston.transports.Papertrail({
+		inlineMeta: true,
+		flushOnClose: true,
+		// colorize: true, // Doesn't work yet as per https://github.com/kenperkins/winston-papertrail/issues/81
+		logFormat: (level, msg) => level + ' ' + msg,
+		...app.config.papertrail,
+	});
+}
+
+var logger = winston.createLogger({
+	level: 'info',
+	format: winston.format.combine(
+		winston.format.splat(),
+		winston.format.printf(info => [info.message].concat(info.meta || []).join(' ')),
+	),
+	transports: [
+		new winston.transports.Console({ // Add default console logger
+			level: 'info',
+			colorize: true,
+			prettyPrint: true,
+			depth: 5,
+			showLevel: false, // Omit the level prefix on the console
+		}),
+
+		app.config.papertrail.enabled
+			? papertrailTransport
+			: null,
+	].filter(i => i), // Remove defunct loggers
+});
+
+// Remap console.* -> logger.*
+console.logRaw = console.log;
+console.log = (...msg) => logger.log('info', msg.join(' '));
+console.info = console.log;
+console.warn = (...msg) => logger.log('warn', msg.join(' '));
+console.error = (...msg) => logger.log('error', msg.join(' '));
+
+app.refresh.log(); // Reload main loggers
+
+// Add Papertrail if its enabled
+if (app.config.papertrail.enabled) app.log('Registered with Papertail as', app.config.papertrail.hostname);
+</server>

@@ -1,0 +1,6 @@
+<server on="init">
+var expressLogger = require('express-log-url');
+
+app.set('log.username', req => req.user && req.user.username ? `(@${req.user.username})` : undefined);
+app.use(expressLogger);
+</server>

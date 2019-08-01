@@ -1,0 +1,6 @@
+<server on="postServer">
+/**
+* Serve the /dist folder as a static resource
+*/
+app.use('/dist', app.middleware.express.static(`${app.config.paths.root}/dist`, {fallthrough: true}));
+</server>

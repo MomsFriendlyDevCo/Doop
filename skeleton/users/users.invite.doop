@@ -1,0 +1,85 @@
+<endpoint>
+var _ = require('lodash');
+var email = require('@momsfriendlydevco/email');
+
+/**
+* Create a basic user record and dispatch an email invite
+* @param {string} req.body.email The user email
+* @param {string} [req.body.name] The users name
+* @param {Object} [req.body.permissions] Optional permissions to set for the user against the project, only available if the current user has usersPromote
+* @returns {Object} The newly created user object consisting of `{_id}`
+*/
+app.post('/api/users/invite', (req, res) => {
+	var session = {user: undefined};
+
+	Promise.resolve()
+		// Sanity checks {{{
+		.then(()=> {
+			if (!req.body.email) throw new Error('An email must be provided to invite a new user');
+			req.body.email = req.body.email.toLowerCase();
+		})
+		// }}}
+		// Sanity check against the requesting user {{{
+		.then(()=> {
+			if (!member.permissions.usersInvite) throw new Error('You are not permitted to invite new members');
+		})
+		// }}}
+		// Either find existing user or create stub account {{{
+		.then(()=> 
+			app.db.users.findOne({email: req.body.email})
+				.then(user => {
+					if (user) return user; // Found existing user - pass on details
+
+					return app.db.users.create({ // User not fund - create a base
+						email: req.body.email,
+						name: req.body.name,
+					})
+				})
+				.then(user => session.user = user),
+		)
+		// }}}
+		// Generate invite token {{{
+		.then(()=> session.user.setToken('invite'))
+		// }}}
+		// Dispatch invite email {{{
+		.then(token => email().send({
+			to: session.user.email,
+			subject: `You have been invited to ${app.config.name}`,
+			template: `${app.config.paths.root}/users/users.invite.email.html`,
+			templateParams: {
+				...session,
+				url: `/invite/accept/${token}`,
+			},
+		}))
+		// }}}
+		// End {{{
+		.then(()=> res.send({_id: session.user._id}))
+		.catch(res.sendError)
+		// }}}
+});
+</endpoint>
+
+<endpoint>
+/**
+* Accept an email invite via token
+* @param {string} req.params.token The token related to accept
+* @returns {Object} Redirect request to /
+*/
+app.get('/invite/accept/:token', (req, res) => {
+	app.db.users.findOne({
+		_token: req.params.token,
+		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
+	})
+		.then(user => {
+			console.log('Would accept token for user', user);
+			throw new Error('NOPE!');
+		})
+		.then(user => new Promise((resolve, reject) => req.logIn(user, err => {
+			if (err) return reject(err);
+			resolve();
+		})))
+		.then(()=> req.user.releaseToken())
+		.then(()=> res.redirect('/'))
+		.catch(()=> res.sendError(403, 'Login token invalid'))
+});
+</endpoint>

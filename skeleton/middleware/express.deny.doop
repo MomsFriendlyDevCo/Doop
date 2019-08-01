@@ -1,0 +1,22 @@
+<server on="middleware">
+/**
+* Express middleware which will always deny any incomming request
+* This is mainly used for debugging
+* @param {Object} [options] Options to use
+* @param {number} [options.code=403] HTTP code to return
+* @param {string} [optonns.text="Denied!"] HTTP text to return
+* @returns {ExpressMiddleware} An express middleware layer
+*/
+
+app.middleware.express.deny = (options) => {
+	var settings = {
+		code: 403,
+		text: 'Denied!',
+		...options,
+	};
+
+	return (req, res, next) => {
+		return res.sendError(settings.code, settings.text);
+	};
+};
+</server>

@@ -1,0 +1,132 @@
+<schema>
+var Users = app.middleware.db.schema('users', {
+	created: {type: Date, default: Date.now},
+	lastLogin: {type: Date, default: Date.now},
+	username: {type: String, required: true, index: {unique: true}},
+	email: {type: String, required: true, index: {unique: true}},
+	_passhash: {type: String},
+	_passhash2: {type: String},
+	_passsalt: {type: String},
+	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
+	_tokenPurpose: {type: 'string', enum: ['resetPassword', 'login', 'invite']},
+	name: {type: String},
+	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
+	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
+	company: {type: 'pointer', ref: 'companies', index: true}, // FIXME: Is this used?
+	settings: {
+		termsVersion: {type: 'number', default: 0}, // The last terms and conditions version the user agreed to. If mismatch with app.config.terms.version the browser is redirected to app.config.terms.url for agreement
+		historyOrder: {type: 'string', enum: ['recentFirst', 'oldestFirst'], default: 'oldestFirst'},
+	},
+	permissions: {
+		debug: {type: 'boolean', default: false},
+		companiesEdit: {type: 'boolean', default: false},
+		debug: {type: 'boolean', default: false},
+		usersDelete: {type: 'boolean', default: false},
+		usersEdit: {type: 'boolean', default: false},
+		usersInvite: {type: 'boolean', default: false},
+	},
+});
+
+// Logins + user passwords {{{
+var crypto = require('crypto');
+
+Users
+	.virtual('password', null, function(password) { // Allow write but not read
+		this._passsalt = crypto.randomBytes(16).toString('base64');
+		this._passhash = this.encryptPass(this._passsalt, password);
+	})
+	.method('encryptPass', function(salt, password) {
+		var saltBuffer = Buffer.from(salt, 'base64');
+		return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64, 'sha512').toString('base64');
+	})
+	.method('checkPassword', function(candidate) {
+		return Promise.resolve(this.encryptPass(this._passsalt || '', candidate) == this._passhash);
+	});
+// }}}
+
+// User tokens {{{
+var _ = require('lodash');
+/**
+* Set the token method on a user
+* NOTE: Also saves the user {_token, _tokenPurpose} fields
+* @param {string} purpose The purpose of the token, stops tokens being used for cross purposes. Must conform to a valid enum in the _tokenPurpose field
+* @returns {Promise} A promise which will resolve with the allocated user token
+*/
+Users.method('setToken', function(purpose) {
+	var tries = 0;
+	var maxTries = 20;
+	return new Promise((resolve, reject) => {
+		var trySet = ()=> {
+			if (tries++ > maxTries) return reject(`Unable to set user token after ${maxTries} tries`);
+			var tryToken = crypto.createHmac('sha256', app.config.secret).update(this._id + Date.now() + _.random(10000, 99999))
+				.digest('base64')
+				.replace(/[^a-z0-9]+/ig, '');
+
+			this.save({
+				$ignoreModified: true,
+				_token: tryToken,
+				_tokenPurpose: purpose,
+			})
+				.then(()=> resolve(tryToken))
+				.catch(e => { // Possible unique collisision, wait a random amount of time and retry
+					app.log('Failed to allocate user token -', e.toString());
+					setTimeout(trySet, _.random(100, 500));
+				})
+		};
+		trySet();
+	});
+})
+
+Users.method('releaseToken', function() {
+	return this.save({
+		$ignoreModified: true,
+		_token: undefined,
+		_tokenPurpose: undefined,
+	})
+});
+// }}}
+
+// Whenever we are saving and we dont have a username use the email address {{{
+Users
+	.hook('create', function(next, query) {
+		if (!query.username) query.username = query.email;
+		if (query.username) query.username = query.username.toLowerCase(); // Username should always be lower case
+		next();
+	})
+	.hook('save', function(next, query) {
+		if (!query.username && query.email) query.username = query.email; // Username should be the email address if we have email but not the username
+		if (query.username) query.username = query.username.toLowerCase(); // Username should always be lower case
+		next();
+	});
+// }}}
+
+// Force username to ALWAYS be lower case {{{
+Users.hook('save', function(done, q) {
+	if (q.username) q.username = q.username.toLowerCase();
+	done();
+});
+// }}}
+
+// Timestamp status tracking {{{
+Users.hook('save', app.middleware.db.timestamps())
+// }}}
+</schema>
+
+<endpoint>
+app.use('/api/users/:id?', app.middleware.express.rest('users', {
+	data: req => req.user ? {user: req.user._id} : undefined,
+	get: true,
+	query: true,
+	count: true,
+	create: false,
+	save: false,
+	meta: true,
+	delete: [
+		app.middleware.express.hasPermission('usersDelete'),
+		app.middleware.express.setDocStatus({collection: 'users', status: 'deleted'}),
+	],
+	queryForce: req => {
+		if (!req.user.permissions.usersEdit) return {select: '_id,username,name,email,company'};
+	},
+}));
+</endpoint>

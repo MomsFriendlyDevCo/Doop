@@ -1,0 +1,9 @@
+/* Input group of button + input or input + button shouldn't have two borders {{{ */
+.input-group > .input-group-addon + input.form-control {
+	border-left: none;
+}
+
+.input-group > input.form-control + .input-group-addon {
+	border-left: none;
+}
+/* }}} */

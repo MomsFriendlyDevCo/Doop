@@ -1,0 +1,35 @@
+<server on="preEndpoints">
+// Inject cookie handling middleware
+var cookieParser = require('cookie-parser');
+app.use(cookieParser({
+	secret: app.config.secret,
+}));
+
+
+/**
+* Inject MemcacheD + Dynamo session storage
+*
+* Process:
+*          1. Check if the input has a cookie header - if not, pass to next()
+*          2. Use cookie to lookup user._id from cache
+*          3. Lookup full user object from Dynamo via user._id
+*/
+app.use((req, res, next) => {
+	var lookupToken;
+	if (app.config.session.cookie.enabled && req.cookies && req.cookies[app.config.session.cookie.name]) { // Cookie mode
+		lookupToken = req.cookies[app.config.session.cookie.name];
+	} else if (app.config.session.authHeader.enabled && req.headers.auth) { // 'Auth' header token method
+		lookupToken = req.headers.auth;
+	} else { // Either no method is enabled or no token / cookie has been provided
+		return next();
+	}
+
+	app.cache.get(app.config.session.cache.prefix + lookupToken) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
+		.then(session => session._id ? session : Promise.reject('Invalid session state'))
+		.then(session => app.db.users.findOneByID(session._id))
+		.then(user => user || Promise.reject('Invalid user ID'))
+		.then(user => req.user = user)
+		.then(()=> next()) // Defer to remaining Express middleware
+		.catch(()=> next()) // Ignore cache faults - probably expired user session or other cache fault
+});
+</server>

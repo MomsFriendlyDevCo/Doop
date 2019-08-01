@@ -1,0 +1,9 @@
+<server on="middleware, dbMiddleware">
+/**
+* Wrapper for the Monoxide schema function
+*/
+
+var monoxide = require('monoxide');
+
+app.middleware.db.schema = monoxide.schema;
+</server>

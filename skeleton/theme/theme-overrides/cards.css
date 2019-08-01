@@ -1,0 +1,15 @@
+/* Card headers look weird {{{ */
+.card .card-header {
+	background: white;
+	border: none;
+	font-size: 15px;
+	font-weight: 700;
+	color: #797979;
+}
+/* }}} */
+
+/* Multiple cards all get squished up {{{ */
+.card + .card {
+	margin-top: 20px;
+}
+/* }}} */

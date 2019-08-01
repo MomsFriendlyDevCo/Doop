@@ -1,0 +1,122 @@
+<server on="init">
+var _ = require('lodash');
+var express = require('express');
+
+// Create an express instance
+app.express = express();
+
+// Glue some Express helpers onto the app object
+Object.assign(app, _(app.express)
+	.pick([
+		'all',
+		'delete',
+		'get',
+		'post',
+		'set',
+		'use',
+	])
+	.mapValues(v => v.bind(app.express))
+	.value()
+);
+</server>
+
+<server on="preEndpoints">
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var compression = require('compression');
+var cors = require('cors');
+var crash = require('@momsfriendlydevco/crash');
+var historyFallback = require('connect-history-api-fallback-exclusions');
+var helmet = require('helmet');
+
+app.use(helmet());
+app.use(cors());
+app.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
+	index: '/',
+	exclusions: ['/api/*', '/go/*'],
+}));
+app.use(cookieParser());
+app.use(bodyParser.json({limit: '64mb'}));
+app.use(bodyParser.urlencoded({limit: '16mb', extended: false}));
+app.use(compression());
+
+// Extend the Res object so it contains the new res.sendError() reporting function
+app.use(function(req, res, next) {
+
+	/**
+	* Report an error
+	* This is really just a convenience function to set all the weird headers in the event of an error
+	* If err is a string with the prefix `xxx:Text` the first part is used as the return code with the second as the error message
+	* @param {number} [code=400] Optional error code to use
+	* @param {string} err The error to report
+	* @return {undefined} This function is fatal to express as it closes the outbound connection when it completes
+	*
+	* @example Throw error 404
+	* res.sendError(404)
+	*
+	* @example Throw general error with 400
+	* res.sendError('This is an error')
+	*
+	* @example Throw error 512 with custom text within one string
+	* res.sendError('512: This is a custom error')
+	*/
+	res.sendError = function(code, err) {
+		if (!isFinite(code)) [code, err] = [400, code.toString()];
+
+		// Process optional string prefix (if we're using the default error fallback)
+		if (code == 400) {
+			var errBits = /^(\d+)+\s*:\s*(.*)$/.exec(err);
+			if (errBits) [, code, err] = errBits;
+		}
+
+		res.errorBody = err;
+		if (!res.headersSent) {
+			res.status(code).send(res.errorBody);
+		} else {
+			app.log.warn('Cannot send error when headers have already been sent');
+		}
+
+		crash.trace(err, {prefix: 'Caught server error'});
+	};
+
+	next();
+});
+</server>
+
+<server on="server">
+var fs = require('fs');
+var http = require('http');
+var https = require('https');
+var express = require('express');
+var url = require('url');
+
+exports = ()=> new Promise(resolve => {
+	if (app.config.ssl.enabled) { // SSL enabled
+		if (app.config.ssl.redirect) { // If SSL enabled + redirect enabled, create basic server to redirect to HTTPS server
+			app.log.debug('server.http - use HTTP server w/ redirect to HTTPS');
+			var redirectApp = express();
+			redirectApp.get('/*', function(req, res) {
+				res.redirect('https://' + url.parse(app.config.url).hostname + req.url); // Force HTTPS protocol, irrespective of specified protocol in app.config.url
+			});
+			app.serverHttp = http.createServer(redirectApp).listen(80);
+			app.serverHttp.timeout = app.config.timeout;
+		}
+
+		// Create HTTPS server
+		app.log.debug('server.https - create HTTPS server');
+		app.server = https.createServer({
+			cert: fs.readFileSync(app.config.ssl.cert),
+			key: fs.readFileSync(app.config.ssl.key),
+		}, app.express).listen(app.config.ssl.port, resolve);
+		app.server.timeout = app.config.timeout;
+	} else {
+		app.log.debug('server.http - use basic HTTP server only');
+		app.server = app.express.listen(app.config.port, app.config.host, resolve);
+		app.server.timeout = app.config.timeout;
+	}
+});
+</server>
+
+<server on="ready">
+app.log('Web interface listening at', app.log.colors.cyan(app.config.url));
+</server>

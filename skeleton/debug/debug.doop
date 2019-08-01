@@ -1,0 +1,24 @@
+<endpoint>
+/**
+* Test response with a 200 response code
+*/
+app.all('/api/debug/http/200', function(req, res) {
+	res.send('Everything is ok, relax');
+});
+
+
+/**
+* Test response with a 403 response code
+*/
+app.all('/api/debug/http/403', function(req, res) {
+	res.status(403).send('You are forbidden from doing that. Forbidden I say!');
+});
+
+
+/**
+* Test response with a 500 response code throwing an intentional error
+*/
+app.all('/api/debug/http/500', function(req, res) {
+	throw new Error('Intentional test error');
+});
+</endpoint>

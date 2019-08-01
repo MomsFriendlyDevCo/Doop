@@ -1,0 +1,39 @@
+<server on="middleware">
+/**
+* Middleware to set the status of a document
+* This is useful as middleware for the app.delete() endpoint to set a status and NOT actually remove the document
+* @param {string|Object} options Options to set
+* @param {string} options.collection The collection name the document belongs to
+* @param {function} [options.docId] How to extract the document ID, defaults to using req.params.id
+* @param {string} [options.key='status'] The field to set
+* @param {string} [options.value='delted'] The value to set the field to
+* @returns {function} Express middleware
+*/
+var monoxide = require('monoxide');
+
+app.middleware.express.setDocStatus = options => {
+	var settings = {
+		collection: undefined,
+		docId: req => req.params.id,
+		key: 'status',
+		value: 'deleted',
+		...options,
+	};
+	if (!settings.collection) throw '"collection" required when using app.middleware.db.setStatus()';
+
+	return function(req, res) {
+		var id = settings.docId(req);
+
+		console.log(`Setting document ID ${id} {${settings.key}: '${settings.value}'}`);
+
+		monoxide.save({
+			$collection: settings.collection,
+			$id: req.params.id,
+			$refetch: false,
+			[settings.key]: settings.value,
+		})
+		.then(()=> res.sendStatus(200))
+		.catch(res.sendError)
+	};
+};
+</server>

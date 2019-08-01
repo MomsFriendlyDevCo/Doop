@@ -1,0 +1,20 @@
+# Private data
+config/private.conf.js
+
+# Dynamic data
+data/
+dist/
+node_modules/
+
+# Logs
+npm-debug.log*
+
+# Lock files / thumbnails / other OS leftovers
+!.gitkeep
+~$*
+.~lock.*
+.DS_Store
+.idea
+*.swp
+tmp
+.vscode

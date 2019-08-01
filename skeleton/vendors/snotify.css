@@ -1,0 +1,18 @@
+/* Snotify simple dialogs background is too light {{{ */
+.snotify-simple {
+	background: #eee;
+}
+/* }}} */
+
+/* Smaller snotify display area {{{ */
+.snotifyToast__inner {
+	min-height: 40px;
+	padding: 5px 40px 5px 15px;
+}
+
+.snotify-icon {
+	background-repeat: no-repeat;
+	right: -8px !important;
+	height: 80%;
+}
+/* }}} */

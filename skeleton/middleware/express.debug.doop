@@ -1,0 +1,19 @@
+<server on="middleware">
+var _ = require('lodash');
+
+/**
+* Express middleware which prints information about an incomming request
+* This is mainly used for debugging
+* @param {string} [message] Prefix message to use when debugging
+* @returns {ExpressMiddleware} An express middleware layer
+*/
+
+app.middleware.express.debug = message => {
+	return (req, res, next) => {
+		app.log(app.log.colors.bgWhite.black(message || 'Debugging middleware for endpoint'), app.log.colors.cyan(req.baseUrl));
+		app.log.dump(_.pick(req, ['body', 'params', 'query']));
+
+		return next();
+	};
+};
+</server>
