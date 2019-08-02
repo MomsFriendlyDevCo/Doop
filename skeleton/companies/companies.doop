@@ -1,6 +1,5 @@
 <schema>
 app.middleware.db.schema('companies', {
-	companyId: {type: 'oid', index: 'primary'},
 	created: {type: 'date', default: Date.now},
 	edited: {type: 'date', default: Date.now},
 	status: {type: 'string', enum: ['active', 'deleted'], default: 'active'},

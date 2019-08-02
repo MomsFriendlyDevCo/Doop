@@ -8,3 +8,5 @@ body.screen-xs th.col-date { width: 130px }
 th.col-filesize { width: 100px }
 
 th.col-button { width: 50px }
+
+th.col-verbs { width: 50px }

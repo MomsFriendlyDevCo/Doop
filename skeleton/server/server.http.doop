@@ -91,6 +91,13 @@ var express = require('express');
 var url = require('url');
 
 exports = ()=> new Promise(resolve => {
+	if (app.config.ssl.enabled && !fs.existsSync(app.config.ssl.cert)) {
+		app.log.warn('SSL enabled but cert file is missing, assuming', app.log.colors.yellow('production simulation mode'), 'without SSL');
+		app.config.ssl.enabled = false;
+		app.config.url = 'http://localhost';
+		app.config.host = 'localhost';
+	}
+
 	if (app.config.ssl.enabled) { // SSL enabled
 		if (app.config.ssl.redirect) { // If SSL enabled + redirect enabled, create basic server to redirect to HTTPS server
 			app.log.debug('server.http - use HTTP server w/ redirect to HTTPS');
@@ -107,7 +114,7 @@ exports = ()=> new Promise(resolve => {
 		app.server = https.createServer({
 			cert: fs.readFileSync(app.config.ssl.cert),
 			key: fs.readFileSync(app.config.ssl.key),
-		}, app.express).listen(app.config.ssl.port, resolve);
+		}, app.express).listen(443, resolve);
 		app.server.timeout = app.config.timeout;
 	} else {
 		app.log.debug('server.http - use basic HTTP server only');

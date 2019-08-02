@@ -14,8 +14,6 @@ var Users = app.middleware.db.schema('users', {
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
 	company: {type: 'pointer', ref: 'companies', index: true}, // FIXME: Is this used?
 	settings: {
-		termsVersion: {type: 'number', default: 0}, // The last terms and conditions version the user agreed to. If mismatch with app.config.terms.version the browser is redirected to app.config.terms.url for agreement
-		historyOrder: {type: 'string', enum: ['recentFirst', 'oldestFirst'], default: 'oldestFirst'},
 	},
 	permissions: {
 		debug: {type: 'boolean', default: false},

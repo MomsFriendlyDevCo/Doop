@@ -1,0 +1,26 @@
+{
+	"companies": [
+		{
+			"_ref": "companies.acme",
+			"name": "ACME INC"
+		},
+		{
+			"name": "The SCP Foundation"
+		},
+		{
+			"name": "Stark Enterprises"
+		},
+		{
+			"name": "LexCorp"
+		},
+		{
+			"name": "The Michael Scott Paper Company"
+		},
+		{
+			"name": "Monsters, Inc."
+		},
+		{
+			"name": "Duff Brewing"
+		}
+	]
+}
