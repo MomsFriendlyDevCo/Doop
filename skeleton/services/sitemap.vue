@@ -28,6 +28,7 @@ module.exports = function() {
 			show: ()=> Vue.services().$session.data.permissions.debug,
 			children: [
 				{title: 'Config', href: '/debug/config'},
+				{title: 'Drag / Drop', href: '/debug/dragDrop'},
 				{title: 'Git', href: '/debug/git'},
 				{title: 'HTTP', href: '/debug/http'},
 				{title: 'Loader', href: '/debug/loader'},
