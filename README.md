@@ -224,8 +224,8 @@ Syntax highlighting for Visual Studio
 -------------------------------------
 
 1. Install Visual Studio Code
-2. Install the `Vetur` plugin
-3. Go to the Vetur config page and click `Veteur > Grammar > Custom Blocks` ("Edit in settings.json")
+2. Press `Ctrl + Shift + X` to view extensions and install the `Vetur` plugin
+3. Go to the Vetur config page and click `Vetur > Grammar > Custom Blocks` ("Edit in settings.json")
 4. Paste the following into the `settings.json` file that opens:
 
 ```json
