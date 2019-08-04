@@ -220,6 +220,39 @@ Differences from standard Vue
 * Watching a group of local properties (but only firing *once*) is available via `vm.$watchAll(props[], callback, options)`
 
 
+Syntax highlighting for Visual Studio
+-------------------------------------
+
+1. Install Visual Studio Code
+2. Install the `Vetur` plugin
+3. Go to the Vetur config page and click `Veteur > Grammar > Custom Blocks` ("Edit in settings.json")
+4. Paste the following into the `settings.json` file that opens:
+
+```json
+{
+    "files.associations": {
+        "*.doop": "vue"
+    },
+    "vetur.grammar.customBlocks": {
+        "endpoint": "js",
+        "component": "js",
+        "directive": "js",
+        "filter": "js",
+        "macgyver": "js",
+        "schema": "js",
+        "server": "js",
+        "service": "js"
+    },
+    "vetur.format.options.useTabs": true,
+    "editor.insertSpaces": false,
+    "vetur.format.options.tabSize": 4
+}
+```
+
+5. Press `Ctrl + Shift + P` then select `Vetur: Generate Grammar from ...`
+6. Reload VSCode
+
+
 Importing front-end resources
 -----------------------------
 There are three major methods to import external resources into a Doop frontend project:
