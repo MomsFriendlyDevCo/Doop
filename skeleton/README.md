@@ -3,6 +3,8 @@ HOW TO CLONE THIS REPO
 
 * Grep for and correct all matches of `FIXME`
 * Delete this note from the top of the README.md file
+* Place your logos in `assets/logo`
+* Generate Favicons using https://realfavicongenerator.net into `assets/favicons`
 
 
 
