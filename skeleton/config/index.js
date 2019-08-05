@@ -33,14 +33,14 @@ if (/-e\s*([a-z0-9\-\.]+)/i.test(process.argv.slice(1).join(' '))) { // exec wit
 
 module.exports = {
 	isProduction: false, // Master `is this production mode` switch - disables debugging and various other speed tweaks when enabled
-	name: '{{FIXME:name}', // Short project name, must be unique on the system
-	title: "{{FIXME:title}}",
+	name: '{{FIXME:name}}', // Short project name, must be unique on the system
+	title: '{{FIXME:title}}',
 	env: env,
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
 	url: 'http://localhost',
 	apiUrl: config => config.url,
-	secret: '{{FIXME}}', // Used as Cookie spice, a quick way to populate this is with `cat /dev/urandom | base64 | head -n10`
+	secret: '{{FIXME}}', // Used as Cookie spice, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
 	access: {
 		lockdown: false, // Set to true to lock the site with the below users
 		users: [
@@ -137,16 +137,14 @@ module.exports = {
 	papertrail: {
 		enabled: false,
 		level: 'info',
-		host: 'logs5.papertrailapp.com',
-		port: 22012,
+		host: '{{FIXME:papertailHost}}',
+		port: 666,
 		hostname: '{{FIXME:papertrailUrl}}',
 		program: '',
 	},
 	paths: {
 		data: path.normalize(`${__dirname}/../data`),
 		dist: path.normalize(`${__dirname}/../dist`),
-		files: path.normalize(`${__dirname}/../data/files`),
-		signatures: path.normalize(`${__dirname}/../data/signatures`),
 		root: path.normalize(`${__dirname}/..`),
 	},
 	sentry: {
@@ -185,11 +183,6 @@ module.exports = {
 		port: 443,
 		cert: undefined, // Path to fullchain.pem
 		key: undefined, // Path to privkey.pem
-	},
-	terms: {
-		enabled: true, // Force the user to agree to terms before allowing access to the main UI
-		version: 1,
-		url: '/terms', // Redirect to here if the $session.data.settings.termsVersion mismatches
 	},
 	theme: {},
 };
