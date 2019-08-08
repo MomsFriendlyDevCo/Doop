@@ -2,6 +2,7 @@
 * Tasks to populate db with specific scenario data - either default or test scenarios
 */
 
+var eval = require('gulp-eval');
 var gulp = require('gulp');
 var monoxide = require('monoxide');
 var scenario = require('gulp-mongoose-scenario');
@@ -19,10 +20,11 @@ gulp.task('scenario', ['load:app.db'], ()=> {
 	if (app.config.env == 'production') throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export SCENARIO=FORCE`');
 
 	return gulp.src([
-		`${app.config.paths.root}/**/*.scenario.json`,
+		`${app.config.paths.root}/**/*.scenario.{js,json}`,
 		'!dist/**/*',
 		'!node_modules/**/*',
 	])
+		.pipe(eval())
 		.pipe(scenario({
 			nuke: true,
 			connection: monoxide.connection,
