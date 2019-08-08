@@ -2,15 +2,20 @@
 /**
 * Display a directory layout
 * This can also optionally take a path within the sitemap to auto-populate children
+*
+* If manually specifying the `root` each item should conform to `{id, href, title, [icon="fas fa-folder"], [transition="slide-right"]}`
+*
 * @param {boolean} [sitemap=true] Indicates that the child contents should be pulled from the sitemap
 * @param {array <Object>} [root] Root node to display, if `sitemap` is true this defaults to what the sitemap provides, otherwise specify it in here
 *
-* @example Display a simple directory view based on the sitemap
-* <component>
+* @example Display a simple directory view based on the sitemap (component only)
 * module.exports = {
 *   route: '/debug',
 *   template: '<directory/>',
 * };
+
+* @example Display a simple directory view based on the sitemap (template only)
+* <directory :root="{children: widgets}"/>
 */
 module.exports = {
 	data() { return {
@@ -39,7 +44,7 @@ module.exports = {
 
 <template>
 	<div v-if="node" class="directory row">
-		<a v-for="node in node.children" :key="node.id" class="col-sm-6 col-md-3" v-href="{url: node.href, transition: 'slide-right'}">
+		<a v-for="node in node.children" :key="node.id" class="col-sm-6 col-md-3" v-href="{url: node.href, transition: node.transition || 'slide-right'}">
 			<div class="card-box clearfix directory-item">
 				<div class="directory-icon float-left">
 					<i :class="(node.icon || 'fas fa-folder') + ' fa-3x m-2'"/>
