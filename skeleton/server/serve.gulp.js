@@ -47,12 +47,12 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 					serverProcess = spawn('node', [`${app.config.paths.root}/server/index.js`], {stdio: 'inherit'});
 					serverProcess.on('close', code => {
 						if (isRestarting) {
-							console.log('Close but restarting', code);
+							console.log('Server closed but is restarting', code);
 							return;
 						}
 						console.log('Process exited with code', code);
 						serverProcess = null;
-						setTimeout(bootServerProcess);
+						setTimeout(bootServerProcess, 1000);
 					});
 				});
 
@@ -79,6 +79,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		// Backend rebuild (server process restart) {{{
 		watch([
 			'**/*.doop',
+			'config/**/*',
 			'server/index.js',
 			'layouts/**/*.html',
 		], {
