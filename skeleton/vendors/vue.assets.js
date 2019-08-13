@@ -65,7 +65,10 @@ Vue.assets = {
 			...options,
 		};
 
-		var context = {...Vue.assets.$assets.services};
+		var context = {
+			_id: id,
+			...Vue.assets.$assets.services,
+		};
 
 		// Register global holder
 		if (settings.singleton && settings.defer) {
