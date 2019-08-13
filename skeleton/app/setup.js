@@ -8,6 +8,7 @@ var _ = require('lodash');
 var debug = require('debug')('doop');
 var eventer = require('@momsfriendlydevco/eventer');
 var fspath = require('path');
+var glob = require('globby');
 var importSCF = require('gulp-block-head').import;
 var fspath = require('path');
 var vm = require('vm');
@@ -85,10 +86,11 @@ module.exports = ()=>
 		// }}}
 		// Slurp .doop files + process {{{
 		.then(()=> debug('Process Doop files'))
-		.then(()=> importSCF([
-			`${app.config.paths.root}/**/*.doop`,
-			`!${app.config.paths.root}/node_modules`,
-		], {
+		.then(()=> glob([
+			`**/*.doop`,
+			...app.config.paths.ignore,
+		]))
+		.then(files => importSCF(files, {
 			blocks: {
 				endpoint: {transform},
 				server: {transform},

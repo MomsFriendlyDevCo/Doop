@@ -27,11 +27,10 @@ var vendorBuilder = (section = 'main') => {
 				if (section != 'main') return resolve([]); // Don't import for non-core modules
 				var paths = [];
 
-				gulp.src([
+				gulp.src(glob.sync([
 					'**/*.vue',
-					'!dist/**/*',
-					'!node_modules/**/*',
-				])
+					...app.config.paths.ignore,
+				]))
 					.pipe(blockHead({
 						blocks: {
 							import: content => content.split('\n').map(_.trim).forEach(path => paths.push(path)),

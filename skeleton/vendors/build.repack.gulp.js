@@ -5,6 +5,7 @@
 */
 var _ = require('lodash');
 var blockHead = require('gulp-block-head');
+var glob = require('globby');
 var gulp = require('gulp');
 var fs = require('fs');
 var fspath = require('path');
@@ -19,11 +20,10 @@ gulp.task('build.repack', ['load:app'], ()=>
 			var changedFileCount = 0;
 			var waitingOn = [];
 
-			gulp.src([
+			gulp.src(glob.sync([
 				'**/*.vue',
-				'!dist/**/*',
-				'!node_modules/**/*',
-			])
+				...app.config.paths.ignore,
+			]))
 			.pipe(blockHead({
 				blocks: {
 					script(content, path, block) {

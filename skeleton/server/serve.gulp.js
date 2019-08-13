@@ -68,7 +68,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 			'**/*.vue',
 			'vendors/vue.*.js',
 		], {
-			ignored: ['dist/**/*', 'fonts*/**/*', 'node_modules/**/*'],
+			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
 		}).on('all', file => {
 			gulp.log('Rebuild Vue files...');
@@ -82,7 +82,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 			'server/index.js',
 			'layouts/**/*.html',
 		], {
-			ignored: ['build/**/*', 'node_modules/**/*'],
+			ignored: ['build/**/*', 'data/**/*', 'dist/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
 		}).on('all', (e, path) => {
 			gulp.log('Rebuild backend hook / layout / path files...');

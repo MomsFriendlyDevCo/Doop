@@ -101,7 +101,7 @@ module.exports = function() {
 
 		$sitemap.selected.node = $sitemap.selected.path && $sitemap.selected.path.length ? _.last($sitemap.selected.path) : undefined;
 
-		$sitemap.setPageTitle();
+		$sitemap.updatePageTitle();
 	}));
 	// }}}
 
@@ -141,13 +141,36 @@ module.exports = function() {
 	// }}}
 
 	// Allow downstream pages to set their own meta information {{{
+	/**
+	* Override the computed breadcrumb trail
+	* Nodes should be root -> current (i.e. current node is last)
+	* Each node must conform to `{title, href}`
+	* @param {array <Object>} breadcrumbs Breadcrumbs to set
+	*/
+	$sitemap.setBreadcrumbs = breadcrumbs => {
+		$sitemap.selected = {
+			node: _.last(breadcrumbs),
+			path: breadcrumbs,
+		};
+		$sitemap.updatePageTitle();
+	};
+
+
+	/**
+	* Override the title of the current node
+	* @param {string} title The alternate title to display
+	*/
 	$sitemap.setTitle = title => {
 		if (!$sitemap.selected.node) throw new Error('Attempt to use $sitemap.setTitle on a page where no current node can be determined');
 		$sitemap.selected.node.title = title;
-		$sitemap.setPageTitle();
+		$sitemap.updatePageTitle();
 	};
 
-	$sitemap.setPageTitle = ()=> {
+
+	/**
+	* Reload the current breadcrumb title + window title
+	*/
+	$sitemap.updatePageTitle = ()=> {
 		if ($sitemap.selected.path.length) {
 			document.title = [{title: Vue.services().$config.title}] // Append site title
 				.concat($sitemap.selected.path) // Append rest of path
@@ -177,7 +200,7 @@ module.exports = {
 <template name="sitemap-breadcrumbs">
 	<div class="row">
 		<!-- Only show breadcrumb area if we have a valid node AND not mobile -->
-		<div v-if="$sitemap.selected.node" class="col-sm-12">
+		<div v-if="$sitemap.selected.node" class="col-sm-12 title-breadcrumbs">
 			<div class="page-title-box">
 				<h4 class="page-title">
 					{{$sitemap.selected.node.titleLong || $sitemap.selected.node.title}}
@@ -201,6 +224,10 @@ module.exports = {
 </template>
 
 <style name="sitemap-breadcrumbs">
+.title-breadcrumbs {
+	z-index: 100;
+}
+
 .page-title-box .breadcrumb-item {
 	color: var(--main);
 }
