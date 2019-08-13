@@ -1,6 +1,7 @@
 <service singleton>
 module.exports = function() {
 	var $sitemap = this;
+	$sitemap.$debugging = false;
 
 	// Raw sitemap (uncomputed) {{{
 	$sitemap.map = [
@@ -53,6 +54,7 @@ module.exports = function() {
 	$sitemap.refresh = (force = false) => {
 		if (!force && $sitemap.refreshing) return $sitemap.refreshing;
 
+		$sitemap.$debug('Refresh');
 		return $sitemap.refreshing = Promise.resolve()
 			.then(()=> this.$session.promise()) // Ensure the user profile pull has completed first
 			.then(()=> $sitemap.resolveTree($sitemap.map))
@@ -61,12 +63,17 @@ module.exports = function() {
 			.catch(e => {
 				if (e.errno && e.errno == 403) return; // Ignore 403's - user not logged in yet
 				this.$toast.catch(e);
-			});
+			})
+			.finally(()=> $sitemap.$debug('Final sitemap', $sitemap.computed))
 	};
 
 	app.ready.then(()=> { // Make sitemap refresh when the user profile changes
 		app.vue.$on('$session.update', ()=> $sitemap.refresh(force = true));
 		app.vue.$on('$session.permissions', ()=> $sitemap.refresh(force = true));
+		app.vue.$on('$session.settled', ()=> {
+			this.$debug('Notified that session has settled');
+			this.$sitemap.refresh(force = true);
+		});
 	});
 
 	/**
@@ -279,7 +286,7 @@ module.exports = {
 		},
 	},
 	created() {
-		this.$on('$sitemap.update', this.refresh); // This also covers $session.update upstream
+		this.$on('$sitemap.update', this.refresh);
 		this.$watch('$route', this.refresh);
 		this.$on('$screen.resize', this.resize);
 	},

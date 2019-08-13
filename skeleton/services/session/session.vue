@@ -6,6 +6,7 @@
 */
 module.exports = function() {
 	var $session = this;
+	$session.$debugging = false;
 
 	$session.data = {permissions: {}}; // User session data
 	$session.isRefreshed = false; // Have we pinged the server yet
@@ -51,15 +52,15 @@ module.exports = function() {
 		*/
 		run(stage) {
 			if ($session.stage >= 3) {
-				console.log('$session.run REPLACE', $session.stage, 'with', stage, '($session has already settled)');
+				$session.$debug('run() REPLACE', $session.stage, 'with', stage, '($session has already settled)');
 				$session.stagePromise = Promise.defer();
 			} else {
-				console.log('$session.run REVERT', $session.stage, 'to', stage);
+				$session.$debug('run() REVERT', $session.stage, 'to', stage);
 			}
 
 			$session.stage = stage - 1;
 			$session.stages.next();
-			$session.stagePromise.promise.finally(()=> console.log('[$session]', 'FINALLY!', $session.data));
+			$session.stagePromise.promise.finally(()=> $session.$debug('FINALLY!', $session.data));
 			return $session.stagePromise.promise;
 		},
 
@@ -70,7 +71,7 @@ module.exports = function() {
 		* @returns {Promise} A promise representing the stage load chain
 		*/
 		next() {
-			console.log('[$session]', 'At stage', $session.stage + 1);
+			$session.$debug('At stage', $session.stage + 1);
 			return app.vue.$emitPromise('$session.stageChange', ++$session.stage)
 				.then(()=> {
 					switch ($session.stage) {
@@ -94,7 +95,7 @@ module.exports = function() {
 		*/
 		bootstrap() {
 			return Promise.resolve()
-				.then(()=> console.log('[$session]', 'stage', 'bootstrap'))
+				.then(()=> $session.$debug('stage', 'bootstrap'))
 				.then(()=> { // Load auth header token if we're in authHeader session preference mode
 					if (!$session.isRefreshed && Vue.services().$config.session.preference == 'authHeader') { // Pull header from localStorage as we're not using cookies
 						return $session.settings.get('authToken').then(token => {
@@ -122,13 +123,13 @@ module.exports = function() {
 			};
 
 			return Promise.resolve()
-				.then(()=> console.log('[$session]', 'stage', 'preBootData'))
+				.then(()=> $session.$debug('stage', 'preBootData'))
 				.then(()=> app.vue.$emitPromise('$session.preBootData'))
 				.then(()=> app.vue.$emitPromise('$session.request', requestPrototype))
 				.then(req => req || requestPrototype) // Did the promise do a complete rewrite or should we use the original?
 				.then(req => Vue.services().$http(req))
 				.then(res => {
-					console.log('[$session]', '$session.data now', JSON.parse(JSON.stringify(res.data)));
+					$session.$debug('$session.data now', JSON.parse(JSON.stringify(res.data)));
 					if (res.data._id) {
 						$session.data = Vue.prototype.$assign($session.data, {permissions: {}}, res.data)
 						$session.isLoggedIn = true;
@@ -147,7 +148,7 @@ module.exports = function() {
 		*/
 		postBootData() {
 			return Promise.resolve()
-				.then(()=> console.log('[$session]', 'stage', 'postBootData'))
+				.then(()=> $session.$debug('stage', 'postBootData'))
 				.then(()=> app.vue.$emitPromise('$session.postBootData', $session.data))
 				.then(()=> $session.stages.next())
 		},
@@ -160,7 +161,7 @@ module.exports = function() {
 		*/
 		settled() {
 			return Promise.resolve()
-				.then(()=> console.log('[$session]', 'stage', 'settled'))
+				.then(()=> $session.$debug('stage', 'settled'))
 				.then(()=> app.vue.$emitPromise('$session.settled', $session.data))
 				.then(()=> $session.isSettled = true)
 				.then(()=> {
@@ -194,7 +195,7 @@ module.exports = function() {
 					if (cb) cb();
 				}));
 			} else {
-				console.log('$session.promise not ready yet');
+				$session.$debug('$session.promise not ready yet');
 				setTimeout(checkPromise, 10);
 			}
 		};
@@ -228,7 +229,7 @@ module.exports = function() {
 			}
 		})
 		.then(()=> $session.stages.run(1)) // Reperform the session fetcher
-		.then(()=> console.log('login done'))
+		.then(()=> $session.$debug('login done'))
 		.finally(()=> this.$loader.stop('$session.login'))
 
 
