@@ -11,6 +11,12 @@ window.app = {
 	ready: new Promise(resolve => setTimeout(()=> {
 		window.app.readyResolve = resolve;
 	})),
+	crash: (msg = 'An unknown error has occured', showReload = true) => {
+		console.log('%capp.crash()', 'color: red; font-weight: bold', {msg, showReload});
+		$('.splash .splash-crash-reload').toggle(showReload);
+		$('.splash .splash-crash-text').text(msg);
+		$('.splash-crash').css('display', 'flex');
+	},
 };
 
 if (app.isCordova) console.log('[core]', 'Running in Cordova mode');

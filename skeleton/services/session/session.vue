@@ -138,6 +138,19 @@ module.exports = function() {
 					}
 				})
 				.then(()=> $session.stage == 1 ? $session.stages.next() : $session.stages.run(2)) // Decide whether to run from this stage or advance based on if we're already past this step
+				.catch(err => {
+					if (
+						(!err.response || !err.response.status)
+						&& err == 'Network error'
+						&& !$session.isRefreshed
+					) {
+						$session.$debug('Network error during preBootData on first fetch');
+						app.crash('Can\'t connect to the SiteMobi servers', showReload=true);
+					} else {
+						$session.$debug('Caught error during preBootData', e);
+						throw e;
+					}
+				})
 		},
 
 
