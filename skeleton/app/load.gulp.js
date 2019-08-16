@@ -7,6 +7,5 @@ var gulp = require('gulp');
 */
 gulp.task.once('load:app', ()=> {
 	require('../app');
-	gulp.log('Using application env', gulp.colors.cyan(app.config.env));
 	return app.setup();
 });
