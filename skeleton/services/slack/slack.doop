@@ -1,0 +1,27 @@
+<server on="init, dbInit, load:slack">
+var SlackClient = require('@slack/web-api').WebClient;
+
+app.slack = {};
+
+/**
+* Post a message on slack
+* @param {Object} msg The message to post
+* @param {string} msg.token The token to use to connect to Slack
+* @param {string} msg.channel The channel name (usually has a leading '#')
+* @param {string} msg.username The username the message should come from (no leading '@')
+* @param {string} msg.body The message body to actually post
+* @returns {Promise} A promise representing the message post
+*/
+app.slack.post = msg => {
+	['token', 'channel', 'username', 'body'].forEach(f => { if (!msg[f]) throw new Error(`The field ${f} must be specified when calling app.slack.post()`) });
+
+	var client = new SlackClient(msg.token);
+
+	return client.chat.postMessage({
+		channel: msg.channel,
+		text: msg.body,
+		username: msg.username,
+		as_user: true,
+	});
+};
+</server>
