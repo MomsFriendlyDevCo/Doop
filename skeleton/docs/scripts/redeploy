@@ -1,0 +1,45 @@
+#!/bin/bash
+# Re-Deploy the Sitemobi server
+# Usage: ~/redeploy [--skip-build]
+#
+# --skip-build      Do not pull from git / rebuild gulp, just restart the process
+
+# Stop on errors
+set -euo pipefail
+
+if [ -d /root/doop.mfdc.dev ]; then
+	echo "Performing DEV redeployment"
+	cd /root/doop.mfdc.dev
+else
+	echo "Unknown server profile"
+	exit
+fi
+
+if [ "${1:-0}" == "--skip-build" ]; then
+	echo "Skipping Git + Gulp"
+else
+	echo "Pre-deploying via Gulp..."
+	gulp preDeploy
+
+	echo "Pulling latest Git repo..."
+	git pull
+
+	echo "Installing NPM packages..."
+	npm ci
+
+	echo "Building via Gulp..."
+	gulp build
+
+	echo "post-deploying via Gulp..."
+	gulp postDeploy
+fi
+
+if [[ `pm2 show sitemobi >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
+	echo "Starting PM2 process for the first time..."
+	pm2 start --name doop server
+else
+	echo "Rebooting PM2 process..."
+	pm2 restart doop
+fi
+
+echo "done."
