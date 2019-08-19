@@ -8,14 +8,14 @@ var monoxide = require('monoxide');
 var scenario = require('gulp-mongoose-scenario');
 var runSequence = require('run-sequence');
 
-gulp.task('db', ['scenario']);
+gulp.task('db', 'scenario');
 
 
 /**
 * Setup the local Mongo DB with all the files located in ./*.json
 * NOTE: To prevent cached data screwing with state, this task will also clear the cache
 */
-gulp.task('scenario', ['load:app.db'], ()=> {
+gulp.task('scenario', 'load:app.db', ()=> {
 	if (process.env.SCENARIO && process.env.SCENARIO == 'FORCE') return;
 	if (app.config.env == 'production') throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export SCENARIO=FORCE`');
 

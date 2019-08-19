@@ -3,7 +3,7 @@ var replace = require('gulp-replace');
 
 gulp.task('build.fonts', ['build.fonts.standard', 'build.fonts.fa5']);
 
-gulp.task('build.fonts.standard', ['load:app'], ()=> {
+gulp.task('build.fonts.standard', 'load:app', ()=> {
 	return; // This task is reserved for future use and currently does nothing
 
 	return gulp.src([

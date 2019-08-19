@@ -4,7 +4,7 @@ var monoxide = require('monoxide');
 
 var hasLoaded = false;
 
-gulp.task.once('load:app.db', ['load:app'], ()=>
+gulp.task.once('load:app.db', 'load:app', ()=>
 	Promise.resolve()
 		.then(()=> {
 			if (hasLoaded) throw 'SKIP';

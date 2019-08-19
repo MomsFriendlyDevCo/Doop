@@ -12,7 +12,7 @@ var fspath = require('path');
 var rollup = require('rollup');
 
 var runCount = 0;
-gulp.task('build.repack', ['load:app'], ()=>
+gulp.task('build.repack', 'load:app', ()=>
 	Promise.resolve()
 		.then(()=> runCount > 0 && fs.promises.stat('dist/vendors.repack.js').then(stat => stat.mtime).catch(()=> 0)) // Fetch last filestamp we compiled against
 		.then(lowWaterMark => new Promise((resolve, reject) => {

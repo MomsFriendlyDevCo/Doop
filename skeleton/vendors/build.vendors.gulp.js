@@ -12,8 +12,8 @@ var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 
 gulp.task('build.vendors', ['build.vendors.core', 'build.vendors.main']);
-gulp.task('build.vendors.core', ['load:app'], ()=> vendorBuilder(section = 'core'));
-gulp.task('build.vendors.main', ['load:app'], ()=> vendorBuilder(section = 'main'));
+gulp.task('build.vendors.core', 'load:app', ()=> vendorBuilder(section = 'core'));
+gulp.task('build.vendors.main', 'load:app', ()=> vendorBuilder(section = 'main'));
 
 
 var vendorBuilder = (section = 'main') => {
