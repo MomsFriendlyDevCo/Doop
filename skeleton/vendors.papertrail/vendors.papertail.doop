@@ -1,3 +1,0 @@
-<server on="init">
-exports = ()=> require('.')();
-</server>
