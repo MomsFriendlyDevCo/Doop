@@ -134,6 +134,44 @@ In addition to the regular Vue [Single-Page-Component](https://vue-loader.vuejs.
 * Services are accessible via either `vm.$service` or `Vue.services().service`
 
 
+Syntax
+======
+
+All `.vue` files are compiled via Babel and executed with the following presets:
+
+* [babel-preset-env](https://babeljs.io/docs/en/babel-preset-env)
+* [babel-plugin-proposal-optional-chaining](https://babeljs.io/docs/en/babel-plugin-proposal-optional-chaining)
+
+In essence this is really just an in-built version of the [lodash.get](https://lodash.com/docs#get) function wrapped in regular JavaScript syntax.
+
+```javascript
+// Assuming:
+var obj = {
+	foo: {
+		bar: {
+			baz: 42,
+		},
+	},
+};
+
+var baz = obj?.foo?.bar?.baz; //= 42
+var nonExistant = obj?.qux?.baz; //= undefined
+```
+
+
+* [babel-plugin-proposal-pipeline-operator](https://babeljs.io/docs/en/babel-plugin-proposal-pipeline-operator) using the [#F sharp standard](https://github.com/valtech-nyc/proposal-fsharp-pipelines)
+
+Chain multiple functions in a pipeline using something like Promise / arrow function syntax:
+
+```javascript
+var result = 'hello'
+	|> doubleSay
+	|> capitalize
+	|> x => exclaim('Howdy or', x);
+```
+
+
+
 API
 ===
 
