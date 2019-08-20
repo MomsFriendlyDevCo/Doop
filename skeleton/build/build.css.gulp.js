@@ -7,6 +7,7 @@ var cleanCSS = require('gulp-clean-css');
 var colors = require('chalk');
 var concat = require('gulp-concat');
 var fspath = require('path');
+var glob = require('globby');
 var gplumber = require('gulp-plumber');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
@@ -18,13 +19,11 @@ var sourcemaps = require('gulp-sourcemaps');
 * @return {Stream}
 */
 gulp.task('build.css', ['load:app'], ()=>
-	gulp.src([
+	gulp.src(glob.sync([
 		'**/*.css',
 		'**/*.vue',
-		'!dist/**/*',
-		'!fonts*/**/*',
-		'!node_modules/**/*',
-	])
+		...app.config.paths.ignore,
+	]))
 		.pipe(gplumber({
 			errorHandler: function(err) {
 				gutil.log(colors.red('ERROR DURING CSS BUILD'));
