@@ -28,13 +28,16 @@ module.exports = {
 		
 		switch ($el.prop('tagName')) {
 			case 'A':
-				$el
-					.off('click')
-					.on('click', e => {
+
+				if (!$el.hasClass('v-href')) {
+					$el.addClass('v-href');
+					$el[0].addEventListener('click', e => {
 						e.preventDefault();
 						app.router.go(binding.value);
-					})
-					.attr('href', url)
+					});
+				}
+
+				$el.attr('href', url)
 				break;
 			case 'TR':
 				$el.children('td').each((i, td) => {
