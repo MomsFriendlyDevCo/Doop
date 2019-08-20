@@ -251,9 +251,9 @@ module.exports = {
 	}),
 	methods: {
 		itemClick(node) {
+			// NOTE: Navigation is handled by v-href anyway so we only need to toggle opening this node
 			this.$set(node, 'opened', !node.opened);
 			this.$set(node, 'selected', false);
-			if (node.href) this.$router.go(node.href);
 			if (!node.children && this.$screen.size == 'xs') this.closeSidebar();
 		},
 		refresh() {
@@ -295,15 +295,15 @@ module.exports = {
 
 <template name="sitemap-map">
 	<ul>
-		<li v-for="node in sitemapTree" :class="node.opened ? 'opened' : 'closed'">
-			<a @click="itemClick(node)" class="waves-effect waves-primary">
+		<li v-for="node in sitemapTree" :class="[node.opened ? 'opened' : 'closed', node.selected && 'active']">
+			<a @click="itemClick(node)" v-href="node.href" class="waves-effect waves-primary">
 				<i :class="node.icon"></i>
 				<span> {{node.title}} </span>
 				<span v-if="node.children" class="menu-arrow"/>
 			</a>
 			<ul v-if="node.children" class="list-unstyled">
-				<li v-for="node in node.children">
-					<a @click="itemClick(node)">{{node.title}}</a>
+				<li v-for="node in node.children" :class="node.selected && 'active'">
+					<a @click="itemClick(node)" v-href="node.href" class="waves-effect waves-primary">{{node.title}}</a>
 				</li>
 			</ul>
 		</li>
@@ -331,5 +331,19 @@ module.exports = {
 
 .side-menu .opened .menu-arrow {
 	transform: rotate(90deg);
+}
+
+.side-menu li > a {
+	border: 0 !important;
+}
+
+.side-menu li.active > a {
+	background: var(--main);
+}
+
+.side-menu li.active > a,
+.side-menu li.active > a > span,
+.side-menu li.active > a > i {
+	color: var(--white) !important;
 }
 </style>
