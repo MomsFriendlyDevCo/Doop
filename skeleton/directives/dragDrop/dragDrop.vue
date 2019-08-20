@@ -61,7 +61,7 @@ module.exports = function() {
 
 
 	$dragDrop.mouseMove = e =>
-		$dragDrop.droppableEl.offset({left: e.clientX - 20, top: e.clientY - 20});
+		$dragDrop.droppableEl.offset({left: e.pageX - 20, top: e.pageY - 20});
 
 
 	return $dragDrop;
