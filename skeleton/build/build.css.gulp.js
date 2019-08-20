@@ -22,6 +22,8 @@ gulp.task('build.css', ['load:app'], ()=>
 	gulp.src(glob.sync([
 		'**/*.css',
 		'**/*.vue',
+		'!fonts',
+		'!fonts.fa5',
 		...app.config.paths.ignore,
 	]))
 		.pipe(gplumber({
