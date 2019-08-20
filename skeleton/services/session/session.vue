@@ -260,8 +260,10 @@ module.exports = function() {
 		.finally(()=> this.$loader.stop('$session.logout'))
 
 
+	// $session.permissions - mirror or app.utils.permissions {{{
 	/**
 	* User permissions handling
+	* NOTE: This is a front-end mirror of the app.utils.permissions library and should be kept up to date
 	* @var {Object}
 	*/
 	$session.permissions = {};
@@ -270,11 +272,13 @@ module.exports = function() {
 	/**
 	* Query whether a user has a given or array of permissions
 	* @param {string|array <string>} permission Single or multiple permissions to check, if an array all must be present
+	* @param {Object} [from=$session.data.permissions] Where to look for permissions
 	*/
-	$session.has = permission =>
-		_.isArray(permission) ? permission.every(p => _.get($session, ['data', 'permissions', p]))
-		: _.isString(permission) ? _.get($session, ['data', 'permissions', p], false)
+	$session.permissions.has = (permission, from = _.get($session, 'data.permissions')) =>
+		_.isArray(permission) ? permission.every(p => from[p])
+		: _.isString(permission) ? !! from[permission]
 		: false;
+	// }}}
 
 
 	/**

@@ -1,0 +1,21 @@
+<server on="init, dbInit">
+var _ = require('lodash');
+
+/**
+* User permissions handling
+* NOTE: This is a backend mirror of the $session.permissions library and should be kept up to date
+* @var {Object}
+*/
+app.utils.permissions = {};
+
+
+/**
+* Query whether a user has a given or array of permissions
+* @param {string|array <string>} permission Single or multiple permissions to check, if an array all must be present
+* @param {Object} [from=app.utils.permissions.data.permissions] Where to look for permissions
+*/
+app.utils.permissions.has = (permission, from = _.get(app.utils.permissions, 'data.permissions')) =>
+	_.isArray(permission) ? permission.every(p => from[p])
+	: _.isString(permission) ? !! from[permission]
+	: false;
+</server>
