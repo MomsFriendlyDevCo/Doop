@@ -43,7 +43,7 @@ module.exports = {
 				<div class="form-group row">
 					<label class="col-4 col-form-label">Name</label>
 					<div class="col-8 col-form-label">
-						<input type="text" v-model="company.name" class="form-control"/>
+						<input type="text" v-model="company.name" class="form-control" autofocus/>
 					</div>
 				</div>
 				<div class="form-group row">

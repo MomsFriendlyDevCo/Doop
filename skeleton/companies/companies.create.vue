@@ -6,7 +6,7 @@ module.exports = {
 		return Promise.resolve()
 			.then(()=> this.$loader.start('companiesCreate'))
 			.then(()=> this.$http.post('/api/companies'))
-			.then(res => this.$router.go(`/companies/${res.data.companyId}`))
+			.then(res => this.$router.go(`/companies/${res.data._id}`))
 			.catch(this.$toast.catch)
 			.finally(()=> this.$loader.stop('companiesCreate'))
 	},

@@ -19,7 +19,7 @@ module.exports = {
 				}))
 				.then(res => this.companies = res.data.map(company => ({
 					...company,
-					url: `/companies/${company.companyId}`,
+					url: `/companies/${company._id}`,
 				})))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop('companies'))
