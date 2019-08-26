@@ -7,6 +7,7 @@
 * @param {string|function <Promise>} [path] Path to save to, can be absolute, relative (in which case it is assumed to be relative to app.config.paths.data) or a promise which resolves to absolute / relative
 * @param {Object} [options] Options to pass to the middleware
 * @param {string|function} [options.path] Alternative way to pass the path
+* @param {string} [options.urlRoot="/attachments"] Prefixing URL to prepend to each files URL
 * @param {string} [options.glob="*"] Glob within the directory to limit files to
 * @param {Object} [options.multer] Options to limit the multer instance to when accepting uploads
 * @param {function} [options.filename] How to name a file which has no 'originalname' property, defaults to Date.now() + some entropy
@@ -20,6 +21,7 @@
 * @example Set up file ReST server with full upload, download, query, delete support
 * app.all('/api/widgets/:id/files/:file?', app.middleware.express.attachments({
 *   path: req => `widgets/${req.params.id}`, // Store in data/widgets/123/
+*   urlRoot: req => '/api/widgets/{req.params.id}', // How the URL should be computed per-file
 *   upload: true,
 *   download: true,
 *   query: true,
@@ -64,6 +66,7 @@ app.middleware.express.attachments = (path, options) => {
 		download: true,
 		delete: false,
 		query: true,
+		urlRoot: '/attachments',
 	});
 	// }}}
 
@@ -87,10 +90,12 @@ app.middleware.express.attachments = (path, options) => {
 					glob(fspath.join(path, settings.glob), {stats: true})
 						.then(files => files.map(file => ({
 							name: fspath.basename(file.path),
-							url: `/attachments/${fspath.basename(file.path)}`,
-							size: settings.stats.size ? file.size : undefined,
+							url: _.isString(options.urlRoot)
+								? `${options.urlRoot}/${fspath.basename(file.path)}`
+								: `${options.urlRoot(req)}/${fspath.basename(file.path)}`,
+							size: settings.stats.size ? file.stats.size : undefined,
 							icon: settings.stats.icon ? faIcons(file.path, {class: 'far'}) : undefined,
-							created: settings.stats.created ? file.ctime : undefined,
+							created: settings.stats.created ? file.stats.ctime : undefined,
 						})))
 						.then(files => res.send(files))
 						.catch(e => res.sendError(e))

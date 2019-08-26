@@ -27,7 +27,8 @@ app.all('/api/debug/http/500', app.middleware.express.isProduction(false), funct
 * Dummy file area
 */
 app.all('/api/debug/files/:file?', app.middleware.express.isProduction(false), app.middleware.express.attachments({
-	path: 'data/debug',
+	path: `${app.config.paths.data}/debug`,
+	urlRoot: '/api/debug/files',
 	upload: true,
 	download: true,
 	query: true,
