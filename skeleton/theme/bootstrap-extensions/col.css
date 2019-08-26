@@ -10,3 +10,15 @@ th.col-filesize { width: 100px }
 th.col-button { width: 50px }
 
 th.col-verbs { width: 50px }
+
+/* Hide first children of anything marked as col-hover until the mouse is over it (useful for dangerous verbs like Delete) {{{ */
+th.col-hover > *,
+td.col-hover > * {
+	visibility: hidden;
+}
+
+tr:hover th.col-hover > *,
+tr:hover td.col-hover > * {
+	visibility: visible;
+}
+/* }}} */
