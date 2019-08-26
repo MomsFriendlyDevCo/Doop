@@ -18,7 +18,19 @@ app.all('/api/debug/http/403', function(req, res) {
 /**
 * Test response with a 500 response code throwing an intentional error
 */
-app.all('/api/debug/http/500', function(req, res) {
+app.all('/api/debug/http/500', app.middleware.express.isProduction(false), function(req, res) {
 	throw new Error('Intentional test error');
 });
+
+
+/**
+* Dummy file area
+*/
+app.all('/api/debug/files/:file?', app.middleware.express.isProduction(false), app.middleware.express.attachments({
+	path: 'data/debug',
+	upload: true,
+	download: true,
+	query: true,
+	delete: true,
+}));
 </endpoint>
