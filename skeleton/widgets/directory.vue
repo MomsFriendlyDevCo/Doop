@@ -63,6 +63,10 @@ module.exports = {
 	align-items: center;
 }
 
+.directory .directory-item:hover {
+	color: var(--main);
+}
+
 .directory .directory-icon {
 	margin-right: 10px;
 }
