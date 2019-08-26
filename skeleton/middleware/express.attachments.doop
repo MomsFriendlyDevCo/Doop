@@ -18,7 +18,7 @@
 * @returns {ExpressMiddleware} An express middleware layer
 *
 * @example Set up file ReST server with full upload, download, query, delete support
-* app.all('/api/widgets/:id/* /:file?', {
+* app.all('/api/widgets/:id/files/:file?', app.middleware.express.attachments({
 *   path: req => `widgets/${req.params.id}`, // Store in data/widgets/123/
 *   upload: true,
 *   download: true,
@@ -82,7 +82,7 @@ app.middleware.express.attachments = (path, options) => {
 				} else if (settings.delete && req.method == 'DELETE' && req.params[settings.param]) { // Delete file
 					fs.promises.unlink(fspath.join(path, req.params[settings.param]))
 						.then(()=> res.sendStatus(200))
-						.catch(e => res.status(400).send(e))
+						.catch(e => res.sendError(e))
 				} else if (settings.query && req.method == 'GET') { // List files
 					glob(fspath.join(path, settings.glob), {stats: true})
 						.then(files => files.map(file => ({
@@ -93,18 +93,19 @@ app.middleware.express.attachments = (path, options) => {
 							created: settings.stats.created ? file.ctime : undefined,
 						})))
 						.then(files => res.send(files))
-						.catch(e => res.status(400).send(e))
+						.catch(e => res.sendError(e))
 				} else if (settings.upload && req.method == 'POST') { // Upload a new file
 					return multerInstance(req, res, ()=> {
+						if (!req.files || !req.files.length) return res.sendError(400, 'No files provided during upload');
 						fs.promises.mkdir(path, {recursive: true})
 							.then(()=> Promise.all(req.files.map(file => // Move buffered file to correct location
 								fs.promises.rename(file.path, fspath.join(path, '/', file.originalname ? fspath.basename(file.originalname) : settings.filename(file)))
 							)))
 							.then(()=> res.sendStatus(200))
-							.catch(e => res.status(400).send(e))
+							.catch(e => res.sendError(e))
 					});
 				} else {
-					res.sendStatus(404);
+					res.sendError(404);
 				}
 			})
 };

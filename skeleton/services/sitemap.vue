@@ -30,6 +30,7 @@ module.exports = function() {
 			children: [
 				{title: 'Config', href: '/debug/config'},
 				{title: 'Drag / Drop', href: '/debug/dragDrop'},
+				{title: 'Files', href: '/debug/files'},
 				{title: 'Git', href: '/debug/git'},
 				{title: 'HTTP', href: '/debug/http'},
 				{title: 'Loader', href: '/debug/loader'},
