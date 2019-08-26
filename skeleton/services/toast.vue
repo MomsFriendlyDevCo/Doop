@@ -58,7 +58,7 @@ module.exports = function() {
 						closeOnClick: false,
 						icon: false,
 						html: ''
-							+ `<h4 id="toast-text-${id}">${text}</h4>`
+							+ `<h4 id="toast-text-${id}">${text || ''}</h4>`
 							+ '<div class="col-12">'
 								+ '<div class="progress m-b-0">'
 									+`<div id="toast-progress-${id}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${progress || 0}%"></div>`
