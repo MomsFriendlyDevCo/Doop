@@ -1,5 +1,6 @@
 # Private data
 config/private.conf.js
+.o
 
 # Dynamic data
 data/
