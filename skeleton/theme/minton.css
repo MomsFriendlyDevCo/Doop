@@ -221,6 +221,7 @@ body.fixed-left .side-menu.left {
 .content-page {
   margin-left: 240px;
   overflow: hidden;
+  min-height: 100vh;
 }
 
 .content-page > .content {
@@ -884,7 +885,6 @@ a:hover, a:active, a:focus {
 }
 
 #wrapper {
-  height: 100%;
   overflow: hidden;
   width: 100%;
 }
