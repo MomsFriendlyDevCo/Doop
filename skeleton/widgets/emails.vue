@@ -8,6 +8,7 @@
 * @param {string} [labelField="name"] The display field of a selected user
 * @param {string} [emailField="email"] The email field of the user
 * @param {string} [placeholder="Enter email addresses or pick a user..."]
+* @param {string} [digestUrl="/api/users"] Where to pull the user list from (default is composed of the url + selection of idField, labelField, emailField)
 * @emits change Event emitted as `newValue` whenever the user changes anything, value is an collection with each item conforming to {user,email}
 * @emits change-emails Event emitted as  `newValue` whenever the user changes anything, value is a simple array of email addresses
 *
@@ -25,6 +26,7 @@ module.exports = {
 		labelField: {type: String, default: 'name'},
 		emailField: {type: String, default: 'email'},
 		placeholder: {type: String, default: 'Enter email addresses or pick a user...'},
+		userUrl: {type: String, default() { return `/api/users?select=${this.$props.idField},${this.$props.labelField},${this.$props.emailField}` }},
 	},
 	computed: {
 		selectedItems() {
@@ -73,7 +75,7 @@ module.exports = {
 		refresh() {
 			return Promise.resolve()
 				.then(()=> this.$loader.startBackground())
-				.then(()=> this.$digest.get(`/api/users?select=${this.$props.idField},${this.$props.labelField},${this.$props.emailField}`))
+				.then(()=> this.$digest.get(this.$props.userUrl))
 				.then(res => this.options = res.data.map(u => ({
 					id: u[this.$props.idField],
 					label: u[this.$props.labelField],

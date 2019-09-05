@@ -21,7 +21,7 @@
 * @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into this.$toast.catch
 *
 * @example Fetch a specific URL and extract a key
-* <digest url="/api/some/url" key="widgets"></digest>
+* <digest url="/api/some/url" key="widgets"/>
 *
 * @example Force all child digests to be invalid
 * this.$emit.down('digest.force.valid', false)
