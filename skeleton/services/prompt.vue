@@ -1,6 +1,7 @@
 <service singleton>
 module.exports = function() {
 	var $prompt = this;
+	$prompt.$debugging = false;
 
 	// $prompt.modal() {{{
 	/**
@@ -121,8 +122,8 @@ module.exports = function() {
 	* This is usually a 1:1 mapping for the dialog options
 	* @see dialog()
 	* @var {Object}
-	* @param {Promise} $defer The promise object for the current dialog
-	* @param {string} $defer.state Tracking of the promise status. ENUM: 'pending', 'resolved', 'rejected'
+	* @param {Promise} defer The promise object for the current dialog
+	* @param {string} defer.state Tracking of the promise status. ENUM: 'pending', 'resolved', 'rejected'
 	* @param {Object} $body The $sce compiled version of the dialog body if isHtml is truthy
 	* @param {Object} $bodyHeader The $sce compiled version of bodyHeader
 	* @param {Object} $bodyFooter The $sce compiled version of bodyFooter
@@ -166,14 +167,15 @@ module.exports = function() {
 	$prompt.dialog = options => {
 		// If we're already showing a dialog - defer showing the next dialog until this one has finished {{{
 		if ($prompt.$settings) {
-			options.$defer = Promise.defer();
+			$prompt.$debug('Dialog already present, adding to queue', {current: $prompt.$settings, new: options});
+			options.defer = Promise.defer();
 			$prompt.$dialogQueue.push(options)
-			return options.$defer.promise;
+			return options.defer.promise;
 		}
 		// }}}
 
 		// Setup defaults {{{
-		var settings = {
+		var settings = $prompt.$settings = {
 			title: 'Dialog',
 			body: 'Body text',
 			isHtml: false,
@@ -193,25 +195,25 @@ module.exports = function() {
 				}],
 				right: [],
 			},
-			$defer: Promise.defer(),
+			defer: Promise.defer(),
 			...options,
 		};
 		// }}}
 
 		// Attach to promise to add a status property {{{
-		settings.$defer.state = 'pending';
-		settings.$defer.promise.then(
-			()=> settings.$defer.state = 'resolved',
-			()=> settings.$defer.state = 'rejected'
+		settings.defer.state = 'pending';
+		settings.defer.promise.then(
+			()=> settings.defer.state = 'resolved',
+			()=> settings.defer.state = 'rejected'
 		);
 		// }}}
 
 		// Setup dialogClose {{{
 		if (!settings.$dialogClose) {
 			if (_.isUndefined(settings.dialogClose) || settings.dialogClose == 'resolve') {
-				settings.$dialogClose = ()=> settings.$defer.resolve();
+				settings.$dialogClose = ()=> settings.defer.resolve();
 			} else if (settings.dialogClose == 'reject') {
-				settings.$dialogClose = ()=> settings.$defer.reject();
+				settings.$dialogClose = ()=> settings.defer.reject();
 			}
 		}
 		// }}}
@@ -223,14 +225,10 @@ module.exports = function() {
 			settings.buttons[align] = settings.buttons[align].map(b => {
 				if (!b.click) b.click = ()=> { // Compute a click event from the method
 					if (_.isUndefined(b.method) || b.method == 'resolve') {
-						settings.$defer.resolve(b.id);
-						$prompt.close(true);
+						$prompt.close(true, b.id);
 					} else if (b.method == 'reject') {
-						settings.$defer.reject(b.id);
-						$prompt.close(false);
+						$prompt.close(false, b.id);
 					}
-
-					$prompt.close();
 				};
 
 				if (!b.class) {
@@ -252,7 +250,7 @@ module.exports = function() {
 		this.$emit.broadcast('$prompt.open', settings);
 		// }}}
 
-		return settings.$defer.promise;
+		return settings.defer.promise;
 	};
 
 
@@ -261,12 +259,24 @@ module.exports = function() {
 	* This may trigger another dialog to open if one is queued
 	* NOTE: This does not resolve the dialog promise
 	* @param {boolean} [ok=false] Whether the dialog contents we're accepted - this is used to determine whether resolve/reject should be called on close
+	* @param {*} [payload] Payload to pass to resolve / reject handlers
 	* @emits $prompt.close Message to the promptHelper that it should close the dialog
 	*/
-	$prompt.close = ok => {
-		if ($prompt.$settings && $prompt.$settings.$dialogClose) $prompt.$settings.$dialogClose();
-		$prompt.$settings = undefined;
-		this.$emit.broadcast('$prompt.close', ok);
+	$prompt.close = (ok = false, payload) => {
+		if (!$prompt.$settings) {
+			$prompt.$debug('Closing already closed modal - assuming internal recursion and ignoring');
+			return;
+		}
+
+		$prompt.$debug('Close modal', {status: ok ? 'resolve' : 'reject', payload});
+
+		$prompt.$settings.defer[ok ? 'resolve' : 'reject'](payload);
+
+		// Force a specific modal handle to close
+		if ($prompt.$settings.element) $prompt.$settings.element.modal('hide');
+
+		// Close standard (handled) modals
+		this.$emit.broadcast('$prompt.close', !!ok);
 	};
 
 
@@ -274,19 +284,13 @@ module.exports = function() {
 	* Shorthand function to resolve the current prompt and close the dialog
 	* @param {*} [value] Optional payload to pass as a resolved value
 	*/
-	$prompt.resolve = value => {
-		$prompt.$settings.$defer.resolve(value);
-		$prompt.close();
-	};
+	$prompt.resolve = value => $prompt.close(true, value);
 
 	/**
 	* Shorthand function to reject the current prompt and close the dialog
 	* @param {*} [value] Optional payload to pass as a rejected value
 	*/
-	$prompt.reject = value => {
-		$prompt.$settings.$defer.reject(value);
-		$prompt.close();
-	};
+	$prompt.reject = value => $prompt.close(false, value);
 	// }}}
 
 	// Basic messaging - $prompt.alert(), $prompt.confirm() {{{
@@ -363,8 +367,8 @@ module.exports = {
 	methods: {
 		testPrompt(method, ...args) {
 			this.$prompt[method](...args)
-				.then(res => console.log(`$prompt.${method} response =`, res))
-				.catch(res => console.log(`$prompt.${method} REJECTION =`, res))
+				.then(res => console.log(`$prompt.${method}`, {status: 'resolve', payload: res}))
+				.catch(res => console.log(`$prompt.${method}`, {status: 'reject', payload: res}))
 		},
 	},
 };
@@ -397,19 +401,19 @@ module.exports = {
 	</div>
 </template>
 
-<component name="prompt-injector">
+<component name="promptInjector">
 module.exports = {
 	data: ()=> ({
 		isShowing: false,
 	}),
 	created() {
 		this.$on('$prompt.open', settings => this.openModal(settings));
-		this.$on('$prompt.close', ok => this.closeModal(ok));
+		this.$on('$prompt.close', ()=> this.closeModal());
 	},
 	methods: {
 		openModal(settings) {
 			this.isShowing = true;
-			this.$prompt.$settings = settings;
+			this.$set(this.$prompt, '$settings', settings);
 
 			this.$prompt.modal({
 				element: '#modal-_prompt',
@@ -421,21 +425,22 @@ module.exports = {
 				onHide: ()=> {
 					if (settings.onHide) settings.onHide();
 
-					if (settings.$defer.state == 'pending') { // Promise not yet resolved - yet we are closing, user probably pressed escape or clicked the background
+					if (settings.defer.state == 'pending') { // Promise not yet resolved - yet we are closing, user probably pressed escape or clicked the background
 						this.$prompt.close();
 					}
 				},
 			})
 		},
-		closeModal(ok) {
+		closeModal() {
 			this.isShowing = false;
+			this.$set(this.$prompt, '$settings', undefined);
 			$('#modal-_prompt').modal('hide');
 		},
 	},
 };
 </component>
 
-<template name="prompt-injector">
+<template name="promptInjector">
 	<div>
 		<div id="modal-_prompt" class="modal">
 			<div v-if="isShowing" class="modal-dialog" :class="$prompt.$settings.modalClass">
@@ -500,6 +505,6 @@ module.exports = {
 }
 
 .modal-backdrop.show {
-	opacity: 0.6 !important;
+	opacity: 0.333 !important;
 }
 </style>
