@@ -10,7 +10,7 @@ module.exports = {
 	methods: {
 		refresh() {
 			return Promise.resolve()
-				.then(()=> this.$loader.start('companies', !this.companies))
+				.then(()=> this.$loader.start(!this.companies))
 				.then(()=> this.$http.get('/api/companies', {
 					params: {
 						...this.query,
@@ -22,7 +22,7 @@ module.exports = {
 					url: `/companies/${company._id}`,
 				})))
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('companies'))
+				.finally(()=> this.$loader.stop())
 		},
 	},
 	created() {

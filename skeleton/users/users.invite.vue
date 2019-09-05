@@ -12,21 +12,21 @@ module.exports = {
 	methods: {
 		refresh() {
 			return Promise.resolve()
-				.then(()=> this.$loader.start('usersInvite'))
+				.then(()=> this.$loader.start())
 				.then(res => this.spec = res.data)
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('usersInvite'))
+				.finally(()=> this.$loader.stop())
 		},
 		submit() {
 			return Promise.resolve()
-				.then(()=> this.$loader.start('usersInvite'))
+				.then(()=> this.$loader.start())
 				.then(()=> this.$http.post('/api/users/invite', {
 					...this.user,
 				}))
 				.then(()=> this.$toast.success(`An invite has been sent to ${this.user.name || this.user.email}`))
 				.then(res => this.$router.go(`/users`))
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('usersInvite'))
+				.finally(()=> this.$loader.stop())
 		},
 	},
 	created() {

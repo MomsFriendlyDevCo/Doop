@@ -8,7 +8,7 @@ module.exports = {
 	methods: {
 		refresh() {
 			return Promise.resolve()
-				.then(()=> this.$loader.startBackground('dashboard'))
+				.then(()=> this.$loader.startBackground())
 				.then(()=> Promise.all([
 					this.$session.data.permissions.companiesEdit
 						? this.$http.get('/api/companies/count?status=active')
@@ -20,7 +20,7 @@ module.exports = {
 						: null,
 				]))
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('dashboard'))
+				.finally(()=> this.$loader.stop())
 		},
 	},
 	beforeRouteEnter(to, from, next) { // Ensure we know who the user is before we can load

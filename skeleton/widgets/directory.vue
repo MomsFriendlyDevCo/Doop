@@ -27,7 +27,7 @@ module.exports = {
 	},
 	created() {
 		Promise.resolve()
-			.then(()=> this.$loader.start('directory'))
+			.then(()=> this.$loader.start())
 			.then(()=> {
 				if (this.$props.sitemap) {
 					return this.$sitemap.promise()
@@ -36,7 +36,7 @@ module.exports = {
 					this.$set(this, 'node', this.$props.root);
 				}
 			})
-			.finally(()=> this.$loader.stop('directory'))
+			.finally(()=> this.$loader.stop())
 			.catch(this.$toast.catch)
 	},
 };

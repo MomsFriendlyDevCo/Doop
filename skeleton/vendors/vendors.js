@@ -6,7 +6,7 @@ module.exports = {
 		// Core vendor dependencies - these should be as minimal as possible
 		// Injected as a <script/> at the start of the <head/>
 		'node_modules/@momsfriendlydevco/loader/dist/loader.{js,css}',
-		'vendors/mfdc-loader.css',
+		'services/loader/loader.css',
 	],
 	main: [
 		// Main vendor dependencies - these include pretty much everything else below-the-fold

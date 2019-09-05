@@ -51,7 +51,7 @@ module.exports = {
 
 			return Promise.resolve()
 				.then(()=> this.isLoading = true)
-				.then(()=> this.$loader.startBackground('promptList'))
+				.then(()=> this.$loader.startBackground())
 				.then(()=> console.log('$prompt req fields', this.$prompt.$settings.field))
 				.then(()=> this.$http.get(this.$prompt.$settings.url, {
 					params: {
@@ -71,7 +71,7 @@ module.exports = {
 				}))
 				.then(res => this.list = res.data)
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('promptList'))
+				.finally(()=> this.$loader.stop())
 				.finally(()=> this.isLoading = false)
 		},
 		select(item) {

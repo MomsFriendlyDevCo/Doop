@@ -259,7 +259,7 @@ module.exports = {
 		},
 		refresh() {
 			Promise.resolve()
-				.then(()=> this.$loader.start(this._uid))
+				.then(()=> this.$loader.start())
 				.then(()=> this.$sitemap.promise())
 				.then(tree => {
 					this.sitemapTree = tree;
@@ -276,7 +276,7 @@ module.exports = {
 							return node;
 						})
 				})
-				.finally(()=> this.$loader.stop(this._uid))
+				.finally(()=> this.$loader.stop())
 		},
 		closeSidebar() {
 			$('#wrapper').addClass('enlarged');

@@ -7,21 +7,21 @@ module.exports = {
 	methods: {
 		refresh() {
 			return Promise.resolve()
-				.then(()=> this.$loader.start('companiesEdit'))
+				.then(()=> this.$loader.start())
 				.then(()=> this.$http.get(`/api/companies/${this.$route.params.id}`))
 				.then(res => this.company = res.data)
 				.then(()=> this.$sitemap.setTitle(this.company.name))
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('companiesEdit'))
+				.finally(()=> this.$loader.stop())
 		},
 		save(notification = false, redirect = false) {
 			return Promise.resolve()
-				.then(()=> this.$loader.startBackground('companiesEditSave'))
+				.then(()=> this.$loader.startBackground())
 				.then(()=> this.$http.post(`/api/companies/${this.$route.params.id}`, this.company))
 				.then(()=> notification && this.$toast.success('Company edits saved'))
 				.then(()=> redirect && this.$router.push('/companies'))
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop('companiesEditSave'))
+				.finally(()=> this.$loader.stop())
 		},
 	},
 	created() {

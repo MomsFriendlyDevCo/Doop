@@ -72,14 +72,14 @@ module.exports = {
 		},
 		refresh() {
 			return Promise.resolve()
-				.then(()=> this.$loader.startBackground('emailsList'))
+				.then(()=> this.$loader.startBackground())
 				.then(()=> this.$digest.get(`/api/users?select=${this.$props.idField},${this.$props.labelField},${this.$props.emailField}`))
 				.then(res => this.options = res.data.map(u => ({
 					id: u[this.$props.idField],
 					label: u[this.$props.labelField],
 					email: u[this.$props.emailField],
 				})))
-				.finally(()=> this.$loader.stop('emailsList'))
+				.finally(()=> this.$loader.stop())
 		},
 		lazyRefresh() {
 			if (!this.options) return this.refresh();

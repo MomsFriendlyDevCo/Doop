@@ -10,10 +10,10 @@ module.exports = {
 	methods: {
 		refresh() {
 			Promise.resolve()
-				.then(()=> this.$loader.start('git'))
+				.then(()=> this.$loader.start())
 				.then(()=> this.$http.get('/api/git/history'))
 				.then(res => this.history = res.data.map(h => _.set(h, 'href', `${this.$config.git.url}/commit/${h.hash}`)))
-				.finally(()=> this.$loader.stop('git'))
+				.finally(()=> this.$loader.stop())
 				.catch(this.$toast.catch)
 		},
 	},

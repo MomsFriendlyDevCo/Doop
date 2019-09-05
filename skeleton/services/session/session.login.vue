@@ -11,7 +11,7 @@ module.exports = {
 	methods: {
 		login() {
 			return Promise.resolve()
-				.then(()=> this.$loader.start('login'))
+				.then(()=> this.$loader.start())
 				.then(()=> this.$session.login({
 					email: this.user.email,
 					password: this.user.password,
@@ -20,7 +20,7 @@ module.exports = {
 				.then(()=> this.$router.go('/'))
 				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))
 				.catch(()=> this.hasError = true)
-				.finally(()=> this.$loader.stop('login'))
+				.finally(()=> this.$loader.stop())
 		},
 	},
 
