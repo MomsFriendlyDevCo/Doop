@@ -1,3 +1,10 @@
+<service>
+/**
+* Stub of basic Loader for dumber loaders like the Vue.services() set rather than components (which is handled below via mixin)
+*/
+module.exports = Loader;
+</service>
+
 <script>
 /**
 * The loader is really just a wrapper for @momsfriendlydevco/loader

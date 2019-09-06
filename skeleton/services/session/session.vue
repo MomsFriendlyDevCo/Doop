@@ -233,7 +233,7 @@ module.exports = function() {
 	* @return {Promise} The promise object for the server request
 	*/
 	$session.login = user => Promise.resolve()
-		.then(()=> this.$loader.start('$session.login'))
+		.then(()=> Vue.services().$loader.start('$session.login'))
 		.then(()=> Vue.services().$http.post('/api/session/login', user))
 		.then(res => { // Use authHeader method?
 			if (Vue.services().$config.session.preference == 'authHeader' && res.data && res.data.auth) {
@@ -243,7 +243,7 @@ module.exports = function() {
 		})
 		.then(()=> $session.stages.run(1)) // Reperform the session fetcher
 		.then(()=> $session.$debug('login done'))
-		.finally(()=> this.$loader.stop('$session.login'))
+		.finally(()=> Vue.services().$loader.stop('$session.login'))
 
 
 	/**
@@ -252,12 +252,12 @@ module.exports = function() {
 	* @emits $session.reset Emitted when the session is nullified
 	*/
 	$session.logout = ()=> Promise.resolve()
-		.then(()=> this.$loader.start('$session.logout'))
+		.then(()=> Vue.services().$loader.start('$session.logout'))
 		.then(()=> app.vue.$emitPromise('$session.reset'))
 		.then(()=> this.$config.session.preference == 'authHeader' && $session.settings.unset('authToken'))
 		.then(()=> this.$http.post('/api/session/logout'))
 		.then(()=> window.location.reload())
-		.finally(()=> this.$loader.stop('$session.logout'))
+		.finally(()=> Vue.services().$loader.stop('$session.logout'))
 
 
 	// $session.permissions - mirror or app.utils.permissions {{{
