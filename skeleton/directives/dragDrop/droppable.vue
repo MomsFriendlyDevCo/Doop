@@ -6,6 +6,8 @@
 * @param {string} [droppable.tag='droppable'] The tag to accept for this element
 * @param {function} [droppable.handler] Function to call as ($dragDrop.data.data) when the user drops a valid item onto this droppable area
 * @param {function} [droppable.handlerInvalid] Function to call as when the user attempted to drop the element on an invalid drop area
+*
+* NOTE: When an item is being dragged over (and its valid) the class `droppable-hover` is applied
 */
 module.exports = {
 	bind(el, binding) {
@@ -15,7 +17,10 @@ module.exports = {
 		$el
 			.addClass('droppable')
 			.on('mouseenter', e => {
-				if ($dragDrop.isDragging) $el.addClass('droppable-hover');
+				if ($dragDrop.isDragging && $dragDrop.data && $dragDrop.data.tag == binding.value.tag) {
+					console.log('Add drop target', $el);
+					$el.addClass('droppable-hover');
+				}
 			})
 			.on('mouseleave', e => {
 				$el.removeClass('droppable-hover');
@@ -23,7 +28,7 @@ module.exports = {
 			.on('mouseup', e => {
 				if (!$dragDrop.isDragging) return; // User did mouse up when not dragging anything
 
-				if ($dragDrop.data.tag != binding.value.tag) { // Invalid drop
+				if ($dragDrop.data && $dragDrop.data.tag != binding.value.tag) { // Invalid drop
 					if (binding.value.handlerInvalid) binding.value.handlerInvalid();
 					$dragDrop.cancel(); // Dropped onto invalid drop area tag
 				} else { // Valid drop

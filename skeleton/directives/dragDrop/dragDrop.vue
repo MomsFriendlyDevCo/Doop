@@ -35,7 +35,8 @@ module.exports = function() {
 			.on('mousemove', $dragDrop.mouseMove)
 			.on('mouseup', ()=> setTimeout($dragDrop.cancel, 100)); // Give the droppable area time to accept the drop before cancelling it
 
-		$('body').addClass('dragging');
+		if ($dragDrop.data && $dragDrop.data.tag)
+			$('body').addClass(['dragging', `dragging-${$dragDrop.data.tag}`]);
 
 		$dragDrop.isDragging = true;
 	};
@@ -56,7 +57,10 @@ module.exports = function() {
 			.off('mousemove', $dragDrop.mouseMove)
 			.off('mouseup', $dragDrop.cancel);
 
-		$('body').removeClass('dragging');
+		if ($dragDrop.data && $dragDrop.data.tag)
+			$('body').removeClass(['dragging', `dragging-${$dragDrop.data.tag}`])
+
+		Vue.set($dragDrop, 'data', undefined);
 	};
 
 
