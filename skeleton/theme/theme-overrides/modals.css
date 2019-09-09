@@ -20,3 +20,8 @@
 	color: var(--white);
 	opacity: 1;
 }
+
+/* Footers should be better spaced */
+.modal .modal-dialog .modal-footer {
+	justify-content: space-between;
+}

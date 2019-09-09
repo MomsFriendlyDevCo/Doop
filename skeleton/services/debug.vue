@@ -1,6 +1,6 @@
 <service singleton>
 /**
-* Simple binding to selectively output information from a componet should its debugging setting be enabled
+* Simple binding to selectively output information from a component should its debugging setting be enabled
 * @param {*} msg... Messages to output
 */
 module.exports = function() {
