@@ -1,6 +1,6 @@
 <component>
 module.exports = {
 	route: '/debug',
-	template: '<directory path="/debug"/>',
+	template: '<directory :sitemap="true"/>',
 };
 </component>
