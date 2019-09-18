@@ -13,8 +13,6 @@ Vue.prototype.$assign = function(target, ...payload) {
 	if (!payload.length && typeof target == 'object') [target, payload] = [this, [target]];
 	// }}}
 
-	console.log('ASSIGN INTO', target, payload);
-
 	payload.forEach(pl => {
 		Object.keys(pl).forEach(k => {
 			Vue.set(target, k, pl[k]);

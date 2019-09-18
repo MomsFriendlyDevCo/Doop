@@ -32,7 +32,7 @@
 * <div class="form-group row">
 *   <label class="col-4 col-form-label">Allow upload</label>
 *   <div class="col-8 col-form-label">
-*     <toggle-button v-model="attachments.allowUpload"/>
+*     <toggle-button v-model="someValue"/>
 *   </div>
 * </div>
 */

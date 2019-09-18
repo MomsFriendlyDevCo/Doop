@@ -394,6 +394,7 @@ module.exports = {
 				<a class="list-group-item" @click="testPrompt('modal', '#modal-test')">vm.$prompt.modal("#modal-test")</a>
 				<a class="list-group-item" @click="testPrompt('alert', 'Hello World')">vm.$prompt.alert("Hello World")</a>
 				<a class="list-group-item" @click="testPrompt('confirm', {content: 'This is a question'})">vm.$prompt.confirm({content: "This is a question"})</a>
+				<a class="list-group-item" @click="testPrompt('input', {title: 'What is your name?'})">vm.$prompt.input({title: 'What is your name?'})</a>
 				<a class="list-group-item" @click="testPrompt('list', {list: [{_id: 1, title: 'Foo'}, {_id: 2, title: 'Bar'}, {_id: 3, title: 'Baz'}]})">vm.$prompt.list({list: [...]})</a>
 				<a class="list-group-item" @click="testPrompt('list', {url: '/api/users', field: 'name'})">vm.$prompt.list({url: '/api/users'})</a>
 			</div>

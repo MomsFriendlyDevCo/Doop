@@ -16,13 +16,12 @@ module.exports = function() {
 			title: undefined,
 			template: data =>
 				'<div class="droppable btn btn-primary">'
-					+ '<i class="far fa-arrows"></i>'
+					+ `<i class="${data.icon || 'far fa-arrows'}"></i>`
 					+ data.title
 				+ '</div>',
 			...data,
 		};
 
-		console.log('dragData', $dragDrop.data.data);
 		$dragDrop.droppableEl = $(
 			_.isString($dragDrop.data.template)
 				? $dragDrop.data.template
@@ -41,17 +40,14 @@ module.exports = function() {
 		$dragDrop.isDragging = true;
 	};
 
-
 	$dragDrop.cancel = ()=> $dragDrop.stop(false);
 	$dragDrop.accept = ()=> $dragDrop.stop(true);
-
 
 	$dragDrop.stop = (accept = false) => {
 		if (!$dragDrop.isDragging) return;
 
 		$dragDrop.droppableEl.remove();
 		$dragDrop.isDragging = false;
-		Vue.set($dragDrop, 'data', undefined);
 
 		$(document)
 			.off('mousemove', $dragDrop.mouseMove)
@@ -63,10 +59,8 @@ module.exports = function() {
 		Vue.set($dragDrop, 'data', undefined);
 	};
 
-
 	$dragDrop.mouseMove = e =>
 		$dragDrop.droppableEl.offset({left: e.pageX - 20, top: e.pageY - 20});
-
 
 	return $dragDrop;
 };

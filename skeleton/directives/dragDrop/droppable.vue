@@ -3,7 +3,7 @@
 * Indicate that an element can accept any element of a valid tag
 * Any draggable element is droppable onto a corresponding v-droppable directive
 * @param {object} droppable Droppable options
-* @param {string} [droppable.tag='droppable'] The tag to accept for this element
+* @param {string|array} [droppable.tag='droppable'] The tag or array of tags to accept for this element
 * @param {function} [droppable.handler] Function to call as ($dragDrop.data.data) when the user drops a valid item onto this droppable area
 * @param {function} [droppable.handlerInvalid] Function to call as when the user attempted to drop the element on an invalid drop area
 *
@@ -17,8 +17,14 @@ module.exports = {
 		$el
 			.addClass('droppable')
 			.on('mouseenter', e => {
-				if ($dragDrop.isDragging && $dragDrop.data && $dragDrop.data.tag == binding.value.tag) {
-					console.log('Add drop target', $el);
+				if (
+					$dragDrop.isDragging
+					&& $dragDrop.data
+					&& ( // Tag checking
+						(!binding.value.tag) // No tag
+						|| _.castArray($dragDrop.data.tag).some(t => t == $dragDrop.data.tag) // At least one tag matches
+					)
+				) {
 					$el.addClass('droppable-hover');
 				}
 			})
@@ -26,14 +32,22 @@ module.exports = {
 				$el.removeClass('droppable-hover');
 			})
 			.on('mouseup', e => {
+				$el.removeClass('droppable-hover');
 				if (!$dragDrop.isDragging) return; // User did mouse up when not dragging anything
 
-				if ($dragDrop.data && $dragDrop.data.tag != binding.value.tag) { // Invalid drop
+				if ( // Check drop validity
+					$dragDrop.isDragging
+					&& $dragDrop.data
+					&& ( // Tag checking
+						(!binding.value.tag) // No tag
+						|| _.castArray($dragDrop.data.tag).some(t => t == $dragDrop.data.tag) // At least one tag matches
+					)
+				) {
+					if (binding.value.handler) binding.value.handler($dragDrop.data.data);
+					$dragDrop.accept(); // Dropped onto valid drop area tag
+				} else {
 					if (binding.value.handlerInvalid) binding.value.handlerInvalid();
 					$dragDrop.cancel(); // Dropped onto invalid drop area tag
-				} else { // Valid drop
-					if (binding.value.handler) binding.value.handler($dragDrop.data.data);
-					$dragDrop.accept(); // Dropped onto invalid drop area tag
 				}
 			});
 	},

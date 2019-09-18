@@ -6,6 +6,7 @@
 * @param {string} [draggable.tag='droppable'] The tag of the droppable that can accept this object
 * @param {*} [draggable.data] Optional data payload to pass to the droppable element
 * @param {string} [draggable.title] The title to display when dragging
+* @param {string} [draggable.icon="far fa-arrows"] Default icon to use when dragging, assuming the default template
 * @param {function} [draggable.handler] Function to call as (data, $el) when dragging starts
 * @param {string|function} [draggable.template] Either a HTML template to use for the ghost dragger element or a function, called as (data) which returns the HTML. Templates always have the attributes `id=droppable` assigned automatically
 * @param {boolean|function <boolean>} [draggable.enabled] Sync function to determine if this element is draggable (only evaluated on bind at this stage)
@@ -39,7 +40,8 @@ module.exports = {
 		var $el = $(el);
 		$el
 			.addClass('draggable')
-			.on('mousedown', ()=> {
+			.on('mousedown', e => {
+				if (e.button != 0) return; // Ignore all but left mouse buttons
 				dragStartTimer = setTimeout(()=> {
 					settings.handler(binding.value, $el);
 					Vue.services().$dragDrop.start(binding.value);

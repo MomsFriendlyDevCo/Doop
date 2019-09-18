@@ -209,11 +209,11 @@ module.exports = {
 			<h2>Current page: {{offset}}</h2>
 		</div>
 		<div class="list-group">
-			<a class="list-group-item" v-href="{url: `/debug/transitions/${offset+1}`, transition: 'cover-up', force: true}">Cover up</a>
-			<a class="list-group-item" v-href="{url: `/debug/transitions/${offset+1}`, transition: 'fade', force: true}">Fade</a>
-			<a class="list-group-item" v-href="{url: `/debug/transitions/${offset+1}`, transition: 'slide-left', force: true}">Slide left</a>
-			<a class="list-group-item" v-href="{url: `/debug/transitions/${offset+1}`, transition: 'slide-right', force: true}">Slide right</a>
-			<a class="list-group-item" v-href="{url: `/debug/transitions/${offset+1}`, transition: 'slide-up', force: true}">Slide up</a>
+			<a class="list-group-item" v-href="{href: `/debug/transitions/${offset+1}`, transition: 'cover-up', force: true}">Cover up</a>
+			<a class="list-group-item" v-href="{href: `/debug/transitions/${offset+1}`, transition: 'fade', force: true}">Fade</a>
+			<a class="list-group-item" v-href="{href: `/debug/transitions/${offset+1}`, transition: 'slide-left', force: true}">Slide left</a>
+			<a class="list-group-item" v-href="{href: `/debug/transitions/${offset+1}`, transition: 'slide-right', force: true}">Slide right</a>
+			<a class="list-group-item" v-href="{href: `/debug/transitions/${offset+1}`, transition: 'slide-up', force: true}">Slide up</a>
 		</div>
 	</div>
 </template>

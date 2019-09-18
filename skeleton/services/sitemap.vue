@@ -152,8 +152,10 @@ module.exports = function() {
 	/**
 	* Override the computed breadcrumb trail
 	* Nodes should be root -> current (i.e. current node is last)
-	* Each node must conform to `{title, href}`
-	* @param {array <Object>} breadcrumbs Breadcrumbs to set
+	* Each node must conform to `{title, href, options[]?}`
+	* @param {array <Object>} breadcrumbs Breadcrumbs to set, each entity is compose of {title, href, options[]?, verb?}
+	* @param {array <Object>} [breadcrumbs.options] Additional options to display as a dropdown on each breadcrumb segment. Composed of {title, href}
+	* @param {array <Object>} [breadcrumbs.verbs] Addtional action verbs to display as buttons next to each breadcrumb segment. Composed of {title, href, class, classBreadcrumb?, classTitle?, tooltip?} - class has to also specify 'btn' classes and is used as default if title / breadcrumb is not used, tooltip overrides title if it is present
 	*/
 	$sitemap.setBreadcrumbs = breadcrumbs => {
 		$sitemap.selected = {
@@ -195,7 +197,7 @@ module.exports = function() {
 };
 </service>
 
-<component name="sitemap-breadcrumbs">
+<component name="sitemapBreadcrumbs">
 module.exports = {
 	data() {
 		return {
@@ -205,29 +207,44 @@ module.exports = {
 }
 </component>
 
-<template name="sitemap-breadcrumbs">
-	<div class="row">
-		<!-- Only show breadcrumb area if we have a valid node AND not mobile -->
-		<div v-if="$sitemap.selected.node" class="col-sm-12 title-breadcrumbs">
-			<div class="page-title-box">
-				<h4 class="page-title">
-					{{$sitemap.selected.node.titleLong || $sitemap.selected.node.title}}
-				</h4>
-				<ol class="breadcrumb float-right">
-					<li class="breadcrumb-item">
-						<a v-href="{url: '/', transition: 'slide-left'}">
-							<i class="far fa-home"/>
-						</a>
-					</li>
-					<li v-for="node in $sitemap.selected.path" class="breadcrumb-item" :class="node == $sitemap.selected.node && 'active'">
-						<a v-href="{url: node.href, transition: 'slide-left'}">
-							{{node.title}}
-						</a>
-					</li>
-				</ol>
-				<div class="clearfix"></div>
-			</div>
-		</div>
+<template name="sitemapBreadcrumbs">
+	<!-- Only show breadcrumb area if we have a valid node AND not mobile -->
+	<div v-if="$sitemap.selected.node" class="page-header">
+		<h4 class="page-title">
+			<span v-if="$sitemap.selected.node.options" class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown">{{$sitemap.selected.node.title}}</a>
+				<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+					<a v-for="option in $sitemap.selected.node.options" :key="option.title" class="dropdown-item" v-href="option.href">{{option.title}}</a>
+				</div>
+			</span>
+			<a v-else v-href="{href: $sitemap.selected.node.href, transition: 'slide-left'}">
+				{{$sitemap.selected.node.titleLong || $sitemap.selected.node.title}}
+			</a>
+			<span v-if="$sitemap.selected.node.verbs" class="btn-group">
+				<a v-for="verb in $sitemap.selected.node.verbs" :key="verb.title" :class="verb.classTitle || verb.class" v-tooltip="verb.tooltip || verb.title" v-href="{href: verb.href}"/>
+			</span>
+		</h4>
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item">
+				<a v-href="{href: '/', transition: 'slide-left'}">
+					<i class="far fa-home"/>
+				</a>
+			</li>
+			<li v-for="node in $sitemap.selected.path" class="breadcrumb-item" :class="node == $sitemap.selected.node && 'active'">
+				<span v-if="node.options" class="dropdown">
+					<a class="dropdown-toggle link" data-toggle="dropdown">{{node.title}}</a>
+					<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						<a v-for="option in node.options" :key="option.title" class="dropdown-item" v-href="option.href">{{option.title}}</a>
+					</div>
+				</span>
+				<a v-else v-href="{href: node.href, transition: 'slide-left'}">
+					{{node.title}}
+				</a>
+				<span v-if="node.verbs" class="btn-group">
+					<a v-for="verb in node.verbs" :key="verb.title" :class="verb.classBreadcrumb || verb.class" v-tooltip="verb.tooltip || verb.title" v-href="verb.href"/>
+				</span>
+			</li>
+		</ol>
 	</div>
 </template>
 
@@ -245,7 +262,7 @@ module.exports = {
 }
 </style>
 
-<component name="sitemap-map">
+<component name="sitemapMap">
 module.exports = {
 	data: ()=> ({
 		sitemapTree: [],
@@ -294,24 +311,26 @@ module.exports = {
 };
 </component>
 
-<template name="sitemap-map">
-	<ul>
-		<li v-for="node in sitemapTree" :class="[node.opened ? 'opened' : 'closed', node.selected && 'active']">
-			<a @click="itemClick(node)" v-href="node.href" class="waves-effect waves-primary">
-				<i :class="node.icon"></i>
-				<span> {{node.title}} </span>
-				<span v-if="node.children" class="menu-arrow"/>
+<template name="sitemapMap">
+	<ul class="nav flex-column flex-nowrap flex-grow-1 flex-shrink-1 overflow-auto">
+		<li class="nav-item" v-for="node in sitemapTree" :class="node.opened ? 'opened' : 'closed'">
+			<a @click="itemClick(node)" v-href="node.href" class="nav-link d-flex align-items-center flex-nowrap">
+				<i class="flex-grow-0 flex-shrink-0 mr-3" :class="node.icon"></i>
+				<span class="flex-grow-0 flex-shrink-1 overflow-hidden text-truncate">{{node.title}}</span>
+				<span v-if="node.children" class="menu-arrow flex-grow-0 flex-shrink-0 pl-2 ml-auto">
+					<i class="text-muted fas fa-fw fa-xs fa-chevron-left"></i>
+				</span>
 			</a>
-			<ul v-if="node.children" class="list-unstyled">
-				<li v-for="node in node.children" :class="node.selected && 'active'">
-					<a @click="itemClick(node)" v-href="node.href" class="waves-effect waves-primary">{{node.title}}</a>
-				</li>
-			</ul>
+			<div class="collapse" v-if="node.children">
+				<a @click="itemClick(node)" v-href="node.href" class="nav-link" v-for="node in node.children">
+					{{node.title}}
+				</a>
+			</div>
 		</li>
 	</ul>
 </template>
 
-<style name="sitemap-map">
+<style>
 #wrapper:not(.enlarged) .side-menu ul.list-unstyled {
 	display: block !important;
 	overflow: hidden;

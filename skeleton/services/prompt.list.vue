@@ -1,11 +1,12 @@
 <script>
 /**
 * Extension for $prompt that adds list selection
-* @param {array} [list] The list contents to display (specify either `list` or `url`)
-* @param {string} [url] The URL to pull the list contents from
-* @param {string} [field="title"] The field to display in the list, this can also be a CSV of fields to pull, the first is always the display and the rest are included in the data feed
-* @param {number} [limit=30] Number of records to retrieve on each page view
-* @param {string|boolean} [sort=true] Whether to sort the fields, if Boolean true the same field as `field` is used as the sort criteria
+* @param {Object} [options] Options to use when displaying the prompt
+* @param {array} [options.list] The list contents to display (specify either `list` or `url`)
+* @param {string} [options.url] The URL to pull the list contents from
+* @param {string} [options.field="title"] The field to display in the list, this can also be a CSV of fields to pull, the first is always the display and the rest are included in the data feed
+* @param {number} [options.limit=30] Number of records to retrieve on each page view
+* @param {string|boolean} [options.sort=true] Whether to sort the fields, if Boolean true the same field as `field` is used as the sort criteria
 */
 app.ready.then(()=> {
 	Vue.services().$prompt.list = options => Vue.services().$prompt.dialog({
