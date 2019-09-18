@@ -19,36 +19,45 @@
 */
 module.exports = {
 	bind(el, binding) {
+		var settings = {
+			...(typeof binding.value == 'object' ? binding.value : null),
+			href: typeof binding.value == 'string'
+				? binding.value
+				: binding.value.href,
+		};
+
+		if (settings.url) console.warn('Do not pass `v-href="{url}"` property to v-href. Use `v-href="{href}"` instead');
+
+		if (!settings.href) return; // Nothing to bind to - URL will presumably be provided in update cycle
+
+		settings.url = settings.href; // Copy href binding for the sake of vm.$router.{push,replace}
+
 		var $el = $(el);
 
-		// Calculate the "simple" url we are redirecting to, if we have one
-		var url = binding.value && _.isObject(binding.value) && binding.value.url && _.isString(binding.value.url) ? binding.value.url
-			: binding.value && _.isString(binding.value) ? binding.value
-			: undefined;
-		
 		switch ($el.prop('tagName')) {
 			case 'A':
-
 				if (!$el.hasClass('v-href')) {
 					$el.addClass('v-href');
 					$el[0].addEventListener('click', e => {
 						e.preventDefault();
-						app.router.go(binding.value);
+						app.router.go(settings.href);
 					});
 				}
 
-				$el.attr('href', url)
+				if (typeof settings.href == 'string') $el.attr('href', settings.href)
 				break;
 			case 'TR':
 				$el.children('td').each((i, td) => {
 					var $td = $(td);
 					if ($td.find('a').length) return; // Already has an <a/>
+
+					if (typeof settings.href == 'string') $td.wrapInner(`<a` + (settings.href ? ` href="${settings.href}"` : '') + '></a>')
+
 					$td
-						.wrapInner(`<a` + (url ? ` href="${url}"` : '') + '></a>')
 						.addClass('clickable')
 						.on('click', 'a', e => {
 							e.preventDefault();
-							app.router.go(binding.value);
+							app.router.go(settings.href);
 						})
 				});
 				break;
