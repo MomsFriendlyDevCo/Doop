@@ -1,7 +1,14 @@
 <service singleton>
 /**
 * Exports a helper function which provides dirty checking against an object
-* The return value is the input value wrapped in a proxy with extra methods '$isDirty' (bool), '$original' (original object), `$changed(key)` and `$diff` (object difference by key)
+*
+* The return value is the input value wrapped in a proxy with extra properties / methods:
+*
+* '$isDirty' (bool)
+* '$original' (original object)
+* `$changed(key)` (returns a boolean if the specified key has changed)
+* `$clear()` (sets the dirty bit to false, reimages the object and returns the new value. Effectively recreating the proxy)
+* `$diff` (object difference by key)
 *
 * NOTE: This function uses 'lazy' dirty checking which locks as 'dirty' on the first detected change. Changing the value BACK will not reset this
 *
@@ -9,9 +16,7 @@
 * @returns {Proxy} A proxy wrapped object suitable for dirty checking
 */
 module.exports = function() {
-	var $dirty = this;
-
-	return function(src) {
+	var $dirtyChecker = function(src) {
 		var originalDoc = _.cloneDeep(src);
 		var isDirty = false; // Dirty lock, when changed this locks in place
 
@@ -32,6 +37,12 @@ module.exports = function() {
 					return originalDoc;
 				} else if (prop == '$changed') {
 					return $changed;
+				} else if (prop == '$clear') {
+					return ()=> {
+						originalDoc = _.cloneDeep(obj);
+						isDirty = false;
+						return obj;
+					};
 				} else if (prop == '$diff') {
 					return _.pickBy(src, (v, k) => $changed(k));
 				}
@@ -41,7 +52,15 @@ module.exports = function() {
 		});
 	};
 
-	return $dirty;
+
+	/**
+	* Convenience function to wrap both Vue.set() + vm.$dirtyChecker() together
+	* @example Set and dirty check a value
+	* vm.$dirtyChecker.set(this, 'someKey', {foo: 1});
+	*/
+	$dirtyChecker.set = (target, key, src) => Vue.set(target, key, $dirtyChecker(src));
+
+	return $dirtyChecker;
 };
 </service>
 
@@ -53,12 +72,12 @@ module.exports = {
 	}},
 	methods: {
 		reset() {
-			this.$set(this, 'data', this.$dirtyChecker({
+			this.$dirtyChecker.set(this, 'data', {
 				foo: 'Foo!',
 				bar: 123,
 				baz: [1, 2, 3],
 				quz: {quz2: {quz3: [1, 2, {quz4: 5}]}},
-			}));
+			});
 		},
 		changeFoo() {
 			this.data.foo = _.sample(['foo', 'Foo', 'foo!', 'Foo!']);
@@ -109,6 +128,7 @@ module.exports = {
 					<a class="list-group-item" @click="changeBaz()">Change Baz</a>
 					<a class="list-group-item" @click="changeQuz()">Change Quz</a>
 					<a class="list-group-item" @click="changeFoo(); changeBar(); changeBaz(); changeQuz()">Change All</a>
+					<a class="list-group-item" @click="data.$clear()">Clear</a>
 					<a class="list-group-item" @click="reset()">Reset</a>
 				</div>
 			</div>
