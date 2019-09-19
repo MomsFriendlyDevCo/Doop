@@ -7,7 +7,15 @@ var gulp = require('gulp');
 
 gulp.task.once('load:app.git', 'load:app', ()=>
 	git.current()
-		.then(gitInfo => app.git = gitInfo)
+		.then(res => {
+			app.git = git;
+			app.git.current = res;
+		})
 );
 
-gulp.task('app.git', 'load:app.git', ()=> console.dump(app.git));
+gulp.task('app.git', 'load:app.git', ()=> console.dump(app.git.current));
+
+gulp.task('app.git.history', 'load:app.git', ()=>
+	app.git.history()
+		.then(v => console.dump(v))
+);

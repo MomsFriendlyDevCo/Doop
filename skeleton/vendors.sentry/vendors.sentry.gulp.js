@@ -13,14 +13,14 @@ gulp.task('deploy:sentry', ['load:app', 'load:app.git'], function(finish) {
 		// }}}
 		// Inform Sentry of the release version {{{
 		.then(function(next) {
-			gulp.log('Posting release version', gulp.colors.cyan(app.git.shortHash), 'to Sentry');
+			gulp.log('Posting release version', gulp.colors.cyan(app.git.current.shortHash), 'to Sentry');
 
 			superagent
 				.post(`https://sentry.io/api/0/organizations/${app.config.sentry.slug}/releases/`)
 				.set('Authorization', `Bearer ${app.config.sentry.token}`)
 				.type('json')
 				.send({
-					version: app.git.shortHash,
+					version: app.git.current.shortHash,
 					environment: app.config.env,
 					projects: [ app.config.name ],
 				})

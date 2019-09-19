@@ -1,15 +1,15 @@
 <server on="init">
 /**
-* Loads and provides the current git release in app.git
+* Loads the Git information service and populates `app.git.current`
 *
 * @example Access the current git shortHash
-* var hash = app.git.shortHash
+* var hash = app.git.current.shortHash
 */
 
-var git = require('.');
+app.git = require('.');
 
-exports = ()=> git.current()
-	.then(gitInfo => app.git = gitInfo)
+exports = ()=> app.git.current()
+	.then(res => app.git.current = res)
 </server>
 
 <endpoint>
