@@ -4,12 +4,18 @@
 * NOTE: Url is expected to return [{url, deleteUrl?, name, icon?, created? (parseable date string), size (bytes)}]
 * The created, icon and size columns will optionally show based on whether any item in the server response has these fields
 * If deleteUrl is omitted the source URL is used instead along with the HTTP DELETE method
+*
+* Available "view"s are:
+* 	- "table": Tabular layout with an icon, name, created date (optional availability of these fields)
+*	- "directory": Use the <directory/> widget to display invidual items
+*	- "icons": Plain, icon only view where additional data is displayed in tooltips, accepts class mutator 'attachments-sm'
+*
 * @param {string} url The backend endpoint to query for file lists and to POST to
 * @param {string} [view="table"] How to display the widget, ENUM: "table", "directory", "icons"
 * @param {boolean} [showControls=false] Whether to show, card like verbs for uploading
 * @param {boolean} [allowDelete=false] Whether to allow file deletion (backend must support DELETE method)
 * @param {boolean} [allowUpload=false] Whether to allow file uploads (backend must support POST method) - NOTE you must setup an upload button somewhere which calls `$refs.attachments.upload()`
-* @param {boolean} [allowUploadMultiple=false] Allow multiple file uploads per upload cycle
+* @param {boolean} [allowUploadMultiple=true] Allow multiple file uploads per upload cycle
 *
 * @example Attachments widget with page level upload button
 * <div class="btn-group-float">
@@ -30,7 +36,7 @@ module.exports = {
 		attachments: undefined,
 		loading: true, // Display a 'Loading' notifier, if false $loader.startBackground() is used instead to indicate action
 		loadCount: 0, // Number of times we have refreshed, used to determine whether `loading` should be set >0
-		hasStats: { // Attribuutes to show, determined when we refresh
+		hasStats: { // Attributes to show, determined when we refresh
 			created: false,
 			icon: false,
 			size: false,
@@ -118,7 +124,7 @@ module.exports = {
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="attachment in attachments" :key="attachment.url" v-href="{url: attachment.url, target: '_blank'}">
+						<tr v-for="attachment in attachments" :key="attachment.url" v-href="{href: attachment.url, target: '_blank'}">
 							<td v-if="hasStats.icon">
 								<i v-if="attachment.icon" :class="[attachment.icon, $screen.isMobile && 'fa-2x']"/>
 							</td>
@@ -168,7 +174,7 @@ module.exports = {
 				<a
 					v-for="attachment in attachments"
 					:key="attachment.url"
-					v-href="{url: attachment.url, target: '_blank'}"
+					v-href="{href: attachment.url, target: '_blank'}"
 					class="attachment-item"
 					:class="attachment.icon"
 					v-tooltip="getAttachmentTooltip(attachment)"
@@ -193,6 +199,7 @@ module.exports = {
 </template>
 
 <style>
+/* icons view {{{ */
 .attachments .attachments-view-icons .attachment-item,
 .attachments .attachments-view-icons .attachment-item-upload {
 	width: 70px;
@@ -253,4 +260,21 @@ module.exports = {
 .attachments .attachments-view-icons .attachment-item .attachment-item-btn:hover {
 	opacity: 1;
 }
+
+/* Mutator .attachments-sm {{{ */
+.attachments.attachments-sm .attachments-view-icons .attachment-item,
+.attachments.attachments-sm .attachments-view-icons .attachment-item-upload {
+	width: 30px;
+	height: 30px;
+	font-size: 20px;
+	margin: 0 1px;
+}
+
+.attachments.attachments-sm .attachments-view-icons .attachment-item .attachment-item-btn {
+	margin-top: 12px;
+	margin-left: 10px;
+	transform: scale(0.8);
+}
+/* }}} */
+/* }}} */
 </style>
