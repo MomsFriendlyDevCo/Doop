@@ -5,7 +5,7 @@
 
 var _ = require('lodash');
 var domain = require('domain');
-var gulp = require('gulp'); // Force gulpy as regular gulp is weird when forced to run tasks out-of-sequence
+var gulp = require('@momsfriendlydevco/gulpy'); // Force gulpy as regular gulp is weird when forced to run tasks out-of-sequence
 var spawn = require('child_process').spawn;
 var watch = require('chokidar').watch;
 
