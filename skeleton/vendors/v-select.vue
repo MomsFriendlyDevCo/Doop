@@ -22,7 +22,7 @@ Vue.component('v-select', VueSelect);
 }
 
 .disabled .v-select .vs__actions,
-.disabled .v-select button.close {
+.disabled .v-select button {
 	display: none;
 }
 /* }}} */
