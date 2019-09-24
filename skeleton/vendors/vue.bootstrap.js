@@ -92,7 +92,7 @@ window.onload = ()=> {
 	window.app.router._go = window.app.router.go;
 	/**
 	* Slightly smarter version of $router.push() which understands absolute URLs
-	* @param {string|number|Object} location The URL to navigate to or the number of steps forward / backward to navigate
+	* @param {string|number|Object|function} location The URL to navigate to or the number of steps forward / backward to navigate, if this is a function it is executed inline
 	* @param {string|number} [location.url] Alternate method of passing the URL to navigate to
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
@@ -103,7 +103,7 @@ window.onload = ()=> {
 			force: false,
 			transition: 'none',
 			target: undefined,
-			...(_.isObject(location) ? location : {url: location}), // Either merge location options or add in as simple URL
+			...(_.isPlainObject(location) ? location : {url: location}), // Either merge location options or add in as simple URL
 		};
 
 		Vue.services().$transitions.set(settings.transition);
@@ -112,6 +112,9 @@ window.onload = ()=> {
 			if (_.isNumber(location.url)) throw new Error('History navigation with targets is not allowed');
 			console.log(`%cNew tab/window naviation to ${settings.url}`);
 			window.open(settings.url);
+		} else if (_.isFunction(settings.url)) {
+			console.log('%cNavigate to function', settings.url);
+			settings.url();
 		} else if (_.isNumber(location.url)) {
 			console.log(`%c$route.goHistory(${settings.url})`, 'color: #00F');
 			window.app.router.routeVersion++;

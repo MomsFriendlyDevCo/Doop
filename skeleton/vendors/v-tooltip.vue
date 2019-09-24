@@ -94,7 +94,7 @@
 }
 
 .tooltip.popover .popover-arrow {
-	border-color: #f9f9f9;
+	border-color: #ccc;
 }
 
 .tooltip[aria-hidden='true'] {
