@@ -16,6 +16,7 @@
 * @param {boolean} [allowDelete=false] Whether to allow file deletion (backend must support DELETE method)
 * @param {boolean} [allowUpload=false] Whether to allow file uploads (backend must support POST method) - NOTE you must setup an upload button somewhere which calls `$refs.attachments.upload()`
 * @param {boolean} [allowUploadMultiple=true] Allow multiple file uploads per upload cycle
+* @param {string|array} [tableClass] Additonal classes to apply to the table (e.g. 'table-sm')
 *
 * @example Attachments widget with page level upload button
 * <div class="btn-group-float">
@@ -31,6 +32,7 @@ module.exports = {
 		allowDelete: {type: Boolean, default: false},
 		allowUpload: {type: Boolean, default: false},
 		allowUploadMultiple: {type: Boolean, default: true},
+		tableClass: {type: [Array, String], default: ''},
 	},
 	data() { return {
 		attachments: undefined,
@@ -113,7 +115,7 @@ module.exports = {
 		<div v-else>
 			<!-- Table view {{{ -->
 			<div v-if="$props.view == 'table'">
-				<table v-if="attachments.length" class="table table-hover">
+				<table v-if="attachments.length" class="table table-hover" :class="$props.tableClass">
 					<thead>
 						<tr>
 							<th v-if="hasStats.icon" class="col-icon">&nbsp;</th>
