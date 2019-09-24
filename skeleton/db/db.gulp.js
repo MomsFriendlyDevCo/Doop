@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var gulp = require('gulp');
+var gulp = require('@momsfriendlydevco/gulpy');
 var monoxide = require('monoxide');
 
 var hasLoaded = false;
@@ -11,11 +11,10 @@ gulp.task.once('load:app.db', 'load:app', ()=>
 		})
 		.then(()=> hasLoaded = true)
 		.then(()=> app.emit('dbInit'))
-		.then(()=> gulp.on('finish', ()=> { // Clean up the database connection when we finish
-			gulp.log('Disconnect database');
-			return monoxide.disconnect()
-				.then(()=> gulp.log('DB Disconnected'));
-		}))
+		.then(()=> gulp.on('finish', ()=> // Clean up the database connection when we finish
+			monoxide.disconnect()
+				.then(()=> gulp.log('DB Disconnected'))
+		))
 		.then(()=> app.emit('dbMiddleware'))
 		.then(()=> app.emit('preSchemas'))
 		.then(()=> app.emit('schemas'))
