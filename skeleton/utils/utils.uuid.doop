@@ -40,6 +40,20 @@ app.utils.uuid.generate = options => {
 
 
 /**
+* Same as generate() but works syncronously
+*/
+app.utils.uuid.generateSync = options => {
+	var settings = {
+		prefix: '',
+		suffix: '',
+		...options,
+	};
+
+	return settings.prefix + uuid({random: crypto.randomBytes(16)}) + settings.suffix;
+};
+
+
+/**
 * Validate a UUID string using similar options to app.utils.uuid.generate
 * @param {string} input The input UUID to examine
 * @param {Object} options Additional options to use when validating
