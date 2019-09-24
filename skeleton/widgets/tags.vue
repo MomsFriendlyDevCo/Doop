@@ -65,12 +65,18 @@ module.exports = {
 				creator: v.creator || this.$session.data._id,
 			})));
 		},
+		getTagStyle(tagStr) {
+			var foundSpec = this.spec.find(s => s.tag == tagStr);
+			if (!foundSpec) return undefined;
+			return foundSpec.color ? {background: foundSpec.color} : {};
+		},
 	},
 };
 </component>
 
 <template>
 	<v-select
+		class="tags"
 		multiple
 		:value="$props.value"
 		:options="options"
@@ -79,5 +85,27 @@ module.exports = {
 		:placeholder="$props.placeholder"
 		label="tag"
 		@input="changed"
-	/>
+	>
+		<template #selected-option-container="{option, deselect, disabled, multiple}">
+			<span class="selected-tag vs__selected" :key="option.index" :style="getTagStyle(option.tag)">
+				{{option.tag}}
+				<button v-if="multiple" :disabled="disabled" @click="deselect(option)" type="button" class="close" aria-label="Remove option">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</span>
+		</template>
+	</v-select>
 </template>
+
+<style>
+.tags .vs__selected {
+	color: #fff;
+}
+
+.tags .vs__selected .close {
+	color: #FFF;
+	font-weight: 900;
+	text-shadow: none;
+	margin-left: 5px;
+}
+</style>
