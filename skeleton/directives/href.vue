@@ -40,7 +40,7 @@ module.exports = {
 					$el.addClass('v-href');
 					$el[0].addEventListener('click', e => {
 						e.preventDefault();
-						app.router.go(settings.href);
+						app.router.go(settings);
 					});
 				}
 
@@ -57,7 +57,7 @@ module.exports = {
 						.addClass('clickable')
 						.on('click', 'a', e => {
 							e.preventDefault();
-							app.router.go(settings.href);
+							app.router.go(settings);
 						})
 				});
 				break;
