@@ -19,6 +19,7 @@ var siftSieve = require('@momsfriendlydevco/sift-sieve');
 * @param {boolean} [options.download=true] Whether to allow file downloads
 * @param {boolean} [options.delete=false] Whether to allow file deletion
 * @param {boolean} [options.query=true] Whether to allow file querying, listing files along with their stats
+* @param {boolean} [options.count=true] Whether to allow file counting
 * @param {boolean} [options.metaData=false] Also store meta data about each file in `.basename.meta.json`
 * @param {boolean} [options.metaDataOnQuery=true] Return all meta data within each query, if this is disabled options.sift will not work on meta data
 * @param {function} [options.metaFields] Function, called as `(req, file)` which returns the meta object to store
@@ -74,6 +75,7 @@ app.middleware.express.attachments = (path, options) => {
 		download: true,
 		delete: false,
 		query: true,
+		count: true,
 		urlRoot: '/attachments',
 
 		metaData: false,
@@ -93,6 +95,13 @@ app.middleware.express.attachments = (path, options) => {
 			})
 			.then(path => fspath.isAbsolute(path) ? path : fspath.join(app.config.paths.data, path)) // Make relative paths absolute
 			.then(path => { // Handle middleware
+				var doCount = false; // Used by the query system to only return a count of matching objects
+
+				if (settings.count && req.method == 'GET' && req.params[settings.param] && req.params[settings.param] == 'count') { // Count files
+					doCount = true;
+					delete req.params[settings.param]; // Delete param, causing this hit to be counted as a query method
+				}
+					
 				if (settings.download && req.method == 'GET' && req.params[settings.param]) { // Serve file
 					res.sendFile(fspath.join(path, req.params[settings.param]));
 				} else if (settings.delete && req.method == 'DELETE' && req.params[settings.param]) { // Delete file
@@ -128,7 +137,7 @@ app.middleware.express.attachments = (path, options) => {
 								.then(data => data.reduce((t, v) => ({...t, ...v}), {})) // Combine all data objects
 						)))
 						.then(files => settings.sift ? siftSieve(files, req.query) : files)
-						.then(files => res.send(files))
+						.then(files => res.send(doCount ? {count: files.length} : files))
 						.catch(e => res.sendError(e))
 				} else if (settings.upload && req.method == 'POST') { // Upload a new file
 					return multerInstance(req, res, ()=> {
