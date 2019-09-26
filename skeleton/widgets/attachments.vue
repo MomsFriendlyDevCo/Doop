@@ -107,7 +107,7 @@ module.exports = {
 </component>
 
 <template>
-	<div class="attachments">
+	<div class="attachments" :class="!attachments || !attachments.length ? 'empty' : ''">
 		<div v-if="loading">
 			<i class="fa fa-spinner fa-spin"/>
 			Loading attachments...
@@ -185,7 +185,7 @@ module.exports = {
 				</a>
 				<a
 					v-if="showControls"
-					@click="upload()"
+					@click.stop="upload()"
 					class="attachment-item-upload fas fa-plus"
 					v-tooltip="'Upload a new file'"
 				/>
