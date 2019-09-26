@@ -21,7 +21,7 @@
 * @example Set up file ReST server with full upload, download, query, delete support
 * app.all('/api/widgets/:id/files/:file?', app.middleware.express.attachments({
 *   path: req => `widgets/${req.params.id}`, // Store in data/widgets/123/
-*   urlRoot: req => '/api/widgets/{req.params.id}', // How the URL should be computed per-file
+*   urlRoot: req => `/api/widgets/${req.params.id}`, // How the URL should be computed per-file
 *   upload: true,
 *   download: true,
 *   query: true,
