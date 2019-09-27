@@ -174,10 +174,6 @@ _.set(app, 'config.mongo.hooks', false); // Disable Mongo hooks until the full a
 // Setup unhandled promise method {{{
 process.on('unhandledRejection', e => crash.trace(e, {prefix: 'Unhandled promise rejection'}));
 // }}}
-// Load extentions {{{
-require('./extensions'); // Load other things we can count on such as console.dump
-require('../vendors/promises');
-// }}}
 // Return a function which will load everthing async {{{
 app.setup = require('./setup');
 // }}}
