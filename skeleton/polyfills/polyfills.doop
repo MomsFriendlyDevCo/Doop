@@ -1,0 +1,28 @@
+<server on="init, dbInit">
+var colors = require('chalk');
+
+var polyfills = [
+	// {id: file to include, test: whether to inject it}
+	{id: 'array.flat', test: ()=> Array.prototype.flat === undefined},
+	{id: 'array.flatMap', test: ()=> Array.prototype.flatMap === undefined},
+	{id: 'console.dump', test: ()=> true},
+	{id: 'fs.exists', test: ()=> true},
+	{id: 'promise.allLimit', test: ()=> true},
+	{id: 'promise.allSeries', test: ()=> true},
+	{id: 'promise.defer', test: ()=> true},
+	{id: 'promise.tap', test: ()=> true},
+	{id: 'promise.timeout', test: ()=> true},
+	{id: 'regexp.escape', test: ()=> true},
+];
+
+console.log('Injected:',
+	polyfills
+		.filter(p => p.test())
+		.map(p => {
+			require(`./${p.id}`)
+			return p;
+		})
+		.map(p => colors.cyan(p.id))
+		.join(', ')
+);
+</server>
