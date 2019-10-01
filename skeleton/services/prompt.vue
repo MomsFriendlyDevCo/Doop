@@ -141,11 +141,11 @@ module.exports = function() {
 	* This is the main $prompt worker - all the below helper functions are really just remappings of this function
 	* @param {Object} options Dialog options to use
 	* @param {string} [options.title='Dialog'] The dialog title
-	* @param {string} [options.body='Body text'] The dialog body (usually the message to display)
+	* @param {string} [options.body=''] The dialog body (usually the message to display)
 	* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
 	* @param {string} [options.bodyHeader] Additional HTML to render above the main body area (this is always HTML rendered)
 	* @param {string} [options.bodyFooter] Additional HTML to render under the main body area (this is always HTML rendered)
-	* @param {Object} [options.component] Vue component object to render as the modal body (under options.body if present)
+	* @param {Object|string} [options.component] Vue component object to render as the modal body (under options.body if present), either as a string or wrapped with `Vue.component('fooComponent')`. Uses the `<dynamic-component/>` service to render so can also accept props, events etc.
 	* @param {string|array} [options.modalClass] Optional modal class items to add (e.g. 'modal-lg')
 	* @param {Object} [options.scope] Scope to use when interpolating HTML (if isHtml is truthy)
 	* @param {string} [options.dialogClose='reject'] How to handle the promise state if the dialog is closed. ENUM: 'resolve', 'reject', 'nothing'
@@ -180,7 +180,7 @@ module.exports = function() {
 		// Setup defaults {{{
 		var settings = Vue.set($prompt, 'settings', {
 			title: 'Dialog',
-			body: 'Body text',
+			body: '',
 			isHtml: false,
 			component: undefined,
 			keyboard: true,
@@ -453,7 +453,7 @@ module.exports = {
 						<mg-form v-if="settings.$isMacgyver" form="promptMacGyver" :config="settings.form" :data="settings.data"/>
 						<div v-if="settings.isHtml" v-html="settings.body"/>
 						<div v-if="settings.bodyFooter" v-html="settings.$bodyFooter"/>
-						<component v-if="settings.component" :is="settings.component"/>
+						<dynamic-component v-if="settings.component" :component="settings.component"/>
 					</div>
 					<div v-if="settings.buttons && (settings.buttons.left.length || settings.buttons.right.length || settings.buttons.center.length)" class="modal-footer">
 						<div class="align-left">

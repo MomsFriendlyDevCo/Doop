@@ -17,7 +17,6 @@ app.ready.then(()=> {
 		sort: true,
 
 		title: 'Select an option',
-		body: '',
 		component: Vue.component('promptList'),
 		buttons: null,
 		dialogClose: 'reject',
