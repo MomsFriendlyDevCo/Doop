@@ -26,7 +26,7 @@ module.exports = function() {
 		if (!this.$debugging) return;
 
 		var prefix = this._id // If the component has a specified ID
-			|| this.$vnode?.tag ? this.$vnode.tag.replace(/^vue-component-\d+-/, '') // Use a (mangled) Vue tag
+			|| this.$vnode && this.$vnode.tag ? this.$vnode.tag.replace(/^vue-component-\d+-/, '') // Use a (mangled) Vue tag
 			: this._uid;
 
 		// Allocate color {{{
