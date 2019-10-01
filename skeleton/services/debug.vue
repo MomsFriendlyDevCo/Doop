@@ -25,8 +25,8 @@ module.exports = function() {
 	var $debug = function(...msg) {
 		if (!this.$debugging) return;
 
-		var prefix = this._id // If the component has a specified ID
-			|| this.$vnode && this.$vnode.tag ? this.$vnode.tag.replace(/^vue-component-\d+-/, '') // Use a (mangled) Vue tag
+		var prefix = this._id ? this._id // If the component has a specified ID
+			: this.$vnode && this.$vnode.tag ? this.$vnode.tag.replace(/^vue-component-\d+-/, '') // Use a (mangled) Vue tag
 			: this._uid;
 
 		// Allocate color {{{
@@ -46,10 +46,30 @@ module.exports = function() {
 	$debug.colorTable = ['#009ACD', '#8b2323', '#2f4f4f', '#2e8b57', '#ee7600', '#ff1493', '#9932cc', '#b03060', '#0000FF'];
 	$debug.seen = {}; // $debuggers we have seen this session and their allocated offset in the above color table
 
-	// Switch on debugging and also output
+	/**
+	* Switch on debugging and also output
+	* @param {*} msg... The message contents to output
+	*
+	* @example Force debugging even if vm.$debugging is disabled
+	* vm.$debug.force('Hello', this.world);
+	*/
 	$debug.force = (...msg) => {
 		this.$debugging = true;
 		return $debug(...msg);
+	};
+
+
+	/**
+	* Output this item and disable outputting for any other debug call that is not also marked as `only`
+	* @param {*} msg... The message contents to output
+	*
+	* @example Output only this item and disable from hereon unless another call to a `only()` marked function is used
+	* vm.$debug.only('Hello', this.world);
+	*/
+	$debug.only = function(...msg) {
+		this.$debugging = true;
+		return $debug(...msg);
+		this.$debugging = false;
 	};
 
 
