@@ -14,8 +14,8 @@
 * @param {string} [lazyParentsDisable='.modal'] jQuery compatible string which, if matched disables lazy loading (defaults to inside modals by default)
 * @param {string} [classValid] Apply this class to the element if the returned value is truthy
 * @param {string} [classInvalid] Apply this class to the element if the return value is falsy
-* @param {string} [textValid] Overrding text to display if the element is valid, if set the response is ignored and this is used as the display instead
-* @param {string} [textInvalid] What display text to use if the response was invalid
+* @param {string|function} [textValid] Either overriding text to display if the element is valid, or a function to call with the server response which returns the mangled output
+* @param {string|function} [textInvalid] As with `textValid` this is either overriding text or a function to mangle a server response
 * @param {string} [iconValid] Optional icon to display next to the context when loaded
 * @param {string} [iconInvalid] Optional icon to display next to the `textInvalid` text when an error occurs
 * @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into this.$toast.catch
@@ -43,7 +43,8 @@ module.exports = {
 		lazyParentsDisable: {type: String, default: '.modal'},
 		classValid: {type: String},
 		classInvalid: {type: String},
-		textInvalid: {type: String},
+		textValid: {type: [String, Function]},
+		textInvalid: {type: [String, Function]},
 		iconValid: {type: String},
 		iconInvalid: {type: String},
 		ignoreErrors: {type: Boolean, default: false},
@@ -58,12 +59,16 @@ module.exports = {
 			} else { // Fetch remote data
 				this.$digest.get(this.$props.url, this.$props.field)
 					.then(value => {
-						this.displayContent = this.$props.textValid || value;
+						this.displayContent = typeof this.$props.textValid == 'string' ? this.$props.textValid
+							: typeof this.$props.textValid == 'function' ? this.$props.textValid(value)
+							: value;
 						this.displayIcon = this.$props.iconValid;
 						if (this.$props.classValid) this.displayClass = this.$props.classValid;
 					})
 					.catch(err => {
-						this.displayContent = this.$props.textInvalid;
+						this.displayContent = typeof this.$props.textInvalid == 'string' ? this.$props.textInvalid
+							: typeof this.$props.textInvalid == 'function' ? this.$props.textInvalid(err)
+							: err;
 						this.displayIcon = this.$props.iconInvalid;
 						if (this.$props.classInvalid) this.displayClass = this.$props.classInvalid;
 						if (!this.$props.ignoreErrors) this.$toast.catch(err);
