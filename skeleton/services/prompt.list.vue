@@ -19,7 +19,7 @@ app.ready.then(()=> {
 		title: 'Select an option',
 		body: '',
 		component: Vue.component('promptList'),
-		buttons: {left: [], right: [], center: []},
+		buttons: null,
 		dialogClose: 'reject',
 		...options,
 	});
@@ -36,36 +36,36 @@ module.exports = {
 	}},
 	methods: {
 		refresh() {
-			this.mainField = this.$prompt.$settings.field.split(/\s*,\s*/, 1)[0];
+			this.mainField = this.$prompt.settings.field.split(/\s*,\s*/, 1)[0];
 
-			if (!this.$prompt.$settings.url) { // User specified a static list
+			if (!this.$prompt.settings.url) { // User specified a static list
 				this.isLoading = false;
 
 				var searcher = new RegExp(this.search.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'), 'i');
-				this.list = this.$prompt.$settings.list
-					.filter(i => searcher.test(i[this.$prompt.$settings.field]));
+				this.list = this.$prompt.settings.list
+					.filter(i => searcher.test(i[this.$prompt.settings.field]));
 
-				if (this.$prompt.$settings.sort)
-					this.list = _.sortBy(this.list, this.$prompt.$settings.sort === true ? this.mainField : this.$prompt.$settings.sort);
+				if (this.$prompt.settings.sort)
+					this.list = _.sortBy(this.list, this.$prompt.settings.sort === true ? this.mainField : this.$prompt.settings.sort);
 				return ;
 			}
 
 			return Promise.resolve()
 				.then(()=> this.isLoading = true)
 				.then(()=> this.$loader.startBackground())
-				.then(()=> console.log('$prompt req fields', this.$prompt.$settings.field))
-				.then(()=> this.$http.get(this.$prompt.$settings.url, {
+				.then(()=> console.log('$prompt req fields', this.$prompt.settings.field))
+				.then(()=> this.$http.get(this.$prompt.settings.url, {
 					params: {
-						limit: this.$prompt.$settings.limit,
-						select: this.$prompt.$settings.field,
+						limit: this.$prompt.settings.limit,
+						select: this.$prompt.settings.field,
 						...(
 							this.search
 								?  {[this.mainField]: {$regex: this.search, $options: 'i'}}
 								: {}
 						),
 						...(
-							this.$prompt.$settings.sort === true ? {sort: this.mainField}
-							: this.$prompt.$settings.sort ? {sort: this.$prompt.$settings.sort}
+							this.$prompt.settings.sort === true ? {sort: this.mainField}
+							: this.$prompt.settings.sort ? {sort: this.$prompt.settings.sort}
 							: {}
 						)
 					},

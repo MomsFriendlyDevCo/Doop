@@ -1,7 +1,7 @@
 <service singleton>
 module.exports = function() {
 	var $prompt = this;
-	$prompt.$debugging = false;
+	$prompt.$debugging = true;
 
 	// $prompt.modal() {{{
 	/**
@@ -53,6 +53,9 @@ module.exports = function() {
 			nestingZStep: 10,
 			...options,
 		};
+
+		this.$debug('$prompt.modal', settings);
+		Vue.set($prompt, 'settings', settings);
 
 		// Expand expression into object if passed a string
 		if (_.isString(settings.element)) settings.element = $(settings.element);
@@ -130,7 +133,7 @@ module.exports = function() {
 	* @param {function} $dialogClose Binding for dialogClose
 	* @param {string} $status The status of the dialog. ENUM: 'showing', 'shown', 'hiding', 'hidden'
 	*/
-	$prompt.$settings = undefined;
+	$prompt.settings = undefined;
 
 
 	/**
@@ -166,8 +169,8 @@ module.exports = function() {
 	*/
 	$prompt.dialog = options => {
 		// If we're already showing a dialog - defer showing the next dialog until this one has finished {{{
-		if ($prompt.$settings) {
-			$prompt.$debug('Dialog already present, adding to queue', {current: $prompt.$settings, new: options});
+		if ($prompt.settings) {
+			$prompt.$debug('Dialog already present, adding to queue', {current: $prompt.settings, new: options});
 			options.defer = Promise.defer();
 			$prompt.$dialogQueue.push(options)
 			return options.defer.promise;
@@ -175,7 +178,7 @@ module.exports = function() {
 		// }}}
 
 		// Setup defaults {{{
-		var settings = $prompt.$settings = {
+		var settings = Vue.set($prompt, 'settings', {
 			title: 'Dialog',
 			body: 'Body text',
 			isHtml: false,
@@ -197,7 +200,8 @@ module.exports = function() {
 			},
 			defer: Promise.defer(),
 			...options,
-		};
+		});
+		this.$debug('$prompt.dialog', settings);
 		// }}}
 
 		// Attach to promise to add a status property {{{
@@ -219,7 +223,7 @@ module.exports = function() {
 		// }}}
 
 		// Setup buttons {{{
-		if (!_.isObject(settings.buttons)) throw new Error('$prompt.dialog({buttons}) must be an object');
+		if (!settings.buttons) settings.buttons = {};
 		['left', 'right', 'center'].forEach(align => {
 			if (!settings.buttons[align]) settings.buttons[align] = [];
 			settings.buttons[align] = settings.buttons[align].map(b => {
@@ -263,17 +267,20 @@ module.exports = function() {
 	* @emits $prompt.close Message to the promptHelper that it should close the dialog
 	*/
 	$prompt.close = (ok = false, payload) => {
-		if (!$prompt.$settings) {
+		if (!$prompt.settings) {
 			$prompt.$debug('Closing already closed modal - assuming internal recursion and ignoring');
 			return;
 		}
 
 		$prompt.$debug('Close modal', {status: ok ? 'resolve' : 'reject', payload});
 
-		$prompt.$settings.defer[ok ? 'resolve' : 'reject'](payload);
+		$prompt.settings.defer[ok ? 'resolve' : 'reject'](payload);
 
 		// Force a specific modal handle to close
-		if ($prompt.$settings.element) $prompt.$settings.element.modal('hide');
+		if ($prompt.settings.element) {
+			$prompt.settings.element.modal('hide');
+			Vue.set($prompt, 'settings', undefined);
+		}
 
 		// Close standard (handled) modals
 		this.$emit.broadcast('$prompt.close', !!ok);
@@ -406,35 +413,23 @@ module.exports = {
 module.exports = {
 	data: ()=> ({
 		isShowing: false,
+		settings: undefined,
 	}),
 	created() {
-		this.$on('$prompt.open', settings => this.openModal(settings));
-		this.$on('$prompt.close', ()=> this.closeModal());
+		this.$on('$prompt.open', this.openModal);
+		this.$on('$prompt.close', this.closeModal);
 	},
 	methods: {
 		openModal(settings) {
+			this.settings = settings;
 			this.isShowing = true;
-			this.$set(this.$prompt, '$settings', settings);
-
 			this.$prompt.modal({
 				element: '#modal-_prompt',
-				onShow: ()=> {
-					if (settings.onShow) settings.onShow();
-
-					if (settings.backdrop) $('body > .modal-backdrop').addClass('shown'); // Add the shown class late to the backdrop - allows the CSS transition to apply if fading / bluring etc.
-				},
-				onHide: ()=> {
-					if (settings.onHide) settings.onHide();
-
-					if (settings.defer.state == 'pending') { // Promise not yet resolved - yet we are closing, user probably pressed escape or clicked the background
-						this.$prompt.close();
-					}
-				},
-			})
+				...this.$prompt.settings,
+			});
 		},
 		closeModal() {
 			this.isShowing = false;
-			this.$set(this.$prompt, '$settings', undefined);
 			$('#modal-_prompt').modal('hide');
 		},
 	},
@@ -444,37 +439,37 @@ module.exports = {
 <template name="promptInjector">
 	<div>
 		<div id="modal-_prompt" class="modal">
-			<div v-if="isShowing" class="modal-dialog" :class="$prompt.$settings.modalClass">
+			<div v-if="isShowing" class="modal-dialog" :class="settings.modalClass">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title">{{$prompt.$settings.title}}</h4>
-						<a class="close" @click="$prompt.close()"><i class="far fa-times fa-lg"/></a>
+						<h4 class="modal-title">{{settings.title}}</h4>
+						<a class="close" @click="closeModal()"><i class="far fa-times fa-lg"/></a>
 					</div>
 					<div class="modal-body">
-						<div v-if="$prompt.$settings.bodyHeader" v-html="$prompt.$settings.$bodyHeader"/>
-						<div v-if="!$prompt.$settings.isHtml" class="text-center">
-							<h4>{{$prompt.$settings.body}}</h4>
+						<div v-if="settings.bodyHeader" v-html="settings.$bodyHeader"/>
+						<div v-if="!settings.isHtml" class="text-center">
+							<h4>{{settings.body}}</h4>
 						</div>
-						<mg-form v-if="$prompt.$settings.$isMacgyver" form="promptMacGyver" :config="$prompt.$settings.form" :data="$prompt.$settings.data"/>
-						<div v-if="$prompt.$settings.isHtml" v-html="$prompt.$settings.body"/>
-						<div v-if="$prompt.$settings.bodyFooter" v-html="$prompt.$settings.$bodyFooter"/>
-						<component v-if="$prompt.$settings.component" :is="$prompt.$settings.component"/>
+						<mg-form v-if="settings.$isMacgyver" form="promptMacGyver" :config="settings.form" :data="settings.data"/>
+						<div v-if="settings.isHtml" v-html="settings.body"/>
+						<div v-if="settings.bodyFooter" v-html="settings.$bodyFooter"/>
+						<component v-if="settings.component" :is="settings.component"/>
 					</div>
-					<div v-if="$prompt.$settings.buttons.left.length || $prompt.$settings.buttons.right.length || $prompt.$settings.buttons.center.length" class="modal-footer">
+					<div v-if="settings.buttons && (settings.buttons.left.length || settings.buttons.right.length || settings.buttons.center.length)" class="modal-footer">
 						<div class="align-left">
-							<a v-for="button in $prompt.$settings.buttons.left" :key="button.id" @click="button.click()" :class="button.class">
+							<a v-for="button in settings.buttons.left" :key="button.id" @click="button.click()" :class="button.class">
 								<i v-if="button.icon" :class="button.icon"/>
 								{{button.title}}
 							</a>
 						</div>
 						<div class="align-center">
-							<a v-for="button in $prompt.$settings.buttons.center" :key="button.id" @click="button.click()" :class="button.class">
+							<a v-for="button in settings.buttons.center" :key="button.id" @click="button.click()" :class="button.class">
 								<i v-if="button.icon" :class="button.icon"/>
 								{{button.title}}
 							</a>
 						</div>
 						<div class="align-right">
-							<a v-for="button in $prompt.$settings.buttons.right" :key="button.id" @click="button.click()" :class="button.class">
+							<a v-for="button in settings.buttons.right" :key="button.id" @click="button.click()" :class="button.class">
 								<i v-if="button.icon" :class="button.icon"/>
 								{{button.title}}
 							</a>

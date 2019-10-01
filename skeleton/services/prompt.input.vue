@@ -29,7 +29,7 @@ app.ready.then(()=> {
 				title: 'Confirm',
 				class: 'btn btn-success',
 				icon: 'fa fa-check',
-				click: ()=> Vue.services().$prompt.resolve(Vue.services().$prompt.$settings.value),
+				click: ()=> Vue.services().$prompt.resolve(Vue.services().$prompt.settings.value),
 			}],
 		},
 		dialogClose: 'reject',
@@ -45,7 +45,7 @@ module.exports = {
 			if (e.which === 27) this.$prompt.reject();
 		},
 		submit() { // Accept the promise when the user submits the form (Enter or whatever)
-			return this.$prompt.resolve(this.$prompt.$settings.value);
+			return this.$prompt.resolve(this.$prompt.settings.value);
 		},
 	},
 };
@@ -58,9 +58,9 @@ module.exports = {
 				<div class="input-group">
 					<input
 						type="search"
-						v-model="$prompt.$settings.value"
+						v-model="$prompt.settings.value"
 						class="form-control"
-						:placeholder="$prompt.$settings.placeholder"
+						:placeholder="$prompt.settings.placeholder"
 						@keydown="keydown"
 						autofocus
 					/>
