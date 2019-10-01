@@ -18,6 +18,8 @@
 * @param {boolean} [allowUploadMultiple=true] Allow multiple file uploads per upload cycle
 * @param {string|array} [tableClass] Additonal classes to apply to the table (e.g. 'table-sm')
 *
+* @slot uploadButton Exposes a custom replacement for the upload button (currently only in icon view). Exposed as {upload(), showControls?}
+*
 * @example Attachments widget with page level upload button
 * <div class="btn-group-float">
 *   <a @click="$refs.attachments.upload()" class="btn btn-icon btn-circle btn-primary fa fa-upload" v-tooltip="'Upload files'"></a>
@@ -183,12 +185,14 @@ module.exports = {
 				>
 					<a @click.stop.prevent="remove(attachment)" class="attachment-item-btn btn btn-danger btn-sm far fa-times"/>
 				</a>
-				<a
-					v-if="showControls"
-					@click.stop="upload()"
-					class="attachment-item-upload fas fa-plus"
-					v-tooltip="'Upload a new file'"
-				/>
+				<slot name="uploadButton" :upload="upload">
+					<a
+						v-if="showControls"
+						@click.stop="upload()"
+						class="attachment-item-upload fas fa-plus"
+						v-tooltip="'Upload a new file'"
+					/>
+				</slot>
 			</div>
 			<!-- }}} -->
 			<!-- Unknown view {{{ -->
