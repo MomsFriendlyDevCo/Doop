@@ -1,6 +1,4 @@
 <server on="middleware">
-var siftSieve = require('@momsfriendlydevco/sift-sieve');
-
 /**
 * Returns a middleware layer which will list, accept uploads at a specified path and optionally delete
 * This middleware is effectively a full ReST server which acts on a base path
@@ -43,6 +41,7 @@ var multer = require('multer');
 var fs = require('fs');
 var fspath = require('path');
 var os = require('os');
+var siftSieve = require('@momsfriendlydevco/sift-sieve');
 
 app.middleware.express.attachments = (path, options) => {
 	// Argument mangling {{{
