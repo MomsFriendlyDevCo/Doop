@@ -16,6 +16,7 @@
 * @param {boolean} [allowDelete=false] Whether to allow file deletion (backend must support DELETE method)
 * @param {boolean} [allowUpload=false] Whether to allow file uploads (backend must support POST method) - NOTE you must setup an upload button somewhere which calls `$refs.attachments.upload()`
 * @param {boolean} [allowUploadMultiple=true] Allow multiple file uploads per upload cycle
+* @param {string} [accept] Types of file to accept as a CSV. Can be mime or extensions. e.g. 'image/*,.pdf,.zip'
 * @param {string|array} [tableClass] Additonal classes to apply to the table (e.g. 'table-sm')
 *
 * @slot uploadButton Exposes a custom replacement for the upload button (currently only in icon view). Exposed as {upload(), showControls?}
@@ -34,6 +35,7 @@ module.exports = {
 		allowDelete: {type: Boolean, default: false},
 		allowUpload: {type: Boolean, default: false},
 		allowUploadMultiple: {type: Boolean, default: true},
+		accept: {type: String},
 		tableClass: {type: [Array, String], default: ''},
 	},
 	data() { return {
@@ -80,11 +82,13 @@ module.exports = {
 					: this.$loader.stop(`attachment-refresh{attachment.url}`)
 				)
 		},
-		upload() {
+		upload(options) {
 			if (!this.$props.allowUpload) return;
 			this.$files.upload({
 				url: this.$props.url,
 				multiple: this.$props.allowUploadMultiple,
+				accept: this.$props.accept,
+				...options,
 			})
 				.then(()=> this.refresh())
 		},

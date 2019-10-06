@@ -1,6 +1,7 @@
 <service defer singleton>
 module.exports = function() {
 	var $files = this;
+	$files.debugging = true;
 
 	/**
 	* Storage of files currently being uploaded
@@ -61,6 +62,7 @@ module.exports = function() {
 					status: 'uploading',
 					error: undefined,
 				};
+				this.$debug('Upload', fileObj);
 
 				$files.uploading[fileObj._id] = fileObj;
 				
@@ -95,6 +97,7 @@ module.exports = function() {
 		// }}}
 
 		if (!settings.files) { // User wants this function to prompt the user
+			this.$debug('Prompt for upload file', settings);
 			return new Promise((resolve, reject) => {
 				var wrapper = $('<div style="display: none"/>').appendTo('body');
 				var fileControl = $(
