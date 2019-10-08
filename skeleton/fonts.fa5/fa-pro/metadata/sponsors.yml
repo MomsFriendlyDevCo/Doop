@@ -53,6 +53,11 @@ apper-systems-ab:
     - asymmetrik
   label: 'Asymmetrik, Ltd.'
   url: 'http://asymmetrik.com'
+ausmed-education:
+  icons:
+    - user-nurse
+  label: Ausmed Education
+  url: 'https://www.ausmed.com.au'
 avianex:
   icons:
     - avianex
@@ -123,6 +128,11 @@ cuttlefish:
     - cuttlefish
   label: Cuttlefish
   url: 'http://wearecuttlefish.com'
+cymedica:
+  icons:
+    - wave-square
+  label: CyMedica
+  url: 'https://www.cymedicaortho.com'
 darren-wiebe:
   icons:
     - church
@@ -157,6 +167,11 @@ dyalog-apl:
     - dyalog
   label: Dyalog APL
   url: 'http://www.dyalog.com'
+econopublish:
+  icons:
+    - hat-cowboy-side
+  label: EconoPublish
+  url: 'https://www.econopublish.com'
 firstdraft:
   icons:
     - firstdraft
@@ -332,6 +347,31 @@ med-apps:
     - medapps
   label: MedApps
   url: 'http://medapps.com.au'
+medapps:
+  icons:
+    - book-medical
+    - book-user
+    - books-medical
+    - clinic-medical
+    - clipboard-user
+    - comment-alt-medical
+    - comment-medical
+    - crutch
+    - crutches
+    - disease
+    - files-medical
+    - head-side-brain
+    - head-side-medical
+    - hospital-user
+    - hospitals
+    - laptop-medical
+    - pager
+    - stretcher
+    - user-md-chat
+    - users-medical
+    - walker
+  label: MedApps
+  url: 'https://medapps.com.au'
 megaport:
   icons:
     - megaport
