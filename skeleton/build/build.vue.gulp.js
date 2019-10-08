@@ -29,7 +29,7 @@ gulp.task('build.vue', ['load:app'], ()=>
 			errorHandler: err => {
 				gutil.log(gutil.colors.red('ERROR DURING JS BUILD'));
 				process.stdout.write(err.stack);
-				console.log('EXIT ERROR');
+				console.log('EXIT ERROR', err);
 			},
 		}))
 		.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.init()))
