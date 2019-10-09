@@ -3,9 +3,12 @@
 </import>
 
 <style>
+/* .tooltip {{{ */
 .tooltip {
 	display: block !important;
-	z-index: 10000;
+	z-index: 100000;
+	border: none;
+	box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.2);
 }
 
 .tooltip .tooltip-inner {
@@ -22,7 +25,7 @@
 	position: absolute;
 	margin: 5px;
 	border-color: black;
-	z-index: 1;
+	z-index: 100000;
 }
 
 .tooltip[x-placement^="top"] {
@@ -108,9 +111,31 @@
 	opacity: 1;
 	transition: opacity .15s;
 }
+/* }}} */
 
-/* Add left alignment option for tooltips */
+/* .tooltip.text-left - Add left alignment option for tooltips {{{ */
 .tooltip.text-left .tooltip-inner {
 	text-align: left;
 }
+/* }}} */
+
+/* .popover-dark {{{ */
+/* e.g. <v-popover popover-class="popover-dark"/> */
+.popover.popover-dark .popover-inner {
+	background: #4c5667;
+	color: #FFF;
+	border: none;
+}
+
+.popover.popover-dark .popover-arrow {
+	border-color: #4c5667;
+}
+/* }}} */
+
+/* .popover-p-1 - minimal padding {{{ */
+/* e.g. <v-popover popover-class="popover-p-1"/> */
+.popover.popover-p-1 .popover-inner {
+	padding: 5px;
+}
+/* }}} */
 </style>
