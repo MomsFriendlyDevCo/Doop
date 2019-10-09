@@ -7,7 +7,7 @@
 * It is also possible to force this element to display values using the emitter events `digest.force.{class,icon,text,valid}`
 *
 * @param {string} [url] The URL to fetch data from (instead of specifying `collection` + `id`)
-* @param {string} [field="title"] Field to display the title of
+* @param {string} [field="title"] Field to display the title of, if using slots specify "*" to populate `data` with the raw data object
 * @param {string} [label] Use this label before fetching a remote one, if specifed the entity is treated as valid (including valid class and icon)
 * @param {boolean} [lazy=true] If true, fetching will be defered until the element is actually shown within the content area
 * @param {string} [lazyParents='#main, body'] jQuery compatible string listing the intersection parents to probe for when lazy==true, the first one found is assumed to be the parent
@@ -20,6 +20,9 @@
 * @param {string} [iconInvalid] Optional icon to display next to the `textInvalid` text when an error occurs
 * @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into this.$toast.catch
 *
+* @slot [loading] What to display when loading - defaults to a FA5 loading spinner. Bindings are `{config}`
+* @slot [display] What to display when data is loaded. Bindings are `{config, data, displayContent}`
+*
 * @example Fetch a specific URL and extract a key
 * <digest url="/api/some/url" key="widgets"/>
 *
@@ -28,6 +31,7 @@
 */
 module.exports = {
 	data: ()=> ({
+		data: undefined,
 		displayContent: '',
 		displayClass: undefined,
 		isLazy: false,
@@ -59,6 +63,7 @@ module.exports = {
 			} else { // Fetch remote data
 				this.$digest.get(this.$props.url, this.$props.field)
 					.then(value => {
+						this.data = value;
 						this.displayContent = typeof this.$props.textValid == 'string' ? this.$props.textValid
 							: typeof this.$props.textValid == 'function' ? this.$props.textValid(value)
 							: value;
@@ -127,11 +132,15 @@ module.exports = {
 
 <template>
 	<div class="digest">
-		<i v-if="loading" class="fa fa-spinner fa-spin"></i>
-		<span v-else :class="displayClass">
-			<i v-if="displayIcon" :class="displayIcon"/>
-			{{displayContent}}
-		</span>
+		<slot v-if="loading" name="loading" :config="$props">
+			<i class="far fa-spinner fa-spin"/>
+		</slot>
+		<slot v-else name="display" :config="$props" :data="data" :displayContent="displayContent">
+			<div :class="displayClass">
+				<i v-if="displayIcon" :class="displayIcon"/>
+				{{displayContent}}
+			</div>
+		</slot>
 	</div>
 </template>
 
@@ -171,37 +180,63 @@ module.exports = function() {
 	/**
 	* Lazily fetch a URL and hold it in a memory cache until it expires
 	* NOTE: Requesting an expired cache entry will automatically cause it to be re-fetched
-	* @param {string} url The URL to fetch
-	* @param {string} [field] Optional field to restrict the response to
+	* @param {string} [url] The URL to fetch, if not speicifed in the options object
+	* @param {string} [field] Optional field to restrict the response to, if omitted the entire raw response is set, use the special case "*" to return only the data portion (implies `{rawResponse: false}`)
+	* @param {object} [options] Additional options to pass
+	* @param {string} [options.url] Alternate method to specify the URL
+	* @param {string|undefined} [options.field] The field to retrieve or the special case "*" for everything
+	* @param {string} [options.hash] Hashing string to use when caching, automatically calculated from the URL + field if omitted
 	* @returns {Promise} A promise which will resolve with either the specificly requested field value or the Axios response for the request
 	*/
-	$digest.get = (url, field) => {
-		var hash = field ? url + '@' + field : url;
+	$digest.get = (url, field, options) => {
+		// Argument mangling {{{
 		if (
-			$digest.cache[hash] // We already have a cache entry
-			&& !$digest.hasExpired($digest.cache[hash].created) // ... and its still valid
-		) return $digest.cache[hash].promise;
+			typeof url == 'string' && typeof field == 'string'
+			|| typeof url == 'string' && field === undefined && options === undefined
+		) { // Called as full function // (url) only
+			// Pass
+		} else if (typeof url == 'string' && typeof field == 'object') { // Called as (url, options)
+			[url, field, options] = [url, undefined, field];
+		} else if (typeof url == 'object') { // Called as (options)
+			[url, field, options] = [options.url, options.field, options];
+		} else {
+			throw new Error(`Unknown call signature for $digest.get(${typeof url}, ${typeof field}, ${typeof options})`);
+		}
+		// }}}
+		var settings = {
+			url,
+			field: field === '*' ? undefined : field, // Either use the provided field name or set to undefined if the special case "*"
+			hash: undefined, // Set below
+			rawResponse: true,
+			...options,
+		};
+		settings.hash = settings.field ? `${url}@${settings.field}` : url;
 
-		$digest.cache[hash] = {
+		if (
+			$digest.cache[settings.hash] // We already have a cache entry
+			&& !$digest.hasExpired($digest.cache[settings.hash].created) // ... and its still valid
+		) return $digest.cache[settings.hash].promise;
+
+		$digest.cache[settings.hash] = {
 			created: new Date(),
 			value: undefined,
-			promise: this.$http.get(field ? `${url}?select=${field}` : url)
+			promise: this.$http.get(settings.field ? `${url}?select=${settings.field}` : url)
 				.then(res => { // Pick the specific field value if requested, otherwise return full response
-					if (field) { // Extract single field
+					if (settings.field) { // Extract single field
 						if (_.isArray(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got an array`);
 						if (!_.isObject(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got a non-object`);
 						if (_.isEmpty(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got empty object`);
-						if (!_.has(res.data, field)) throw new Error(`Expected the field "${field}" in single document response from URL "${url}. Got keys: ${Object.keys(res.data).join(', ')}`);
+						if (!_.has(res.data, settings.field)) throw new Error(`Expected the field "${settings.field}" in single document response from URL "${url}. Got keys: ${Object.keys(res.data).join(', ')}`);
 
-						return res.data[field];
-					} else { // Return entire Axios response
-						return res;
+						return res.data[settings.field];
+					} else { // Return only the data portion of the response
+						return res.data;
 					}
 				})
-				.then(payload => $digest.cache[hash].value = payload),
+				.then(payload => $digest.cache[settings.hash].value = payload),
 		};
 
-		return $digest.cache[hash].promise;
+		return $digest.cache[settings.hash].promise;
 	};
 
 

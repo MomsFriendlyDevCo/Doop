@@ -76,7 +76,7 @@ module.exports = {
 			return Promise.resolve()
 				.then(()=> this.$loader.startBackground())
 				.then(()=> this.$digest.get(this.$props.userUrl))
-				.then(res => this.options = res.data.map(u => ({
+				.then(res => this.options = res.map(u => ({
 					id: u[this.$props.idField],
 					label: u[this.$props.labelField],
 					email: u[this.$props.emailField],
