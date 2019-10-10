@@ -26,7 +26,7 @@ var transform = (content, path, block) => {
 
 	var sandbox = vm.createContext({
 		app, global, module,  // Import the standard modules
-		Buffer, // Import standard classes
+		Array, Buffer, Promise, RegExp, // Import standard classes
 		id, // Glue the module ID onto the base structure
 		db: app.db,
 		console: rawModules.console ? console : {
