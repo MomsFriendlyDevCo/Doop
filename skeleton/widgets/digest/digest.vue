@@ -8,6 +8,7 @@
 *
 * @param {string} [url] The URL to fetch data from (instead of specifying `collection` + `id`)
 * @param {string} [field="title"] Field to display the title of, if using slots specify "*" to populate `data` with the raw data object
+* @param {string} [filter] Optional Vue filter to run the result through before outputting
 * @param {string} [label] Use this label before fetching a remote one, if specifed the entity is treated as valid (including valid class and icon)
 * @param {boolean} [lazy=true] If true, fetching will be defered until the element is actually shown within the content area
 * @param {string} [lazyParents='#main, body'] jQuery compatible string listing the intersection parents to probe for when lazy==true, the first one found is assumed to be the parent
@@ -41,6 +42,7 @@ module.exports = {
 	props: {
 		url: {type: String, required: true},
 		field: {type: String, default: "title"},
+		filter: {type: String},
 		label: {type: String},
 		lazy: {type: Boolean, default: true},
 		lazyParents: {type: String, default: '#main, body'},
@@ -67,6 +69,9 @@ module.exports = {
 						this.displayContent = typeof this.$props.textValid == 'string' ? this.$props.textValid
 							: typeof this.$props.textValid == 'function' ? this.$props.textValid(value)
 							: value;
+
+						if (this.$props.filter) this.displayContent = Vue.filter(this.$props.filter)(this.displayContent);
+
 						this.displayIcon = this.$props.iconValid;
 						if (this.$props.classValid) this.displayClass = this.$props.classValid;
 					})
