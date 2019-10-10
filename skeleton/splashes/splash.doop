@@ -1,0 +1,3 @@
+<endpoint>
+app.use('/splashes', app.middleware.express.static(`${app.config.paths.root}/splashes/assets`, {immutable: true}));
+</endpoint>
