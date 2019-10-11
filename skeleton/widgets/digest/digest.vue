@@ -29,6 +29,21 @@
 *
 * @example Force all child digests to be invalid
 * this.$emit.down('digest.force.valid', false)
+*
+* @example Pull in a full data record and template the responses
+* <digest
+*   field="*"
+*   :url="`/api/widgets/${input.file}`"
+* >
+*   <template #loading>
+*     <i class="far fa-spinner fa-spin"/>
+*     Loading widget information...
+*   </template>
+*   <template #display="{data: widget}">
+*     <strong class="d-block">{{widget.title}}</strong>
+*     <small class="d-block">{{widget.description}}</small>
+*   </template>
+* </digest>
 */
 module.exports = {
 	data: ()=> ({
