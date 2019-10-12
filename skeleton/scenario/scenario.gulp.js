@@ -15,9 +15,8 @@ gulp.task('db', 'scenario');
 * Setup the local Mongo DB with all the files located in ./*.json
 * NOTE: To prevent cached data screwing with state, this task will also clear the cache
 */
-gulp.task('scenario', 'load:app.db', ()=> {
-	if (process.env.SCENARIO && process.env.SCENARIO == 'FORCE') return;
-	if (app.config.env == 'production') throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export SCENARIO=FORCE`');
+gulp.task('scenario', 'db:nuke', 'load:app.db', ()=> {
+	if (app.config.env == 'production' && (!process.env.SCENARIO || process.env.SCENARIO != 'FORCE')) throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export SCENARIO=FORCE`');
 
 	return gulp.src([
 		`${app.config.paths.root}/**/*.scenario.{js,json}`,

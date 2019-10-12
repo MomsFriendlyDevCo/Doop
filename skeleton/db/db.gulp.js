@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var gulp = require('@momsfriendlydevco/gulpy');
 var monoxide = require('monoxide');
 
