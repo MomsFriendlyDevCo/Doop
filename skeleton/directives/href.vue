@@ -40,6 +40,7 @@ module.exports = {
 					$el.addClass('v-href');
 					$el[0].addEventListener('click', e => {
 						e.preventDefault();
+						e.stopPropagation();
 						app.router.go(settings);
 					});
 				}
