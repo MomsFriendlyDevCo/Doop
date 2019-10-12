@@ -29,9 +29,12 @@ module.exports = {
 	props: {
 		url: {type: String, required: true},
 		cellHref: {type: Function},
-		columns: {type: Array, required: true},
+		columns: {type: Array, required: true}, // Defaults + type mangling applied in computedColumns
+		config: {type: Object, default: ()=> ({})}, // Defaults applied in computedConfig()
 		search: {type: Boolean, default: false},
-		config: {type: Object, default() {
+	},
+	computed: {
+		computedConfig() { // Apply Doop / Monoxide defaults to base config structure
 			return {
 				card_mode: true,
 				show_refresh_button: false,
@@ -39,15 +42,15 @@ module.exports = {
 				server_mode: true,
 				per_page: 30,
 				global_search: {
+					...this.$props.config.global_search,
 					visibility: this.$props.search,
 					placeholder: 'Search...',
 					searchOnPressEnter: true,
 				},
+				...this.$props.config,
 			};
-		}},
-	},
-	computed: {
-		columnsComputed() { // Rewrite base columns config so we can avoid being explicit in most cases
+		},
+		computedColumns() { // Rewrite base columns config so we can avoid being explicit in most cases
 			return this.$props.columns.map(v => {
 				switch (v.type) {
 					case 'status':
@@ -60,6 +63,10 @@ module.exports = {
 						v.column_classes = v.row_classes = 'col-text';
 						v.row_text_alignment = 'text-left';
 						break;
+					case 'number':
+						v.column_classes = v.row_classes = 'col-number';
+						v.row_text_alignment = 'text-right';
+						break;
 					case 'verbs':
 						v.column_classes = v.row_classes = 'col-verbs';
 						break;
@@ -71,6 +78,8 @@ module.exports = {
 	},
 	methods: {
 		refresh(query) {
+			if (!this.$props.url) return; // No URL available yet, URL is probably dynamic - do nothing
+
 			return Promise.resolve()
 				.then(()=> this.$loader.startBackground(!this.rows))
 				.then(()=> ({params: { // Compute AxiosRequest
@@ -81,19 +90,28 @@ module.exports = {
 					skip: ((query?.page || 1) - 1) * (query?.per_page || this.config?.per_page || 30),
 				}}))
 				.then(req => { this.$debug('AxiosRequest', req); return req })
-				.then(req => Promise.all([
-					// Fetch matching rows
-					this.$http.get(this.$props.url, req)
-						.then(res => this.rows = res.data),
+				.then(req => {
+					// Calculate endpoint URLs {{{
+					var endpointQuery = new URL(this.$props.url, window.location.href);
 
-					// Count potencial rows (i.e. the count based on query)
-					this.$http.get(`${this.$props.url}/count`, {
-						...req,
-						params: _.omit(req.params, ['sort', 'limit', 'skip', 'select', 'populate']), // Omit meta fields from count or they are included as filters
-					})
-						.then(res => this.rowCount = res.data.count),
-				]))
-				.then(()=> console.log('DATA', {rows: this.rows, rowCount: this.rowCount}))
+					var endpointCount = new URL(this.$props.url, window.location.href);
+					endpointCount.pathname += '/count';
+					// }}}
+
+					Promise.all([
+						// Fetch matching rows
+						this.$http.get(endpointQuery.toString(), req)
+							.then(res => this.rows = res.data),
+
+						// Count potencial rows (i.e. the count based on query)
+						this.$http.get(endpointCount.toString(), {
+							...req,
+							params: _.omit(req.params, ['sort', 'limit', 'skip', 'select', 'populate']), // Omit meta fields from count or they are included as filters
+						})
+							.then(res => this.rowCount = res.data.count),
+					]);
+				})
+				.then(()=> this.$debug('Row data', {rows: this.rows, rowCount: this.rowCount}))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop())
 		},
@@ -103,8 +121,8 @@ module.exports = {
 			props: {
 				rows: this.rows,
 				totalRows: this.rowCount,
-				columns: this.columnsComputed,
-				config: this.$props.config,
+				columns: this.computedColumns,
+				config: this.computedConfig,
 			},
 			on: {
 				'on-change-query': this.refresh,
