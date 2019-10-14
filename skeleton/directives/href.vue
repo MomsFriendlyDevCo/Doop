@@ -21,9 +21,10 @@ module.exports = {
 	bind(el, binding) {
 		var settings = {
 			...(typeof binding.value == 'object' ? binding.value : null),
-			href: typeof binding.value == 'string'
-				? binding.value
-				: binding.value.href,
+			href:
+				typeof binding.value == 'string' ? binding.value
+				: binding.value ? binding.value.href
+				: null,
 		};
 
 		if (settings.url) console.warn('Do not pass `v-href="{url}"` property to v-href. Use `v-href="{href}"` instead');
