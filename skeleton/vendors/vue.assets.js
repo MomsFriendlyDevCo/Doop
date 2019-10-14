@@ -26,7 +26,11 @@ Vue.assets = {
 	* @alias Vue.component
 	*/
 	component: (id, config) => {
-		if (config && config.route) Vue.assets.$assets.routes.push({path: config.route, component: id});
+		if (config && config.route) {
+			_.castArray(config.route).forEach(route => {
+				Vue.assets.$assets.routes.push({path: route, component: id});
+			});
+		}
 		Vue.component(id, config);
 	},
 
