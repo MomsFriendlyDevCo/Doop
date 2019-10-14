@@ -15,8 +15,12 @@
 *
 * @url https://rubanraj54.gitbook.io/vue-bootstrap4-table/usage
 * @param {string} url Doop / Monoxide ReST endpoint to connect to
+* @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
 * @param {Object} columns Column definitions
 * @param {Object} config Overall table definition
+* @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
+* @param {string} [text-loading="Loading..."] Message to display when loading FIXME: Not yet implemented
+* @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
 *
 * @slot [columnId] The per-cell rendering of a specific row. Row data available as `props.row`
 * @slot [column_columnId] COlumn header rendering of a specific column definition
@@ -25,13 +29,16 @@ module.exports = {
 	data() { return {
 		rows: [],
 		rowCount: 0,
+		state: 'pending', // ENUM: 'pending', 'loading', 'ready'
 	}},
 	props: {
 		url: {type: String, required: true},
+		view: {type: String, default: 'table'},
 		cellHref: {type: Function},
 		columns: {type: Array, required: true}, // Defaults + type mangling applied in computedColumns
 		config: {type: Object, default: ()=> ({})}, // Defaults applied in computedConfig()
 		search: {type: Boolean, default: false},
+		directoryMap: {type: [Object,Function]},
 	},
 	computed: {
 		computedConfig() { // Apply Doop / Monoxide defaults to base config structure
@@ -41,6 +48,8 @@ module.exports = {
 				show_reset_button: false,
 				server_mode: true,
 				per_page: 30,
+				per_page_options: [5, 10, 30, 100, 500, 1000],
+				highlight_row_hover_color: 'var(--gray-light)',
 				global_search: {
 					...this.$props.config.global_search,
 					visibility: this.$props.search,
@@ -81,6 +90,7 @@ module.exports = {
 			if (!this.$props.url) return; // No URL available yet, URL is probably dynamic - do nothing
 
 			return Promise.resolve()
+				.then(()=> this.state = 'loading')
 				.then(()=> this.$loader.startBackground(!this.rows))
 				.then(()=> ({params: { // Compute AxiosRequest
 					...(query?.filters),
@@ -98,7 +108,7 @@ module.exports = {
 					endpointCount.pathname += '/count';
 					// }}}
 
-					Promise.all([
+					return Promise.all([
 						// Fetch matching rows
 						this.$http.get(endpointQuery.toString(), req)
 							.then(res => this.rows = res.data),
@@ -114,31 +124,52 @@ module.exports = {
 				.then(()=> this.$debug('Row data', {rows: this.rows, rowCount: this.rowCount}))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop())
+				.finally(()=> this.state = 'ready')
 		},
 	},
 	render(h) {
-		return h('vue-bootstrap4-table', {
-			props: {
-				rows: this.rows,
-				totalRows: this.rowCount,
-				columns: this.computedColumns,
-				config: this.computedConfig,
-			},
-			on: {
-				'on-change-query': this.refresh,
-			},
-			scopedSlots: _(this.$scopedSlots)
-				.mapValues((func, slot) => {
-					if (slot == 'pagination-info' || slot.startsWith('column_')) return slot; // Don't screw with column / pagination slot definitions
-					return props => h('a', {
-						directives: [{
-							name: 'href',
-							value: this.$props.cellHref(props.row),
-						}],
-					}, func(props));
-				})
-				.value(),
-		});
+		if (this.$props.view == 'table') {
+			return h('vue-bootstrap4-table', {
+				props: {
+					rows: this.rows,
+					totalRows: this.rowCount,
+					columns: this.computedColumns,
+					config: this.computedConfig,
+				},
+				on: {
+					'on-change-query': this.refresh,
+				},
+				scopedSlots: _(this.$scopedSlots)
+					.mapValues((func, slot) => {
+						if (slot == 'pagination-info' || slot.startsWith('column_')) return slot; // Don't screw with column / pagination slot definitions
+						return props => h('a', {
+							directives: [{
+								name: 'href',
+								value: this.$props.cellHref(props.row),
+							}],
+						}, func(props));
+					})
+					.value(),
+			});
+		} else if (this.$props.view == 'directory') {
+			if (this.state == 'pending') this.refresh(); // Kick off first load if we havn't already done so
+
+			return h('directory', {
+				props: {
+					root: {
+						children:
+							_.isPlainObject(this.$props.directoryMap) ? this.rows.map(row =>
+								_.mapValues(this.$props.directoryMap, (v, k) => row[v])
+							)
+							: _.isFunction(this.$props.directoryMap) ? this.rows.map(this.$props.directoryMap)
+							: this.$props.cellHref ? this.rows.map(row => ({...row, href: this.$props.cellHref(row)}))
+							: this.rows,
+					},
+				},
+			});
+		} else {
+			throw new Error(`Unsupported view "${this.$props.view}"`);
+		}
 	},
 	created() {
 		this.$debugging = true;
