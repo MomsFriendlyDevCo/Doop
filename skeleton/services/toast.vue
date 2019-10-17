@@ -129,8 +129,8 @@ module.exports = function() {
 	position: absolute;
 	width: 50px;
 	left: -6px;
-	top: -6px;
-	bottom: -6px;
+	top: -20px;
+	bottom: -20px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
