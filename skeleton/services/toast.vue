@@ -35,9 +35,15 @@ module.exports = function() {
 	* Display a toast with progress
 	* @param {string} id A unique ID to identify the toast so it can be changed later
 	* @param {string} [text] The text of the progress area
-	* @paraM {number} progress Progress to show between 0 and 100 - at 100 the progress display is removed
+	* @param {number} progress Progress to show between 0 and 100 - at 100 the progress display is removed
+	* @param {object} [options] Additional options to pass
+	* @param {object} [options.icon="far fa-spinner fa-spin"] Font-Awesome comaptible icon class to use in the side of the toast
 	*/
-	$toast.progress = (id, text, progress) => {
+	$toast.progress = (id, text, progress, options) => {
+		var settings = {
+			icon: 'far fa-spinner fa-spin',
+		};
+
 		// Argument mangling {{{
 		if (!id) throw new Error('$toast.progress(id, [text], progress) requires an ID');
 		if (_.isNumber(text)) {
@@ -58,10 +64,16 @@ module.exports = function() {
 						closeOnClick: false,
 						icon: false,
 						html: ''
-							+ `<h4 id="toast-text-${id}">${text || ''}</h4>`
-							+ '<div class="col-12">'
-								+ '<div class="progress m-b-0">'
-									+`<div id="toast-progress-${id}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${progress || 0}%"></div>`
+							+ '<div class="media col-12">'
+								+ '<div class="mr-2 snotify-fa-icon">'
+									+ `<i class="${settings.icon}"></i>`
+								+ '</div>'
+								+ '<div class="media-body">'
+									+ `<h4 id="toast-text-${id}">${text || ''}</h4>`
+										+ '<div class="progress mb-1">'
+											+`<div id="toast-progress-${id}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${progress || 0}%"></div>`
+										+ '</div>'
+									+ '</div>'
 								+ '</div>'
 							+ '</div>'
 					},
@@ -107,9 +119,33 @@ module.exports = function() {
 </service>
 
 <style>
+.snotifyToast {
+	box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.2);
+}
+
+/* Icons {{{ */
+.snotifyToast .snotify-fa-icon {
+	font-size: 2em;
+	position: absolute;
+	width: 50px;
+	left: -6px;
+	top: -6px;
+	bottom: -6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	filter: brightness(1.3);
+	background: var(--secondary);
+}
+
+.snotifyToast .snotify-fa-icon + .media-body {
+	margin-left: 50px;
+}
+/* }}} */
+
 /* Progress {{{ */
 .snotifyToast.snotify-progress {
-	background-color: var(--gray);
+	background-color: var(--secondary);
 	border: 1px solid var(--gray-dark);
 }
 

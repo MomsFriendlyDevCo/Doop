@@ -83,7 +83,9 @@ module.exports = function() {
 							size: e.total,
 							progress: Math.round(e.loaded / e.total * 100),
 						});
-						Vue.services().$toast.progress(fileObj._id, fileObj.name, fileObj.progress);
+						Vue.services().$toast.progress(fileObj._id, fileObj.name, fileObj.progress, {
+							icon: 'far fa-file-upload',
+						});
 					},
 					...settings?.body,
 				})
