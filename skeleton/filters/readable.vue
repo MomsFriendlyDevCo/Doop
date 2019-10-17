@@ -2,14 +2,18 @@
 ./node_modules/@momsfriendlydevco/readable/dist/readable.js
 </import>
 
+<script>
+readable.defaults.fileSize.formatters.fallback = '0b';
+</script>
+
 <filter name="fileSize">
-module.exports = value => readable.fileSize(value);
+module.exports = (value, options) => readable.fileSize(value, options);
 </filter>
 
 <filter name="relativeTime">
-module.exports = value => readable.relativeTime(value);
+module.exports = (value, options) => readable.relativeTime(value, options);
 </filter>
 
 <filter name="sizeOf">
-module.exports = value => readable.sizeOf(value);
+module.exports = (value, options) => readable.sizeOf(value, options);
 </filter>
