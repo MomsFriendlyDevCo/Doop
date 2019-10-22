@@ -58,7 +58,7 @@
     "gulp": "^4.0.2",
     "gulp-add": "^0.1.0",
     "gulp-babel": "^8.0.0",
-    "gulp-block-head": "^1.0.6",
+    "gulp-block-head": "^1.0.8",
     "gulp-cache": "^1.1.2",
     "gulp-clean-css": "^4.2.0",
     "gulp-concat": "^2.6.1",
