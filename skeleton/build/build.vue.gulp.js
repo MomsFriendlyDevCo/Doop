@@ -39,7 +39,7 @@ gulp.task('build.vue', ['load:app'], ()=>
 				name: path => `scripts/${fspath.basename(path, '.vue')}.js`,
 				transform: content => content,
 			},
-			backpressure: false, // Ignore backpressure as future pipe stages buffer anyway
+			backpressure: true, // Ignore backpressure as future pipe stages buffer anyway
 			blocks: { // Listed in insertation order
 				script: {
 					sort: 0,

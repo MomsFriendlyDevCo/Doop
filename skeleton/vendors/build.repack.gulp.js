@@ -17,7 +17,7 @@ var runCount = 0;
 gulp.task('build.repack', 'load:app', ()=> {
 	var dumpPath = `${app.config.paths.root}/doop.script.repack.js`;
 
-	Promise.resolve()
+	return Promise.resolve()
 		.then(()=> runCount > 0 && fs.promises.stat('dist/vendors.repack.js').then(stat => stat.mtime).catch(()=> 0)) // Fetch last filestamp we compiled against
 		.then(lowWaterMark => new Promise((resolve, reject) => {
 			var changedFileCount = 0;
