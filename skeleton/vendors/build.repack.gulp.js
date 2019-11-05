@@ -5,18 +5,21 @@
 */
 var _ = require('lodash');
 var blockHead = require('gulp-block-head');
+var concat = require('gulp-concat');
 var glob = require('globby');
 var gulp = require('gulp');
 var fs = require('fs');
 var fspath = require('path');
+var readable = require('@momsfriendlydevco/readable');
 var rollup = require('rollup');
 
 var runCount = 0;
-gulp.task('build.repack', 'load:app', ()=>
-	Promise.resolve()
+gulp.task('build.repack', 'load:app', ()=> {
+	var dumpPath = `${app.config.paths.root}/doop.script.repack.js`;
+
+	return Promise.resolve()
 		.then(()=> runCount > 0 && fs.promises.stat('dist/vendors.repack.js').then(stat => stat.mtime).catch(()=> 0)) // Fetch last filestamp we compiled against
 		.then(lowWaterMark => new Promise((resolve, reject) => {
-			var code = [];
 			var changedFileCount = 0;
 			var waitingOn = [];
 
@@ -36,31 +39,32 @@ gulp.task('build.repack', 'load:app', ()=>
 										gulp.log('Repacking', gulp.colors.cyan(fspath.relative(app.config.paths.root, path)));
 										changedFileCount++;
 									}
-
-									// Track file changes anyway in case any other file needs recompiling
-									content
-										.split('\n')
-										.map(_.trim)
-										.forEach(line => code.push(line));
 								})
 						);
+
+						return content;
 					},
 				},
 			}))
-			.on('finish', ()=> Promise.all(waitingOn) // Let all async tasks finish...
-				.then(()=> {
-					if (changedFileCount > 0) {
-						if (runCount > 0) gulp.log('Need to repack due to', gulp.colors.cyan(changedFileCount), 'changed files');
-						resolve(code.join('\n'));
-					} else {
-						reject('SKIP');
-					}
-				})
-			)
+			.pipe(concat(fspath.basename(dumpPath)))
+			.pipe(gulp.dest(fspath.dirname(dumpPath)))
+			.on('finish', ()=> {
+				Promise.all(waitingOn) // Let all async tasks finish...
+					.then(()=> {
+						if (changedFileCount > 0) {
+							if (runCount > 0) gulp.log('Need to repack due to', gulp.colors.cyan(changedFileCount), 'changed files');
+							resolve();
+						} else {
+							return Promise.reject('SKIP');
+						}
+					})
+					.then(resolve)
+					.catch(reject)
+			})
 		}))
-		.then(importCode => fs.promises.writeFile(`${app.config.paths.root}/doop-repack.js`, importCode))
+		.then(()=> gulp.log('Compiling via Rollup'))
 		.then(mappings => rollup.rollup({
-			input: `${app.config.paths.root}/doop-repack.js`,
+			input: dumpPath,
 			inlineDynamicImports: true,
 			plugins: [
 				require('rollup-plugin-replace')({
@@ -91,10 +95,10 @@ gulp.task('build.repack', 'load:app', ()=>
 		.then(bundle => bundle.generate({
 			format: 'cjs',
 		}))
-		.then(res => Promise.all([
-			fs.promises.writeFile('dist/vendors.repack.js', res.output[0].code),
-			fs.promises.unlink(`${app.config.paths.root}/doop-repack.js`)
-		]))
-		.catch(e => e === 'SKIP' ? Promise.resolve() : e)
+		.then(res => fs.promises.writeFile('dist/vendors.repack.js', res.output[0].code))
+		.then(()=> fs.promises.stat('dist/vendors.repack.js'))
+		.then(stat => gulp.log('Generated', gulp.colors.cyan(readable.fileSize(stat.size)), 'script via repack'))
+		.catch(e => e === 'SKIP' ? Promise.resolve() : Promise.reject(e))
 		.finally(()=> runCount++)
-);
+		.finally(()=> dumpPath && fs.promises.unlink(dumpPath).catch(e => {}))
+});
