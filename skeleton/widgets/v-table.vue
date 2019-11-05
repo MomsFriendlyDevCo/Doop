@@ -15,15 +15,52 @@
 *
 * @url https://rubanraj54.gitbook.io/vue-bootstrap4-table/usage
 * @param {string} url Doop / Monoxide ReST endpoint to connect to
-* @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
 * @param {Object} columns Column definitions
 * @param {Object} config Overall table definition
+* @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
+* @param {function} [cellHref] Function called as `(row)` which can optionally return a link to wrap each cell as a link. Uses `v-href` internally so any of its values are supported
 * @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
 * @param {string} [text-loading="Loading..."] Message to display when loading FIXME: Not yet implemented
 * @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
 *
 * @slot [columnId] The per-cell rendering of a specific row. Row data available as `props.row`
-* @slot [column_columnId] COlumn header rendering of a specific column definition
+* @slot [column_columnId] Column header rendering of a specific column definition
+* 
+* @example Set up column definitions within a controller
+* data() { return {
+*	columns: [
+*		{type: 'status', name: 'status'},
+*		{type: 'text', label: 'Title', name: 'title', sort: true},
+*		{type: 'date',label: 'Created', name: 'created,},
+*		{type: 'date', label: 'Last edited', name: 'edited'},
+*		{type: 'verbs', name: 'verbs'},
+* 	],
+* }}
+*
+* @example Show an interactive list of widgets within a template
+* <v-table
+* 	url="/api/widgets"
+* 	:columns="columns"
+* 	:cell-href="row => `/widgets/${row._id}`"
+* 	:search="true"
+* 	text-empty="No widgets found"
+* 	text-loading="Loading widgets..."
+* >
+* 	<template #status="props">
+* 		<i v-if="props.row.status == 'active'" class="fas fa-circle text-success" v-tooltip="'Widget is active'"/>
+* 		<i v-else-if="props.row.status == 'deleted'" class="fas fa-circle text-warning" v-tooltip="'Widget has been deleted'"/>
+* 		<i v-else class="fas fa-question-circle text-warning" v-tooltip="'Widget status is unknown'"/>
+* 	</template>
+* 	<template #title="props">
+* 		{{props.row.title}}
+* 	</template>
+* 	<template #created="props">
+* 		<date :date="props.row.created"/>
+* 	</template>
+* 	<template #edited="props">
+* 		<date :date="props.row.edited"/>
+* 	</template>
+* </v-table>
 */
 module.exports = {
 	data() { return {
