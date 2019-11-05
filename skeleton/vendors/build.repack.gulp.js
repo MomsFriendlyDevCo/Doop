@@ -14,6 +14,7 @@ var readable = require('@momsfriendlydevco/readable');
 var rollup = require('rollup');
 
 var runCount = 0;
+var repackCache;
 gulp.task('build.repack', 'load:app', ()=> {
 	var dumpPath = `${app.config.paths.root}/doop.script.repack.js`;
 
@@ -64,6 +65,7 @@ gulp.task('build.repack', 'load:app', ()=> {
 		}))
 		.then(()=> gulp.log('Compiling via Rollup'))
 		.then(mappings => rollup.rollup({
+			...(repackCache ? {cache: repackCache} : null),
 			input: dumpPath,
 			inlineDynamicImports: true,
 			plugins: [
@@ -92,9 +94,12 @@ gulp.task('build.repack', 'load:app', ()=> {
 				require('rollup-plugin-uglify').uglify(),
 			],
 		}))
-		.then(bundle => bundle.generate({
-			format: 'cjs',
-		}))
+		.then(bundle => {
+			repackCache = bundle.cache;
+			return bundle.generate({
+				format: 'cjs',
+			});
+		})
 		.then(res => fs.promises.writeFile('dist/vendors.repack.js', res.output[0].code))
 		.then(()=> fs.promises.stat('dist/vendors.repack.js'))
 		.then(stat => gulp.log('Generated', gulp.colors.cyan(readable.fileSize(stat.size)), 'script via repack'))
