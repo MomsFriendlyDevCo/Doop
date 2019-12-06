@@ -51,6 +51,7 @@ module.exports = function() {
 	* @param {function} [options.postMangle] How to mangle incomming AxiosResponse objects into a usable data set, defaults to just extracting `res.data`
 	* @param {string} [options.subscriptionId=this._uid] How to reference this component
 	* @param {boolean} [options.autoUnsubscribe] If true, listens for the `.on('$destroy')` custom event and unsubcribes
+	* @param {function} [options.onPoll] Function to run when a poll event occurs. Called as `(data)`
 	*/
 	$pubSub.subscribe = function(url, options) {
 		if (!url) throw new Error('Cannot subscribe to empty URL');
@@ -61,30 +62,30 @@ module.exports = function() {
 			postMangle: res => res.data,
 			subscriptionId: this._uid,
 			autoUnsubscribe: true,
+			onPoll: undefined,
 			...options,
 		};
 
 		if ($pubSub.subscriptions[url]) { // Already exists
+			this.$debug('Existing subscription to', url, {subId: settings.subscriptionId});
 			$pubSub.subscriptions[url].controllers.add(settings.subscriptionId);
 		} else {
-			this.$debug('New subscription to', url, {subId: settings.subscriptionId});
+			this.$debug('New subscription to', url, {subId: settings.subscriptionId, ...settings});
 			Vue.set($pubSub.subscriptions, url, {
 				url,
 				pollDelay: settings.pollDelay,
 				postMangle: settings.postMangle,
 				controllers: new Set([settings.subscriptionId]),
+				onPoll: settings.onPoll,
+				timer: setTimeout(()=> $pubSub.poll(sub.url), settings.pollDelay),
 			});
 
-			if (settings.immediate) {
-				$pubSub.poll(url);
-			} else {
-				sub.timer = setTimeout(()=> $pubSub.poll(sub.url), $pubSub.pollDelay);
-			}
+			if (settings.immediate) $pubSub.poll(url);
 		}
 
 		if (settings.autoUnsubscribe) {
 			if (!this._events) return this.$debug('FIXME: Cannot autoUnsubscribe against non-Vue component', {vm: this});
-			this.$on('$destroy', ()=> $pubSub.unsubscribe(sub.url, settings.subscriptionId))
+			this.$on('$destroy', ()=> $pubSub.unsubscribe(url, settings.subscriptionId))
 		}
 	};
 
@@ -92,6 +93,7 @@ module.exports = function() {
 	/**
 	* Invoke a subscribed URL poll immediately
 	* This will pull in the latest data and reset all pending timers
+	* @returns {Promise} A promise which will resolve with the returned data
 	*/
 	$pubSub.poll = function(url) {
 		var sub = $pubSub.subscriptions[url];
@@ -100,10 +102,14 @@ module.exports = function() {
 		clearTimeout(sub.timer);
 
 		this.$debug('Poll', url);
-		this.$http.get(sub.url)
+		return this.$http.get(sub.url)
 			.then(res => sub.postMangle(res))
 			.then(res => Vue.set($pubSub.data, sub.url, res))
-			// .finally(()=> sub.timer = setTimeout(()=> $pubSub.poll(sub.url), sub.pollDelay))
+			.then(res => sub.onPoll && sub.onPoll(res))
+			.finally(()=> {
+				if (!$pubSub.subscriptions[url]) return; // We were unsubscribed while still working - exit with no reschedule
+				sub.timer = setTimeout(()=> $pubSub.poll(sub.url), sub.pollDelay);
+			})
 	};
 
 
@@ -111,18 +117,21 @@ module.exports = function() {
 	* Unsubscribe from a URL endpoint by its unique url
 	* This API is called automatically when a parent component is destroyed
 	* @param {string} url The URL to unsubscribe from
-	* @param {string} [subscriptionId=this._uid] The reference of the current component unsubscribing
+	* @param {string} [subscriptionId=this._uid] The reference of the current component unsubscribing, if no ID is given all controllers are force unsubscribed
 	*/
 	$pubSub.unsubscribe = function(url, subscriptionId) {
-		if (!$pubSub.subscriptions[url]) return; // Not subscribed anyway
+		var sub = $pubSub.subscriptions[url];
+		if (!sub) return; // Not subscribed anyway
 
-		this.$debug('Unsubscribe from', url, {subId: subscriptionId});
-		$pubSub.subscriptions[url].controllers.delete(subscriptionId);
+		if (subscriptionId) sub.controllers.delete(subscriptionId);
 
-		if (!$pubSub.subscriptions[url].controllers.size) { // No more subscribers - remove it
-			clearTimeout($pubSub.subscriptions[url].timer);
+		if (!subscriptionId || !sub.controllers.size) { // No more subscribers - remove it
+			this.$debug('Unsubscribe from', url, {subId: subscriptionId});
+			clearTimeout(sub.timer);
 			Vue.delete($pubSub.subscriptions, url);
 			Vue.delete($pubSub.data, url);
+		} else {
+			this.$debug('Partial unsubscribe from', url, {subId: subscriptionId, remainingControllers: sub.size});
 		}
 	};
 
@@ -148,15 +157,20 @@ module.exports = function() {
 */
 module.exports = {
 	props: {
-		url: String,
-		pollDelay: Number,
+		url: {type: String, required: true},
+		pollDelay: {type: Number, default: 2000},
+		onPoll: {type: Function},
 	},
 	mounted() {
 		this.$pubSub.subscribe(this.$props.url, {
-			uid: this._uid,
-			pollDelay: this.pollDelay,
+			autoUnsubscribe: false, // We take care of this in the components lifecycle anyway
 			subscriptionId: this._uid,
+			pollDelay: this.$props.pollDelay,
+			onPoll: this.$props.onPoll,
 		});
+	},
+	beforeDestroy() {
+		this.$pubSub.unsubscribe(this.$props.url, this._uid);
 	},
 };
 </component>
