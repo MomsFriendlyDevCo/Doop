@@ -30,8 +30,8 @@ module.exports = {
 		},
 	},
 	ssl: {
-		enabled: true,
-		redirect: true,
+		enabled: false,
+		redirect: false,
 		port: 443,
 		cert: '/etc/letsencrypt/live/{{FIXME:hostname}}/fullchain.pem',
 		key: '/etc/letsencrypt/live/{{FIXME:hostname}}/privkey.pem',
