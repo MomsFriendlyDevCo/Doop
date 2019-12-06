@@ -42,12 +42,12 @@ module.exports = {
 					},
 					focusout: ()=> {
 						$el
-							.attr('contenteditable', false)
+							.removeAttr('contenteditable')
 							.removeClass(settings.classEditing)
 							.off('keypress', events.keypress)
 							.off('focusout', events.focusout)
 
-						settings.handler($el.text(), $el, settings);
+						settings.handler(_.trim($el.text()), $el, settings);
 					},
 				};
 
