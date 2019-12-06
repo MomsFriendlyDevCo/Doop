@@ -3,6 +3,10 @@
 	border-bottom-width: 1px;
 }
 
+/* Support for modal sizes */
+.modal .modal-dialog.modal-lg {max-width: 80%}
+.modal .modal-dialog.modal-xl {max-width: 95%}
+
 /* Modals should have a drop shadow */
 .modal .modal-dialog {
 	box-shadow: 7px 7px 5px 0px rgba(50, 50, 50, 0.16);
