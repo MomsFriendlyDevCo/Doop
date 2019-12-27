@@ -182,13 +182,19 @@ module.exports = {
 				},
 				scopedSlots: _(this.$scopedSlots)
 					.mapValues((func, slot) => {
-						if (slot == 'pagination-info' || slot.startsWith('column_')) return slot; // Don't screw with column / pagination slot definitions
-						return props => h('a', {
+						// Don't screw with column / pagination slot definitions
+						if (slot == 'pagination-info' || slot.startsWith('column_')) return func;
+
+						// Wrap with cellHref property?
+						if (this.$props.cellHref) return props => h('a', {
 							directives: [{
 								name: 'href',
 								value: this.$props.cellHref(props.row),
 							}],
 						}, func(props));
+
+						// Fell though all other render methods - let Vue handle the raw slot
+						return func;
 					})
 					.value(),
 			});
