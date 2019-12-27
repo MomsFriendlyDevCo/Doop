@@ -10,10 +10,10 @@ app.middleware.express.hasPermission = (...permissions) => {
 		if (!req.user || !req.user.permissions || permissions.every(p => req.user.permissions[p])) {
 			next();
 		} else if (!req.user) {
-			app.warn('User is not logged in');
+			app.log.warn('User is not logged in');
 			res.sendError(403, 'Login required');
 		} else {
-			app.warn('User', app.log.colors.cyan(req.user.username), 'does not have permissions', permissions);
+			app.log.warn('User', app.log.colors.cyan(req.user.username), 'does not have permissions', permissions);
 			res.sendError(403, 'Insufficient permissions');
 		}
 	};
