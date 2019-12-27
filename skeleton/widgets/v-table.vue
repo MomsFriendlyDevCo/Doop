@@ -109,6 +109,10 @@ module.exports = {
 						v.column_classes = v.row_classes = 'col-text';
 						v.row_text_alignment = 'text-left';
 						break;
+					case 'lookup':
+						v.column_classes = v.row_classes = 'col-text';
+						v.row_text_alignment = 'text-center';
+						break;
 					case 'number':
 						v.column_classes = v.row_classes = 'col-number';
 						v.row_text_alignment = 'text-right';
