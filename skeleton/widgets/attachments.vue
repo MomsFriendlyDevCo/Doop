@@ -11,7 +11,7 @@
 *	- "icons": Plain, icon only view where additional data is displayed in tooltips, accepts class mutator 'attachments-sm'
 *
 * @param {string} url The backend endpoint to query for file lists and to POST to
-* @param {string} [view="table"] How to display the widget, ENUM: "table", "directory", "icons"
+* @param {string} [view="table"] How to display the widget, ENUM: "table", "directory", "icons", "gallery"
 * @param {boolean} [showControls=false] Whether to show, card like verbs for uploading
 * @param {boolean} [allowDelete=false] Whether to allow file deletion (backend must support DELETE method)
 * @param {boolean} [allowUpload=false] Whether to allow file uploads (backend must support POST method) - NOTE you must setup an upload button somewhere which calls `$refs.attachments.upload()`
@@ -199,6 +199,30 @@ module.exports = {
 				</slot>
 			</div>
 			<!-- }}} -->
+			<!-- Gallery view {{{ -->
+			<div v-else-if="$props.view == 'gallery'" class="attachments-view-gallery">
+				<a
+					v-for="attachment in attachments"
+					:key="attachment.url"
+					v-href="{href: attachment.url, target: '_blank'}"
+					v-tooltip="getAttachmentTooltip(attachment)"
+					class="attachment-item"
+					:style="{'background-image': `url('${attachment.url}')`}"
+				>
+					<a @click.stop.prevent="remove(attachment)" class="attachment-item-btn btn btn-danger btn-sm far fa-times"/>
+				</a>
+				<slot name="uploadButton" :upload="upload">
+					<a
+						v-if="showControls"
+						@click.stop="upload()"
+						class="attachment-item-upload"
+						v-tooltip="'Upload a new file'"
+					>
+						<i class="fas fa-plus"/>
+					</a>
+				</slot>
+			</div>
+			<!-- }}} -->
 			<!-- Unknown view {{{ -->
 			<div v-else class="text-danger">
 				Unknown attachment view "{{view}}"
@@ -286,5 +310,47 @@ module.exports = {
 	transform: scale(0.8);
 }
 /* }}} */
+/* }}} */
+/* gallery view {{{ */
+.attachments .attachments-view-gallery .attachment-item,
+.attachments .attachments-view-gallery .attachment-item-upload {
+	width: 140px;
+	height: 140px;
+	font-size: 80px;
+	border-radius: 5px;
+	margin: 5px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	color: var(--light);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+	border: 1px solid var(--light);
+	vertical-align: bottom;
+}
+
+.attachments .attachments-view-gallery .attachment-item:hover,
+.attachments .attachments-view-gallery .attachment-item-upload:hover {
+	border: 1px solid var(--primary);
+	color: var(--primary);
+}
+
+.attachments .attachments-view-gallery .attachment-item:hover .attachment-item-btn {
+	display: block;
+}
+
+.attachments .attachments-view-gallery .attachment-item .attachment-item-btn {
+	display: none;
+	position: absolute;
+	margin-top: 50px;
+	margin-left: 50px;
+	opacity: 0.5;
+	transition: opacity 0.2s;
+}
+
+.attachments .attachments-view-gallery .attachment-item .attachment-item-btn:hover {
+	opacity: 1;
+}
 /* }}} */
 </style>
