@@ -150,7 +150,9 @@ app.middleware.express.attachments = (path, options) => {
 									fs.promises.rename(file.path, dstFile),
 
 									// (if settings.metaData), create meta file
-									fs.promises.writeFile(settings.metaPath(dstFile), JSON.stringify(settings.metaFields(req, file), null, '\t')),
+									settings.metaData
+										? fs.promises.writeFile(settings.metaPath(dstFile), JSON.stringify(settings.metaFields(req, file), null, '\t'))
+										: undefined,
 								]);
 							})))
 							.then(()=> res.sendStatus(200))
