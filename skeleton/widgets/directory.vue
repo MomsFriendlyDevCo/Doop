@@ -63,7 +63,7 @@ module.exports = {
 					<div class="media align-items-center">
 						<i class="directory-icon" :class="(node.icon || 'fas fa-folder') + ' fa-3x m-2'"/>
 						<div class="media-body ml-1">
-							<h3 class="mb-0 direcotory-text">{{node.title}}</h3>
+							<h3 class="mb-0 directory-text">{{node.title}}</h3>
 							<div v-if="node.subTitle">{{node.subTitle}}</div>
 						</div>
 					</div>
