@@ -40,17 +40,25 @@ module.exports = {
 							events.focusout();
 						}
 					},
+					isEnding: false,
 					focusout: ()=> {
+						// Constrain this function to oonly work once (fix for some browsers that fires focusout zelously)
+						if (events.isEnding) return;
+						events.isEnding = true;
+
 						$el
 							.removeAttr('contenteditable')
 							.removeClass(settings.classEditing)
 							.off('keypress', events.keypress)
 							.off('focusout', events.focusout)
 
-						settings.handler(_.trim($el.text()), $el, settings);
+						var newText = _.trim($el.text());
+						Promise.resolve(settings.handler(newText, $el, settings))
+							.then(()=> settings.value = newText); // Update value to new text if we didn't throw
 					},
 				};
 
+				// Binnd all our properties
 				$el
 					.attr('contenteditable', true)
 					.addClass(settings.classEditing)
@@ -58,14 +66,14 @@ module.exports = {
 					.on('keypress', events.keypress)
 					.on('focusout', events.focusout)
 
-					// Silly hack to select the contenteditable range {{{
-					var range = document.createRange();
-					range.selectNodeContents($el[0]);
-					range.setStart($el[0].firstChild, $el.text().length);
-					var sel = window.getSelection();
-					sel.removeAllRanges();
-					sel.addRange(range);
-					// }}}
+				// Silly hack to select the contenteditable range {{{
+				var range = document.createRange();
+				range.selectNodeContents($el[0]);
+				range.setStart($el[0].firstChild, $el.text().length);
+				var sel = window.getSelection();
+				sel.removeAllRanges();
+				sel.addRange(range);
+				// }}}
 			});
 	},
 };
@@ -74,6 +82,7 @@ module.exports = {
 <style>
 .editable {
 	border: 1px solid transparent;
+	cursor: pointer;
 }
 
 .editable.editing {
