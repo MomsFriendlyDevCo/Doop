@@ -240,7 +240,9 @@ module.exports = function() {
 		$digest.cache[settings.hash] = {
 			created: new Date(),
 			value: undefined,
-			promise: this.$http.get(settings.field ? `${url}?select=${settings.field}` : url)
+			promise: this.$http.get(url, {
+				...(settings.field ? {params: {select: settings.field}} : null)
+			})
 				.then(res => { // Pick the specific field value if requested, otherwise return full response
 					if (settings.field) { // Extract single field
 						if (_.isArray(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got an array`);
