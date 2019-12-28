@@ -17,6 +17,7 @@
 * @param {string} url Doop / Monoxide ReST endpoint to connect to
 * @param {Object} columns Column definitions
 * @param {Object} config Overall table definition
+* @param {string} [config.sortBy] Override sort detection to use the named field instead of auto-detecting based on the first sortable field
 * @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
 * @param {function} [cellHref] Function called as `(row)` which can optionally return a link to wrap each cell as a link. Uses `v-href` internally so any of its values are supported
 * @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
@@ -97,28 +98,43 @@ module.exports = {
 			};
 		},
 		computedColumns() { // Rewrite base columns config so we can avoid being explicit in most cases
-			return this.$props.columns.map(v => {
+			var sortedBy = this.computedConfig?.sortBy; // Final result of the column we sorted by
+
+			return this.$props.columns.map((v, i) => {
+				// Process `{sort: true}` into setting the initial sort order for the first sortable item (unless 'sortBy' is set in config)
+				if (
+					(!sortedBy && v.sort) // First discovered sortable column in auto-detect mode
+					|| (v.name == sortedBy) // Nominated column to sort by
+				) {
+					sortedBy = v.name; // Prevent applying sort again
+					v.initial_sort = true;
+				}
+
+				// Apply type shortcuts
 				switch (v.type) {
 					case 'status':
 						v.column_classes = v.row_classes = 'col-status';
+						v.column_text_alignment = v.row_text_alignment = 'text-left';
 						break;
 					case 'date':
 						v.column_classes = 'col-date';
+						v.column_text_alignment = v.row_text_alignment = 'text-center';
 						break;
 					case 'text':
 						v.column_classes = v.row_classes = 'col-text';
-						v.row_text_alignment = 'text-left';
+						v.column_text_alignment = v.row_text_alignment = 'text-left';
 						break;
 					case 'lookup':
 						v.column_classes = v.row_classes = 'col-text';
-						v.row_text_alignment = 'text-center';
+						v.column_text_alignment = v.row_text_alignment = 'text-center';
 						break;
 					case 'number':
 						v.column_classes = v.row_classes = 'col-number';
-						v.row_text_alignment = 'text-right';
+						v.column_text_alignment = v.row_text_alignment = 'text-right';
 						break;
 					case 'verbs':
 						v.column_classes = v.row_classes = 'col-verbs';
+						v.column_text_alignment = v.row_text_alignment = 'text-right';
 						break;
 					default: if (v.type) throw new Error(`Unknown column type "${v.type}"`);
 				}
@@ -136,7 +152,7 @@ module.exports = {
 				.then(()=> ({params: { // Compute AxiosRequest
 					...(query?.filters),
 					...(query?.global_search ? {q: query.global_search} : null), // Add search functionality
-					...(query?.sort && query.sort.length ? {sort: query?.sort.join(',')} : null),
+					...(query?.sort && query.sort.length ? {sort: query?.sort.map(i => _.isString(i) ? i : `${i.order == 'asc' ? '' : '-'}${i.name}`).join(',')} : null),
 					limit: query?.per_page || this.config?.per_page || 30,
 					skip: ((query?.page || 1) - 1) * (query?.per_page || this.config?.per_page || 30),
 				}}))
@@ -193,9 +209,12 @@ module.exports = {
 							}],
 						}, func(props));
 
-						// Fell though all other render methods - let Vue handle the raw slot
+						// Fell though all other render methods - let Vue handle the raw slot render
 						return func;
 					})
+					.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down'}))
+					.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up'}))
+					.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort'}))
 					.value(),
 			});
 		} else if (this.$props.view == 'directory') {
