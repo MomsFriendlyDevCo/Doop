@@ -93,6 +93,7 @@ module.exports = {
 					.catch(err => {
 						this.displayContent = typeof this.$props.textInvalid == 'string' ? this.$props.textInvalid
 							: typeof this.$props.textInvalid == 'function' ? this.$props.textInvalid(err)
+							: err.statusText ? err.statusText
 							: err;
 						this.displayIcon = this.$props.iconInvalid;
 						if (this.$props.classInvalid) this.displayClass = this.$props.classInvalid;
