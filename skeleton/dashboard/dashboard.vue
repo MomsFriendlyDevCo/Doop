@@ -35,7 +35,7 @@ module.exports = {
 <template>
 	<div>
 		<div class="row">
-			<a v-if="$session.data.permissions.usersEdit" v-href="{url: '/users', transition: 'slide-right'}" class="col-sm-6 col-md-3">
+			<a v-if="$session.data.permissions.usersEdit" v-href="{href: '/users', transition: 'slide-right'}" class="col-sm-6 col-md-3">
 				<div class="card-box">
 					<div class="float-left">
 						<i class="fas fa-user fa-4x m-2 text-primary"/>
@@ -49,7 +49,7 @@ module.exports = {
 					</div>
 				</div>
 			</a>
-			<a v-if="$session.data.permissions.companiesEdit" v-href="{url: '/companies', transition: 'slide-right'}" class="col-sm-6 col-md-3">
+			<a v-if="$session.data.permissions.companiesEdit" v-href="{href: '/companies', transition: 'slide-right'}" class="col-sm-6 col-md-3">
 				<div class="card-box">
 					<div class="float-left">
 						<i class="fas fa-building fa-4x m-2 text-info"/>
