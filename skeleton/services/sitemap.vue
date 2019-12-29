@@ -314,7 +314,7 @@ module.exports = {
 
 <template name="sitemapMap">
 	<ul class="nav flex-column flex-nowrap flex-grow-1 flex-shrink-1 overflow-auto">
-		<li class="nav-item" v-for="node in sitemapTree" :class="node.opened ? 'opened' : 'closed'">
+		<li class="nav-item" v-for="node in sitemapTree" :class="[node.opened ? 'opened' : 'closed', node.selected && 'active']">
 			<a @click="itemClick(node)" v-href="node.href" class="nav-link d-flex align-items-center flex-nowrap">
 				<i class="flex-grow-0 flex-shrink-0 mr-3" :class="node.icon"></i>
 				<span class="flex-grow-0 flex-shrink-1 overflow-hidden text-truncate">{{node.title}}</span>
@@ -323,7 +323,7 @@ module.exports = {
 			</a>
 			<ul class="collapse" v-if="node.children">
 				<li v-for="node in node.children">
-					<a @click="itemClick(node)" v-href="node.href" class="nav-link">
+					<a @click="itemClick(node)" v-href="node.href" class="nav-link" :class="node.selected && 'active'">
 						{{node.title}}
 					</a>
 				</li>
@@ -376,5 +376,9 @@ module.exports = {
 
 .side-menu li.opened .collapse {
 	display: block !important;
+}
+
+.side-menu .collapse a.active {
+	background: var(--main-highlight);
 }
 </style>
