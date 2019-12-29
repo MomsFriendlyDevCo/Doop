@@ -5,38 +5,24 @@ module.exports = {
 		user: {
 			email: undefined,
 			name: undefined,
-			permissions: {},
 		},
-		spec: undefined,
 	}},
 	methods: {
-		refresh() {
-			return Promise.resolve()
-				.then(()=> this.$loader.start())
-				.then(res => this.spec = res.data)
-				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop())
-		},
 		submit() {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
-				.then(()=> this.$http.post('/api/users/invite', {
-					...this.user,
-				}))
-				.then(()=> this.$toast.success(`An invite has been sent to ${this.user.name || this.user.email}`))
-				.then(res => this.$router.go(`/users`))
+				.then(()=> this.$http.post('/api/users/invite', this.user))
+				.then(()=> this.$toast.success(`Invite sent to ${this.user.name || this.user.email}`))
+				.then(res => this.$router.go(`/users/${res._id}`))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop())
 		},
-	},
-	created() {
-		return this.refresh();
 	},
 };
 </component>
 
 <template>
-	<form v-if="spec" class="form-horizontal" @submit.prevent="submit()">
+	<form class="form-horizontal" @submit.prevent="submit()">
 		<div class="btn-group-float">
 			<a @click="submit()" class="btn btn-icon btn-lg btn-circle btn-success fa fa-check" v-tooltip="'Send user invite'"></a>
 		</div>

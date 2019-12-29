@@ -117,7 +117,7 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	query: true,
 	count: true,
 	create: false,
-	save: false,
+	save: app.middleware.express.hasPermission('usersEdit'),
 	meta: true,
 	delete: [
 		app.middleware.express.hasPermission('usersDelete'),
