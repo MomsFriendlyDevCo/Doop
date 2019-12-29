@@ -85,9 +85,14 @@ module.exports = {
 	text-decoration: none;
 }
 
+.directory .directory-item .media-body {
+	overflow: hidden;
+}
+
 .directory .directory-item .directory-text {
 	white-space: nowrap;
 	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .directory .directory-item:hover {
