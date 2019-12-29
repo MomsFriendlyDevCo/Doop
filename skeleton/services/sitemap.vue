@@ -319,14 +319,15 @@ module.exports = {
 				<i class="flex-grow-0 flex-shrink-0 mr-3" :class="node.icon"></i>
 				<span class="flex-grow-0 flex-shrink-1 overflow-hidden text-truncate">{{node.title}}</span>
 				<span v-if="node.children" class="menu-arrow flex-grow-0 flex-shrink-0 pl-2 ml-auto">
-					<i class="text-muted fas fa-fw fa-xs fa-chevron-left"></i>
 				</span>
 			</a>
-			<div class="collapse" v-if="node.children">
-				<a @click="itemClick(node)" v-href="node.href" class="nav-link" v-for="node in node.children">
-					{{node.title}}
-				</a>
-			</div>
+			<ul class="collapse" v-if="node.children">
+				<li v-for="node in node.children">
+					<a @click="itemClick(node)" v-href="node.href" class="nav-link">
+						{{node.title}}
+					</a>
+				</li>
+			</ul>
 		</li>
 	</ul>
 </template>
@@ -346,6 +347,10 @@ module.exports = {
 	max-height: 100vh;
 }
 
+.side-menu ul {
+	overflow-x: hidden !important;
+}
+
 .side-menu .menu-arrow {
 	transition: transform 0.3s ease-out;
 }
@@ -356,6 +361,7 @@ module.exports = {
 
 .side-menu li > a {
 	border: 0 !important;
+	white-space: nowrap;
 }
 
 .side-menu li.active > a {
@@ -366,5 +372,9 @@ module.exports = {
 .side-menu li.active > a > span,
 .side-menu li.active > a > i {
 	color: var(--white) !important;
+}
+
+.side-menu li.opened .collapse {
+	display: block !important;
 }
 </style>
