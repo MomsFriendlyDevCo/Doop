@@ -187,6 +187,7 @@ module.exports = {
 	render(h) {
 		if (this.$props.view == 'table') {
 			return h('vue-bootstrap4-table', {
+				class: 'v-table',
 				props: {
 					rows: this.rows,
 					totalRows: this.rowCount,
@@ -247,3 +248,13 @@ module.exports = {
 	},
 };
 </component>
+
+<style>
+.v-table .card-header {
+	display: none;
+}
+
+.v-table table th {
+	border-top: none;
+}
+</style>
