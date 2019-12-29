@@ -5,10 +5,8 @@
 * @param {number} [timeout=100] Delay in MS to wait before running the function
 */
 module.exports = function() {
-	var $timeout = function(func, timeout) {
-		Vue.nextTick(()=> setTimeout(func, timeout));
+	return function $timeout(func, timeout = 100) {
+		this.$nextTick(()=> setTimeout(func, timeout));
 	};
-
-	return $timeout;
 };
 </service>
