@@ -237,6 +237,11 @@ module.exports = {
 			throw new Error(`Unsupported view "${this.$props.view}"`);
 		}
 	},
+	watch: {
+		url() { // React to URL changes by refreshing
+			this.refresh();
+		},
+	},
 	created() {
 		this.$debugging = true;
 	},
