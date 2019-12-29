@@ -34,7 +34,7 @@ module.exports = function() {
 	* @param {Object} [options.body] Additional AxiosRequest parameters to pass, overrides auto-generated properties
 	* @param {boolean} [options.multiple=true] If prompting for files, allow multiple
 	* @param {string} [options.accept] The file types to accept, can be a mime list or extension list. e.g. 'image/*,.pdf,.zip'
-	* @param {FileList|File} [options.files] The file(s) to upload in File or FileList format, specifying this does not prompt the user
+	* @param {FormData|FileList|File} [options.files] The file(s) to upload in FormData, File or FileList format, specifying this does not prompt the user
 	* @return {Profimise} A promise which will resolve when all uploads complete
 	*/
 	$files.upload = (options) => {
@@ -117,8 +117,14 @@ module.exports = function() {
 					.appendTo(wrapper)
 					.click();
 			});
-		} else { // Being given an existing FileList object
-			return upload(settings.files instanceof File ? [settings.files] : settings.files);
+		} else if (settings.files instanceof FormData) {
+			return upload(settings.files.values());
+		} else if (settings.files instanceof File) {
+			return upload([settings.files]);
+		} else if (settings.files instanceof FileList) { // Being given an existing FileList object
+			return upload(settings.files);
+		} else {
+			throw new Error('Unknown file upload wrapper');
 		}
 	};
 
