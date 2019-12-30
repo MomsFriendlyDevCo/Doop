@@ -2,6 +2,8 @@
 module.exports = function() {
 	var $prompt = this;
 	$prompt.$debugging = true;
+	$prompt.dialogQueue = [];
+
 
 	// $prompt.modal() {{{
 	/**
@@ -212,7 +214,7 @@ module.exports = function() {
 		settings.defer.state = 'pending';
 		settings.defer.promise.then(
 			()=> settings.defer.state = 'resolved',
-			()=> settings.defer.state = 'rejected'
+			()=> settings.defer.state = 'rejected',
 		);
 		// }}}
 
@@ -256,6 +258,9 @@ module.exports = function() {
 
 		// Open the dialog (via Bootstrap) {{{
 		this.$emit.broadcast('$prompt.open', settings);
+
+		// Trap out-of-context destruction (clicking on background, pressing escape etc.) and reroute to cancel action
+		$(document).one('hide.bs.modal', ()=> $prompt.close(false))
 		// }}}
 
 		return settings.defer.promise;
