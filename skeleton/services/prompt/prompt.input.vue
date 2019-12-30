@@ -14,7 +14,7 @@ app.ready.then(()=> {
 		title: 'Input text',
 		body: '',
 		placeholder: '',
-		component: Vue.component('promptInput'),
+		component: 'promptInput',
 		value: options.default || '',
 		buttons: {
 			left: [{

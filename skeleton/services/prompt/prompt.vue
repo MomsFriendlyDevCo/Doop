@@ -138,14 +138,16 @@ module.exports = function() {
 
 	/**
 	* Display a dialog with various customisations
-	* This is the main $prompt worker - all the below helper functions are really just remappings of this function
+	* This is the main $prompt worker - all the other $prompt.* functions are really just wrappers for this function
 	* @param {Object} options Dialog options to use
 	* @param {string} [options.title='Dialog'] The dialog title
 	* @param {string} [options.body=''] The dialog body (usually the message to display)
 	* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
 	* @param {string} [options.bodyHeader] Additional HTML to render above the main body area (this is always HTML rendered)
 	* @param {string} [options.bodyFooter] Additional HTML to render under the main body area (this is always HTML rendered)
-	* @param {Object|string} [options.component] Vue component object to render as the modal body (under options.body if present), either as a string or wrapped with `Vue.component('fooComponent')`. Uses the `<dynamic-component/>` service to render so can also accept props, events etc.
+	* @param {string} [options.component] Vue component object to render as the modal body (under options.body if present), either as a string or wrapped with `Vue.component('fooComponent')`. Uses the `<dynamic-component/>` service to render so can also accept props, events etc.
+	* @param {Object} [options.componentProps] Property values to pass when initializing the component
+	* @param {Object} [options.componentEvents] Event mappings to pass when initializing the component
 	* @param {string|array} [options.modalClass] Optional modal class items to add (e.g. 'modal-lg')
 	* @param {Object} [options.scope] Scope to use when interpolating HTML (if isHtml is truthy)
 	* @param {string} [options.dialogClose='reject'] How to handle the promise state if the dialog is closed. ENUM: 'resolve', 'reject', 'nothing'
@@ -202,6 +204,8 @@ module.exports = function() {
 			...options,
 		});
 		this.$debug('$prompt.dialog', settings);
+
+		if (settings.component && !_.isString(settings.component)) throw new Error('$prompt.dialog({component}) must be a string or object - use the raw component name or the wrapped Vue.component(name) value');
 		// }}}
 
 		// Attach to promise to add a status property {{{
@@ -300,69 +304,7 @@ module.exports = function() {
 	$prompt.reject = value => $prompt.close(false, value);
 	// }}}
 
-	// Basic messaging - $prompt.alert(), $prompt.confirm() {{{
-	/**
-	* Display a general alert dialog
-	* This function inherits all properties from dialog() but sets various sane defaults suitable for a simple message
-	* @see $prompt.dialog()
-	* @param {Object|string} options Either an options object or the body text of the alert
-	* @param {string} [options.title='Alert'] The title of the alert
-	* @param {string} [options.body='Be alerted'] The body of the alert message
-	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
-	*/
-	$prompt.alert = options => {
-		if (_.isString(options)) options = {title: options};
-		return $prompt.dialog({
-			title: 'Alert',
-			body: 'Be alerted',
-			dialogClose: 'resolve', // Alerts dont ever reject
-			buttons: {
-				center: [{
-					id: 'close',
-					title: 'Close',
-					method: 'resolve',
-				}],
-			},
-			...options,
-		});
-	};
-
-	/**
-	* Prompt with confirm / cancel buttons
-	* This function inherits all properties from dialog() but sets various sane defaults suitable for a confirmation prompt
-	* @see $prompt.dialog()
-	* @param {Object|string} options Either an options object or the body text of the confirmation
-	* @param {string} [options.title='Confirm action'] The title of the dialog
-	* @param {string} [options.body='Are you sure you want to do this?'] The body of the dialog
-	* @param {array} [options.buttons=Confirm + Cancel]
-	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
-	*/
-	$prompt.confirm = options => {
-		if (_.isString(options)) options = {body: options};
-		return $prompt.dialog({
-			title: 'Confirm action',
-			body: 'Are you sure you want to do this?',
-			dialogClose: 'reject', // Reject if the user had second thoughts
-			buttons: {
-				left: [{
-					id: 'cancel',
-					title: 'Cancel',
-					method: 'reject',
-					class: 'btn btn-danger',
-					icon: 'fa fa-times',
-				}],
-				right: [{
-					id: 'confirm',
-					title: 'Confirm',
-					method: 'resolve',
-					class: 'btn btn-success',
-					icon: 'fa fa-check',
-				}],
-			},
-			...options,
-		});
-	};
-	// }}}
+	// All other $prompt.* functions are in seperate files within `services/prompt/prompt.*.vue`
 
 	return $prompt;
 };
@@ -450,10 +392,20 @@ module.exports = {
 						<div v-if="!settings.isHtml" class="text-center">
 							<h4>{{settings.body}}</h4>
 						</div>
-						<mg-form v-if="settings.$isMacgyver" form="promptMacGyver" :config="settings.form" :data="settings.data"/>
+						<mg-form
+							v-if="settings.$isMacgyver"
+							form="promptMacGyver"
+							:config="settings.form"
+							:data="settings.data"
+						/>
 						<div v-if="settings.isHtml" v-html="settings.body"/>
+						<dynamic-component
+							v-if="settings.component"
+							:component="settings.component"
+							:props="settings.componentProps"
+							:events="settings.componentEvents"
+						/>
 						<div v-if="settings.bodyFooter" v-html="settings.$bodyFooter"/>
-						<dynamic-component v-if="settings.component" :component="settings.component"/>
 					</div>
 					<div v-if="settings.buttons && (settings.buttons.left.length || settings.buttons.right.length || settings.buttons.center.length)" class="modal-footer">
 						<div class="align-left">
