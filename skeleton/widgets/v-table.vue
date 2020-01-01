@@ -15,18 +15,23 @@
 *
 * @url https://rubanraj54.gitbook.io/vue-bootstrap4-table/usage
 * @param {string} url Doop / Monoxide ReST endpoint to connect to
-* @param {Object} columns Column definitions
-* @param {Object} config Overall table definition
-* @param {string} [config.sortBy] Override sort detection to use the named field instead of auto-detecting based on the first sortable field
 * @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
 * @param {function} [cellHref] Function called as `(row)` which can optionally return a link to wrap each cell as a link. Uses `v-href` internally so any of its values are supported
 * @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
 * @param {string} [text-loading="Loading..."] Message to display when loading FIXME: Not yet implemented
 * @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
 *
+* @param {Object} columns Column definitions
+* @param {Object} [columns.INDEX.macgyver] MacGyver rendering method to override the slot definition
+* @param {function} [columns.INDEX.macgyver.onChange] Function to execute when the column value changes. Called as `(props, newVal)`, get the full row data as normal with `props.row`
+*
+* @param {Object} config Overall table definition
+* @param {string} [config.sortBy] Override sort detection to use the named field instead of auto-detecting based on the first sortable field
+*
+*
 * @slot [columnId] The per-cell rendering of a specific row. Row data available as `props.row`
 * @slot [column_columnId] Column header rendering of a specific column definition
-* 
+*
 * @example Set up column definitions within a controller
 * data() { return {
 *	columns: [
@@ -138,6 +143,7 @@ module.exports = {
 						break;
 					default: if (v.type) throw new Error(`Unknown column type "${v.type}"`);
 				}
+
 				return v;
 			});
 		},
@@ -213,6 +219,29 @@ module.exports = {
 						// Fell though all other render methods - let Vue handle the raw slot render
 						return func;
 					})
+					.thru(cols => {
+						this.$props.columns
+							.filter(col => col.macgyver)
+							.forEach(col => {
+								cols[col.name] = props => {
+									return h('mgForm', {
+										props: {
+											config: col.macgyver,
+											data: {
+												[col.name]: props.row[col.name],
+											},
+										},
+										on: {
+											changeItem: col.macgyver.onChange ?
+												e => col.macgyver.onChange(props, e.value)
+												: undefined,
+										},
+									});
+								};
+							});
+
+						return cols;
+					})
 					.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down'}))
 					.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up'}))
 					.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort'}))
@@ -244,7 +273,7 @@ module.exports = {
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debugging = false;
 	},
 };
 </component>
@@ -256,5 +285,9 @@ module.exports = {
 
 .v-table table th {
 	border-top: none;
+}
+
+.v-table .col-number {
+	width: 100px;
 }
 </style>
