@@ -25,48 +25,13 @@ window.onload = ()=> {
 	// Router {{{
 
 	// Sort routes {{{
-	// Code taken in-part from https://github.com/hash-bang/string-sort (author of this module is the author of string-sort)
-	// See that module for a test kit and documentation
-	// TL;DR - this is a [Schwartzian Transform](https://en.wikipedia.org/wiki/Schwartzian_transform)
-	var keyOrder = [
-		{key: '_priority', reverse: true},
-		{key: '_pathHuman', charOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', fallback: ()=> String.fromCharCode(65000)},
-		{key: '_path', charOrder: 'abcdefghijklmnopqrstuvwxyz0123456789:/-_', fallback: ()=> String.fromCharCode(65000)},
-	];
-
-
-	// Cache the lookup table for each key rule
-	keyOrder.forEach(keyRule => {
-		if (keyRule.charOrder) {
-			keyRule.charOrderTable = {};
-			keyRule.charOrder.split('').forEach((c,i) => keyRule.charOrderTable[c] = String.fromCharCode(i + 65));
-		}
-	});
-
-	Vue.assets.$assets.routes = Vue.assets.$assets.routes
-		.map(r => [r].concat(keyOrder.map(keyRule => { // Pack the rules into an array of the form [RouterRule, fields...]
-			// Construct each key value
-			if (!_.hasIn(r, keyRule.key)) { // Lookup key missing
-				return undefined;
-			} else if (keyRule.charOrderTable) { // Translate string into something we can use
-				return r[keyRule.key]
-					.toString()
-					.split('')
-					.map(c => keyRule.charOrderTable[c] || keyRule.fallback(c))
-					.join('');
-			} else { // Just return the value
-				return r[keyRule.key];
-			}
-		})))
-		.sort(function(a, b) { // Sort everything...
-			for (var k = 0; k < keyOrder.length; k++) { // Compare each field until we hit something that differs
-				if (_.isUndefined(a[k+1]) || _.isUndefined(b[k+1])) continue; // Skip non-existant comparitors
-				if (a[k+1] == b[k+1]) continue; // Fall though as both values are the same
-				// If we got here the fields differ
-				return a[k+1] > b[k+1] ? (keyOrder[k].reverse ? -1 : 1) : (keyOrder[k].reverse ? 1 : -1);
-			}
-		})
-		.map(i => i[0]); // Unpack and return the rule again
+	// Tidy up routing by sorting all '/' + ':' chars AFTER their ASCII values by replacing them with something stupidly higher in the UTF charset
+	// This has the effect that routes sort in a 'natural' order. e.g. `/widgets/add`, `/widgets/create`, `/widgets/:id`
+	Vue.assets.$assets.routes = _.sortBy(Vue.assets.$assets.routes,
+		route => route.path
+			.replace(/\//g, String.fromCharCode(824))
+			.replace(/:/g, String.fromCharCode(818))
+	);
 	// }}}
 
 	// Setup router {{{
@@ -93,7 +58,7 @@ window.onload = ()=> {
 	/**
 	* Slightly smarter version of $router.push() which understands absolute URLs
 	* @param {string|number|Object|function} location The URL to navigate to or the number of steps forward / backward to navigate, if this is a function it is executed inline
-	* @param {string|number} [location.url] Alternate method of passing the URL to navigate to
+	* @param {string|number} [location.href] Alternate method of passing the URL to navigate to
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
 	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window
