@@ -242,9 +242,9 @@ module.exports = {
 
 						return cols;
 					})
-					.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down'}))
-					.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up'}))
-					.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort'}))
+					.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down ml-1'}))
+					.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up ml-1'}))
+					.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort ml-1'}))
 					.value(),
 			});
 		} else if (this.$props.view == 'directory') {
