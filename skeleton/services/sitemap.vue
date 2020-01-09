@@ -344,7 +344,7 @@ module.exports = {
 }
 
 #wrapper:not(.enlarged) .side-menu .opened ul.list-unstyled {
-	max-height: 100vh;
+	max-height: none;
 }
 
 .side-menu ul {

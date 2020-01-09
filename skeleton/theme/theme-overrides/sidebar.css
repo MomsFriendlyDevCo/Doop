@@ -80,7 +80,7 @@
 		transition: max-height 500ms ease-in-out !important;
 	}
 	#sidebar-menu > ul > li.opened > ul {
-		max-height: 100vh !important;
+		max-height: none !important;
 	}
 	#sidebar-menu > ul > li > ul > li,
 	#sidebar-menu > ul > li > a > span {

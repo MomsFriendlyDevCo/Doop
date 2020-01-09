@@ -51,7 +51,6 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 		}
 	});
 
-	console.log('$setPath', path, value, 'now=', _.get(target, path));
 	return value;
 };
 </script>
