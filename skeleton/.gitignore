@@ -1,5 +1,6 @@
 # Private data
 config/private.conf.js
+.error
 .o
 
 # Dynamic data
