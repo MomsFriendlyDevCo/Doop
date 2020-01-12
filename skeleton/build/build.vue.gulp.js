@@ -100,18 +100,12 @@ gulp.task('build.vue', ['load:app'], ()=>
 			},
 		}))
 		.pipe(replace(/\s*module.exports =\s*/, ''))
-		.pipe(cache(babel({ // Cache output and pipe though Babel
+		.pipe(babel({ // Cache output and pipe though Babel
 			presets: ['@babel/env'],
 			plugins: [
 				'@babel/plugin-proposal-optional-chaining',
-				["@babel/plugin-proposal-pipeline-operator", {proposal: 'fsharp'}]
+				['@babel/plugin-proposal-pipeline-operator', {proposal: 'fsharp'}]
 			],
-		}), {
-			key: file => [app.config.name, file.contents.toString('utf8'), file.stat.mtime, file.stat.size].join(','),
-			success: file => {
-				gutil.log(gutil.colors.blue('[Babel]'), 'compile', gutil.colors.cyan(file.relative));
-				return true;
-			},
 		}))
 		.pipe(replace(/^"use strict";\n$/m, ''))
 		.pipe(concat('app.js'))
