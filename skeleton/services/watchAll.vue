@@ -40,8 +40,11 @@ module.exports = function(props, callback, options) {
 		handler = callback
 	}
 	// }}}
-		
+
 	// Attach watcher to every named prop
-	props.forEach(prop => this.$watch(prop, handler.bind(null, prop, {immediate: settings.immediate})));
+	props.forEach(prop => this.$watch(prop, handler.bind(null, prop)));
+
+	// Run handler immediately if needed
+	if (settings.immediate) handler();
 }
 </service>
