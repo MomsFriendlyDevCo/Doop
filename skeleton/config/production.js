@@ -13,11 +13,6 @@ module.exports = {
 		debugCSS: false,
 		minifyCSS: false, // FIXME: Untested
 	},
-	docs: {
-		oversight: {
-			enabled: true,
-		},
-	},
 	papertrail: {
 		enabled: true,
 	},
