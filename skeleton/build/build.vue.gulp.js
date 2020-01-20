@@ -26,7 +26,7 @@ gulp.task('build.vue', ['load:app'], ()=>
 		'!node_modules/**/*',
 	])
 		// .error file generation on crash (or cleanup if everything ok) {{{
-		.on('finish', ()=> fs.promises.unlink(`${__dirname}/.error`).catch(()=> null)) // Remove .error file on successful compile
+		.on('finish', ()=> fs.promises.unlink(`${app.config.paths.root}/.error`).catch(()=> null)) // Remove .error file on successful compile
 		.pipe(plumber({
 			errorHandler: err => {
 				var trace = crash.generate(err, {
