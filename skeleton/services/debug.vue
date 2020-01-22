@@ -27,7 +27,15 @@ module.exports = function() {
 
 		var prefix = this._id ? this._id // If the component has a specified ID
 			: this.$vnode && this.$vnode.tag ? this.$vnode.tag.replace(/^vue-component-\d+-/, '') // Use a (mangled) Vue tag
-			: this._uid;
+			: this._uid ? this._uid
+			: (()=> { // Try to read stack trace
+				var caller = Error().stack.split('\n').slice(3, 4);
+				if (!caller) return;
+				var callerBits = /^\s+at (.+) /.exec(caller);
+				if (!callerBits) return;
+				return callerBits[1];
+
+			})() || 'UNOWN SOURCE'
 
 		// Allocate color {{{
 		if ($debug.seen[prefix] === undefined) { // Not seen this prefix before
