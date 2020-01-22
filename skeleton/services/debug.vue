@@ -81,6 +81,10 @@ module.exports = function() {
 	};
 
 
+	console.$debugging = true;
+	console.debug = $debug; // Convenience mapping to console.debug
+
+
 	return $debug;
 };
 </service>
