@@ -146,7 +146,7 @@ module.exports = {
 		program: '',
 	},
 	paths: {
-		ignore: config => [`!data`, `!dist`, `!node_modules`], // NOTE: Because the gulpfile.js loads early in the boot order it must be updated when this list changes also
+		ignore: config => ['!data', '!dist', '!node_modules'], // NOTE: Because the gulpfile.js loads early in the boot order it must be updated when this list changes also
 		data: path.normalize(`${__dirname}/../data`),
 		dist: path.normalize(`${__dirname}/../dist`),
 		root: path.normalize(`${__dirname}/..`),
