@@ -10,6 +10,7 @@ var concat = require('gulp-concat');
 var crash = require('@momsfriendlydevco/crash');
 var fs = require('fs');
 var fspath = require('path');
+var glob = require('globby');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gutil = require('gulp-util');
@@ -19,12 +20,11 @@ var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 
 gulp.task('build.vue', ['load:app'], ()=>
-	gulp.src([
+	gulp.src(glob.sync([
 		'vendors/vue.*.js', // Early injection workers
 		'**/*.vue',
-		'!dist/**/*',
-		'!node_modules/**/*',
-	])
+		...app.config.paths.ignore,
+	]))
 		// .error file generation on crash (or cleanup if everything ok) {{{
 		.on('finish', ()=> fs.promises.unlink(`${app.config.paths.root}/.error`).catch(()=> null)) // Remove .error file on successful compile
 		.pipe(plumber({
