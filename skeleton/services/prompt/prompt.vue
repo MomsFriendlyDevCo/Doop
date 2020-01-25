@@ -351,6 +351,7 @@ module.exports = {
 				<a class="list-group-item" @click="testPrompt('input', {title: 'What is your name?'})">vm.$prompt.input({title: 'What is your name?'})</a>
 				<a class="list-group-item" @click="testPrompt('list', {list: [{_id: 1, title: 'Foo'}, {_id: 2, title: 'Bar'}, {_id: 3, title: 'Baz'}]})">vm.$prompt.list({list: [...]})</a>
 				<a class="list-group-item" @click="testPrompt('list', {url: '/api/users', field: 'name'})">vm.$prompt.list({url: '/api/users'})</a>
+				<a class="list-group-item" @click="testPrompt('macgyver', {macgyver: [{type: 'mgText', id: 'testText'}]})">vm.$prompt.macgyver({macgyver: [{type: 'mgText', id: 'testText'}]})</a>
 			</div>
 		</div>
 	</div>
@@ -397,12 +398,6 @@ module.exports = {
 						<div v-if="!settings.isHtml" class="text-center">
 							<h4>{{settings.body}}</h4>
 						</div>
-						<mg-form
-							v-if="settings.$isMacgyver"
-							form="promptMacGyver"
-							:config="settings.form"
-							:data="settings.data"
-						/>
 						<div v-if="settings.isHtml" v-html="settings.body"/>
 						<dynamic-component
 							v-if="settings.component"
