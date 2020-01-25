@@ -3,6 +3,8 @@ app.ready.then(()=> {
 	/**
 	* Display a MacGyver form
 	* This function inherits all properties from dialog() but sets various sane defaults
+	*
+	* The loaded mgForm ref is available as $prompt.settings.macgyverForm during onShow
 	* @see $prompt.dialog()
 	* @param {Object} options An options object
 	* @param {Object|array} options.macgyver The MacGyver form to display
@@ -43,12 +45,16 @@ module.exports = {
 			this.$prompt.settings.value = value;
 		},
 	},
+	mounted() {
+		this.$prompt.settings.macgyverForm = this.$refs.form;
+	},
 };
 </component>
 
 <template>
 	<div>
 		<mg-form
+			ref="form"
 			:config="$prompt.settings.macgyver"
 			:data="$prompt.settings.value"
 			@change="change"
