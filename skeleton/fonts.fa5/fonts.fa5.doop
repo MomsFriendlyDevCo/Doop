@@ -1,0 +1,31 @@
+<endpoint>
+var _ = require('lodash');
+
+/**
+* Provide a JSON list of FA fonts
+*/
+_.chain(require(`${app.config.paths.root}/fonts.fa5/fa-pro/metadata/icons.json`))
+	.map((v, k) => {
+		v.class = k;
+		return _.pick(v, [
+			'class', 'styles', 'unicode',
+		]);
+	})
+	.map(icon => ({
+		id: icon.class,
+		class:
+			icon.styles[0] == 'brands' ? `fab fa-${icon.class}`
+			: `fa fa-${icon.class}`,
+		varients: icon.styles
+			.map(s =>
+				s == 'brands' ? `fab fa-${icon.class}`
+				: s == 'solid' ? `fa fa-${icon.class}`
+				: s == 'regular' ? `far fa-${icon.class}`
+				: s == 'light' ? `fal fa-${icon.class}`
+				: null
+			)
+			.filter(s => s),
+	}))
+	.tap(v => app.get('/api/webfonts/fa.json', (req, res) => res.send(v)))
+	.value();
+</endpoint>
