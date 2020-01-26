@@ -8,6 +8,7 @@ app.ready.then(()=> {
 	* @see $prompt.dialog()
 	* @param {Object} options An options object
 	* @param {Object|array} options.macgyver The MacGyver form to display
+	* @param {Object} [options.value] Optional MacGyver form values
 	* @param {string} [options.title='Input required'] The title of the dialog
 	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
 	*/

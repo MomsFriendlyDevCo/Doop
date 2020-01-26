@@ -22,7 +22,6 @@ module.exports = {
 		events: {type: Object},
 	},
 	render: function(h) {
-		console.log('DEBUG DC', this.$props);
 		return h(this.$props.component, {
 			props: this.$props.props,
 			on: this.$props.on,
