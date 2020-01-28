@@ -8,11 +8,13 @@ app.ready.then(()=> {
 	* @see $prompt.dialog()
 	* @param {Object} options An options object
 	* @param {Object|array} options.macgyver The MacGyver form to display
+	* @param {string} [options.form] Optional mgForm reference name
 	* @param {Object} [options.value] Optional MacGyver form values
 	* @param {string} [options.title='Input required'] The title of the dialog
 	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
 	*/
 	Vue.services().$prompt.macgyver = options => {
+		if (options.form && typeof options.form != 'string') throw new Error('$prompt.macgyver({form}) must be a string, use {macgyver} to pass form config');
 		return Vue.services().$prompt.dialog({
 			title: 'Input required',
 			dialogClose: 'reject', // Reject if the user had second thoughts
@@ -56,6 +58,7 @@ module.exports = {
 	<div>
 		<mg-form
 			ref="form"
+			:form="$prompt.settings.form"
 			:config="$prompt.settings.macgyver"
 			:data="$prompt.settings.value"
 			@change="change"
