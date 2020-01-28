@@ -17,6 +17,7 @@ var gutil = require('gulp-util');
 var plumber = require('gulp-plumber');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');
+var stripAnsi = require('strip-ansi');
 var uglify = require('gulp-uglify');
 
 gulp.task('build.vue', ['load:app'], ()=>
@@ -29,14 +30,14 @@ gulp.task('build.vue', ['load:app'], ()=>
 		.on('finish', ()=> fs.promises.unlink(`${app.config.paths.root}/.error`).catch(()=> null)) // Remove .error file on successful compile
 		.pipe(plumber({
 			errorHandler: err => {
+				console.warn(err.toString());
 				var trace = crash.generate(err, {
 					prefix: 'ERROR DURING VUE BUILD',
 					context: {
 						pathRewrite: path => path.replace(/#(.*)$/, ''), // Transform `thing.js#service` -> `thing.js`
 					},
 				});
-				process.stderr.write(trace);
-				return fs.promises.writeFile(`${app.config.paths.root}/.error`, trace);
+				return fs.promises.writeFile(`${app.config.paths.root}/.error`, stripAnsi(trace));
 			},
 		}))
 		// }}}
