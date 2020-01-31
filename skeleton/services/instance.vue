@@ -19,12 +19,6 @@
 */
 module.exports = function() {
 	var $instance = function $instance(as, name, props, options) {
-		var settings = {
-			singleton: false,
-			rebuild: false,
-			...options,
-		};
-
 		// Argument mangling {{{
 		if (typeof as == 'string' && typeof name == 'string') { // Called with all args
 			// Pass
@@ -34,6 +28,12 @@ module.exports = function() {
 			throw new Error('Unknown call method');
 		}
 		// }}}
+
+		var settings = {
+			singleton: false,
+			rebuild: false,
+			...options,
+		};
 
 		if (!settings.rebuild && Vue.singletons && Vue.singletons[name]) { // Do we already have a singleton registered with this name - if so use that?
 			return this[as] = Vue.singletons[name];

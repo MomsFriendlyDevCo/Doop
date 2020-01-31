@@ -35,6 +35,7 @@ app.ready.then(()=> {
 					click: ()=> Vue.services().$prompt.close(true, Vue.services().$prompt.settings.value),
 				}],
 			},
+			value: {},
 			...options,
 		});
 	};
@@ -43,11 +44,6 @@ app.ready.then(()=> {
 
 <component>
 module.exports = {
-	methods: {
-		change(value) {
-			this.$prompt.settings.value = value;
-		},
-	},
 	mounted() {
 		this.$prompt.settings.macgyverForm = this.$refs.form;
 	},
@@ -61,7 +57,7 @@ module.exports = {
 			:form="$prompt.settings.form"
 			:config="$prompt.settings.macgyver"
 			:data="$prompt.settings.value"
-			@change="change"
+			@change="$set($prompt.settings, 'value', $event)"
 		/>
 	</div>
 </template>
