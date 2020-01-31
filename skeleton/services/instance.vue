@@ -5,7 +5,7 @@
 * This fixes a few issues with Vue while attempting this:
 *
 * 	- The horrible constructor syntax
-*	- Even though passing {props: ...} when constructing a component it don't seem to get populated into vm.$props
+*	- Correction of props -> propsData when creating
 *       - Support for shared singleton instances (set `vm.{singleton: true}`) which are setup once and only once
 *
 * @param {string} as What to add the component as within the vm
@@ -35,24 +35,20 @@ module.exports = function() {
 		}
 		// }}}
 
-
 		if (!settings.rebuild && Vue.singletons && Vue.singletons[name]) { // Do we already have a singleton registered with this name - if so use that?
 			return this[as] = Vue.singletons[name];
 		}
 
-
 		// Create the component instance using the bloody awful instantiation syntax
 		this[as] = new (Vue.component(name))({
-			props, // This doesn't get populated anyway but it at least keeps Vue happy that required props validate
+			propsData: props,
 		});
 
+		// Register this component as a singleton?
 		if (settings.singleton || this[as].$options.singleton) {
 			if (!Vue.singletons) Vue.singletons = {};
 			Vue.singletons[name] = this[as];
 		}
-
-		// Copy all props over into the incorrectly setup component instance
-		Object.keys(props || {}).forEach(key => this[as].$props[key] = props[key]);
 
 		return this[as];
 	};
