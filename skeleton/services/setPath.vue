@@ -32,6 +32,7 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 
 
 	var node = target;
+	if (!path) throw new Error('Cannot $setPath with undefined path');
 	(_.isString(path) ? path.split('.') : path).some((chunk, chunkIndex, chunks) => {
 		if (chunkIndex == chunks.length - 1) { // Leaf node
 			this.$set(node, chunk, value);
