@@ -10,6 +10,9 @@
 * @example Debug simple data (assuming `vm.$debugging = true`)
 * vm.$debug('Some data', aProxyObject)
 *
+* @example Debug something with an overriding prefix
+* vm.$debug('[Custom Prefix]', 'Some data', aProxyObject)
+*
 * @example FORCE debugging to be enabled from this point on even if `vm.$debugging` is falsy
 * vm.$debug.force('Some data', aProxyObject)
 */
@@ -28,6 +31,7 @@ module.exports = function() {
 		var prefix = this._id ? this._id // If the component has a specified ID
 			: this.$vnode && this.$vnode.tag ? this.$vnode.tag.replace(/^vue-component-\d+-/, '') // Use a (mangled) Vue tag
 			: this._uid ? this._uid
+			: msg.length && /^\[.*\]$/.test(msg[0]) ? msg.shift().slice(1, -1) // First message item is of the format `[PREFIX]`
 			: (()=> { // Try to read stack trace
 				var caller = Error().stack.split('\n').slice(3, 4);
 				if (!caller) return;
