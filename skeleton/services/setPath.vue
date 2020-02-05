@@ -8,6 +8,7 @@
 * @param {*} value The value to set
 * @param {Object} [options] Additional options
 * @param {boolean} [options.arrayNumeric=true] Process numeric path segments as arrays
+* @param {boolean} [options.debug=false] Also print out debugging information when setting the value
 * @returns {Object} The set value, like $set()
 *
 * @example Set a deeply nested path within a target object
@@ -27,9 +28,11 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 
 	var settings = {
 		arrayNumeric: true,
+		debug: false,
 		...options,
 	};
 
+	if (settings.debug) console.debug('[$setPath]', path, '=', value, {target, options});
 
 	var node = target;
 	if (!path) throw new Error('Cannot $setPath with undefined path');
