@@ -58,7 +58,7 @@ window.onload = ()=> {
 	/**
 	* Slightly smarter version of $router.push() which understands absolute URLs
 	* @param {string|number|Object|function} location The URL to navigate to or the number of steps forward / backward to navigate, if this is a function it is executed inline
-	* @param {string|number} [location.href] Alternate method of passing the URL to navigate to
+	* @param {string|number} [location.url] Alternate method of passing the URL to navigate to
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
 	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window

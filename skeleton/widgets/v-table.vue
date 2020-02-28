@@ -20,6 +20,7 @@
 * @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
 * @param {string} [text-loading="Loading..."] Message to display when loading FIXME: Not yet implemented
 * @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
+* @param {boolean} [useSearchQuery=true] If searching is enabled, accept the initial search query from $route.query.q
 *
 * @param {Object} columns Column definitions
 * @param {Object} [columns.INDEX.macgyver] MacGyver rendering method to override the slot definition
@@ -82,6 +83,7 @@ module.exports = {
 		config: {type: Object, default: ()=> ({})}, // Defaults applied in computedConfig()
 		search: {type: Boolean, default: false},
 		directoryMap: {type: [Object,Function]},
+		useSearchQuery: {type: Boolean, default: true},
 	},
 	computed: {
 		computedConfig() { // Apply Doop / Monoxide defaults to base config structure
@@ -98,6 +100,10 @@ module.exports = {
 					visibility: this.$props.search,
 					placeholder: 'Search...',
 					searchOnPressEnter: true,
+					...(this.$props.useSearchQuery && this.$route.query.q // Populate initial search query if useSearchQuery is enabled
+						? {init: {value:  this.$route.query.q}}
+						: null
+					),
 				},
 				...this.$props.config,
 			};
@@ -193,6 +199,7 @@ module.exports = {
 	render(h) {
 		if (this.$props.view == 'table') {
 			return h('vue-bootstrap4-table', {
+				ref: 'table',
 				class: 'v-table',
 				props: {
 					rows: this.rows,
@@ -274,6 +281,15 @@ module.exports = {
 	},
 	created() {
 		this.$debugging = false;
+	},
+	watch: {
+		'$route.query.q': { // Watch router query and update if change detected
+			handler() {
+				if (!this.$props.useSearchQuery) return; // Ignoring search query anyway
+				$(this.$el).find('.row.no-gutters input.form-control').val(this.$route.query.q); // There is no sane way to override the form search box contents
+				this.$refs.table.updateGlobalSearchHandler(this.$route.query.q); // Tell the table to refresh
+			},
+		},
 	},
 };
 </component>
