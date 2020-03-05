@@ -1,26 +1,30 @@
 <server on="init">
+/**
+* Create dummy Express(like) methods which queue up endpoints
+* These get processed in a later hook which turns them into real Express endpoints on `app`
+* This is so that route paths can be 'sane' sorted similar to the front end (i.e. '/api/widgets/create' sorts before '/api/widgets/:id')
+*/
 var _ = require('lodash');
-var express = require('express');
 
-// Create an express instance
-app.express = express();
+/**
+* Storage for future endpoints, deleted when processed
+* All calls to app.get() etc. are created as elements in this list so they can be sorted after the main express loader has finished
+* @type {array<Object>}
+* @property {string} method The HTTP method to wrap (also 'set')
+* @property {string} path The path to setup the endpoint on
+* @property {*} [...args] Additional Express compatible behaviour to queue up
+*/
+app.endpoints = [];
 
-// Glue some Express helpers onto the app object
-Object.assign(app, _(app.express)
-	.pick([
-		'all',
-		'delete',
-		'get',
-		'post',
-		'set',
-		'use',
-	])
-	.mapValues(v => v.bind(app.express))
-	.value()
+['all', 'delete', 'get', 'post', 'set', 'use'].forEach(method =>
+	app[method] = (path, ...args) => app.endpoints.push({method, path, args})
 );
 </server>
 
-<server on="preEndpoints">
+<server on="server">
+/**
+* Initalize core server
+*/
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var compression = require('compression');
@@ -28,20 +32,24 @@ var cors = require('cors');
 var crash = require('@momsfriendlydevco/crash');
 var historyFallback = require('connect-history-api-fallback-exclusions');
 var helmet = require('helmet');
+var express = require('express');
 
-app.use(helmet());
-app.use(cors());
-app.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
+app.express = express();
+
+// NOTE: We're using app.express rather than app.use as we want the raw express hook rather than our custom wrapped one
+app.express.use(helmet());
+app.express.use(cors());
+app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',
-	exclusions: ['/api/*', '/go/*'],
+	exclusions: ['/api/*', '/dist/*', '/go/*'],
 }));
-app.use(cookieParser());
-app.use(bodyParser.json({limit: '64mb'}));
-app.use(bodyParser.urlencoded({limit: '16mb', extended: false}));
-app.use(compression());
+app.express.use(cookieParser());
+app.express.use(bodyParser.json({limit: '64mb'}));
+app.express.use(bodyParser.urlencoded({limit: '16mb', extended: false}));
+app.express.use(compression());
 
 // Extend the Res object so it contains the new res.sendError() reporting function
-app.use(function(req, res, next) {
+app.express.use(function(req, res, next) {
 
 	/**
 	* Report an error
@@ -81,6 +89,32 @@ app.use(function(req, res, next) {
 
 	next();
 });
+</server>
+
+<server on="server">
+/**
+* Explode all endpoints in app.endpoints into actual Express endpoints
+*/
+var _ = require('lodash');
+_(app.endpoints)
+	.sortBy(endpoint => _.isString(endpoint.path) && endpoint.path // Translate "/" + ":" into low ranking sort characters
+		.replace(/\//g, String.fromCharCode(824))
+		.replace(/:/g, String.fromCharCode(818))
+	)
+	.forEach(endpoint => {
+		app.express[endpoint.method](...[
+			endpoint.path,
+			...endpoint.args,
+		].filter(i => i));
+		console.log('USE EP', endpoint.method, endpoint.path);
+	});
+
+delete app.endpoints; // Prevent usage of endpoints now its been processed
+
+// Replace all app methods with warnings
+['all', 'delete', 'get', 'post', 'set', 'use'].forEach(method =>
+	app[method] = path => app.log.warn('Attemping to set up express path at', app.log.colors.cyan(path), 'after server hook has fired - request rejected')
+);
 </server>
 
 <server on="server">

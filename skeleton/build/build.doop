@@ -1,4 +1,4 @@
-<server on="postServer">
+<server on="postEndpoints">
 /**
 * Serve the /dist folder as a static resource
 */
