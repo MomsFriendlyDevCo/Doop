@@ -2,12 +2,14 @@
 /**
 * Set a dotted notation or array path to a set value
 * This function will correctly populate any missing entities, calling vm.$set on each traversal of the path
+* Passing undefined as a value removes the key (unless removeUndefined is set to false)
 *
 * @param {Object} [target] The target to set the path of, if omitted the `vm` object is used as the base for traversal 
 * @param {string|array} path The path to set within the target / vm
 * @param {*} value The value to set
 * @param {Object} [options] Additional options
 * @param {boolean} [options.arrayNumeric=true] Process numeric path segments as arrays
+* @param {boolean} [options.removeUndefined=true] If undefined is specified as a value the key is removed instead of being set
 * @param {boolean} [options.debug=false] Also print out debugging information when setting the value
 * @returns {Object} The set value, like $set()
 *
@@ -29,6 +31,7 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 	var settings = {
 		arrayNumeric: true,
 		debug: false,
+		removeUndefined: true,
 		...options,
 	};
 
@@ -38,7 +41,11 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 	if (!path) throw new Error('Cannot $setPath with undefined path');
 	(_.isString(path) ? path.split('.') : path).some((chunk, chunkIndex, chunks) => {
 		if (chunkIndex == chunks.length - 1) { // Leaf node
-			this.$set(node, chunk, value);
+			if (settings.removeUndefined && value === undefined) {
+				this.$unset(node, chunk);
+			} else {
+				this.$set(node, chunk, value);
+			}
 		} else if (node[chunk] === undefined) { // This chunk (and all following chunks) does't exist - populate from here
 			chunks.slice(chunkIndex).forEach(chunk => {
 				if (settings.arrayNumeric && isFinite(chunk)) {
