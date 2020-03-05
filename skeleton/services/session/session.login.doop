@@ -26,6 +26,7 @@ app.post('/api/session/login', (req, res) => {
 	Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
+			if (!req.body) throw new Error('No login credentials');
 			if (!req.body.email) throw new Error('400: No email address provided');
 			if (!req.body.password) throw new Error('400: No password provided');
 		})
