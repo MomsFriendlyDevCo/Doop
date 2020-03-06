@@ -27,7 +27,10 @@ module.exports = {
 				: null,
 		};
 
-		if (settings.url) console.warn('Do not pass `v-href="{url}"` property to v-href. Use `v-href="{href}"` instead for - ' + settings.url);
+		if (settings.url) {
+			console.warn('[DEPRECIATED] Do not pass `v-href="{url}"` property to v-href. Use `v-href="{href}"` for URL', settings.url);
+			settings.href = settings.url;
+		}
 
 		if (!settings.href) return; // Nothing to bind to - URL will presumably be provided in update cycle
 
