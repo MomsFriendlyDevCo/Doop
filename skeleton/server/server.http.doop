@@ -106,7 +106,6 @@ _(app.endpoints)
 			endpoint.path,
 			...endpoint.args,
 		].filter(i => i));
-		console.log('USE EP', endpoint.method, endpoint.path);
 	});
 
 delete app.endpoints; // Prevent usage of endpoints now its been processed
