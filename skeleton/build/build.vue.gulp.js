@@ -13,7 +13,6 @@ var fspath = require('path');
 var glob = require('globby');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
-var gutil = require('gulp-util');
 var plumber = require('gulp-plumber');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');

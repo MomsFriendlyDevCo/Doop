@@ -69,7 +69,6 @@
     "gulp-replace": "^1.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-uglify": "^3.0.2",
-    "gulp-util": "^3.0.8",
     "hashed-release-name": "^1.0.0",
     "helmet": "^3.21.2",
     "jquery": "^3.4.1",

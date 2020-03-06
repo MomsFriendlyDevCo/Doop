@@ -11,7 +11,6 @@ var glob = require('globby');
 var gplumber = require('gulp-plumber');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
-var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 
 /**
@@ -28,7 +27,7 @@ gulp.task('build.css', ['load:app'], ()=>
 	]))
 		.pipe(gplumber({
 			errorHandler: function(err) {
-				gutil.log(colors.red('ERROR DURING CSS BUILD'));
+				gulp.log(colors.red('ERROR DURING CSS BUILD'));
 
 				process.stdout.write(err.stack);
 				hasErr = err;

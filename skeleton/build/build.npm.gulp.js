@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var fs = require('fs').promises;
 var gulp = require('gulp');
-var gutil = require('gulp-util');
 var semver = require('semver');
 var spawn = require('child_process').spawn;
 
@@ -11,7 +10,7 @@ gulp.task('npm', ['npm.update', 'npm.engineCheck']);
 gulp.task('npm.update', ['load:app', 'load:app.git'], ()=> {
 	if (app.config.isProduction) return done(); // Skip if production
 	if (!_.get(app, 'config.gulp.npmUpdate')) {
-		gutil.log('NPM auto-update is disabled');
+		gulp.log('NPM auto-update is disabled');
 		return;
 	}
 
@@ -40,7 +39,7 @@ gulp.task('npm.update', ['load:app', 'load:app.git'], ()=> {
 		// Perform action {{{
 		.then(data => new Promise(resolve => {
 			if (!data.performUpdate) return;
-			gutil.log('Project requires NPM update', gutil.colors.grey(`(Package Hash: ${app.git.shortHash}, latest update: ${_.get(this.stamps, ['package.json', 'shortHash']) || 'NONE'})`));
+			gulp.log('Project requires NPM update', gulp.colors.grey(`(Package Hash: ${app.git.shortHash}, latest update: ${_.get(this.stamps, ['package.json', 'shortHash']) || 'NONE'})`));
 
 			var ps = spawn('npm', ['install', '--no-progress', '--audit=false'], {
 				cwd: app.config.paths.root,
@@ -66,7 +65,7 @@ gulp.task('npm.engineCheck', ['load:app'], done => {
 	var needVersion = require(`${app.config.paths.root}/package.json`).engines.node;
 
 	if (!semver.satisfies(process.version, needVersion)) {
-		gutil.log(gutil.colors.yellow('WARNING'), 'Recommended Node version is', gutil.colors.bold.blue(needVersion) + '.', 'Current Node version is', gutil.colors.bold.blue(process.version), '- while things may work its recommended you update');
+		gulp.log(gulp.colors.yellow('WARNING'), 'Recommended Node version is', gulp.colors.bold.blue(needVersion) + '.', 'Current Node version is', gulp.colors.bold.blue(process.version), '- while things may work its recommended you update');
 	}
 	done();
 });
