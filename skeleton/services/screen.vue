@@ -38,7 +38,7 @@ module.exports = function() {
 
 		if (newSize != $screen.size) {
 			Vue.set($screen, 'size', newSize);
-			app.ready.then(()=> this.$emit.broadcast('$screen.resize', $screen.size));
+			app.ready.then(()=> app.broadcast('$screen.resize', $screen.size));
 		}
 
 		$('body')

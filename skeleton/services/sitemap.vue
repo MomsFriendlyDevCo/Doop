@@ -61,7 +61,7 @@ module.exports = function() {
 			.then(()=> this.$session.promise()) // Ensure the user profile pull has completed first
 			.then(()=> $sitemap.resolveTree($sitemap.map))
 			.then(tree => $sitemap.computed = tree)
-			.tap(()=> this.$emit.broadcast('$sitemap.update', $sitemap.computed))
+			.tap(()=> app.broadcast('$sitemap.update', $sitemap.computed))
 			.catch(e => {
 				if (e.errno && e.errno == 403) return; // Ignore 403's - user not logged in yet
 				this.$toast.catch(e);

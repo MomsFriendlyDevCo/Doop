@@ -136,7 +136,7 @@ window.onload = ()=> {
 				if (to.path != '/login') $('body').removeClass('bootstrapping'); // Let the login page handle its own bootstrapping overrides (so we dont get screen flash-in)
 			})
 
-		if (app.vue && app.vue.$emit) app.vue.$emit.broadcast('$router.change');
+		if (app.vue && app.vue.$emit) app.broadcast('$router.change');
 	});
 	// }}}
 

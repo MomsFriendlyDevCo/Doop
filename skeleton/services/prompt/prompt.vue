@@ -257,7 +257,7 @@ module.exports = function() {
 		// }}}
 
 		// Open the dialog (via Bootstrap) {{{
-		this.$emit.broadcast('$prompt.open', settings);
+		app.broadcast('$prompt.open', settings);
 
 		// Trap out-of-context destruction (clicking on background, pressing escape etc.) and reroute to cancel action
 		$(document).one('hide.bs.modal', ()=> $prompt.close(false))
@@ -292,7 +292,7 @@ module.exports = function() {
 		}
 
 		// Close standard (handled) modals
-		this.$emit.broadcast('$prompt.close', !!ok);
+		app.broadcast('$prompt.close', !!ok);
 	};
 
 

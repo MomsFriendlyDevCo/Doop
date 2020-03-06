@@ -8,7 +8,7 @@ var methods = {}; // Method's to glue onto vm.$emit
 * @param {string} msg The name of the event to emit
 * @param {*} [payload...] The payload of the event
 */
-methods.broadcast = (msg, ...payload) => {
+app.broadcast = methods.broadcast = (msg, ...payload) => {
 	app.vue.$emit.call(app.vue, msg, ...payload);
 	app.vue.$emit.down.call(app.vue, msg, ...payload);
 };
@@ -92,6 +92,4 @@ Vue.mixin({
 		));
 	},
 });
-
-export default methods;
 </script>
