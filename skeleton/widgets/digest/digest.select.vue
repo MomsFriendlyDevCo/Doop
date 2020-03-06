@@ -13,7 +13,7 @@
 * @param {booean} [ignoreErrors=false] Whether to not print errors into $toast.error
 * @param {string} [title=selectText] The title of the dialog, defaults to `selectText`
 * @param {string|boolean} [sort=true] Whether to sort the documents, boolean true uses the same field as `field`
-* @param {number} [limit=30] The number of documents to pull from the server in each batch
+* @param {number|boolean} [limit=30] The number of documents to pull from the server in each batch, set to falsy to disable
 * @param {string} [iconValid] The icon to display when the entity is valid
 * @param {string} [iconInvalid] The icon to display when the entity is invalid
 * @param {string|boolean} [add=false] Allow adding of new items, note that only the `field` is created with new records. If this is a string the POST will be sent to that URL instead of `url`
@@ -22,7 +22,7 @@
 * @param {object} [addPost] Additional POST structure to send when creating the item
 * @emits change Emitted as `(id, document)` when the user changes the selection - can be undefined if the user cleared the field
 * @emits changeData Emitted as `(document)` (i.e. the whole data) as a convenience method to bind to the entire data array
-* @emits changeFIELD Emitted for each field in the resultant document with fields as camelCase with first leter caps, for example {_id: 123, label: 'hello'} emits 'changeUserId' + 'changeLabel'
+* @emits changeFIELD Emitted for each field in the resultant document with fields as camelCase with first leter caps, for example {userId: 123, label: 'hello'} emits 'changeUserId' + 'changeLabel'
 */
 module.exports = {
 	props: {
@@ -38,7 +38,7 @@ module.exports = {
 		ignoreErrors: {type: Boolean, default: false},
 		title: {type: String},
 		field: {type: String, default: 'title'},
-		limit: {type: Number, default: 30},
+		limit: {type: [Number, Boolean], default: 30},
 		sort: {type: [Boolean, String], default: true},
 		iconValid: {type: String},
 		iconInvalid: {type: String},

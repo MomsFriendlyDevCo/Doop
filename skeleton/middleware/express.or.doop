@@ -21,7 +21,7 @@ app.middleware.express.or = (middlewares, failHandler) => (req, res, next) => {
 		waitingCount--;
 		if (err) errors[offset] = err;
 
-		if (!err) { // This middleware item succeeded
+		if (waitingCount <= 0 && !err) { // This middleware item succeeded
 			calledNext = true;
 			next();
 		} else if (waitingCount <= 0 && !calledNext) { // Nothing else to wait for and none of the middlewares succeded

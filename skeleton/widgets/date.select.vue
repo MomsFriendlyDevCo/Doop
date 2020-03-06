@@ -74,6 +74,7 @@ module.exports = {
 	<div class="date-select btn btn-light">
 		<datetime
 			v-model="value"
+			value-zone="local"
 			:type="$props.type"
 			:minute-step="$props.minuteStep"
 			use12-hour
@@ -104,13 +105,13 @@ module.exports = {
 .vdatetime-popup__header,
 .vdatetime-calendar__month__day--selected > span > span,
 .vdatetime-calendar__month__day--selected:hover > span > span {
-	background: #3bafda;
+	background: var(--main);
 }
 
 .vdatetime-year-picker__item--selected,
 .vdatetime-time-picker__item--selected,
 .vdatetime-popup__actions__button {
-	color: #3bafda;
+	color: var(--main);
 }
 
 /* Disabled state {{{ */
