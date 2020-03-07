@@ -17,7 +17,7 @@ module.exports = function() {
 	// $session.stage bootstrapping {{{
 	/**
 	* $session bootstrap stage
-	* Subscribing to any of the $session.* events allows trapping the promise, emitPromise() is supported in each case
+	* Subscribing to any of the $session.* events allows trapping the promise, emit.promise() is supported in each case
 	*
 	* -1 - preBootstrap - Not yet called the stage setup
 	* 0 - bootstrap - Initial boot @emits $session.bootstrap
@@ -41,7 +41,7 @@ module.exports = function() {
 	/**
 	* Object lookup of stages to perform while bootstrapping
 	* Rules:
-	* 	- Each stage should call app.vue.$emitPromise('$session.<STAGEID>') during its process
+	* 	- Each stage should call app.vue.$emit.promise('$session.<STAGEID>') during its process
 	* 	- Each stage should call $session.stages.next() on completion to advance
 	*/
 	$session.stages = {
@@ -72,7 +72,7 @@ module.exports = function() {
 		*/
 		next() {
 			$session.$debug('At stage', $session.stage + 1);
-			return app.vue.$emitPromise('$session.stageChange', ++$session.stage)
+			return app.vue.$emit.promise('$session.stageChange', ++$session.stage)
 				.then(()=> {
 					switch ($session.stage) {
 						case 0: return $session.stages.bootstrap();
@@ -103,7 +103,7 @@ module.exports = function() {
 						});
 					}
 				})
-				.then(()=> app.vue.$emitPromise('$session.bootstrap'))
+				.then(()=> app.vue.$emit.promise('$session.bootstrap'))
 				.then(()=> $session.stages.next())
 		},
 
@@ -124,8 +124,8 @@ module.exports = function() {
 
 			return Promise.resolve()
 				.then(()=> $session.$debug('stage', 'preBootData'))
-				.then(()=> app.vue.$emitPromise('$session.preBootData'))
-				.then(()=> app.vue.$emitPromise('$session.request', requestPrototype))
+				.then(()=> app.vue.$emit.promise('$session.preBootData'))
+				.then(()=> app.vue.$emit.promise('$session.request', requestPrototype))
 				.then(req => req || requestPrototype) // Did the promise do a complete rewrite or should we use the original?
 				.then(req => Vue.services().$http(req))
 				.then(res => {
@@ -147,8 +147,8 @@ module.exports = function() {
 						$session.$debug('Network error during preBootData on first fetch');
 						app.crash('Can\'t connect to the SiteMobi servers', showReload=true);
 					} else {
-						$session.$debug('Caught error during preBootData', e);
-						throw e;
+						$session.$debug('Caught error during preBootData', err);
+						throw err;
 					}
 				})
 		},
@@ -162,7 +162,7 @@ module.exports = function() {
 		postBootData() {
 			return Promise.resolve()
 				.then(()=> $session.$debug('stage', 'postBootData'))
-				.then(()=> app.vue.$emitPromise('$session.postBootData', $session.data))
+				.then(()=> app.vue.$emit.promise('$session.postBootData', $session.data))
 				.then(()=> $session.stages.next())
 		},
 
@@ -175,7 +175,7 @@ module.exports = function() {
 		settled() {
 			return Promise.resolve()
 				.then(()=> $session.$debug('stage', 'settled'))
-				.then(()=> app.vue.$emitPromise('$session.settled', $session.data))
+				.then(()=> app.vue.$emit.promise('$session.settled', $session.data))
 				.then(()=> $session.isSettled = true)
 				.then(()=> {
 					if ($session.isLoggedIn) {
@@ -253,7 +253,7 @@ module.exports = function() {
 	*/
 	$session.logout = ()=> Promise.resolve()
 		.then(()=> Vue.services().$loader.start('$session.logout'))
-		.then(()=> app.vue.$emitPromise('$session.reset'))
+		.then(()=> app.vue.$emit.promise('$session.reset'))
 		.then(()=> this.$config.session.preference == 'authHeader' && $session.settings.unset('authToken'))
 		.then(()=> this.$http.post('/api/session/logout'))
 		.then(()=> window.location.reload())

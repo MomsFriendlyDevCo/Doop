@@ -5,7 +5,7 @@ var promisify = require('util').promisify;
 * @param {string} req.params.token The token used to login the user
 */
 app.get('/go/login/:token', (req, res) => {
-	app.db.users.findOne({
+	db.users.findOne({
 		_token: req.params.token,
 		_tokenPurpose: 'login', // Restrict the token usage to users requesting logins only
 	})

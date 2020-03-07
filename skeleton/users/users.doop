@@ -113,9 +113,9 @@ Users.hook('save', app.middleware.db.timestamps())
 <endpoint>
 app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
-	get: true,
-	query: true,
-	count: true,
+	get: app.middleware.express.isUser(),
+	query: app.middleware.express.isUser(),
+	count: app.middleware.express.isUser(),
 	create: false,
 	save: app.middleware.express.hasPermission('usersEdit'),
 	meta: true,
