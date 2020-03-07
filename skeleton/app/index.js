@@ -77,6 +77,36 @@ global.app = {
 	* @returns {Object} The new config object
 	*/
 	configLoad(profile) {
+		var program = {};
+		if (!profile && !process.env.DOOP_IGNORE_CMD_ARGS) {
+			// Load command line arguments {{{
+			program = require('commander');
+			require('commander-extras');
+			program
+				.version(require('../package.json').version)
+				.usage('[-e env]')
+				.option('-e, --environment <env>', 'Set the envionment to use')
+				.option('-o, --opt <key=val>', 'Set a config option by its dotted path', (v, total) => {
+					var bits = [key, val] = v.split(/\s*=\s*/, 2);
+					if (bits.length == 1) { // Assume we are just setting a flag to true
+						_.set(total, key, true);
+					}  else if (bits.length == 2) { // Assume key=val
+						_.set(total, key, // Set the key, accepting various shorthand boolean values
+							val === 'true' ? true
+							: val === 'false' ? false
+							: val
+						);
+					} else {
+						throw `Failed to parse setting "${v}"`;
+					}
+					return total
+				}, {})
+				.option('--merge-config <env>', 'Merge a CSV of other config profiles over the base config')
+				.env('DOOP_IGNORE_CMD_ARGS', 'If truthy no further processing is done on extra command arguments such as `-e [env]` or `o [opt=val]`')
+				.parse(process.argv);
+			// }}}
+		}
+
 		if (profile) {
 			if (app.env) {
 				app.log('Replacing config ENV', app.log.colors.cyan(app.env), 'with', app.log.colors.cyan(profile));
@@ -84,6 +114,9 @@ global.app = {
 				app.log('ENV', app.log.colors.cyan.bold(app.env));
 			}
 			app.env = process.env.NODE_ENV = profile;
+		} else if (program.environment) {
+			app.env = program.environment;
+			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from CLI)'));
 		} else if (process.env.NODE_ENV) {
 			app.env = process.env.NODE_ENV;
 			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from NODE_ENV)'));
@@ -92,8 +125,6 @@ global.app = {
 			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(no NODE_ENV, using default)'));
 		}
 
-		// Echo ENV we are using {{{
-		// }}}
 		// Load initial config {{{
 		app.config = require('../config');
 		if (fs.existsSync(`${__dirname}/../config/private.js`)) {
@@ -133,11 +164,8 @@ global.app = {
 			});
 		}
 		// }}}
-		// Adjust port and url if SSL is enabled {{{
-		if (app.config.ssl.enabled) {
-			app.config.url = 'https://' + url.parse(app.config.url).hostname;
-			app.config.port = app.config.ssl.port;
-		}
+		// If CLI provided overrides - merge them {{{
+		_.merge(app.config, program.opt);
 		// }}}
 		// If config.url doesn't contain a port append it {{{
 		if (app.config.port != 80 && url.parse(app.config.url).port != app.config.port) {
