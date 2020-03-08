@@ -1,4 +1,4 @@
-<server on="init, dbInit">
+<server on="init, dbInit, essencial">
 var colors = require('chalk');
 
 var polyfills = [

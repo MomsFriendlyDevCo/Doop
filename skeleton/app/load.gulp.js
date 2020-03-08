@@ -7,5 +7,6 @@ var gulp = require('gulp');
 */
 gulp.task.once('load:app', ()=> {
 	require('../app');
-	return app.setup();
+	return app.setup()
+		.then(()=> app.emit('essencial'))
 });
