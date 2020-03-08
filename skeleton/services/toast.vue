@@ -12,6 +12,7 @@ module.exports = function() {
 	$toast.info = Snotify.info.bind(Snotify);
 	$toast.success = Snotify.success.bind(Snotify);
 	$toast.warn = $toast.warning = Snotify.warning.bind(Snotify);
+	$toast.danger = Snotify.error.bind(Snotify);
 	$toast.error = Snotify.error.bind(Snotify);
 	$toast.confirm = Snotify.confirm.bind(Snotify);
 	$toast.prompt = Snotify.prompt.bind(Snotify);
