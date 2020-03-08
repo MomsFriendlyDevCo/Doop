@@ -100,6 +100,7 @@ _(app.endpoints)
 	.sortBy(endpoint => _.isString(endpoint.path) && endpoint.path // Translate "/" + ":" into low ranking sort characters
 		.replace(/\//g, String.fromCharCode(824))
 		.replace(/:/g, String.fromCharCode(818))
+		.replace(/\?/g, String.fromCharCode(825))
 	)
 	.forEach(endpoint => {
 		app.express[endpoint.method](...[
