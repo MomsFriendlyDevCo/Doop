@@ -70,7 +70,7 @@
     "gulp-replace": "^1.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-uglify": "^3.0.2",
-    "hashed-release-name": "^1.0.0",
+    "hashed-release-name": "^1.0.1",
     "helmet": "^3.21.2",
     "jquery": "^3.4.1",
     "lodash-keyarrange": "^1.1.1",
