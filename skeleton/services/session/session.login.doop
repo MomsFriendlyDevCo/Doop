@@ -11,8 +11,8 @@ app.get('/go/login/:token', (req, res) => {
 		$errNotFound: false,
 	})
 		.then(user => user || Promise.reject('Login token invalid'))
-		.then(user => user.logIn(res))
-		.then(()=> req.user.releaseToken())
+		.then(user => user.logIn(res).then(()=> user))
+		.then(user => user.releaseToken())
 		.then(()=> res.redirect('/'))
 		.catch(e => res.sendError(403, e.toString()))
 });
