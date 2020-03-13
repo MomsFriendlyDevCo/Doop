@@ -24,7 +24,7 @@ module.exports = {
 	render: function(h) {
 		return h(this.$props.component, {
 			props: this.$props.props,
-			on: this.$props.on,
+			on: this.$props.events,
 		});
 	},
 };
