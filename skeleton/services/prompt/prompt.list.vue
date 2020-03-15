@@ -56,8 +56,12 @@ module.exports = {
 				.then(()=> console.log('$prompt req fields', this.$prompt.settings.field))
 				.then(()=> this.$http.get(this.$prompt.settings.url, {
 					params: {
-						limit: this.$prompt.settings.limit,
 						select: this.$prompt.settings.field,
+						...(
+							this.$prompt.settings.limit
+								? {limit: this.$prompt.settings.limit}
+								: {}
+						),
 						...(
 							this.search
 								?  {[this.mainField]: {$regex: this.search, $options: 'i'}}
