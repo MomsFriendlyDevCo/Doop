@@ -161,16 +161,24 @@ module.exports = {
 		pollDelay: {type: Number, default: 2000},
 		onPoll: {type: Function},
 	},
-	mounted() {
-		this.$pubSub.subscribe(this.$props.url, {
-			autoUnsubscribe: false, // We take care of this in the components lifecycle anyway
-			subscriptionId: this._uid,
-			pollDelay: this.$props.pollDelay,
-			onPoll: this.$props.onPoll,
-		});
-	},
 	beforeDestroy() {
-		this.$pubSub.unsubscribe(this.$props.url, this._uid);
+		this.$pubSub.unsubscribe(this.$props.subscribedUrl, this._uid);
+	},
+	watch: {
+		'$props.url': {
+			immediate: true,
+			handler(newVal, oldVal) {
+				Promise.resolve()
+					.then(()=> oldVal && this.$pubSub.unsubscribe(oldVal, this._uid)) // UnSubscribe to anything we may already be subscribed to
+					.then(()=> this.$pubSub.subscribe(this.$props.url, {
+						autoUnsubscribe: false, // We take care of this in the components lifecycle
+						subscriptionId: this._uid,
+						pollDelay: this.$props.pollDelay,
+						onPoll: this.$props.onPoll,
+					}))
+			},
+		},
+
 	},
 };
 </component>
