@@ -98,7 +98,9 @@ module.exports = {
 		],
 	},
 	layout: {
-		headInject: [], // Aditional HTML compliant content to inject into the page header
+		headInject: [ // Aditional HTML compliant content to inject into the page header (line feeds added automatically)
+			// '<meta name="description" content="FIXME: SEO description"/>',
+		],
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
 			'/dist/app.css',
 			'/dist/app.js',
