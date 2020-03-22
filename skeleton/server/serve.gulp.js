@@ -101,6 +101,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 			'config/**/*',
 			'server/index.js',
 			'layouts/**/*.html',
+			...app.config.gulp.watchRestart,
 		], {
 			ignored: ['build/**/*', 'data/**/*', 'dist/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,

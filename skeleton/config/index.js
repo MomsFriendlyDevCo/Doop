@@ -89,6 +89,7 @@ module.exports = {
 		minifyJS: false,
 		debugCSS: true,
 		minifyCSS: false,
+		watchRestart: [], // Additional files to watch and trigger a server restart when modified
 		watchModules: false,
 		watchModulesInclude: [], // Additional globs to count as modules when `watchModules` is enabled
 		watchVendors: false,
