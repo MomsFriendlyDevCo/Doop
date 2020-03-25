@@ -139,6 +139,15 @@ module.exports = function() {
 
 
 	/**
+	* Storage for previous settings queues
+	* This gets appended if a model-within-model situation occurs
+	* Upon model close this should get popped so that $prompt.settings is always the latest version
+	* @type {array<Object>}
+	*/
+	$prompt.settingsNested = [];
+
+
+	/**
 	* Display a dialog with various customisations
 	* This is the main $prompt worker - all the other $prompt.* functions are really just wrappers for this function
 	* @param {Object} options Dialog options to use
@@ -174,10 +183,8 @@ module.exports = function() {
 	$prompt.dialog = options => {
 		// If we're already showing a dialog - defer showing the next dialog until this one has finished {{{
 		if ($prompt.settings) {
-			$prompt.$debug('Dialog already present, adding to queue', {current: $prompt.settings, new: options});
-			options.defer = Promise.defer();
-			$prompt.$dialogQueue.push(options)
-			return options.defer.promise;
+			$prompt.$debug('Dialog already present, stashing previous settings', {current: $prompt.settings, new: options});
+			$prompt.settingsNested.push($prompt.settings);
 		}
 		// }}}
 
@@ -293,6 +300,13 @@ module.exports = function() {
 
 		// Close standard (handled) modals
 		app.broadcast('$prompt.close', !!ok);
+
+
+		// Pop back to previous settings object if we have one
+		if ($prompt.settingsNested.length) {
+			$prompt.settings = $prompt.settingsNested.pop();
+			this.$debug('Pop $prompt session', $prompt.settings);
+		}
 	};
 
 
