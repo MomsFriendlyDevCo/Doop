@@ -245,15 +245,19 @@ module.exports = function() {
 				...(settings.field ? {params: {select: settings.field}} : null)
 			})
 				.then(res => { // Pick the specific field value if requested, otherwise return full response
-					if (settings.field) { // Extract single field
-						if (_.isArray(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got an array`);
-						if (!_.isObject(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got a non-object`);
-						if (_.isEmpty(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got empty object`);
-						if (!_.has(res.data, settings.field)) throw new Error(`Expected the field "${settings.field}" in single document response from URL "${url}. Got keys: ${Object.keys(res.data).join(', ')}`);
+					if (!settings.field) return res.data; // No field specified - return entire data response
+
+					if (_.isArray(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got an array`);
+					if (!_.isObject(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got a non-object`);
+					if (_.isEmpty(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got empty object`);
+					if (/,/.test(settings.field)) { // Given a CSV of fields - use the first one
+						var useField = settings.field.split(/\s*,\s*/, 2)[0];
+						if (!res.data[useField]) throw new Error(`Expected the field "${useField}" (as first field of CSV "${settings.field}") in single document response from URL "${url}". Got keys: ${Object.keys(res.data).join(', ')}`);
+						return res.data[useField];
+					} else { // Extract single key specified by settings.field
+						if (!_.has(res.data, settings.field)) throw new Error(`Expected the field "${settings.field}" in single document response from URL "${url}". Got keys: ${Object.keys(res.data).join(', ')}`);
 
 						return res.data[settings.field];
-					} else { // Return only the data portion of the response
-						return res.data;
 					}
 				})
 				.then(payload => $digest.cache[settings.hash].value = payload),
