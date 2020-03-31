@@ -39,8 +39,12 @@ module.exports = function() {
 			return this[as] = Vue.singletons[name];
 		}
 
+
+		var component = Vue.component(name);
+		if (!component) throw new Error(`Unknown component "${name}" when initalizing via $instance`);
+
 		// Create the component instance using the bloody awful instantiation syntax
-		this[as] = new (Vue.component(name))({
+		this[as] = new component({
 			propsData: props,
 		});
 
