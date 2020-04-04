@@ -110,7 +110,7 @@ module.exports = function() {
 
 		$sitemap.selected.node = $sitemap.selected.path && $sitemap.selected.path.length ? _.last($sitemap.selected.path) : undefined;
 
-		$sitemap.updatePageTitle();
+		this.refresh();
 	}));
 	// }}}
 
@@ -267,6 +267,7 @@ module.exports = {
 module.exports = {
 	data: ()=> ({
 		sitemapTree: [],
+		lastPath: undefined, // Last route path the sitemap was refreshed for
 	}),
 	methods: {
 		itemClick(node) {
@@ -276,6 +277,9 @@ module.exports = {
 			if (!node.children && this.$screen.size == 'xs') this.closeSidebar();
 		},
 		refresh() {
+			if (this.lastPath == this.$route.path) return; // Don't regenerate if we're refreshing the same path
+			this.lastPath = this.$route.path;
+
 			Promise.resolve()
 				.then(()=> this.$loader.start())
 				.then(()=> this.$sitemap.promise())
