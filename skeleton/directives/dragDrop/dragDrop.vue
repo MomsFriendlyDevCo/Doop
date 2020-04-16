@@ -73,7 +73,11 @@ module.exports = {
 	}},
 	methods: {
 		droppedUser(data) {
-			this.$toast.success(`Dropped ${data.name}`);
+			if (data.files) { // Droped external files?
+				this.$toast.success('Dropped files: ' + Array.from(data.files).map(file => file.name).join(', '));
+			} else {
+				this.$toast.success(`Dropped ${data.name}`);
+			}
 		},
 		managerTemplate(data) {
 			return '<div class="droppable btn btn-danger">'
@@ -120,8 +124,19 @@ module.exports = {
 					<h2>Droppable</h2>
 				</div>
 				<div class="card-body">
-					<div class="alert alert-secondary d-flex align-items-center justify-content-center" style="width: 100%; height: 300px" v-droppable="{tag: 'debug-user', handler: droppedUser}">
-						<div>Drop area</div>
+					<div
+						class="alert alert-secondary d-flex align-items-center justify-content-center"
+						style="width: 100%; height: 300px"
+						v-droppable="{
+							tag: 'debug-user',
+							handler: droppedUser,
+							dropFiles: true,
+						}"
+					>
+						<div class="text-center">
+							Drop area<br/>
+							<small class="text-muted">(also accepts file drops)</small>
+						</div>
 					</div>
 				</div>
 			</div>

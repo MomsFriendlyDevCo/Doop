@@ -6,6 +6,7 @@
 * @param {string|array} [droppable.tag='droppable'] The tag or array of tags to accept for this element
 * @param {function} [droppable.handler] Function to call as ($dragDrop.data.data) when the user drops a valid item onto this droppable area
 * @param {function} [droppable.handlerInvalid] Function to call as when the user attempted to drop the element on an invalid drop area
+* @param {boolean} [droppable.dropFiles] Accept external files in the drop area, if files are dropped the handler is fired with `{files: FileList}`
 *
 * NOTE: When an item is being dragged over (and its valid) the class `droppable-hover` is applied
 */
@@ -50,6 +51,26 @@ module.exports = {
 					$dragDrop.cancel(); // Dropped onto invalid drop area tag
 				}
 			});
+
+		if (binding.value && binding.value.dropFiles) { // Also bind to file listeners
+			if (!binding.value.handler) console.warn('v-droppable{dropFiles:true} is set but no {handler} is specified - this will accept files but do nothing!');
+
+			$el
+				.on('dragover', e => {
+					console.log('Drag over', e.originalEvent.dataTransfer.files);
+					e.stopPropagation();
+					e.preventDefault();
+					$el.addClass('droppable-hover');
+				})
+				.on('dragexit', e => $el.removeClass('droppable-hover'))
+				.on('drop', e => {
+					console.log('Drop', e.originalEvent.dataTransfer.files);
+					e.preventDefault();
+					e.stopPropagation();
+					$el.removeClass('droppable-hover');
+					if (binding.value.handler) binding.value.handler({files: e.originalEvent.dataTransfer.files});
+				})
+		}
 	},
 };
 </directive>
