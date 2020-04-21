@@ -69,6 +69,7 @@ gulp.task('build.repack', 'load:app', ()=> {
 			input: dumpPath,
 			inlineDynamicImports: true,
 			plugins: [
+				require('rollup-plugin-progress')(),
 				require('rollup-plugin-replace')({
 					'process.env.NODE_ENV': app.config.isProduction ? '"production"' : '"dev"',
 				}),
