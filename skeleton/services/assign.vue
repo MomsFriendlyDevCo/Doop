@@ -10,7 +10,7 @@
 */
 Vue.prototype.$assign = function(target, ...payload) {
 	// Argument munging {{{
-	if (!payload.length && typeof target == 'object') [target, payload] = [this, [target]];
+	if (!payload.length && typeof target == 'object') [target, payload] = [this, [target]]; // If no payload assume the first arg just needs merging into `this`
 	// }}}
 
 	payload.forEach(pl => {
