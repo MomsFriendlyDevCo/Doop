@@ -405,7 +405,7 @@ module.exports = {
 				<div class="modal-content">
 					<div class="modal-header">
 						<h4 class="modal-title">{{settings.title}}</h4>
-						<a class="close" @click="closeModal()"><i class="far fa-times fa-lg"/></a>
+						<a class="close" @click="$prompt.close(false, 'cancel')"><i class="far fa-times fa-lg"/></a>
 					</div>
 					<div class="modal-body">
 						<div v-if="settings.bodyHeader" v-html="settings.$bodyHeader"/>
