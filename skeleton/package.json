@@ -59,7 +59,7 @@
     "gulp": "^4.0.2",
     "gulp-add": "^0.1.0",
     "gulp-babel": "^8.0.0",
-    "gulp-block-head": "^1.0.8",
+    "gulp-block-head": "^1.0.9",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
     "gulp-eval": "^1.0.0",

@@ -45,7 +45,11 @@ gulp.task('build.vue', ['load:app'], ()=>
 		.pipe(blockHead({
 			default: {
 				name: path => `scripts/${fspath.basename(path, '.vue')}.js`,
-				transform: content => content,
+				transform: (content, path) => {
+					if (fspath.extname(path) == '.js') return content;
+					console.log('Unknown default content for file', path, 'only .JS files are accepted whole');
+					return '';
+				},
 			},
 			backpressure: true, // Ignore backpressure as future pipe stages buffer anyway
 			blocks: { // Listed in insertation order
