@@ -14,6 +14,7 @@ var glob = require('globby');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var plumber = require('gulp-plumber');
+var os = require('os');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');
 var stripAnsi = require('strip-ansi');
@@ -82,7 +83,7 @@ gulp.task('build.vue', ['load:app'], ()=>
 					sort: 5,
 					transform: (content, path, block) => `Vue.assets.template('${_.camelCase(block.attr.name || fspath.basename(path, '.vue'))}', '`
 						+ _.trimEnd(content, ';')
-							.replace(/\n/g, '\\n')
+							.replace(os.EOL == '\n' ? /\n/g : /\r\n/g, os.EOL == '\n' ? '\\n' : '\\r\\n') // Convert linefeeds (for each OS type) into escaped char sequences
 							.replace(/\t/g, '\\t')
 							.replace(/'/g, "\\'")
 						+ '\');',
