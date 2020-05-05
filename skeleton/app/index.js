@@ -135,6 +135,8 @@ global.app = {
 
 		if (fs.existsSync(`${__dirname}/../config/${app.env}.js`)) {
 			_.merge(app.config, require(`${__dirname}/../config/${app.env}.js`));
+		} else if (app.env == 'dev') {
+			app.log('Using base', app.log.colors.cyan('DEV'), 'config environment');
 		} else {
 			app.log.warn('ENV config file', app.log.colors.cyan(fspath.resolve(`${__dirname}/../config/${app.env}.js`)), 'not found');
 		}
