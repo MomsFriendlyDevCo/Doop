@@ -5,7 +5,12 @@
 var glob = require('globby');
 var gulp = require('@momsfriendlydevco/gulpy').mutate();
 
+process.chdir(__dirname); // Always chdir to root of project so all paths are relative
+
 gulp.task('default', 'serve');
 
-glob.sync([`${__dirname}/**/*.gulp.js`, `!${__dirname}/data`, `!${__dirname}/dist`, `!${__dirname}/node_modules`])
-	.forEach(path => require(path));
+// Include all .gulp.js files into gulp mix
+glob(['**/*.gulp.js', '!data', '!dist', '!node_modules'])
+	.then(paths =>
+		paths.forEach(path => require(`./${path}`))
+	);
