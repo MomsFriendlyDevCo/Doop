@@ -4,6 +4,8 @@
   "description": "{{FIXME:title}}",
   "main": "server/index.js",
   "scripts": {
+    "build": "gulp build",
+    "dev": "gulp server",
     "start": "node server"
   },
   "repository": {
