@@ -10,7 +10,5 @@ process.chdir(__dirname); // Always chdir to root of project so all paths are re
 gulp.task('default', 'serve');
 
 // Include all .gulp.js files into gulp mix
-glob(['**/*.gulp.js', '!data', '!dist', '!node_modules'])
-	.then(paths =>
-		paths.forEach(path => require(`./${path}`))
-	);
+glob.sync(['**/*.gulp.js', '!data', '!dist', '!node_modules'])
+	.forEach(path => require(`./${path}`))
