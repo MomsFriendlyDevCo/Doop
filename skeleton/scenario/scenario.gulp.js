@@ -16,7 +16,7 @@ gulp.task('db', 'scenario');
 * NOTE: To prevent cached data screwing with state, this task will also clear the cache
 */
 gulp.task('scenario', 'db:nuke', 'load:app.db', ()=> {
-	if (app.config.env == 'production' && (!process.env.SCENARIO || process.env.SCENARIO != 'FORCE')) throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export SCENARIO=FORCE`');
+	if (app.config.env == 'production' && (!process.env.NUKE || process.env.NUKE != 'FORCE')) throw new Error('Refusing to reload database in production! If you REALLY want to do this set `export NUKE=FORCE`');
 
 	return gulp.src([
 		`${app.config.paths.root}/**/*.scenario.{js,json}`,
