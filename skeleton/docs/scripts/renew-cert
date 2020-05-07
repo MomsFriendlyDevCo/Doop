@@ -1,0 +1,23 @@
+#!/bin/bash
+# Renew a letsencrypt / acme cert
+# This includes wildcard certs
+# Usage: renew-cert
+
+# Stop on errors
+set -euo pipefail
+
+echo "Requesting cert renewal via Certbot..."
+sudo certbot certonly \
+	--cert-name doop.mfdc.dev \
+	-d doop.mfdc.dev \
+	-d *.doop.mfdc.dev \
+	-m daemons@mfdc.biz \
+	--agree-tos \
+	--eff-email \
+	--manual-public-ip-logging-ok \
+	--dns-dnsmadeeasy \
+	--dns-dnsmadeeasy-credentials "$HOME/.dnsmadeeasy" \
+
+
+echo "Reloading Nginx..."
+sudo service nginx reload

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Re-Deploy the Sitemobi server
+# Re-Deploy the server
 # Usage: ~/redeploy [--skip-build]
 #
 # --skip-build      Do not pull from git / rebuild gulp, just restart the process
@@ -34,12 +34,15 @@ else
 	gulp postDeploy
 fi
 
-if [[ `pm2 show sitemobi >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
+if [[ `pm2 show doop-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
 	echo "Starting PM2 process for the first time..."
-	pm2 start --name doop server
+	pm2 start --name 'doop-a' server/index.js -- -e production -o port=10001 -o papertrail.program=doop-a
+	pm2 start --name 'doop-b' server/index.js -- -e production -o port=10002 -o papertrail.program=doop-b
+	pm2 start --name 'doop-c' server/index.js -- -e production -o port=10003 -o papertrail.program=doop-c
+	pm2 start --name 'doop-d' server/index.js -- -e production -o port=10004 -o papertrail.program=doop-d
 else
 	echo "Rebooting PM2 process..."
-	pm2 restart doop
+	pm2 restart doop-a doop-b doop-c doop-d
 fi
 
 echo "done."
