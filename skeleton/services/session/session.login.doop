@@ -21,8 +21,10 @@ app.get('/go/login/:token', (req, res) => {
 <server on="postEndpoints">
 var _ = require('lodash');
 
-app.post('/api/session/login', (req, res) => {
-	Promise.resolve()
+app.post([
+	'/api/session/login',
+	...(app.config.session.auth.allowPost ? ['/login'] : []),
+], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
 			if (!req.body) throw new Error('No login credentials');
@@ -39,12 +41,29 @@ app.post('/api/session/login', (req, res) => {
 			.then(()=> user)
 		)
 		// }}}
-		// Perform login {{{
-		.then(user => user.logIn(res))
+		// Generate UUID {{{
+		.then(user => app.utils.uuid.generate().then(token => [user, token]))
+		// }}}
+		// Create cookie against user login {{{
+		.then(data => {
+			var [user, token] = data;
+
+			var output;
+			app.log('Successful login for', user.username || user.email);
+
+			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
+			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
+
+			return app.cache.set(app.config.session.cache.prefix + token, {_id: user._id}).then(()=> output);
+		})
 		// }}}
 		// End {{{
-		.then(output => res.status(200).send(output))
+		.then(output => res.format({
+			html: ()=> res.redirect('/'),
+			json: ()=> res.status(200).send(output),
+			default: ()=> res.status(406).send('Not an acceptable login accept type'),
+		}))
 		.catch(res.sendError)
 		// }}}
-});
+);
 </server>

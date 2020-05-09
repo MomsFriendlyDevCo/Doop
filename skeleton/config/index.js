@@ -165,6 +165,7 @@ module.exports = {
 		auth: {
 			preference: 'cookie', // Which method should the front end prefer when logging in, ENUM: 'cookie', 'authHeader'
 			bypassEmptyPassword: true, // Allow login the user has a blank password in the DB (disabled in prod obviously)
+			allowPost: false, // Allow POST login credentials to /login
 		},
 		authHeader: {
 			enabled: true, // Support 'auth' header token method in backend
