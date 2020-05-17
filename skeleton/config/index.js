@@ -67,6 +67,9 @@ module.exports = {
 		sandboxDir: config => `${config.paths.dist}/sandbox-dockets`,
 		appPath: config => `${config.paths.dist}/dockets.apk`,
 	},
+	dates: {
+		parseFormats: ['YYYY-MM-DD', 'D/M/YYYY', 'D/M/YYYY', 'D/M/YY', 'D/M'], // Array of formats to pass to moment(value, FORMATS) to parse dates
+	},
 	email: {
 		enabled: true,
 		method: 'mailgun',
