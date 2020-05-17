@@ -14,6 +14,9 @@ var _ = require('lodash');
 * @param {Object} [options.docFilter] Additional filter to apply to all `.search()` calls on the database
 * @param {function} [options.docSoftFilter] Additonal Monoxide filter to apply to all documents on each '.search()' call. Called as `(next, doc)`
 * @param {string} [options.select] Optional CSV of fields to limit by
+* @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
+* @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
+* @param {RegExp} [options.tagsRe] RegExp used to split tags
 *
 * @param {array<Object>} [options.fields] Field definition for each item that should be indexed
 * @param {string} [options.fields.name] Optional reference name for the field, useful when debugging
@@ -21,10 +24,9 @@ var _ = require('lodash');
 * @param {function} [options.fields.handler] Function called as `(doc)` which is expected to return a single string to index, can use either this or `option.fields.path`
 * @param {number} [options.fields.weight=1] Weighting during search
 *
-* @param {Object<function>} [options.tags] Define custom tag behaviour, tag keys are always lower case. Handlers are called as `(query, val)` and can mutate the query
-* @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
-* @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
-* @param {RegExp} [options.tagsRe] RegExp used to split tags
+* @param {Object<function>|Object<Object>} [options.tags] Define custom tag behaviour, tag keys are always lower case. If value is a function it is assumed to populate the `mongo` property.
+* @param {function} [options.tags.mongo] Called as `(query, val)` to mutate a Mongo query
+* @param {function} [options.tags.filter] Called as `(doc, val)` to filter documents after they have been fetched from Mongo, expected to return a (promisable) boolean indicating if the document should be included in the search
 *
 * @returns {function} Database middleware
 *
@@ -41,8 +43,13 @@ var _ = require('lodash');
 *         },
 *       ],
 *       tags: {
-*         is: (query, val) => query.find({status: val}), // Filter docs to those of a specific status (e.g. `IS:active`)
-*         after: (query, val) => query.find({created: {$gt: moment(val).toDate()}}), // Filter docs to those created after the specified date (e.g. `AFTER:2020-02-28`)
+*         is: (query, val) => query.find({status: val}), // Filter docs to those of a specific status (e.g. `IS:active`) via Mongo
+*         after: { // More explcit way of detailing how the tag should be handled
+*           mongo: (query, val) => query.find({created: {$gt: moment(val).toDate()}}), // Filter docs via Mongo to those created after the specified date (e.g. `AFTER:2020-02-28`)
+*         },
+*         dayOfWeek: {
+*           filter: (doc, val) => moment(doc.created).format('ddd') == val), // "Soft" filter using JS after the doc has been pulled to the day of the week (e.g. `DAY:Mon`)
+*         },
 *       },
 *     }))
 *
@@ -52,6 +59,9 @@ var _ = require('lodash');
 *
 * @example Ask the ReST end point for fuzzy search results
 *   GET /api/users?q=smith+20
+*
+* @example Ask the ReST end point for fuzzy search results including tags (assumes the `after` tag is defined as per the first example)
+*   GET /api/users?q=smith+20+after:2020-01-01
 */
 app.middleware.db.search = (model, options) => {
 	// Settings {{{
@@ -186,12 +196,16 @@ app.middleware.db.search = (model, options) => {
 					.value()
 				);
 
-			// Execute tag actions if there are any
+			// Include tag mongo filters if there are any {{{
 			_.forEach(searchSettings.mergeTags, (val, tag) => {
 				if (!searchSettings.tags[tag]) return app.log.warn('No handler for tag', app.log.colors.cyan.bold(tag) + ':' + app.log.colors.cyan(val), '- skipping query filter');
-				console.log('CALL HANDLER', tag);
-				searchSettings.tags[tag].call(query, query, val);
+				if (_.isFunction(searchSettings.tags[tag])) {
+					searchSettings.tags[tag].call(query, query, val);
+				} else if (_.isFunction(searchSettings.tags[tag].mongo)) {
+					searchSettings.tags[tag].mongo.call(query, query, val);
+				} // Implied else - tag is defined but has no Mongo query mutator, probably will just mutate on find
 			});
+			// }}}
 
 			query
 				.find(searchSettings.filter) // Apply other filters
@@ -200,7 +214,25 @@ app.middleware.db.search = (model, options) => {
 					: settings.select ? settings.select.split(',') // Otherwise assume settings.select is a CSV
 					: searchSettings.select.split(',') // or fall back to main search setting
 				)
-				.filter(searchSettings.softFilter) // Apply soft filters
+				// .filter(searchSettings.softFilter) // Apply soft filters
+				.filter(function(cb, doc) { // Handle Monoxide "soft" filters if there are any
+					_.chain(searchSettings.mergeTags)
+						.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
+						.map((val, tag) => // Map all filters into a promise array
+							Promise.resolve(searchSettings.tags[tag].filter.call(doc, doc, val))
+						)
+						.thru(promises => Promise.all(promises)
+							.then(results => {
+								if (!results.length) return cb(null, true); // No filters - approve all documents by default
+								if (results.every(r => r)) { // All results are truthy - approve doc
+									cb(null, true);
+								} else { // At least one filter returned false - filter out doc
+									cb(null, false);
+								}
+							})
+						)
+						.value()
+				})
 				.map((next, doc) => // Remap each found doc...
 					!searchSettings.count ? next(null, doc) // We dont need to do any document mangling for count operations
 					: Promise.all(settings.fields.map((field, fieldIndex) =>
