@@ -99,7 +99,7 @@ module.exports = function() {
 				.then(()=> { // Load auth header token if we're in authHeader session preference mode
 					if (!$session.isRefreshed && Vue.services().$config.session.preference == 'authHeader') { // Pull header from localStorage as we're not using cookies
 						return $session.settings.get('authToken').then(token => {
-							if (token) axios.defaults.headers.auth = token;
+							if (token) axios.defaults.headers.Auth = token;
 						});
 					}
 				})
@@ -237,7 +237,7 @@ module.exports = function() {
 		.then(()=> Vue.services().$http.post('/api/session/login', user))
 		.then(res => { // Use authHeader method?
 			if (Vue.services().$config.session.preference == 'authHeader' && res.data && res.data.auth) {
-				axios.defaults.headers.auth = res.data.auth;
+				axios.defaults.headers.Auth = res.data.auth;
 				return $session.settings.set('authToken', res.data.auth, 'local');
 			}
 		})
