@@ -17,11 +17,18 @@ app.middleware.express.or = (middlewares, failHandler) => (req, res, next) => {
 	var calledNext = false; // Whether we have already called next() due to one middleware layer succeeding
 	var errors = Array.from(new Array(waitingCount), ()=> null); // Populate the error array (so we can direct sett error messages later)
 
+	/**
+	* Deal with the return of a middleware function
+	* This should either allow the callback (once) on the first successful response OR fail if all of the entries errored out
+	* @param {number} offset The offset in the middlewares array that is being processed
+	* @param {*} [err] Error, if any that was thrown by the middleware. If omitted or falsy / undefined this assumes that the call was successful
+	*/
 	var middlewareOrHandler = (offset, err) => {
 		waitingCount--;
 		if (err) errors[offset] = err;
 
-		if (waitingCount <= 0 && !err) { // This middleware item succeeded
+		if (!err) { // This middleware item succeeded
+			if (calledNext) return; // We've already let this callback fire, ignore subsequent middleware truthy responses
 			calledNext = true;
 			next();
 		} else if (waitingCount <= 0 && !calledNext) { // Nothing else to wait for and none of the middlewares succeded
@@ -40,7 +47,7 @@ app.middleware.express.or = (middlewares, failHandler) => (req, res, next) => {
 	middlewares.forEach((m, mIndex) => m(req, {
 		...res,
 		send: (payload) => {
-			middlewareOrHandler(mIndex, );
+			middlewareOrHandler(mIndex);
 		},
 		sendError: (code, msg) => {
 			if (code && msg) return middlewareOrHandler(mIndex, `${code}: ${msg}`);
