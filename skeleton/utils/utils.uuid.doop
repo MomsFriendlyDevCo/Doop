@@ -6,7 +6,7 @@
 
 var crypto = require('crypto');
 var promisify = require('util').promisify;
-var uuid = require('uuid').uuidv4;
+var uuid = require('uuid').v4;
 
 var cryptoRandomBytes = promisify(crypto.randomBytes);
 app.utils.uuid = {};
