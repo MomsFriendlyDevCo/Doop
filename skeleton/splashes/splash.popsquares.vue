@@ -31,12 +31,15 @@ module.exports = {
 	>
 		<div
 			v-for="row in $props.rows"
+			:key="row"
 			class="popsquare-row"
 		>
 			<div
 				v-for="col in $props.cols"
+				:key="col"
 				class="popsquare"
 				:style="generateSquareStyle()"
+				v-once
 			/>
 		</div>
 	</div>
