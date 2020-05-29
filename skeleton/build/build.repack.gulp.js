@@ -1,5 +1,5 @@
 /**
-* Process all .vue file <script repack/> blocks using Rollup
+* Process all .vue file <script repack/> blocks using Parcel
 * NOTE: This task is quite time consuming as all dependencies must be recomputed and its tricky to tell if the destination needs recompiling
 *       To avoid this we stash file stamps on each run and only do a full recompile the first time around, this can unfortunately miss dependencies at the cost of faster compile speed
 */
@@ -10,8 +10,8 @@ var glob = require('globby');
 var gulp = require('gulp');
 var fs = require('fs');
 var fspath = require('path');
+var parcel = require('parcel-bundler');
 var readable = require('@momsfriendlydevco/readable');
-var rollup = require('rollup');
 
 var runCount = 0;
 var repackCache;
@@ -63,45 +63,19 @@ gulp.task('build.repack', 'load:app', ()=> {
 					.catch(reject)
 			})
 		}))
-		.then(()=> gulp.log('Compiling via Rollup'))
-		.then(mappings => rollup.rollup({
-			...(repackCache ? {cache: repackCache} : null),
-			input: dumpPath,
-			inlineDynamicImports: true,
-			plugins: [
-				require('rollup-plugin-progress')(),
-				require('rollup-plugin-replace')({
-					'process.env.NODE_ENV': app.config.isProduction ? '"production"' : '"dev"',
-				}),
-				require('rollup-plugin-commonjs')({ // Allow reading CommonJS formatted files (this has to exist high in the load order)
-					include: ['node_modules/**/*', 'demo/**/*', 'dist/**/*'], // FIXME: What goes here
-				}),
-				require('rollup-plugin-node-resolve')({ // Allow Node style module resolution
-					browser: true, // Use the `browser` path in package.json when possible
-					preferBuiltins: true,
-				}),
-				require('rollup-plugin-node-globals')({ // Inject global Node module shivs
-					baseDir: false,
-					buffer: false,
-					dirname: false,
-					filename: false,
-					global: false,
-					process: true,
-				}),
-				require('rollup-plugin-babel')({
-					presets: ['@babel/env'],
-					exclude: 'node_modules/**',
-				}),
-				require('rollup-plugin-uglify').uglify(),
-			],
+		.then(()=> gulp.log('Compiling via Parcel'))
+		.then(()=> new parcel(dumpPath, {
+			outDir: `${app.config.paths.root}/dist`,
+			outFile: 'vendors.repack.js',
+			watch: false,
+			cache: true,
+			cacheDir: '.cache',
+			minify: app.config.gulp.minifyJS,
+			sourceMaps: false, // FIXME: needs to be `app.config.gulp.debugJS` disabled until https://github.com/parcel-bundler/parcel/issues/2408 closes
+			autoInstall: false, // Disable install of missing deps
+			detailedReport: true,
 		}))
-		.then(bundle => {
-			repackCache = bundle.cache;
-			return bundle.generate({
-				format: 'cjs',
-			});
-		})
-		.then(res => fs.promises.writeFile('dist/vendors.repack.js', res.output[0].code))
+		.then(bundler => bundler.bundle())
 		.then(()=> fs.promises.stat('dist/vendors.repack.js'))
 		.then(stat => gulp.log('Generated', gulp.colors.cyan(readable.fileSize(stat.size)), 'script via repack'))
 		.catch(e => e === 'SKIP' ? Promise.resolve() : Promise.reject(e))
