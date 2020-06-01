@@ -14,7 +14,7 @@
 * All properties and slots of this component are identical to the vue-bootstrap4-table component with the exception of the below which adds Doop specific behaviour
 *
 * @url https://rubanraj54.gitbook.io/vue-bootstrap4-table/usage
-* @param {string} url Doop / Monoxide ReST endpoint to connect to
+* @param {string|Object} url Doop / Monoxide ReST endpoint to connect to, if this is a plain object its assumed to be an Axios compatible request (including a 'url' key) to merge with computed properties such as filters, sorting, pagination
 * @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
 * @param {function} [cellHref] Function called as `(row)` which can optionally return a link to wrap each cell as a link. Uses `v-href` internally so any of its values are supported
 * @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
@@ -76,7 +76,7 @@ module.exports = {
 		state: 'pending', // ENUM: 'pending', 'loading', 'ready'
 	}},
 	props: {
-		url: {type: String, required: true},
+		url: {type: [String, Object], required: true},
 		view: {type: String, default: 'table'},
 		cellHref: {type: Function},
 		columns: {type: Array, required: true}, // Defaults + type mangling applied in computedColumns
@@ -143,6 +143,10 @@ module.exports = {
 						v.column_classes = v.row_classes = 'col-number';
 						v.column_text_alignment = v.row_text_alignment = 'text-right';
 						break;
+					case 'thumbnail':
+						v.column_classes = v.row_classes = 'col-thumbnail';
+						v.column_text_alignment = v.row_text_alignment = 'text-center';
+						break;
 					case 'verbs':
 						v.column_classes = v.row_classes = 'col-verbs';
 						v.column_text_alignment = v.row_text_alignment = 'text-right';
@@ -157,34 +161,42 @@ module.exports = {
 	methods: {
 		refresh(query) {
 			if (!this.$props.url) return; // No URL available yet, URL is probably dynamic - do nothing
+			if (_.isPlainObject(this.$props.url) && !this.$props.url.url) throw new Error('No "url" key provided in v-table object');
 
 			return Promise.resolve()
 				.then(()=> this.state = 'loading')
 				.then(()=> this.$loader.startBackground(!this.rows))
-				.then(()=> ({params: { // Compute AxiosRequest
-					...(query?.filters),
-					...(query?.global_search ? {q: query.global_search} : null), // Add search functionality
-					...(query?.sort && query.sort.length ? {sort: query?.sort.map(i => _.isString(i) ? i : `${i.order == 'asc' ? '' : '-'}${i.name}`).join(',')} : null),
-					limit: query?.per_page || this.config?.per_page || 30,
-					skip: ((query?.page || 1) - 1) * (query?.per_page || this.config?.per_page || 30),
-				}}))
+				.then(()=> _.merge( // Calculate Axios request object
+					{ // Calculate fields from v-table session - filters, search, sorting, pagination
+						method: 'GET',
+						params: { // Compute AxiosRequest
+							...(query?.filters),
+							...(query?.global_search ? {q: query.global_search} : null), // Add search functionality
+							...(query?.sort && query.sort.length ? {sort: query?.sort.map(i => _.isString(i) ? i : `${i.order == 'asc' ? '' : '-'}${i.name}`).join(',')} : null),
+							limit: query?.per_page || this.config?.per_page || 30,
+							skip: ((query?.page || 1) - 1) * (query?.per_page || this.config?.per_page || 30),
+						}
+					},
+					_.isString(this.$props.url) ? {url: this.$props.url} : this.$props.url, // Merge either single URL string OR entire url object
+				))
 				.then(req => { this.$debug('AxiosRequest', req); return req })
 				.then(req => {
 					// Calculate endpoint URLs {{{
-					var endpointQuery = new URL(this.$props.url, window.location.href);
+					var endpointQuery = new URL(req.url, window.location.href);
 
-					var endpointCount = new URL(this.$props.url, window.location.href);
+					var endpointCount = new URL(req.url, window.location.href);
 					endpointCount.pathname += '/count';
 					// }}}
 
 					return Promise.all([
 						// Fetch matching rows
-						this.$http.get(endpointQuery.toString(), req)
+						this.$http({...req, url: endpointQuery.toString()})
 							.then(res => this.rows = res.data),
 
 						// Count potencial rows (i.e. the count based on query)
-						this.$http.get(endpointCount.toString(), {
+						this.$http({
 							...req,
+							url: endpointCount.toString(),
 							params: _.omit(req.params, ['sort', 'limit', 'skip', 'select', 'populate']), // Omit meta fields from count or they are included as filters
 						})
 							.then(res => this.rowCount = res.data.count),
@@ -275,21 +287,17 @@ module.exports = {
 		}
 	},
 	watch: {
-		url() { // React to URL changes by refreshing
+		'$props.url'() { // React to URL changes by refreshing
 			this.refresh();
+		},
+		'$route.query.q'() { // Watch router query and update if change detected
+			if (!this.$props.useSearchQuery) return; // Ignoring search query anyway
+			$(this.$el).find('.row.no-gutters input.form-control').val(this.$route.query.q); // There is no sane way to override the form search box contents
+			this.$refs.table.updateGlobalSearchHandler(this.$route.query.q); // Tell the table to refresh
 		},
 	},
 	created() {
 		this.$debugging = false;
-	},
-	watch: {
-		'$route.query.q': { // Watch router query and update if change detected
-			handler() {
-				if (!this.$props.useSearchQuery) return; // Ignoring search query anyway
-				$(this.$el).find('.row.no-gutters input.form-control').val(this.$route.query.q); // There is no sane way to override the form search box contents
-				this.$refs.table.updateGlobalSearchHandler(this.$route.query.q); // Tell the table to refresh
-			},
-		},
 	},
 };
 </component>
@@ -305,5 +313,14 @@ module.exports = {
 
 .v-table .col-number {
 	width: 100px;
+}
+
+.v-table .col-thumbnail {
+	width: 50px;
+}
+
+.v-table .col-thumbnail img {
+	max-width: 50px;
+	max-height: 50px;
 }
 </style>
