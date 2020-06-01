@@ -20,6 +20,7 @@
 * @param {string} [addTitle="Enter the title of the new item"] Title text to display when adding a new item
 * @param {string} [addDefault=""] Default value when adding a new item
 * @param {object} [addPost] Additional POST structure to send when creating the item
+* @param {string} [classValid="btn btn-light"] The class to use when an item is selected
 * @emits change Emitted as `(id, document)` when the user changes the selection - can be undefined if the user cleared the field
 * @emits changeData Emitted as `(document)` (i.e. the whole data) as a convenience method to bind to the entire data array
 * @emits changeFIELD Emitted for each field in the resultant document with fields as camelCase with first leter caps, for example {_id: 123, label: 'hello'} emits 'change_id' + 'changeLabel'
@@ -40,6 +41,7 @@ module.exports = {
 		field: {type: String, default: 'title'},
 		limit: {type: [Number, Boolean], default: 30},
 		sort: {type: [Boolean, String], default: true},
+		classValid: {type: String, default: 'btn btn-light'},
 		iconValid: {type: String},
 		iconInvalid: {type: String},
 		textInvalid: {type: String},
@@ -109,7 +111,7 @@ module.exports = {
 
 <template>
 	<div class="digest-select btn-group">
-		<a @click.stop="select()" :class="$props.editable ? 'btn btn-light' : 'nonclickable'">
+		<a @click.stop="select" :class="$props.editable ? $props.classValid : 'nonclickable'">
 			<digest
 				v-if="$props.selected"
 				:label="$props.label"
