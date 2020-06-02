@@ -212,7 +212,8 @@ app.middleware.db.search = (model, options) => {
 				.select(
 					settings.count ? '_id' // Only pick the _id if we're in count mode to save memory
 					: settings.select ? settings.select.split(',') // Otherwise assume settings.select is a CSV
-					: searchSettings.select.split(',') // or fall back to main search setting
+					: searchSettings.select ? searchSettings.select.split(',') // or fall back to main search setting
+					: undefined
 				)
 				// .filter(searchSettings.softFilter) // Apply soft filters
 				.filter(function(cb, doc) { // Handle Monoxide "soft" filters if there are any
