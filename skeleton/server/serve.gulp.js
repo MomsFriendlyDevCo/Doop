@@ -90,8 +90,8 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
 		}).on('all', file => {
-			gulp.log('Rebuild Vue files...');
-			gulp.run('build.css', 'build.vue', ()=> bootServerProcess(false));
+			gulp.log('Rebuild Vue + Parcel files...');
+			gulp.run('build.css', ['build.vue', 'build.repack'], ()=> bootServerProcess(false));
 		});
 		// }}}
 
