@@ -101,6 +101,7 @@
     "vue-select": "^3.10.3",
     "vue-signature-pad": "^1.1.17",
     "vue-snotify": "^3.2.1",
+    "vuejs-datepicker": "^1.6.2",
     "winston": "^3.2.1",
     "winston-papertrail": "git+https://github.com/BeauBouchard/winston-papertrail.git"
   }
