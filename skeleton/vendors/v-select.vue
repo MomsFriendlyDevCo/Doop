@@ -26,4 +26,9 @@ Vue.component('v-select', VueSelect);
 	display: none;
 }
 /* }}} */
+
+/* Copy background color from theme */
+.vs__dropdown-option--highlight {
+	background: var(--main);
+}
 </style>
