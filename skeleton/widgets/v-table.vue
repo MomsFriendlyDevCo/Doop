@@ -219,7 +219,6 @@ module.exports = {
 	},
 	render(h) {
 		if (this.$props.view == 'table') {
-			console.log('STATE', this.state);
 			if (['pending', 'loading'].includes(this.state)) {
 				return h('div', {class: 'card'}, [
 					h('div', {class: 'card-body p-4'}, [
@@ -326,7 +325,7 @@ module.exports = {
 
 		// Start initial load loop
 		this.refresh({ // Try to guess the first query so we don't make a duplicate when v-table wakes up and makes the same exact refresh request
-			sort: this.$props.columns.find(c => c.sort == true).name || 'title',
+			sort: [this.$props.columns.find(c => c.sort == true).name || 'title'],
 			limit: this.$props.config?.per_page || 30,
 			skip: 0,
 		});
