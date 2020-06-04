@@ -18,7 +18,8 @@
 * @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
 * @param {function} [cellHref] Function called as `(row)` which can optionally return a link to wrap each cell as a link. Uses `v-href` internally so any of its values are supported
 * @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
-* @param {string} [text-loading="Loading..."] Message to display when loading FIXME: Not yet implemented
+* @param {string} [text-loading="Loading..."] Message to display when loading
+* @param {boolean} [loadForeground=true] Use the foreground (covering) loader when loading the first time. Disable this if the table should show inline with a loading message (specified by text-loading)
 * @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
 * @param {boolean} [useSearchQuery=true] If searching is enabled, accept the initial search query from $route.query.q
 *
@@ -74,6 +75,7 @@ module.exports = {
 		rows: [],
 		rowCount: 0,
 		state: 'pending', // ENUM: 'pending', 'loading', 'ready'
+		lastQuery: undefined,
 	}},
 	props: {
 		url: {type: [String, Object], required: true},
@@ -84,6 +86,8 @@ module.exports = {
 		search: {type: Boolean, default: false},
 		directoryMap: {type: [Object,Function]},
 		useSearchQuery: {type: Boolean, default: true},
+		textLoading: {type: String, default: 'Loading...'},
+		loadForeground: {type: Boolean, default: true},
 	},
 	computed: {
 		computedConfig() { // Apply Doop / Monoxide defaults to base config structure
@@ -160,12 +164,17 @@ module.exports = {
 	},
 	methods: {
 		refresh(query) {
+			if (this.state == 'loading') return; // Already refreshing
 			if (!this.$props.url) return; // No URL available yet, URL is probably dynamic - do nothing
 			if (_.isPlainObject(this.$props.url) && !this.$props.url.url) throw new Error('No "url" key provided in v-table object');
 
+			// Check that vue-bootstrap4-table didn't get caught in a refresh loop by comparing against the last query
+			if (this.lastQuery && query && _.isEqual(query, this.lastQuery)) return;
+			this.lastQuery = query;
+
 			return Promise.resolve()
 				.then(()=> this.state = 'loading')
-				.then(()=> this.$loader.startBackground(!this.rows))
+				.then(()=> this.$loader.start(`v-table-${this._uid}`, this.$props.loadForeground && !this.rows.length))
 				.then(()=> _.merge( // Calculate Axios request object
 					{ // Calculate fields from v-table session - filters, search, sorting, pagination
 						method: 'GET',
@@ -204,68 +213,84 @@ module.exports = {
 				})
 				.then(()=> this.$debug('Row data', {rows: this.rows, rowCount: this.rowCount}))
 				.catch(this.$toast.catch)
-				.finally(()=> this.$loader.stop())
+				.finally(()=> this.$loader.stop(`v-table-${this._uid}`))
 				.finally(()=> this.state = 'ready')
 		},
 	},
 	render(h) {
 		if (this.$props.view == 'table') {
-			return h('vue-bootstrap4-table', {
-				ref: 'table',
-				class: 'v-table',
-				props: {
-					rows: this.rows,
-					totalRows: this.rowCount,
-					columns: this.computedColumns,
-					config: this.computedConfig,
-				},
-				on: {
-					'on-change-query': this.refresh,
-				},
-				scopedSlots: _(this.$scopedSlots)
-					.mapValues((func, slot) => {
-						// Don't screw with column / pagination slot definitions
-						if (slot == 'pagination-info' || slot.startsWith('column_')) return func;
+			console.log('STATE', this.state);
+			if (['pending', 'loading'].includes(this.state)) {
+				return h('div', {class: 'card'}, [
+					h('div', {class: 'card-body p-4'}, [
+						h('div', {
+							class: 'text-center h3',
+						}, [
+							h('i', {class: 'far fa-spinner fa-spin mr-2'}),
+							h('span', this.$props.textLoading),
+						])
+					])
+				]);
+			} else if (this.state == 'ready') {
+				return h('vue-bootstrap4-table', {
+					ref: 'table',
+					class: 'v-table',
+					props: {
+						rows: this.rows,
+						totalRows: this.rowCount,
+						columns: this.computedColumns,
+						config: this.computedConfig,
+					},
+					on: {
+						'on-change-query': this.refresh,
+					},
+					scopedSlots: _(this.$scopedSlots)
+						.mapValues((func, slot) => {
+							// Don't screw with column / pagination slot definitions
+							if (slot == 'pagination-info' || slot.startsWith('column_')) return func;
 
-						// Wrap with cellHref property?
-						if (this.$props.cellHref) return props => h('a', {
-							directives: [{
-								name: 'href',
-								value: this.$props.cellHref(props.row),
-							}],
-						}, func(props));
+							// Wrap with cellHref property?
+							if (this.$props.cellHref) return props => h('a', {
+								directives: [{
+									name: 'href',
+									value: this.$props.cellHref(props.row),
+								}],
+							}, func(props));
 
-						// Fell though all other render methods - let Vue handle the raw slot render
-						return func;
-					})
-					.thru(cols => {
-						this.$props.columns
-							.filter(col => col.macgyver)
-							.forEach(col => {
-								cols[col.name] = props => {
-									return h('mgForm', {
-										props: {
-											config: col.macgyver,
-											data: {
-												[col.name]: props.row[col.name],
+							// Fell though all other render methods - let Vue handle the raw slot render
+							return func;
+						})
+						.thru(cols => {
+							this.$props.columns
+								.filter(col => col.macgyver)
+								.forEach(col => {
+									cols[col.name] = props => {
+										return h('mgForm', {
+											props: {
+												config: col.macgyver,
+												data: {
+													[col.name]: props.row[col.name],
+												},
 											},
-										},
-										on: {
-											changeItem: col.macgyver.onChange ?
-												e => col.macgyver.onChange(props, e.value)
-												: undefined,
-										},
-									});
-								};
-							});
+											on: {
+												changeItem: col.macgyver.onChange ?
+													e => col.macgyver.onChange(props, e.value)
+													: undefined,
+											},
+										});
+									};
+								});
 
-						return cols;
-					})
-					.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down ml-1'}))
-					.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up ml-1'}))
-					.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort ml-1'}))
-					.value(),
-			});
+							return cols;
+						})
+						.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down ml-1'}))
+						.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up ml-1'}))
+						.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort ml-1'}))
+						.value(),
+				});
+			} else {
+				throw new Error(`Unknown v-table state "${this.state}"`);
+			}
 		} else if (this.$props.view == 'directory') {
 			if (this.state == 'pending') this.refresh(); // Kick off first load if we havn't already done so
 
@@ -298,6 +323,13 @@ module.exports = {
 	},
 	created() {
 		this.$debugging = false;
+
+		// Start initial load loop
+		this.refresh({ // Try to guess the first query so we don't make a duplicate when v-table wakes up and makes the same exact refresh request
+			sort: this.$props.columns.find(c => c.sort == true).name || 'title',
+			limit: this.$props.config?.per_page || 30,
+			skip: 0,
+		});
 	},
 };
 </component>
