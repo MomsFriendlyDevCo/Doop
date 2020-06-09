@@ -7,7 +7,7 @@
 * <a v-href="'/link/to/somewhere'">Text</a>
 *
 * @example Make <a/> tags link somewhere with a fancy transition
-* <a v-href="{url: '/widgets', transition: 'slide-right'}">Text</a>
+* <a v-href="{href: '/widgets', transition: 'slide-right'}">Text</a>
 *
 * @example Simple table links
 * <table>
