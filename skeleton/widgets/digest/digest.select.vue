@@ -11,6 +11,7 @@
 * @param {boolean} [editable=true] Whether the component should be in an editable state
 * @param {booean} [allowRemove=true] Whether to allow the user to remove the current selection
 * @param {booean} [ignoreErrors=false] Whether to not print errors into $toast.error
+* @param {string} [searchMethod='regex'] Method to use when searching. See $prompt.list for details
 * @param {string} [title=selectText] The title of the dialog, defaults to `selectText`
 * @param {string|boolean} [sort=true] Whether to sort the documents, boolean true uses the same field as `field`
 * @param {number|boolean} [limit=30] The number of documents to pull from the server in each batch, set to falsy to disable
@@ -37,6 +38,7 @@ module.exports = {
 		editable: {type: Boolean, default: true},
 		allowRemove: {type: Boolean, default: true},
 		ignoreErrors: {type: Boolean, default: false},
+		searchMethod: {type: String, default: 'regex'},
 		title: {type: String},
 		field: {type: String, default: 'title'},
 		limit: {type: [Number, Boolean], default: 30},
@@ -70,6 +72,7 @@ module.exports = {
 					field: Array.from(new Set(this.$props.field.split(/\s*,\s*/).concat([this.$props.idField]))).join(','),
 					sort: this.$props.sort,
 					limit: this.$props.limit,
+					searchMethod: this.$props.searchMethod,
 					buttons: !this.$props.add // Display 'Add new' button if adding is enabled
 						? {left: [], center: [], right: []}
 						: {left: [], center: [], right: [
