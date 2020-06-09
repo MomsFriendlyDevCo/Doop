@@ -117,6 +117,13 @@ module.exports = {
 		],
 		http2Inject: config => config.layout.assets, // Links to files that should be HTTP2 injected on initial page hit
 	},
+	lock: {
+		expiry: 1000 * 60 * 60, // 1 hour
+		mongodb: {
+			uri: config => config.mongo.uri,
+			collection: 'locks',
+		},
+	},
 	logging: {
 		enabled: true,
 		verbose: 1, // 0=off, 1=errors only, 2=all

@@ -35,6 +35,7 @@
     "@momsfriendlydevco/fa-icons": "^1.0.1",
     "@momsfriendlydevco/gulpy": "^1.4.1",
     "@momsfriendlydevco/loader": "^1.2.1",
+    "@momsfriendlydevco/lock": "^1.2.12",
     "@momsfriendlydevco/readable": "^1.2.1",
     "@momsfriendlydevco/sift-sieve": "^1.0.0",
     "@slack/web-api": "^5.9.0",

@@ -1,0 +1,6 @@
+<server on="middleware">
+var Lock = require('@momsfriendlydevco/lock');
+
+app.lock = new Lock(app.config.lock);
+return app.lock.init();
+</server>
