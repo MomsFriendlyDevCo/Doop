@@ -150,7 +150,7 @@ app.middleware.db.search = (model, options) => {
 			skip: 0,
 			select: undefined,
 			count: false,
-			...settings,
+			..._.cloneDeep(settings),
 			...options,
 		};
 
