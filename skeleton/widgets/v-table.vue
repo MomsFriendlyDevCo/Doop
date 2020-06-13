@@ -21,6 +21,7 @@
 * @param {string} [text-loading="Loading..."] Message to display when loading
 * @param {boolean} [loadForeground=true] Use the foreground (covering) loader when loading the first time. Disable this if the table should show inline with a loading message (specified by text-loading)
 * @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
+* @param {boolean} [search=true] Show the search header (shortcut to set config.global_search.visibility
 * @param {boolean} [useSearchQuery=true] If searching is enabled, accept the initial search query from $route.query.q
 *
 * @param {Object} columns Column definitions
