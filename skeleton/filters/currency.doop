@@ -1,0 +1,4 @@
+<server on="middleware, dbMiddleware">
+var _ = require('lodash');
+_.set(app, 'filters.currency', value => Number(value || 0).toLocaleString('en-AU', {style: 'currency', currency: 'AUD'}));
+</server>
