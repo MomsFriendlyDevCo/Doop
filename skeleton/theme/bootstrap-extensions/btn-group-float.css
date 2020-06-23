@@ -55,7 +55,7 @@
 /* Nudge large 'Save' buttons into the shoulder of smaller delete buttons */
 .btn-group-float > .btn.btn-sm.btn-danger + .btn.btn-lg.btn-success,
 .btn-group-float > .btn.btn-sm.btn-secondary + .btn.btn-lg.btn-success {
-	margin-left: -15px;
+	margin-left: -10px;
 }
 
 /* Hide when routing or animating {{{ */
