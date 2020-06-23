@@ -2,16 +2,15 @@
 module.exports = {
 	data() { return {
 		searchQuery: this.$route.query.q,
-		showHelper: false,
+		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
 		helper: {
 			search: '',
 			after: undefined,
 			before: undefined,
-			statusDraft: false,
-			statusQuote: false,
 			statusInvoice: false,
 			statusProcessing: false,
 			statusCompleted: false,
+			payment: 'all',
 		},
 	}},
 	methods: {
@@ -20,6 +19,25 @@ module.exports = {
 		*/
 		submit() {
 			this.$router.push({path: '/orders', query: {q: this.searchQuery}});
+		},
+
+
+		/**
+		* Set the visiblity of the helper
+		* @param {boolean|string} [state='toggle'] Either the visibility boolean or 'toggle' to switch
+		*/
+		setHelperVisibility(state = 'toggle') {
+			this.showHelper = state == 'toggle' ? !this.showHelper : !!state;
+
+			if (this.showHelper) {
+				// Hook into global body click handler
+				this.$timeout(()=> $('body').on('click', '*', this.handleBodyClick), 250); // Let DOM settle then bind to clicking outside the area to close
+				app.vue.$on('$beforeRoute', this.handleRoute);
+			} else {
+				// Destroy global body click handler
+				$('body').off('click', '*', this.handleBodyClick);
+				app.vue.$off('$beforeRoute', this.handleRoute);
+			}
 		},
 
 
@@ -50,11 +68,11 @@ module.exports = {
 						helper.before = moment(i.substring(7)).toDate();
 					} else if (i.startsWith('is:')) {
 						var statuses = i.substring(3).split(/\s*,\s*/);
-						helper.statusDraft = statuses.includes('draft');
-						helper.statusQuote = statuses.includes('quote');
 						helper.statusInvoice = statuses.includes('invoice');
 						helper.statusProcessing = statuses.includes('processing');
 						helper.statusCompleted = statuses.includes('completed');
+					} else if (i.startsWith('payment:')) {
+						helper.payment = i.substr(8);
 					} else { // Don't recognise as a token - throw onto fuzzy searching pile
 						helper.search.push(i);
 					}
@@ -76,16 +94,36 @@ module.exports = {
 				this.helper.search,
 				this.helper.after ? `after:${moment(this.helper.after).format('YYYY-MM-DD')}` : '',
 				this.helper.before ? `before:${moment(this.helper.before).format('YYYY-MM-DD')}` : '',
-				this.helper.statusDraft || this.helper.statusQuote || this.helper.statusInvoice || this.helper.statusProcessing || this.helper.statusCompleted
+				this.helper.statusInvoice || this.helper.statusProcessing || this.helper.statusCompleted
 					? 'is:' + [
-						this.helper.statusDraft && 'draft',
-						this.helper.statusQuote && 'quote',
 						this.helper.statusInvoice && 'invoice',
 						this.helper.statusProcessing && 'processing',
 						this.helper.statusCompleted && 'completed',
 					].filter(s => s).join(',')
 					: '',
+				this.helper.payment && this.helper.payment != 'all' ? `payment:${this.helper.payment}` : '',
 			].filter(i => i).join(' ')
+		},
+
+
+		/**
+		* Detect and handle top level body clicks
+		* Close the dialog if the click is detected anywhere outside the DOM element tree
+		*/
+		handleBodyClick(e) {
+			if (!this.showHelper) return; // Helper is invisible anyway - disguard
+			if (!$(e.target).parents('.app-search-helper').toArray().length) { // Helper is not in DOM tree upwards - user clicked outside open search helper area
+				e.stopPropagation();
+				this.setHelperVisibility(false);
+			}
+		},
+
+		/**
+		* Detect and handle routing while the search helper is open
+		*/
+		handleRoute(data) {
+			if (!this.showHelper) return; // Helper is invisible anyway - disguard
+			this.setHelperVisibility(false);
 		},
 	},
 	watch: {
@@ -103,6 +141,9 @@ module.exports = {
 			},
 		},
 	},
+	beforeDestroy() {
+		this.setHelperVisibility(false); // Clean up body click handlers
+	},
 };
 </component>
 
@@ -110,7 +151,7 @@ module.exports = {
 	<form @submit.prevent="submit" role="search">
 		<input v-model="searchQuery" type="text" placeholder="Search orders..." class="form-control">
 		<a @click="submit" class="far fa-search"/>
-		<a @click="showHelper = !showHelper" class="far fa-chevron-down"/>
+		<a @click="setHelperVisibility('toggle')" class="far fa-chevron-down"/>
 		<div class="app-search-helper form-horizontal container" :class="showHelper && 'open'">
 			<div class="form-group row">
 				<label class="col-sm-3 col-form-label">Search</label>
@@ -130,15 +171,7 @@ module.exports = {
 			</div>
 			<div class="form-group row">
 				<label class="col-sm-3 col-form-label">Status</label>
-				<div class="col-sm-9 form-inline">
-					<div class="form-check mr-3">
-						<input v-model="helper.statusDraft" class="form-check-input" type="checkbox" id="searchHelperStatusDraft"/>
-						<label class="form-check-label" for="searchHelperStatusDraft">Draft</label>
-					</div>
-					<div class="form-check mr-3">
-						<input v-model="helper.statusQuote" class="form-check-input" type="checkbox" id="searchHelperStatusQuote"/>
-						<label class="form-check-label" for="searchHelperStatusQuote">Quote</label>
-					</div>
+				<div class="col-sm-9 form-inline form-control-plaintext">
 					<div class="form-check mr-3">
 						<input v-model="helper.statusInvoice" class="form-check-input" type="checkbox" id="searchHelperStatusInvoice"/>
 						<label class="form-check-label" for="searchHelperStatusInvoice">Invoice</label>
@@ -150,6 +183,27 @@ module.exports = {
 					<div class="form-check mr-3">
 						<input v-model="helper.statusCompleted" class="form-check-input" type="checkbox" id="searchHelperStatusCompleted"/>
 						<label class="form-check-label" for="searchHelperStatusCompleted">Completed</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-3 col-form-label">Payment</label>
+				<div class="col-sm-9 form-inline form-control-plaintext">
+					<div class="form-check mr-3">
+						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentAll" name="searchHelperPayment" value="all"/>
+						<label class="form-check-label" for="searchHelperPaymentAll">All</label>
+					</div>
+					<div class="form-check mr-3">
+						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentSettled" name="searchHelperPayment" value="settled"/>
+						<label class="form-check-label" for="searchHelperPaymentSettled">Settled</label>
+					</div>
+					<div class="form-check mr-3">
+						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentPartial" name="searchHelperPayment" value="partial"/>
+						<label class="form-check-label" for="searchHelperPaymentPartial">Partial</label>
+					</div>
+					<div class="form-check mr-3">
+						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentUnpaid" name="searchHelperPayment" value="unpaid"/>
+						<label class="form-check-label" for="searchHelperPaymentUnpaid">Unpaid</label>
 					</div>
 				</div>
 			</div>

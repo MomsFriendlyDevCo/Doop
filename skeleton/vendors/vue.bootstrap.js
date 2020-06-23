@@ -126,6 +126,7 @@ window.onload = ()=> {
 	// Router > Guards > Check session {{{
 	window.app.router.beforeEach((to, from, next) => {
 		Vue.assets.service('$session').promise()
+			.then(()=> app.vue.$emit('$beforeRoute', {to, from}))
 			.then(user => next())
 			.catch(()=> { // Forbid nav if not logged in an the path is in a whitelist
 				if (['/login'].includes(to.path)) return next(); // Let whitelisted paths continue
