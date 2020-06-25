@@ -140,6 +140,19 @@ Users.hook('save', function(done, q) {
 // Timestamp status tracking {{{
 Users.hook('save', app.middleware.db.timestamps())
 // }}}
+
+// Permission Utilities {{{ */
+/**
+* Return if the user has the valid array of permissions
+* All permissions must be present to return true
+* @param {string|array<string>} permission... Permission(s) to check
+* @returns boolean True if the user has all permissions
+*/
+Users.method('hasPermission', function(...permissions) {
+	var user = this;
+	return permissions.every(p => user.permissions[p]);
+});
+// }}}
 </schema>
 
 <endpoint>
