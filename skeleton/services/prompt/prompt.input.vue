@@ -5,6 +5,8 @@
 * @param {string} [options.title="Input text"] Title of the prompt window
 * @param {string} [options.default=""] Default value of the input box
 * @param {string} [options.placeholder=""] Placeholder for the input box
+* @param {string} [options.prefix=""] Optional prefix for the input element
+* @param {string} [options.sufffix=""] Optional suffix for the input element
 *
 * @example Prompt for a users name
 * vm.$prompt.input({title: 'What is your name'}).then(response => ...)
@@ -56,6 +58,11 @@ module.exports = {
 		<div class="form-group row">
 			<div class="col-12">
 				<div class="input-group">
+					<div v-if="$prompt.settings.prefix" class="input-group-prepend">
+						<span class="input-group-text">
+							{{$prompt.settings.prefix}}
+						</span>
+					</div>
 					<input
 						type="search"
 						v-model="$prompt.settings.value"
@@ -64,6 +71,11 @@ module.exports = {
 						@keydown="keydown"
 						autofocus
 					/>
+					<div v-if="$prompt.settings.suffix" class="input-group-append">
+						<span class="input-group-text">
+							{{$prompt.settings.suffix}}
+						</span>
+					</div>
 				</div>
 			</div>
 		</div>
