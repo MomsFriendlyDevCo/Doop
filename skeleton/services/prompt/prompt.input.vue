@@ -70,6 +70,7 @@ module.exports = {
 						:placeholder="$prompt.settings.placeholder"
 						@keydown="keydown"
 						autofocus
+						data-autofocus-method="select"
 					/>
 					<div v-if="$prompt.settings.suffix" class="input-group-append">
 						<span class="input-group-text">
