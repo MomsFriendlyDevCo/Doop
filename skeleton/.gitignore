@@ -1,6 +1,5 @@
 # Private data
 config/private.conf.js
-.cache
 .error
 .o
 
@@ -13,6 +12,7 @@ node_modules/
 npm-debug.log*
 
 # Lock files / thumbnails / other OS leftovers
+.cache
 !.gitkeep
 ~$*
 .~lock.*
