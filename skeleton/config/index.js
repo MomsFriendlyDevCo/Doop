@@ -144,9 +144,7 @@ module.exports = {
 		hooks: false, // Overridden during Doop bootstrap (otherwise ignore all hook calls)
 		uri: 'mongodb://localhost/FIXME-name',
 		options: {
-			db: {
-				safe: true,
-			}
+			useUnifiedTopology: true,
 		},
 		plugins: ['iterators', 'promises', 'rest'],
 	},
