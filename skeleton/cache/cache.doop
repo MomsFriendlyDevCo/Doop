@@ -40,3 +40,60 @@ exports = ()=>
 		.then(()=> app.on('exit', ()=> app.cache.destroy()))
 
 </server>
+
+<server on="middleware">
+var _ = require('lodash');
+
+/**
+* Simple wrapper middleware function which either returns the cached ID (via app.cache) or runs a worker to calculate + cache a new one
+* NOTE: Since Promise execute immediately the worker must be a promise factory
+* @param {string|Object} options Options to use when caching, if this is a non-object its assumed to be the value of `options.id`
+* @param {string} options.id The ID of the cache to use
+* @param {boolean} [options.enabled=true] Whether to use the cache at all, set to false to debug the function worker each time
+* @param {string} [options.expiry="1h"] Any timesting valid entry to determine the maximum cache time
+* @param {boolean} [options.rejectAs=undefined] Cache throwing promises as this value rather than repeating them each hit
+* @param {*} [options.invalidStore] Value use to detect the absence of a value in the cache (so we can detect null/undefined values even though they are falsy)
+* @param {function} worker The worker PROMISE FACTORY function to execute if the cache value does not exist, the result of this is used for the subsequent cache value
+* @returns {Promise<*>} A promise which will return with the result of worker - or the cached value of worker until it expires
+*
+* @example Return the cached response, otherwise compute it
+* app.cache.function({id: 'myFunc'}, ()=> someBigPromise()).then(result => ...)
+*/
+app.cache.function = (options, worker) => {
+	var settings = {
+		id: !_.isPlainObject(options) ? options : undefined,
+		enabled: true,
+		expiry: '1h',
+		// rejectAs: undefined, // If set we use rejectAs, otherwise leave unset so we can also detect `undefined` value
+		invalidStore: '!!!UNKNOWN!!!',
+		...options,
+	};
+	if (!settings.id) throw new Error('No ID specified for app.cache.function(id, worker)');
+	if (worker instanceof Promise) throw new Error('app.cache.function must be passed a PROMISE FACTORY not an already executing PROMISE');
+	if (!_.isFunction(worker)) throw new Error('app.cache.function worker must be a function');
+
+	// Bypass cache entirely when disabled
+	if (!settings.enabled) return Promise.resolve(worker());
+
+	return app.cache.get(settings.id, settings.invalidStore)
+		.then(res => {
+			if (res !== settings.invalidStore) return res; // Result found
+
+			app.log('Cache function refresh for', app.log.colors.cyan(settings.id));
+			return Promise.resolve(worker()) // Execute worker as promisable
+				.then(value => app.cache.set(settings.id, value, settings.expiry)) // Cache output result and return
+				.catch(e => {
+					if (settings.hasOwnProperty('rejectAs')) {
+						console.log('SET CACHE THROW', settings.id, ':=', settings.rejectAs);
+						return app.cache.set(settings.id, settings.rejectAs)
+							.then(v => {
+								console.log('POST THROW CACHE', settings.id);
+								return v;
+							})
+					} else {
+						app.log.warn('Cache func function refresh for', settings.id, 'threw', e.toString());
+					}
+				})
+		})
+};
+</server>
