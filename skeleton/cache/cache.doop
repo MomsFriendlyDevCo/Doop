@@ -81,17 +81,14 @@ app.cache.function = (options, worker) => {
 
 			app.log('Cache function refresh for', app.log.colors.cyan(settings.id));
 			return Promise.resolve(worker()) // Execute worker as promisable
-				.then(value => app.cache.set(settings.id, value, settings.expiry)) // Cache output result and return
+				.then(value => app.cache.set(settings.id, value, settings.expiry).then(()=> value)) // Cache output result and return
 				.catch(e => {
 					if (settings.hasOwnProperty('rejectAs')) {
-						console.log('SET CACHE THROW', settings.id, ':=', settings.rejectAs);
-						return app.cache.set(settings.id, settings.rejectAs)
-							.then(v => {
-								console.log('POST THROW CACHE', settings.id);
-								return v;
-							})
+						app.log.warn('Cache func function refresh for', settings.id, 'threw', 'using fallback', settings.rejectAs);
+						return app.cache.set(settings.id, settings.rejectAs).then(()=> rejectAs);
 					} else {
 						app.log.warn('Cache func function refresh for', settings.id, 'threw', e.toString());
+						throw e;
 					}
 				})
 		})
