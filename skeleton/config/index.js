@@ -50,6 +50,8 @@ module.exports = {
 	cache: {
 		enabled: true,
 		keyMangle: config => key => `${config.name}-${config.env}-${key}`, // Configure cache to use the site name prefix (prevents cache collosions if multiple instances are running on the same box)
+		cleanAuto: false,
+		cleanAutoInterval: '3h',
 		modules: ['filesystem'], // Disabled ['memcached', 'mongodb', 'memory'] until we can find a way around the size limits (memcached = 1mb, mongodb = 16mb)
 		memcached: {
 			options: {
