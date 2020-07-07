@@ -9,11 +9,14 @@ var colors = require('chalk');
 module.exports = ()=>
 	Promise.resolve()
 		.then(()=> app.caches = {})
-		.then(()=> Promise.all(app.config.cache.modules.map(id => new Promise((resolve, reject) => {
-			app.caches[id] = new cache({...app.config.cache, modules: [id]}, err => {
-				if (err) { reject(err) } else { resolve() }
+		.then(()=> Promise.all(app.config.cache.modules.map(id => {
+			app.caches[id] = new cache({
+				...app.config.cache,
+				modules: [id],
+				init: false,
 			});
-		}))))
+			return app.caches[id].init();
+		})))
 		.then(()=> app.cache = app.caches[app.config.cache.modules[0]]) // Point to main cache object
 		.then(()=> console.log(
 			colors.blue('[cache]'),
