@@ -77,31 +77,31 @@ app.middleware.db.codeAlloc = (model, options) => {
 			// Fetch document and add 'code' if missing {{{
 			.then(()=> new Promise((resolve, reject) => {
 				if (doc.hasOwnProperty(settings.field) && (doc[settings.field] === null || doc[settings.field] === '(Code assigned on save)')) {
-					app.log('Code field exists and is not allocated', app.log.colors.cyan(settings.collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan('null'));
+					app.log('Code field exists and is not allocated', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan('null'));
 					return resolve(); // Key allocated but is null
 				}
 				if (doc.hasOwnProperty(settings.field) && doc[settings.field] === undefined) {
 					if (settings.allocateUndefined) {
 						return resolve();
 					} else {
-						app.log('Code field exists but undefined during create', app.log.colors.cyan(settings.collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan('undefined'));
+						app.log('Code field exists but undefined during create', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan('undefined'));
 						return reject('SKIP');
 					}
 				}
 				if (!doc._id) {
-					app.log('Unable to fetch code for partial document', app.log.colors.cyan(settings.collection), '#', '_id', '=', app.log.colors.cyan('undefined'));
+					app.log('Unable to fetch code for partial document', app.log.colors.cyan(model.$collection), '#', '_id', '=', app.log.colors.cyan('undefined'));
 					return reject('SKIP');
 				}
 
-				db[settings.collection]
+				model
 					.findOneByID(doc._id)
 					.select(settings.field)
 					.exec((err, found) => {
 						if (err) {
-							app.log('Failed to fetch code for partial document', app.log.colors.cyan(settings.collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(err));
+							app.log('Failed to fetch code for partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(err));
 							return reject('SKIP');
 						}
-						app.log('Fetched code for partial document', app.log.colors.cyan(settings.collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(found[settings.field]));
+						app.log('Fetched code for partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(found[settings.field]));
 						doc[settings.field] = found[settings.field];
 						if (_.isString(doc[settings.field]) && doc[settings.field]) return reject('SKIP');
 						return resolve();
