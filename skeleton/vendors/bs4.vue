@@ -22,5 +22,10 @@ app.ready.then(()=> {
 				cand.focus();
 		}
 	});
+
+	// When [data-dismiss="dropdown"] is set on a dropdown-item also close the dropdown
+	$(document).on('click', '.dropdown-item[data-dismiss="dropdown"]', e => {
+		$(e.target).closest('.dropdown-menu').removeClass('show');
+	});
 });
 </script>
