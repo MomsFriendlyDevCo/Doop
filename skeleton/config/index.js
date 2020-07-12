@@ -191,7 +191,7 @@ module.exports = {
 		logoutUrl: '/login', // Where to redirect to post-logout
 		profile: {
 			forcePermissions: { // Force permission setter (only applies to non production boxes)
-				debug: true,
+				// debug: true,
 			},
 		},
 	},

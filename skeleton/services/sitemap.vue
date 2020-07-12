@@ -14,19 +14,19 @@ module.exports = function() {
 			title: 'Companies',
 			href: '/companies',
 			icon: 'fal fa-building',
-			show: ()=> Vue.services().$session.data.permissions.companiesEdit,
+			show: ()=> Vue.services().$session.hasPermission('companiesEdit'),
 		},
 		{
 			title: 'Users',
 			href: '/users',
 			icon: 'fal fa-users',
-			show: ()=> Vue.services().$session.data.permissions.usersEdit,
+			show: ()=> Vue.services().$session.hasPermission('usersEdit'),
 		},
 		{
 			title: 'Debugging',
 			href: '/debug',
 			icon: 'fal fa-cog',
-			show: ()=> Vue.services().$session.data.permissions.debug,
+			show: ()=> Vue.services().$session.hasPermission('debug'),
 			children: [
 				{title: 'Config', href: '/debug/config'},
 				{title: 'DirtyChecker', href: '/debug/dirtyChecker'},

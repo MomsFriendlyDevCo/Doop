@@ -271,11 +271,24 @@ module.exports = function() {
 	
 	/**
 	* Query whether a user has a given or array of permissions
-	* @param {string|array <string>} permission Single or multiple permissions to check, if an array all must be present
+	* @param {string|array<string>} permission Single or multiple permissions to check, if an array all must be present
 	* @returns {boolean} A boolean if the permission statement matches
+	* @see $session.hasPermission.any()
 	*/
 	$session.hasPermission = permission =>
 		_.isArray(permission) ? permission.every(p => _.get($session, ['data', 'permissions', p]))
+		: _.isString(permission) ? _.get($session, ['data', 'permissions', permission], false)
+		: false;
+
+
+	/**
+	* Similar to $session.hasPermission but applies an "OR" condition to arrays
+	* @param {string|array<string>} permission Single or multiple permissions to check, if an array any item must be present
+	* @returns {boolean} A boolean if the permission statement matches
+	* @see $session.hasPermission()
+	*/
+	$session.hasPermission.any = permission =>
+		_.isArray(permission) ? permission.some(p => _.get($session, ['data', 'permissions', p]))
 		: _.isString(permission) ? _.get($session, ['data', 'permissions', permission], false)
 		: false;
 	// }}}
