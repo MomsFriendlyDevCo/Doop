@@ -7,6 +7,7 @@ module.exports = function() {
 	};
 
 	var Snotify = Vue.prototype.$snotify;
+	Snotify.config.global.preventDuplicates = true;
 
 	$toast.primary = Snotify.simple.bind(Snotify);
 	$toast.info = Snotify.info.bind(Snotify);
