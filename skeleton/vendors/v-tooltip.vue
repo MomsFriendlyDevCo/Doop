@@ -91,7 +91,7 @@
 .tooltip.popover .popover-inner {
 	background: #f9f9f9;
 	color: black;
-	padding: 24px;
+	padding: 5px;
 	border-radius: 5px;
 	box-shadow: 0 5px 30px rgba(black, .1);
 }
@@ -129,6 +129,32 @@
 
 .popover.popover-dark .popover-arrow {
 	border-color: #4c5667;
+}
+/* }}} */
+
+/* .popover-danger {{{ */
+/* e.g. <v-popover popover-class="popover-danger"/> */
+.popover.popover-danger .popover-inner {
+	background: var(--danger);
+	color: var(--white);
+	border: none;
+}
+
+.popover.popover-danger .popover-arrow {
+	border-color: var(--danger);
+}
+/* }}} */
+
+/* .popover-success {{{ */
+/* e.g. <v-popover popover-class="popover-success"/> */
+.popover.popover-success .popover-inner {
+	background: var(--success);
+	color: var(--white);
+	border: none;
+}
+
+.popover.popover-success .popover-arrow {
+	border-color: var(--success);
 }
 /* }}} */
 
