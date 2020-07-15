@@ -18,7 +18,7 @@ app.middleware.db.statusChange = (model, options) => {
 			db.logs.create({
 				created: new Date(),
 				col: model.$collection,
-				doc: doc._id,
+				doc: newDoc._id,
 				body: `Status changed<span class="from">${oldDoc.status}</span><span class="to">${newDoc.status}</span>`,
 			}),
 		...options,
