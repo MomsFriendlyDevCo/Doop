@@ -9,11 +9,13 @@ gulp.task.once('load:app.db', 'load:app', ()=>
 			if (hasLoaded) throw 'SKIP';
 		})
 		.then(()=> hasLoaded = true)
+		.then(()=> {
+			gulp.on('finish', ()=> // Clean up the database connection when we finish
+				monoxide.disconnect()
+					.then(()=> gulp.log('DB Disconnected'))
+			);
+		})
 		.then(()=> app.emit('dbInit'))
-		.then(()=> gulp.on('finish', ()=> // Clean up the database connection when we finish
-			monoxide.disconnect()
-				.then(()=> gulp.log('DB Disconnected'))
-		))
 		.then(()=> app.emit('dbMiddleware'))
 		.then(()=> app.emit('preSchemas'))
 		.then(()=> app.emit('schemas'))
