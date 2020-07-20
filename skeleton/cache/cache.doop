@@ -37,7 +37,9 @@ exports = ()=>
 			app.middleware.express.cache = middlewareCache;
 			return promisify(app.middleware.express.cache.setup)(app.config.cache);
 		})
-		.then(()=> app.on('exit', ()=> app.cache.destroy()))
+		.then(()=> {
+			app.on('exit', ()=> app.cache.destroy());
+		});
 
 </server>
 
