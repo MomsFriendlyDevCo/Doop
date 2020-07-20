@@ -33,7 +33,7 @@ module.exports = {
 		idField: {type: String, default: '_id'},
 		field: {type: String, required: true},
 		label: {type: String},
-		selected: {type: String},
+		selected: {type: [String, Number]},
 		selectText: {type: String, default: 'Select...'},
 		editable: {type: Boolean, default: true},
 		allowRemove: {type: Boolean, default: true},
