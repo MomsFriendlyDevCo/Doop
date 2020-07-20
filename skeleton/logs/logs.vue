@@ -61,10 +61,10 @@ module.exports = {
 			entity="logs"
 			:show-search="false"
 		>
-			<template #created="{rows}">
+			<template #created="{row}">
 				<date :date="row.created"/>
 			</template>
-			<template #creator="{rows}">
+			<template #creator="{row}">
 				<digest
 					v-if="row.creator"
 					field="name"
@@ -75,7 +75,7 @@ module.exports = {
 					text-invalid="Invalid user"
 				/>
 			</template>
-			<template #body="{rows}">
+			<template #body="{row}">
 				<div v-html="row.body"/>
 			</template>
 		</v-table>
