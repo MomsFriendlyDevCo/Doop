@@ -231,7 +231,7 @@ module.exports = function() {
 			rawResponse: true,
 			...options,
 		};
-		settings.hash = settings.field ? `${url}@${settings.field}` : url;
+		settings.hash = settings.hash ? settings.hash : settings.field ? `${url}@${settings.field}` : url;
 
 		if (
 			$digest.cache[settings.hash] // We already have a cache entry
