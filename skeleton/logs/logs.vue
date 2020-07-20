@@ -11,24 +11,6 @@ module.exports = {
 	data() { return {
 		postContent: '',
 		postMode: false,
-		columns: [
-			{
-				type: 'date',
-				label: 'Date',
-				name: 'created',
-				sort: true,
-			},
-			{
-				type: 'lookup',
-				label: 'Creator',
-				name: 'creator',
-			},
-			{
-				type: 'text',
-				label: 'Change',
-				name: 'body',
-			},
-		],
 	}},
 	methods: {
 		beginComment() {
@@ -58,27 +40,43 @@ module.exports = {
 		<v-table
 			ref="logTable"
 			:url="`/api/logs?col=${$props.collection}&doc=${$props.id}`"
-			:columns="columns"
-			:search="false"
-			text-empty="No logs found"
-			text-loading="Loading logs..."
+			:columns="[
+				{
+					id: 'created',
+					type: 'date',
+					title: 'Date',
+				},
+				{
+					id: 'creator',
+					type: 'lookup',
+					title: 'Creator',
+				},
+				{
+					id: 'body',
+					type: 'text',
+					title: 'Change',
+				},
+			]"
+			sort="-created"
+			entity="logs"
+			:show-search="false"
 		>
-			<template #created="props">
-				<date :date="props.row.created"/>
+			<template #created="{rows}">
+				<date :date="row.created"/>
 			</template>
-			<template #creator="props">
+			<template #creator="{rows}">
 				<digest
-					v-if="props.row.creator"
+					v-if="row.creator"
 					field="name"
-					:url="`/api/users/${props.row.creator}`"
+					:url="`/api/users/${row.creator}`"
 					class-valid="badge badge-primary"
 					icon-valid="fas fa-user"
 					class-invalid="badge badge-danger"
 					text-invalid="Invalid user"
 				/>
 			</template>
-			<template #body="props">
-				<div v-html="props.row.body"/>
+			<template #body="{rows}">
+				<div v-html="row.body"/>
 			</template>
 		</v-table>
 		<div v-if="$props.comments" class="mt-2">

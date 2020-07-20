@@ -1,31 +1,6 @@
 <component>
 module.exports = {
 	route: '/users',
-	data() { return {
-		users: undefined,
-		columns: [
-			{
-				type: 'status',
-				name: 'status',
-			},
-			{
-				type: 'text',
-				label: 'Email',
-				name: 'email',
-				sort: true,
-			},
-			{
-				type: 'text',
-				label: 'Name',
-				name: 'name',
-				sort: true,
-			},
-			{
-				type: 'verbs',
-				name: 'verbs',
-			},
-		],
-	}},
 	methods: {
 		setStatus(user, status) {
 			return Promise.resolve()
@@ -47,26 +22,43 @@ module.exports = {
 		<v-table
 			ref="users"
 			:url="`/api/users`"
-			:columns="columns"
-			:cell-href="cell => `/users/${cell._id}`"
-			:search="true"
-			text-empty="No users found"
-			text-loading="Loading users..."
+			:columns="[
+				{
+					id: 'status',
+					type: 'status',
+				},
+				{
+					id: 'email',
+					type: 'text',
+				},
+				{
+					id: 'name',
+					type: 'text',
+				},
+				{
+					id: 'company',
+					type: 'text',
+				},
+				{
+					id: 'verbs',
+					type: 'verbs',
+				},
+			]"
+			sort="email"
+			entity="users"
+			:cell-href="row => `/users/${row._id}`"
 		>
-			<template #status="props">
-				<i v-if="props.row.status == 'active'" class="fas fa-circle text-success" v-tooltip="'User is active'"/>
-				<i v-else-if="props.row.status == 'deleted'" class="fas fa-circle text-warning" v-tooltip="'User has been disabled'"/>
+			<template #status="{row}">
+				<i v-if="row.status == 'active'" class="fas fa-circle text-success" v-tooltip="'User is active'"/>
+				<i v-else-if="row.status == 'deleted'" class="fas fa-circle text-warning" v-tooltip="'User has been disabled'"/>
 				<i v-else class="fas fa-question-circle text-warning" v-tooltip="'User status is unknown'"/>
 			</template>
-			<template #email="props">
-				{{props.row.email}}
-			</template>
-			<template #name="props">
-				{{props.row.name}}
-			</template>
-			<template #verbs="props">
-				<i v-if="props.row.status == 'active'" @click.prevent.stop="setStatus(props.row, 'deleted')" class="btn btn-light btn-hover-danger far fa-trash" v-tooltip="'Disable this user account'"/>
-				<i v-else-if="props.row.status == 'deleted'" @click.prevent.stop="setStatus(props.row, 'active')" class="btn btn-light far fa-undo" v-tooltip="'Re-enable this user account'"/>
+			<template #verbs="{row}">
+				<div class="btn-group">
+					<i @click.prevent.stop="userOrders(row)" class="btn btn-light btn-hover-primary far fa-clipboard-list" v-tooltip="'Show user orders'"/>
+					<i v-if="row.status == 'active'" @click.prevent.stop="setStatus(row, 'deleted')" class="btn btn-light btn-hover-danger far fa-trash" v-tooltip="'Disable this user account'"/>
+					<i v-else-if="row.status == 'deleted'" @click.prevent.stop="setStatus(row, 'active')" class="btn btn-light far fa-undo" v-tooltip="'Re-enable this user account'"/>
+				</div>
 			</template>
 		</v-table>
 	</div>

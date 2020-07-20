@@ -1,193 +1,123 @@
 <component>
 /**
-* Customized version of the <vue-bootstrap4-table/> component which works in a specifically Doop compatible way
+* Customizable table component with auto data retrieval, pagnination and searching
 *
-* Differences from vue-bootstrap4-table:
-*
-* - Sensible base config
-* - `url` prop automatically links against a Monoxide backend, pulls data and adds pagination
-* - `cellHref` adds automatic `v-href` directive around all cell contents (based on its usual logic of skipping if an <a/> tag is present)
-* - `columns` array definition now includes meta 'type' field which sets various behaviours in bulk. e.g. `{type: 'text'}` sets correct CSS classes and text alignment
-* - Search is included (assumes you have a backend 'text' index)
-*
-*
-* All properties and slots of this component are identical to the vue-bootstrap4-table component with the exception of the below which adds Doop specific behaviour
-*
-* @url https://rubanraj54.gitbook.io/vue-bootstrap4-table/usage
 * @param {string|Object} url Doop / Monoxide ReST endpoint to connect to, if this is a plain object its assumed to be an Axios compatible request (including a 'url' key) to merge with computed properties such as filters, sorting, pagination
-* @param {string} [view="table"] How to display the table. ENUM: "table", "directory"
-* @param {function} [cellHref] Function called as `(row)` which can optionally return a link to wrap each cell as a link. Uses `v-href` internally so any of its values are supported
-* @param {string} [text-empty="No items found"] Message to display when no items are found after loading FIXME: Not yet implemented
-* @param {string} [text-loading="Loading..."] Message to display when loading
-* @param {boolean} [loadForeground=true] Use the foreground (covering) loader when loading the first time. Disable this if the table should show inline with a loading message (specified by text-loading)
-* @param {object|function} [directoryMap] Mapping of row keys to directory keys `{title, subTitle, icon}` if a function this is run as `(row)`
-* @param {boolean} [search=true] Show the search header (shortcut to set config.global_search.visibility
-* @param {boolean} [useSearchQuery=true] If searching is enabled, accept the initial search query from $route.query.q
+* @param {string} [sort] Field to sort by, if omitted the rowKey is used instead
+* @param {boolean} [sortAsc=true] When sorting, sort ascending (A-Z)
+* @param {number} [limit=30] How many records to show per page
 *
-* @param {Object} columns Column definitions
-* @param {Object} [columns.INDEX.macgyver] MacGyver rendering method to override the slot definition
-* @param {function} [columns.INDEX.macgyver.onChange] Function to execute when the column value changes. Called as `(props, newVal)`, get the full row data as normal with `props.row`
+* @param {boolean|function} [showSearch=true] Show the search interface
 *
-* @param {Object} config Overall table definition
-* @param {string} [config.sortBy] Override sort detection to use the named field instead of auto-detecting based on the first sortable field
+* @param {boolean|function} [cellHref=false] If a function is specified its called as `(row)` per row to determine a `v-href` compatible per-cell link
+* @param {string} [rowKey="_id"] Key to use when looping over data to ensure minimal DOM re-rendering
+* @param {boolean} [loadForeground=false] Use the foreground loader rather than the background one
 *
+* @param {string} [layout="card"] How to layout the element, ENUM: 'card' (use BS4 cards), 'none' (use no styling)
+* @param {string} [entity="items"] Shorthand to quickly set various text messages (used to compose the textEmpty etc.)
+* @param {string} [textEmpty="No ${entity} found"] Text to display when the table data is empty, use the slot 'state-empty' for more advanced content
+* @param {string} [textLoading="Loading ${entity}..."] Text to display when the table data is loading, use the slot 'state-loading' for more advanced content
 *
-* @slot [columnId] The per-cell rendering of a specific row. Row data available as `props.row`
-* @slot [column_columnId] Column header rendering of a specific column definition
+* @param {array<Object>} columns Column definition
+* @param {string} columns.id ID of a specific column, used as the field name, must be unique
+* @param {string} [column.title] Title of the column, if omitted the ID via _.startCase is used
+* @param {string} [column.type] Optional columnType behaviour to inherit
+* @param {boolean} [column.sortable=false] Whether the column can be sorted
 *
-* @example Set up column definitions within a controller
-* data() { return {
-*	columns: [
-*		{type: 'status', name: 'status'},
-*		{type: 'text', label: 'Title', name: 'title', sort: true},
-*		{type: 'date',label: 'Created', name: 'created,},
-*		{type: 'date', label: 'Last edited', name: 'edited'},
-*		{type: 'verbs', name: 'verbs'},
-* 	],
-* }}
+* @param {Object} [columnTypes] Lookup object of column prototypes
+* @param {string} [columnTypes.cellClass] CSS class to apply to the cell for the matching column type
 *
-* @example Show an interactive list of widgets within a template
-* <v-table
-* 	url="/api/widgets"
-* 	:columns="columns"
-* 	:cell-href="row => `/widgets/${row._id}`"
-* 	:search="true"
-* 	text-empty="No widgets found"
-* 	text-loading="Loading widgets..."
-* >
-* 	<template #status="props">
-* 		<i v-if="props.row.status == 'active'" class="fas fa-circle text-success" v-tooltip="'Widget is active'"/>
-* 		<i v-else-if="props.row.status == 'deleted'" class="fas fa-circle text-warning" v-tooltip="'Widget has been deleted'"/>
-* 		<i v-else class="fas fa-question-circle text-warning" v-tooltip="'Widget status is unknown'"/>
-* 	</template>
-* 	<template #title="props">
-* 		{{props.row.title}}
-* 	</template>
-* 	<template #created="props">
-* 		<date :date="props.row.created"/>
-* 	</template>
-* 	<template #edited="props">
-* 		<date :date="props.row.edited"/>
-* 	</template>
-* </v-table>
+* @param {string|array|Object} [tableClass="table"] CSS classes to add to the <table/> element
+*
+* @slot state-loading Slot template to display if table data is being loaded
+* @slot state-empty Slot template to display if no data is found to display in the table
+* @slot table-header Slot to template as the header area - wraps pagination and item counts
+* @slot table-header-left Slot to template as the header area (far left) - wraps search controls
+* @slot table-header-center Slot to template as the header area (center) - displays nothing by default
+* @slot table-header-right Slot to template as the header area (far right) - displays nothing by default
+* @slot table-footer Slot to template as the footer area - wraps pagination and item counts
+* @slot table-footer-left Slot to template as the footer area (far left) - wraps pagination controls
+* @slot table-footer-center Slot to template as the footer area (center) - displays nothing by default
+* @slot table-footer-right Slot to template as the footer area (far right) - wraps item counts
+* @slot COLUMN Per-column custom cell rendering, if specified each slot gets the "row" data binding
 */
+
 module.exports = {
 	data() { return {
-		rows: [],
-		rowCount: 0,
-		state: 'pending', // ENUM: 'pending', 'loading', 'ready'
-		lastQuery: undefined,
+		state: 'init', // ENUM: 'loading', 'ready', 'empty', 'error'
+		error: undefined, // Error from server, if any
+		rows: undefined,
+		rowCount: undefined,
+		pages: undefined, // Number of pages based on rowCount
+
+		endpointFilters: {},
+		endpointSearch: '',
+		endpointSort: undefined, // Inherits from $props.sort on initial refresh, changed by user after that
+		endpointSortAsc: undefined, // ^^^
+		endpointPage: 0,
+
+		searchInput: '', // Ubsubmitted query the user is typing
 	}},
 	props: {
 		url: {type: [String, Object], required: true},
-		view: {type: String, default: 'table'},
-		cellHref: {type: Function},
-		columns: {type: Array, required: true}, // Defaults + type mangling applied in computedColumns
-		config: {type: Object, default: ()=> ({})}, // Defaults applied in computedConfig()
-		search: {type: Boolean, default: false},
-		directoryMap: {type: [Object,Function]},
-		useSearchQuery: {type: Boolean, default: true},
-		textLoading: {type: String, default: 'Loading...'},
-		loadForeground: {type: Boolean, default: true},
-	},
-	computed: {
-		computedConfig() { // Apply Doop / Monoxide defaults to base config structure
-			return {
-				card_mode: true,
-				show_refresh_button: false,
-				show_reset_button: false,
-				server_mode: true,
-				per_page: 30,
-				per_page_options: [5, 10, 30, 100, 500, 1000],
-				highlight_row_hover_color: 'var(--gray-light)',
-				global_search: {
-					...this.$props.config.global_search,
-					visibility: this.$props.search,
-					placeholder: 'Search...',
-					searchOnPressEnter: true,
-					...(this.$props.useSearchQuery && this.$route.query.q // Populate initial search query if useSearchQuery is enabled
-						? {init: {value:  this.$route.query.q}}
-						: null
-					),
-				},
-				...this.$props.config,
-			};
-		},
-		computedColumns() { // Rewrite base columns config so we can avoid being explicit in most cases
-			var sortedBy = this.computedConfig?.sortBy; // Final result of the column we sorted by
+		sort: {type: String},
+		sortAsc: {type: Boolean, default: true},
+		limit: {type: Number, default: 30},
 
-			return this.$props.columns.map((v, i) => {
-				// Process `{sort: true}` into setting the initial sort order for the first sortable item (unless 'sortBy' is set in config)
-				if (
-					(!sortedBy && v.sort) // First discovered sortable column in auto-detect mode
-					|| (v.name == sortedBy) // Nominated column to sort by
-				) {
-					sortedBy = v.name; // Prevent applying sort again
-					v.initial_sort = true;
-				}
+		columns: {type: Array, validator: v => v.every(i => i.id)},
+		columnTypes: {type: Object, default() { /* Column types {{{ */ return {
+			status: {cellClass: 'col-status text-left'},
+			date: {cellClass: 'col-date text-center'},
+			text: {cellClass: 'col-text text-left'},
+			lookup: {cellClass: 'col-text text-center'},
+			number: {cellClass: 'col-number text-right'},
+			thumbnail: {cellClass: 'col-thumbnail text-center'},
+			verbs: {cellClass: 'col-verbs text-right'},
+		}}}, /* }}} */
 
-				// Apply type shortcuts
-				switch (v.type) {
-					case 'status':
-						v.column_classes = v.row_classes = 'col-status';
-						v.column_text_alignment = v.row_text_alignment = 'text-left';
-						break;
-					case 'date':
-						v.column_classes = 'col-date';
-						v.column_text_alignment = v.row_text_alignment = 'text-center';
-						break;
-					case 'text':
-						v.column_classes = v.row_classes = 'col-text';
-						v.column_text_alignment = v.row_text_alignment = 'text-left';
-						break;
-					case 'lookup':
-						v.column_classes = v.row_classes = 'col-text';
-						v.column_text_alignment = v.row_text_alignment = 'text-center';
-						break;
-					case 'number':
-						v.column_classes = v.row_classes = 'col-number';
-						v.column_text_alignment = v.row_text_alignment = 'text-right';
-						break;
-					case 'thumbnail':
-						v.column_classes = v.row_classes = 'col-thumbnail';
-						v.column_text_alignment = v.row_text_alignment = 'text-center';
-						break;
-					case 'verbs':
-						v.column_classes = v.row_classes = 'col-verbs';
-						v.column_text_alignment = v.row_text_alignment = 'text-right';
-						break;
-					default: if (v.type) throw new Error(`Unknown column type "${v.type}"`);
-				}
+		showSearch: {type: Boolean, default: true},
 
-				return v;
-			});
-		},
+		cellHref: {type: [Boolean, Function], default: false},
+		rowKey: {type: String, default: '_id'},
+		loadForeground: {type: Boolean, default: false},
+
+		layout: {type: String, default: 'card'},
+		entity: {type: String, default: 'items'},
+		textEmpty: {type: String, default() { return `No ${this.entity} found` }},
+		textLoading: {type: String, default() { return `Loading ${this.entity}...` }},
+
+		tableClass: {type: String, default: 'table'},
 	},
 	methods: {
-		refresh(query) {
+		/**
+		* Refresh the contents of the table
+		* @returns {Promise} A promise which will resolve when the table has finished loading
+		*/
+		refresh() {
+			this.$debug('Refresh', this.url);
 			if (this.state == 'loading') return; // Already refreshing
-			if (!this.$props.url) return; // No URL available yet, URL is probably dynamic - do nothing
-			if (_.isPlainObject(this.$props.url) && !this.$props.url.url) throw new Error('No "url" key provided in v-table object');
+			if (!this.url) return this.$debug('Skipping refresh due to falsy URL'); // No URL available yet, URL is probably dynamic - do nothing
+			if (_.isPlainObject(this.url) && !this.url.url) throw new Error('No "url" key provided in v-table object');
 
-			// Check that vue-bootstrap4-table didn't get caught in a refresh loop by comparing against the last query
-			if (this.lastQuery && query && _.isEqual(query, this.lastQuery)) return;
-			this.lastQuery = query;
+			if (this.endpointSort === undefined) this.endpointSort = this.sort || this.rowKey; // Set intial sort state
+			if (this.endpointSortAsc === undefined) this.endpointSortAsc = this.sortAsc;
 
 			return Promise.resolve()
 				.then(()=> this.state = 'loading')
-				.then(()=> this.$loader.start(`v-table-${this._uid}`, this.$props.loadForeground && !this.rows.length))
+				.then(()=> this.$loader.start(`v-table-${this._uid}`, this.loadForeground && !this.row.length))
 				.then(()=> _.merge( // Calculate Axios request object
+					{}, // Empty object so we don't stomp on anything
+					_.isString(this.url) ? {url: this.url} : this.url, // Merge either single URL string OR entire url object
 					{ // Calculate fields from v-table session - filters, search, sorting, pagination
 						method: 'GET',
 						params: { // Compute AxiosRequest
-							...(query?.filters),
-							...(query?.global_search ? {q: query.global_search} : null), // Add search functionality
-							...(query?.sort && query.sort.length ? {sort: query?.sort.map(i => _.isString(i) ? i : `${i.order == 'asc' ? '' : '-'}${i.name}`).join(',')} : null),
-							limit: query?.per_page || this.config?.per_page || 30,
-							skip: ((query?.page || 1) - 1) * (query?.per_page || this.config?.per_page || 30),
+							...(this.endpointFilters),
+							...(this.endpointSearch ? {q: this.endpointSearch} : {}), // Add search functionality
+							sort: (this.endpointSortAsc ? '' : '-') + this.endpointSort,
+							limit: this.limit,
+							skip: this.limit * this.endpointPage,
 						}
 					},
-					_.isString(this.$props.url) ? {url: this.$props.url} : this.$props.url, // Merge either single URL string OR entire url object
 				))
 				.then(req => { this.$debug('AxiosRequest', req); return req })
 				.then(req => {
@@ -209,150 +139,164 @@ module.exports = {
 							url: endpointCount.toString(),
 							params: _.omit(req.params, ['sort', 'limit', 'skip', 'select', 'populate']), // Omit meta fields from count or they are included as filters
 						})
-							.then(res => this.rowCount = res.data.count),
+							.then(res => {
+								this.rowCount = res.data.count;
+								this.pages = Math.floor(this.rowCount / this.limit);
+							}),
 					]);
 				})
 				.then(()=> this.$debug('Row data', {rows: this.rows, rowCount: this.rowCount}))
-				.catch(this.$toast.catch)
+				.then(()=> this.state = this.rows.length > 0 ? 'ready' : 'empty')
+				.catch(e => {
+					this.$toast.catch(e);
+					this.state = 'error';
+					this.error = e;
+				})
 				.finally(()=> this.$loader.stop(`v-table-${this._uid}`))
-				.finally(()=> this.state = 'ready')
 		},
-	},
-	render(h) {
-		if (this.$props.view == 'table') {
-			if (['pending', 'loading'].includes(this.state)) {
-				return h('div', {class: 'card'}, [
-					h('div', {class: 'card-body p-4'}, [
-						h('div', {
-							class: 'text-center h3',
-						}, [
-							h('i', {class: 'far fa-spinner fa-spin mr-2'}),
-							h('span', this.$props.textLoading),
-						])
-					])
-				]);
-			} else if (this.state == 'ready') {
-				return h('vue-bootstrap4-table', {
-					ref: 'table',
-					class: 'v-table',
-					props: {
-						rows: this.rows,
-						totalRows: this.rowCount,
-						columns: this.computedColumns,
-						config: this.computedConfig,
-					},
-					on: {
-						'on-change-query': this.refresh,
-					},
-					scopedSlots: _(this.$scopedSlots)
-						.mapValues((func, slot) => {
-							// Don't screw with column / pagination slot definitions
-							if (slot == 'pagination-info' || slot.startsWith('column_')) return func;
 
-							// Wrap with cellHref property?
-							if (this.$props.cellHref) return props => h('a', {
-								directives: [{
-									name: 'href',
-									value: this.$props.cellHref(props.row),
-								}],
-							}, func(props));
 
-							// Fell though all other render methods - let Vue handle the raw slot render
-							return func;
-						})
-						.thru(cols => {
-							this.$props.columns
-								.filter(col => col.macgyver)
-								.forEach(col => {
-									cols[col.name] = props => {
-										return h('mgForm', {
-											props: {
-												config: col.macgyver,
-												data: {
-													[col.name]: props.row[col.name],
-												},
-											},
-											on: {
-												changeItem: col.macgyver.onChange ?
-													e => col.macgyver.onChange(props, e.value)
-													: undefined,
-											},
-										});
-									};
-								});
+		/**
+		* Set the sort column
+		* @param {string} columnId Column to sort by
+		* @param {string} [behaviour='set'] How to handle setting sort, ENUM: 'set' (just set), 'toggle' (set + toggle asc/desc order if already selected), 'asc' (set sort to asending, 'desc' (set sort to decending)
+		* @returns {Promise} A promise when the data has finished refreshing
+		*/
+		setSort(columnId, behaviour = 'set') {
+			if (!this.columns.find(c => c.id == columnId)?.sortable) return; // Abort if the column cannot be sorted
 
-							return cols;
-						})
-						.set('sort-asc-icon', ()=> h('i', {class: 'fas fa-sort-down ml-1'}))
-						.set('sort-desc-icon', ()=> h('i', {class: 'fas fa-sort-up ml-1'}))
-						.set('no-sort-icon', ()=> h('i', {class: 'fal fa-sort ml-1'}))
-						.value(),
-				});
+			if (behaviour == 'set') {
+				this.endpointSort = columnId;
+				this.endpointSortAsc = behaviour == 'desc' ? false : true;
+			} else if (this.endpointSort == columnId && behaviour == 'toggle') { // Column already set and we're being asked to toggle
+				this.endpointSortAsc = !this.endpointSortAsc;
 			} else {
-				throw new Error(`Unknown v-table state "${this.state}"`);
+				this.endpointSort = columnId;
+				this.endpointSortAsc = true;
 			}
-		} else if (this.$props.view == 'directory') {
-			if (this.state == 'pending') this.refresh(); // Kick off first load if we havn't already done so
 
-			return h('directory', {
-				props: {
-					root: {
-						children:
-							_.isPlainObject(this.$props.directoryMap) ? this.rows.map(row =>
-								_.mapValues(this.$props.directoryMap, (v, k) => row[v])
-							)
-							: _.isFunction(this.$props.directoryMap) ? this.rows.map(this.$props.directoryMap)
-							: this.$props.cellHref ? this.rows.map(row => ({...row, href: this.$props.cellHref(row)}))
-							: this.rows,
-					},
-				},
-			});
-		} else {
-			throw new Error(`Unsupported view "${this.$props.view}"`);
-		}
-	},
-	watch: {
-		'$props.url'() { // React to URL changes by refreshing
-			this.refresh();
+			return this.refresh();
 		},
-		'$route.query.q'() { // Watch router query and update if change detected
-			if (!this.$props.useSearchQuery) return; // Ignoring search query anyway
-			$(this.$el).find('.row.no-gutters input.form-control').val(this.$route.query.q); // There is no sane way to override the form search box contents
-			this.$refs.table.updateGlobalSearchHandler(this.$route.query.q); // Tell the table to refresh
+
+
+		/**
+		* Search by a given fuzzy query
+		* @param {string} [query] The incomming query to search by, if omitted all results (filters depending) are returned
+		* @returns {Promise} A promise when the data has finished refreshing
+		*/
+		search(query) {
+			this.endpointSearch = query;
+			return this.refresh();
 		},
 	},
 	created() {
-		this.$debugging = false;
-
-		// Start initial load loop
-		this.refresh({ // Try to guess the first query so we don't make a duplicate when v-table wakes up and makes the same exact refresh request
-			sort: [this.$props.columns.find(c => c.sort == true).name || 'title'],
-			limit: this.$props.config?.per_page || 30,
-			skip: 0,
-		});
+		this.$debugging = true;
+		this.$watchAll(['url', 'limit', 'columns'], this.refresh, {immediate: true, deep: true});
 	},
 };
 </component>
 
+<template>
+	<div class="v-table" :class="layout == 'card' && 'card'">
+		<!-- Header {{{ -->
+		<div :class="layout == 'card' && 'card-header'">
+			<slot name="table-header">
+				<div class="v-table-header">
+					<slot name="table-header-left">
+						<form v-if="showSearch" @submit.prevent="search(searchInput)" class="form-inline">
+							<div class="input-group">
+								<input v-model.trim="searchInput" type="search" class="form-control" :placeholder="`Search ${entity}...`"/>
+								<div class="input-group-append">
+									<a @click="search(searchInput)" class="btn btn-light far fa-search"/>
+								</div>
+							</div>
+						</form>
+					</slot>
+					<slot name="table-header-center"/>
+					<slot name="table-header-right"/>
+				</div>
+			</slot>
+		</div>
+		<!-- }}} -->
+		<!-- Body {{{ -->
+		<div :class="layout == 'card' && 'card-body'">
+			<table v-if="state == 'ready'" :class="tableClass">
+				<thead>
+					<tr>
+						<th v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
+							<a @click="setSort(col.id, 'toggle')" :class="!col.sortable && 'no-click'">
+								{{col.title || _.startCase(col .id)}}
+								<i v-if="endpointSort == col.id" :class="endpointSortAsc ? 'far fa-sort-amount-down-alt text-primary' : 'far fa-sort-amount-up-alt text-primary'"/>
+							</a>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="row in rows" :key="row[rowKey]">
+						<td v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
+							<a v-href="cellHref ? cellHref(row) : false">
+								<slot :name="col.id" :row="row">
+									{{row[col.id]}}
+								</slot>
+							</a>
+						</td>
+					</tr>
+				</tbody>
+				<tfoot>
+				</tfoot>
+			</table>
+			<slot v-else-if="state == 'empty'" name="state-empty">
+				<div class="alert alert-warning">
+					{{textEmpty}}
+				</div>
+			</slot>
+			<slot v-else-if="state == 'loading'" name="state-loading">
+				<div class="text-center">
+					<i class="far fa-spinner fa-spin"/>
+					{{textLoading}}
+				</div>
+			</slot>
+			<slot v-else-if="state == 'error'" name="state-error">
+				<div class="alert alert-danger">
+					<h3>An error has occured</h3>
+					<pre>{{error}}</pre>
+				</div>
+			</slot>
+			<div v-else class="alert alert-danger">Invalid state {{state}}</div>
+		</div>
+		<!-- }}} -->
+		<!-- Footer {{{ -->
+		<div :class="layout == 'card' && 'card-footer'">
+			<slot name="table-footer">
+				<div class="v-table-footer">
+					<slot name="table-footer-left">
+						<pagination
+							:value="1"
+							:max="pages"
+							@click="endpointPage = $event; refresh()"
+						/>
+					</slot>
+					<slot name="table-footer-center"/>
+					<slot name="table-footer-right">
+						<div class="text-muted">
+							Displaying {{entity}} {{limit * endpointPage + 1}} - {{Math.min(rowCount, limit * (endpointPage + 1))}} of {{rowCount}}
+						</div>
+					</slot>
+				</div>
+			</slot>
+		</div>
+		<!-- }}} -->
+	</div>
+</template>
+
 <style>
-.v-table .card-header {
-	display: none;
+.v-table .v-table-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
-.v-table table th {
-	border-top: none;
-}
-
-.v-table .col-number {
-	width: 100px;
-}
-
-.v-table .col-thumbnail {
-	width: 50px;
-}
-
-.v-table .col-thumbnail img {
-	max-width: 50px;
-	max-height: 50px;
+.v-table .pagination {
+	margin-bottom: 0;
 }
 </style>
