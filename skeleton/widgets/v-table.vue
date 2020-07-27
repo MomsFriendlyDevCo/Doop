@@ -54,7 +54,7 @@ module.exports = {
 		endpointSearch: '',
 		endpointSort: undefined, // Inherits from $props.sort on initial refresh, changed by user after that
 		endpointSortAsc: undefined, // ^^^
-		endpointPage: 0,
+		endpointPage: 1,
 
 		searchInput: '', // Ubsubmitted query the user is typing
 	}},
@@ -180,6 +180,17 @@ module.exports = {
 
 
 		/**
+		* Navigate to a specific page + refresh
+		* @param {number} page The page offset (starting at 1) to navigate to
+		* @returns {Promise} A promise when the data has finished refreshing
+		*/
+		setPage(page) {
+			this.endpointPage = page;
+			return this.refresh();
+		},
+
+
+		/**
 		* Search by a given fuzzy query
 		* @param {string} [query] The incomming query to search by, if omitted all results (filters depending) are returned
 		* @returns {Promise} A promise when the data has finished refreshing
@@ -271,9 +282,9 @@ module.exports = {
 				<div class="v-table-footer">
 					<slot name="table-footer-left">
 						<pagination
-							:value="1"
+							:value="endpointPage"
 							:max="pages"
-							@click="endpointPage = $event; refresh()"
+							@change="setPage($event)"
 						/>
 					</slot>
 					<slot name="table-footer-center"/>
