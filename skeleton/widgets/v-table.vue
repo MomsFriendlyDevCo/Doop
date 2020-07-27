@@ -115,8 +115,8 @@ module.exports = {
 							...(this.endpointSearch ? {q: this.endpointSearch} : {}), // Add search functionality
 							sort: (this.endpointSortAsc ? '' : '-') + this.endpointSort,
 							limit: this.limit,
-							skip: this.limit * this.endpointPage,
-						}
+							skip: this.limit * (this.endpointPage - 1), // Since page numbers start at 1 we have to decrement to get the skip value
+						},
 					},
 				))
 				.then(req => { this.$debug('AxiosRequest', req); return req })

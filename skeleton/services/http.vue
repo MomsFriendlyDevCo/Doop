@@ -18,7 +18,9 @@ module.exports = function() {
 	axios.defaults.headers.common.Accept = 'application/json';
 
 	// Make Axios encode using jQueries parameter serializer to keep Monoxide happy
-	axios.defaults.paramsSerializer = $.param;
+	axios.defaults.paramsSerializer = params =>
+		$.param(params)
+			.replace(/\bq=(.+)\b/g, p => p.replace(/%3A/g, ':')) // Allow `q=` to contain ':' tags
 
 	// Monkey patch Axios so that any error response gets correctly decoded rather than weird stuff like 'Server returned a 403 code'
 	axios.interceptors.response.use(response => response, error => {
