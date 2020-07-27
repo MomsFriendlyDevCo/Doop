@@ -5,9 +5,10 @@
 * @param {array <string|array>} props Named properties within `vm` to watch, dotted notation or array notation is supported
 * @param {function} callback The callback to run when the watch triggers
 * @param {Object} [options] Additional options
+* @param {boolean} [options.deep=false] Recurse into deep object/array sets
 * @param {boolean} [options.immediate=false] Execute the callback immediately on register, needAll can cause the callback not to fire if all required paths are not available yet
 * @param {boolean} [options.needAll=false] Only fire the watcher when every single member listed has a non-undefined value
-* @param {boolean} [options.needAllLock=true] WHether, after seeing all paths, we ALWAYS route to the callback in future, even if the values become undefined. Set to falsy to always check for the paths presence
+* @param {boolean} [options.needAllLock=true] After accepting all paths in `needAll`, ALWAYS call the callback in future, even if the values become undefined. Set to falsy to always check for the paths presence
 * @param {boolean} [options.preventLoops=true] Assume that the watcher can effect a peer expression and that we should not keep retriggering this watch expression
 */
 module.exports = function(props, callback, options) {
@@ -15,6 +16,7 @@ module.exports = function(props, callback, options) {
 		needAll: false,
 		needAllLock: true,
 		preventLoops: true,
+		deep: false,
 		immediate: false,
 		...options,
 	};
@@ -42,7 +44,7 @@ module.exports = function(props, callback, options) {
 	// }}}
 
 	// Attach watcher to every named prop
-	props.forEach(prop => this.$watch(prop, handler.bind(null, prop)));
+	props.forEach(prop => this.$watch(prop, handler.bind(null, prop), {deep: settings.deep}));
 
 	// Run handler immediately if needed
 	if (settings.immediate) handler();
