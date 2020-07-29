@@ -19,7 +19,7 @@
 * @param {string} [textLoading="Loading ${entity}..."] Text to display when the table data is loading, use the slot 'state-loading' for more advanced content
 *
 * @param {array<Object>} columns Column definition
-* @param {string} columns.id ID of a specific column, used as the field name, must be unique
+* @param {string} columns.id ID of a specific column, used as the field name in dotted notation, must be unique
 * @param {string} [column.title] Title of the column, if omitted the ID via _.startCase is used
 * @param {string} [column.type] Optional columnType behaviour to inherit
 * @param {boolean} [column.sortable=false] Whether the column can be sorted
@@ -247,7 +247,7 @@ module.exports = {
 						<td v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
 							<a v-href="cellHref ? cellHref(row) : false">
 								<slot :name="col.id" :row="row">
-									{{row[col.id]}}
+									{{_.get(row, col.id)}}
 								</slot>
 							</a>
 						</td>
