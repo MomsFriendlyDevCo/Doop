@@ -13,7 +13,7 @@ module.exports = {
 				.then(()=> this.$loader.start())
 				.then(()=> this.$http.post('/api/users/invite', this.user))
 				.then(()=> this.$toast.success(`Invite sent to ${this.user.name || this.user.email}`))
-				.then(res => this.$router.go(`/users/${res._id}`))
+				.then(res => this.$router.go(`/users/${res.data._id}`))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop())
 		},
@@ -34,13 +34,28 @@ module.exports = {
 				<div class="form-group row">
 					<label class="col-4 col-form-label">Email</label>
 					<div class="col-8 col-form-label">
-						<input type="email" v-model="user.email" class="form-control" data-lpignore="true" autocomplete="off" required autofocus/>
+						<input
+							v-model="user.email"
+							type="email"
+							class="form-control"
+							data-lpignore="true"
+							autocomplete="off"
+							required
+							autofocus
+						/>
 					</div>
 				</div>
 				<div class="form-group row">
 					<label class="col-4 col-form-label">Name (optional)</label>
 					<div class="col-8 col-form-label">
-						<input type="text" v-model="user.name" class="form-control" data-lpignore="true" autocomplete="off"/>
+						<input
+							v-model="user.name"
+							type="text"
+							class="form-control"
+							data-lpignore="true"
+							autocomplete="off"
+							@keyup.enter="submit()"
+						/>
 					</div>
 				</div>
 			</div>

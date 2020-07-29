@@ -21,22 +21,20 @@ app.post('/api/users/invite', (req, res) => {
 		// }}}
 		// Sanity check against the requesting user {{{
 		.then(()=> {
-			if (!member.permissions.usersInvite) throw new Error('You are not permitted to invite new members');
+			if (!req.user.permissions.usersInvite) throw new Error('You are not permitted to invite new members');
 		})
 		// }}}
 		// Either find existing user or create stub account {{{
-		.then(()=> 
-			app.db.users.findOne({email: req.body.email})
-				.then(user => {
-					if (user) return user; // Found existing user - pass on details
+		.then(()=> app.db.users.findOne({email: req.body.email, $errNotFound: false}))
+		.then(user => {
+			if (user) return user; // Found existing user - pass on details
 
-					return app.db.users.create({ // User not fund - create a base
-						email: req.body.email,
-						name: req.body.name,
-					})
-				})
-				.then(user => session.user = user),
-		)
+			return app.db.users.create({ // User not fund - create a new user with provided details
+				email: req.body.email,
+				name: req.body.name || req.body.email,
+			})
+		})
+		.then(user => session.user = user)
 		// }}}
 		// Generate invite token {{{
 		.then(()=> session.user.setToken('invite'))
@@ -48,6 +46,7 @@ app.post('/api/users/invite', (req, res) => {
 			template: `${app.config.paths.root}/users/users.invite.email.html`,
 			templateParams: {
 				...session,
+				config: app.config,
 				url: `/invite/accept/${token}`,
 			},
 		}))
