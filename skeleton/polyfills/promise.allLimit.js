@@ -25,6 +25,8 @@ Promise.allLimit = (limit, promises) => new Promise((resolve, reject) => {
 		while (queue.promisesRemaining.length > 0 && queue.running < queue.limit) {
 			var promiseRunner = function(thisPromise, promiseIndex) {
 				queue.running++;
+				if (typeof thisPromise != 'function') throw new Error('Called with a non-promise wrapper - all promise.allLimit items must be promise factories');
+
 				Promise.resolve(thisPromise())
 					.then(res => {
 						queue.output[promiseIndex] = res;
