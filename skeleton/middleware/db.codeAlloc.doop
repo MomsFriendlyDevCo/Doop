@@ -94,13 +94,17 @@ app.middleware.db.codeAlloc = (model, options) => {
 				}
 
 				model
-					.findOneByID(doc._id)
+					.findOne({_id: doc._id, $errNotFound: false})
 					.select(settings.field)
 					.exec((err, found) => {
 						if (err) {
-							app.log('Failed to fetch code for partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(err));
+							app.log.warn('Failed to fetch code for partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, 'threw error', app.log.colors.cyan(err));
+							return reject('SKIP');
+						} else if (!found) {
+							app.log.warn('Failed to fetch partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), 'database cannot find document');
 							return reject('SKIP');
 						}
+
 						app.log('Fetched code for partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(found[settings.field]));
 						doc[settings.field] = found[settings.field];
 						if (_.isString(doc[settings.field]) && doc[settings.field]) return reject('SKIP');
