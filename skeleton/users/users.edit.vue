@@ -60,7 +60,7 @@ module.exports = {
 		<div class="card" fixme="Should only be visible if user has project.members[].usersPromote">
 			<div class="card-header">Permissions</div>
 			<div class="card-body">
-				<permissions
+				<permissions-list
 					:selected="user.permissions"
 					:spec="spec"
 					spec-prefix="permissions."

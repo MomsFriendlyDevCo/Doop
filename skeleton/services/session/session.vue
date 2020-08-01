@@ -370,7 +370,7 @@ module.exports = function() {
 };
 </service>
 
-<component>
+<component name="session">
 module.exports = {
 	route: '/debug/session',
 	data() { return {
@@ -378,7 +378,7 @@ module.exports = {
 };
 </component>
 
-<template>
+<template name="session">
 	<div class="card">
 		<div class="card-body">
 			<pre>{{$session.data}}</pre>
