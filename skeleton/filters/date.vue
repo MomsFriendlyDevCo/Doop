@@ -1,4 +1,6 @@
-<filter>
+<script>
+import * as moment from 'moment';
+
 /**
 * Display human-readable dates
 * This filter is similar to the <date/> component which adds the extra behaviour of having tooltip
@@ -10,7 +12,7 @@
 * @param {string} [options.formatDesktop="ddd MMM Do YYYY h:mma"] Date format to use on larger displays
 * @returns {string} A formatted date
 */
-module.exports = value => {
+app.filter('date', value => {
 	var settings = {
 		format: '',
 		formatMobile: 'Do MMM YYYY',
@@ -26,8 +28,8 @@ module.exports = value => {
 
 	return dateMoment.format(
 		settings.format ? settings.format
-		: Vue.services().$screen.isMobile ? settings.formatMobile
+		: app.service('$screen').isMobile ? settings.formatMobile
 		: settings.formatDesktop
 	);
-};
-</filter>
+});
+</script>
