@@ -4,6 +4,7 @@ config/private.conf.js
 .o
 
 # Dynamic data
+app/app.index.vue
 data/
 dist/
 node_modules/

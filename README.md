@@ -90,6 +90,7 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/users`                       | User schemas and management
 | `/vendors`                     | Externally supported vendor scripts
 | `/widgets`                     | Shared front-end Vue services
+| `/.posthtmlrc`                 | Config file to override self-closing tags being valid in a Vue compile
 
 
 Blocks

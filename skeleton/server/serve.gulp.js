@@ -85,13 +85,12 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		watch([
 			'**/*.css',
 			'**/*.vue',
-			'vendors/vue.*.js',
 		], {
 			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
 		}).on('all', file => {
 			gulp.log('Rebuild Vue + Parcel files...');
-			gulp.run('build.css', ['build.vue', 'build.repack'], ()=> bootServerProcess(false));
+			gulp.run('build.vue', ()=> bootServerProcess(false));
 		});
 		// }}}
 
@@ -132,7 +131,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 				ignoreInitial: true,
 			}).on('all', ()=> {
 				gulp.log('Node_modules has changed, Rebuild Vendors...');
-				gulp.run('build.vendors.main', ()=> bootServerProcess(true));
+				gulp.run('build.vue', ()=> bootServerProcess(true));
 			});
 		}
 
@@ -142,7 +141,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 				ignoreInitial: true,
 			}).on('all', ()=> {
 				gulp.log('Vendors file has changed, Rebuild Vendors...');
-				gulp.run('build.vendors.main', ()=> bootServerProcess(false));
+				gulp.run('build.vue', ()=> bootServerProcess(false));
 			});
 		}
 		// }}}

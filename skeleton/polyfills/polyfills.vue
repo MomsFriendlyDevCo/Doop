@@ -2,12 +2,12 @@
 /**
 * Front-end polyfills to apply
 */
-import './polyfills/array.flat';
-import './polyfills/array.flatMap';
-import './polyfills/promise.allLimit';
-import './polyfills/promise.allSeries';
-import './polyfills/promise.defer';
-import './polyfills/promise.tap';
-import './polyfills/promise.timeout';
-import './polyfills/regexp.escape';
+import './array.flat';
+import './array.flatMap';
+import './promise.allLimit';
+import './promise.allSeries';
+import './promise.defer';
+import './promise.tap';
+import './promise.timeout';
+import './regexp.escape';
 </script>

@@ -5,4 +5,4 @@
 
 var gulp = require('gulp');
 
-gulp.task('build', ['build.css', 'build.fonts', 'build.repack', 'build.vendors', 'build.vue']);
+gulp.task('build', ['build.fonts', 'build.vue']);
