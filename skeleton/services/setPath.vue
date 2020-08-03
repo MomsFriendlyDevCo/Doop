@@ -19,7 +19,7 @@
 * @example Set a deeply nested path, with arrays, assuming VM as the root node
 * vm.$setPath('foo.1.bar', 123); // vm.$data.foo = [{bar: 123}]
 */
-Vue.prototype.$setPath = function(target, path, value, options) {
+app.service('$setPath', function(target, path, value, options) {
 	// Argument mangling {{{
 	if (_.isString(target) || _.isArray(target) || value === undefined) { // called as (path, value)
 		[target, path, value, options] = [this, target, path, value];
@@ -63,5 +63,5 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 	});
 
 	return value;
-};
+});
 </script>

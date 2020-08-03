@@ -11,37 +11,35 @@
 * @example Prompt for a users name
 * vm.$prompt.input({title: 'What is your name'}).then(response => ...)
 */
-app.ready.then(()=> {
-	Vue.services().$prompt.input = options => Vue.services().$prompt.dialog({
-		title: 'Input text',
-		body: '',
-		placeholder: '',
-		component: 'promptInput',
-		value: options.default || '',
-		buttons: {
-			left: [{
-				id: 'cancel',
-				title: 'Cancel',
-				method: 'reject',
-				class: 'btn btn-danger',
-				icon: 'fa fa-times',
-			}],
-			right: [{
-				id: 'confirm',
-				title: 'Confirm',
-				class: 'btn btn-success',
-				icon: 'fa fa-check',
-				click: ()=> Vue.services().$prompt.resolve(Vue.services().$prompt.settings.value),
-			}],
-		},
-		dialogClose: 'reject',
-		...options,
-	});
-})
+app.service('$prompt').methods.input = options => Vue.services().$prompt.dialog({
+	title: 'Input text',
+	body: '',
+	placeholder: '',
+	component: 'promptInput',
+	value: options.default || '',
+	buttons: {
+		left: [{
+			id: 'cancel',
+			title: 'Cancel',
+			method: 'reject',
+			class: 'btn btn-danger',
+			icon: 'fa fa-times',
+		}],
+		right: [{
+			id: 'confirm',
+			title: 'Confirm',
+			class: 'btn btn-success',
+			icon: 'fa fa-check',
+			click: ()=> Vue.services().$prompt.resolve(Vue.services().$prompt.settings.value),
+		}],
+	},
+	dialogClose: 'reject',
+	...options,
+});
 </script>
 
-<component>
-module.exports = {
+<script>
+app.component('promptInput', {
 	methods: {
 		keydown(e) { // Reject when the user presses escape
 			if (e.which === 27) this.$prompt.reject();
@@ -50,8 +48,8 @@ module.exports = {
 			return this.$prompt.resolve(this.$prompt.settings.value);
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form class="form-horizontal" @submit.prevent="submit()">

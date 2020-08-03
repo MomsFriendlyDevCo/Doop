@@ -14,7 +14,7 @@
 * @example Get a deeply nested path, with arrays, assuming VM as the root node and a fallback
 * vm.$getPath('foo.1.bar', 123); // The value of vm.$data.foo OR 123 if it doesnt exist
 */
-Vue.prototype.$getPath = function(target, path, fallback) {
+app.service('$getPath', function(target, path, fallback) {
 	// Argument mangling {{{
 	if (_.isString(target) || _.isArray(target)) { // called as (path, fallback)
 		[target, path, fallback] = [this, target, path];
@@ -33,5 +33,5 @@ Vue.prototype.$getPath = function(target, path, fallback) {
 			node = node[chunk];
 		}
 	});
-};
+});
 </script>

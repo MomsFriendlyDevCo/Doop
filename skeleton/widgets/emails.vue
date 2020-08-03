@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Component which displays a multi-select control that allows user selection and optionally also raw email addresses
 * This component exports a collection which resembles `{user: user._id, email: rawString}`
@@ -15,7 +15,7 @@
 * @example
 * <emails :selected="emails" @change="emails = $event"/>
 */
-module.exports = {
+app.component('emails', {
 	data() { return {
 		options: undefined,
 		userCache: {},
@@ -87,8 +87,8 @@ module.exports = {
 			if (!this.options) return this.refresh();
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="emails">

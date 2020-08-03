@@ -1,4 +1,4 @@
-<service singleton>
+<script>
 /**
 * Utility function to instantiate a Vue sub-component within the current component
 *
@@ -17,58 +17,55 @@
 *
 * @param {boolean} [vm.singleton=false] If present on the instantiated component (or as options.singleton) this indicates that only the first version of the instance should be used, all other $instance calls will reuse this single pointer
 */
-module.exports = function() {
-	var $instance = function $instance(as, name, props, options) {
-		// Argument mangling {{{
-		if (typeof as == 'string' && typeof name == 'string') { // Called with all args
-			// Pass
-		} else if (typeof as == 'string' && typeof name != 'string') { // Omitted 'name'
-			[as, name, props, options] = [as, as, name, props];
-		} else {
-			throw new Error('Unknown call method');
-		}
-		// }}}
+var $instance = function $instance(as, name, props, options) {
+	// Argument mangling {{{
+	if (typeof as == 'string' && typeof name == 'string') { // Called with all args
+		// Pass
+	} else if (typeof as == 'string' && typeof name != 'string') { // Omitted 'name'
+		[as, name, props, options] = [as, as, name, props];
+	} else {
+		throw new Error('Unknown call method');
+	}
+	// }}}
 
-		var settings = {
-			singleton: false,
-			rebuild: false,
-			...options,
-		};
-
-		if (!settings.rebuild && Vue.singletons && Vue.singletons[name]) { // Do we already have a singleton registered with this name - if so use that?
-			return this[as] = Vue.singletons[name];
-		}
-
-
-		var component = Vue.component(name);
-		if (!component) throw new Error(`Unknown component "${name}" when initalizing via $instance`);
-
-		// Create the component instance using the bloody awful instantiation syntax
-		this[as] = new component({
-			propsData: props,
-		});
-
-		// Register this component as a singleton?
-		if (settings.singleton || this[as].$options.singleton) {
-			if (!Vue.singletons) Vue.singletons = {};
-			Vue.singletons[name] = this[as];
-		}
-
-		return this[as];
+	var settings = {
+		singleton: false,
+		rebuild: false,
+		...options,
 	};
 
-
-	/**
-	* Remove a singleton instance
-	* Since singletons are not cleaned up with the component destruction this needs to be called somewhere in the component lifecycle to clean up garbage
-	* @param {string} name The name of the singleton to remove
-	*/
-	$instance.destroy = function $instanceRemove(name) {
-		if (Vue.singletons && Vue.singletons[name])
-			delete Vue.singletons[name];
-	};
+	if (!settings.rebuild && Vue.singletons && Vue.singletons[name]) { // Do we already have a singleton registered with this name - if so use that?
+		return this[as] = Vue.singletons[name];
+	}
 
 
-	return $instance;
+	var component = Vue.component(name);
+	if (!component) throw new Error(`Unknown component "${name}" when initalizing via $instance`);
+
+	// Create the component instance using the bloody awful instantiation syntax
+	this[as] = new component({
+		propsData: props,
+	});
+
+	// Register this component as a singleton?
+	if (settings.singleton || this[as].$options.singleton) {
+		if (!Vue.singletons) Vue.singletons = {};
+		Vue.singletons[name] = this[as];
+	}
+
+	return this[as];
 };
-</service>
+
+
+/**
+* Remove a singleton instance
+* Since singletons are not cleaned up with the component destruction this needs to be called somewhere in the component lifecycle to clean up garbage
+* @param {string} name The name of the singleton to remove
+*/
+$instance.destroy = function $instanceRemove(name) {
+	if (Vue.singletons && Vue.singletons[name])
+		delete Vue.singletons[name];
+};
+
+app.service('$instance', $instance);
+</script>

@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Component which manages user email addresses
 * This displays a simple table of email addresses with optional subscriptions next to each
@@ -6,7 +6,7 @@
 * @param {array<Object>} fields Checkbox fields to display, each entity should be of the form `[{id: String, title: String, default?: true[default]/false/'firstOnly'}]`
 * @emits change Emitted as `(emails)` when any of the contents changes
 */
-module.exports = {
+app.component('userEmails', {
 	data() { return {
 		emails: [],
 	}},
@@ -55,8 +55,8 @@ module.exports = {
 			},
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<table class="table table-striped">

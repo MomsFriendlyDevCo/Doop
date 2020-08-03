@@ -8,7 +8,7 @@
 * @example Patch an object with new keys
 * vm.$assign(this.widget, {id: 123, name: 'My widget'})
 */
-Vue.prototype.$assign = function(target, ...payload) {
+app.service('$assign', function(target, ...payload) {
 	// Argument munging {{{
 	if (!payload.length && typeof target == 'object') [target, payload] = [this, [target]]; // If no payload assume the first arg just needs merging into `this`
 	// }}}
@@ -19,5 +19,5 @@ Vue.prototype.$assign = function(target, ...payload) {
 		});
 	});
 	return target;
-};
+});
 </script>

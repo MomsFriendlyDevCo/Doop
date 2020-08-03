@@ -1,6 +1,6 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/debug',
 	template: '<directory :sitemap="true"/>',
-};
-</component>
+});
+</script>

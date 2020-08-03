@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component('splashPopsquares', {
 	props: {
 		duration: {type: String, default: '3s'},
 		colors: {type: Array, default: ()=> ['#FF0000', '#00FF00', '#0000FF']},
@@ -16,8 +16,8 @@ module.exports = {
 			};
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div

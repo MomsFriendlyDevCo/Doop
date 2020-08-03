@@ -1,5 +1,5 @@
-<service singleton>
-module.exports = function() {
+<script>
+app.service('$eval', function() {
 	var $eval = this;
 
 	/**
@@ -121,5 +121,5 @@ module.exports = function() {
 	};
 
 	return $eval;
-};
-</service>
+});
+</script>

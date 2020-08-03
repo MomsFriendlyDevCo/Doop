@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component('splashParticles', {
 	data() { return {
 		pgHandle: undefined,
 	}},
@@ -29,8 +29,8 @@ module.exports = {
 	beforeDestroy() {
 		this.pgHandle.destroy();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="splash splash-particles"/>

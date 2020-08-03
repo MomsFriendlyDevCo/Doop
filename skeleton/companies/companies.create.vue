@@ -1,5 +1,5 @@
-<component name="companiesCreate">
-module.exports = {
+<script>
+app.component({
 	route: '/companies/create',
 	render: ()=> {},
 	created() {
@@ -10,5 +10,5 @@ module.exports = {
 			.catch(this.$toast.catch)
 			.finally(()=> this.$loader.stop())
 	},
-};
-</component>
+});
+</script>

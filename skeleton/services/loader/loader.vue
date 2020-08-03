@@ -1,11 +1,6 @@
-<service>
-/**
-* Stub of basic Loader for dumber loaders like the Vue.services() set rather than components (which is handled below via mixin)
-*/
-module.exports = Loader;
-</service>
-
 <script>
+import from '@momsfriendlydevco/loader';
+
 /**
 * The loader is really just a wrapper for @momsfriendlydevco/loader
 * @url https://www.npmjs.com/package/@momsfriendlydevco/loader
@@ -46,16 +41,16 @@ Vue.mixin({
 });
 </script>
 
-<component>
-module.exports = {
+<script>
+app.controller({
 	route: '/debug/loader',
 	methods: {
 		testLoader(method, ...args) {
 			this.$loader[method](...args);
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="card">

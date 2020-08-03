@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/users/invite',
 	data() { return {
 		user: {
@@ -18,8 +18,8 @@ module.exports = {
 				.finally(()=> this.$loader.stop())
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form class="form-horizontal" @submit.prevent="submit()">

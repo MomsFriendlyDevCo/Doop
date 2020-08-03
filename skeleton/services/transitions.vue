@@ -1,58 +1,56 @@
-<service singleton>
-module.exports = function() {
-	var $transitions = this;
+<script>
+var $transitions = {};
 
-	/**
-	* Specify whether to use any transitions
-	* If this is false, 'none' is used for all transitions and can never change
-	* @var {bool}
-	*/
-	$transitions.enabled = false;
+/**
+* Specify whether to use any transitions
+* If this is false, 'none' is used for all transitions and can never change
+* @var {bool}
+*/
+$transitions.enabled = false;
 
-	$transitions.transitions = {
-		'none': {
-			class: 'page-transition-none', // CSS class to apply to the <transition/> element
-			maxKeepAlive: 0, // How long to preserve the last page before cleaning up (generally x2 of the CSS animation duration)
-		},
-		'cover-up': {
-			class: 'page-transition-cover-up',
-			maxKeepAlive: 2000,
-		},
-		'slide-left': {
-			class: 'page-transition-slide-left',
-			maxKeepAlive: 2000,
-		},
-		'slide-right': {
-			class: 'page-transition-slide-right',
-			maxKeepAlive: 2000,
-		},
-		'slide-up': {
-			class: 'page-transition-slide-up',
-			maxKeepAlive: 2000,
-		},
-		'fade': {
-			class: 'page-transition-fade',
-			maxKeepAlive: 2000,
-		},
-	};
-
-	$transitions.current = $transitions.transitions.none;
-
-	/**
-	* Set the current page transition
-	* This is pretty useless unless its immediately followed by a router action
-	* @param {string} [id="none"] The ID of the transition to apply
-	* @see $router.go()
-	*/
-	$transitions.set = (id = 'none') => {
-		if (!$transitions.enabled) return $transitions.transitions.none;
-		if (!$transitions.transitions[id]) throw new Error(`Unknown transition "${id}"`);
-		$transitions.current = $transitions.transitions[id];
-	};
-
-	return $transitions;
+$transitions.transitions = {
+	'none': {
+		class: 'page-transition-none', // CSS class to apply to the <transition/> element
+		maxKeepAlive: 0, // How long to preserve the last page before cleaning up (generally x2 of the CSS animation duration)
+	},
+	'cover-up': {
+		class: 'page-transition-cover-up',
+		maxKeepAlive: 2000,
+	},
+	'slide-left': {
+		class: 'page-transition-slide-left',
+		maxKeepAlive: 2000,
+	},
+	'slide-right': {
+		class: 'page-transition-slide-right',
+		maxKeepAlive: 2000,
+	},
+	'slide-up': {
+		class: 'page-transition-slide-up',
+		maxKeepAlive: 2000,
+	},
+	'fade': {
+		class: 'page-transition-fade',
+		maxKeepAlive: 2000,
+	},
 };
-</service>
+
+$transitions.current = $transitions.transitions.none;
+
+/**
+* Set the current page transition
+* This is pretty useless unless its immediately followed by a router action
+* @param {string} [id="none"] The ID of the transition to apply
+* @see $router.go()
+*/
+$transitions.set = (id = 'none') => {
+	if (!$transitions.enabled) return $transitions.transitions.none;
+	if (!$transitions.transitions[id]) throw new Error(`Unknown transition "${id}"`);
+	$transitions.current = $transitions.transitions[id];
+};
+
+app.service('$transitions', $transitions);
+</script>
 
 <style>
 /* page-transition-cover-up {{{ */
@@ -181,13 +179,13 @@ module.exports = function() {
 /* }}} */
 </style>
 
-<component>
-module.exports = {
+<script>
+app.component({
+	route: '/debug/transitions/:offset?',
 	data() { return {
 		offset: 0,
 		cardClasses: ['', 'bg-primary text-white', 'bg-success text-white', 'bg-info text-white', 'bg-warning text-white', 'bg-danger text-white'],
 	}},
-	route: '/debug/transitions/:offset?',
 	created() {
 		if (!this.$route.params.offset) {
 			this.offset = 1;
@@ -200,8 +198,8 @@ module.exports = {
 			return this.cardClasses[(this.offset - 1) % this.cardClasses.length];
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="card" :class="cardClass">

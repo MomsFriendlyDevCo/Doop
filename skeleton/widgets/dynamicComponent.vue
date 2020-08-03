@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Extended version of the built in `<component/>` dynamic component that supports events and props and sanity checks
 *
@@ -7,7 +7,7 @@
 * @param {Object} [component.events] Event bindings as an object lookup
 * @param {Object} [component.props] Prop bindings as an object lookup
 */
-module.exports = {
+app.component('dynamicComponent', {
 	props: {
 		component: {
 			type: String,
@@ -27,5 +27,5 @@ module.exports = {
 			on: this.$props.events,
 		});
 	},
-};
-</component>
+});
+</script>

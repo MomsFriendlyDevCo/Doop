@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Display a permission setting UI
 * The current permissions are specified with `selected` and their spec available with `spec`
@@ -7,7 +7,7 @@
 * @param {string} [specPerfix=""] How to filter the flat `spec` object to the permissions list
 * @emits change Event emitted as `(selected)` when the user changes the permissions
 */
-module.exports = {
+app.component('permissions', {
 	props: {
 		selected: {type: Object, required: true},
 		spec: {type: Object, required: true},
@@ -34,8 +34,8 @@ module.exports = {
 			this.$emit('change', this.selected);
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

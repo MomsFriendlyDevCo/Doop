@@ -1,4 +1,4 @@
-<service singleton>
+<script>
 /**
 * Exports a helper function which provides dirty checking against an object
 *
@@ -15,7 +15,7 @@
 * @param {Object} src The source object to wrap
 * @returns {Proxy} A proxy wrapped object suitable for dirty checking
 */
-module.exports = function() {
+app.service('$dirtyChecker', function() {
 	var $dirtyChecker = function(src) {
 		var originalDoc = _.cloneDeep(src);
 		var isDirty = false; // Dirty lock, when changed this locks in place
@@ -61,11 +61,11 @@ module.exports = function() {
 	$dirtyChecker.set = (target, key, src) => Vue.set(target, key, $dirtyChecker(src));
 
 	return $dirtyChecker;
-};
-</service>
+});
+</script>
 
-<component>
-module.exports = {
+<script>
+app.controller({
 	route: '/debug/dirtyChecker',
 	data() { return {
 		data: undefined,
@@ -95,8 +95,8 @@ module.exports = {
 	created() {
 		this.reset();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="row">

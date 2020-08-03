@@ -1,9 +1,9 @@
-<component>
+<script>
 /**
 * Draw a simple Ellipse background
 * @param {string} [color="dark"] The background color type
 */
-module.exports = {
+app.component('splashEllipse', {
 	data: ()=> ({
 	}),
 	methods: {
@@ -11,8 +11,8 @@ module.exports = {
 	props: {
 		background: {type: String, default: 'dark'},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="splash splash-ellipse" :class="`splash-ellipse-${$props.background}`"/>

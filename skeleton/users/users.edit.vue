@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/users/:id',
 	data() { return {
 		user: undefined,
@@ -33,8 +33,8 @@ module.exports = {
 	created() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form v-if="user" class="form-horizontal" @submit.prevent="save(true, false)">

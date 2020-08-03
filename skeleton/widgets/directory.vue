@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Display a directory layout
 * This can also optionally take a path within the sitemap to auto-populate children
@@ -24,7 +24,7 @@
 * @example Display a simple directory view based on the sitemap (template only)
 * <directory :root="{children: widgets}"/>
 */
-module.exports = {
+app.component('directory', {
 	data() { return {
 		node: undefined,
 	}},
@@ -52,8 +52,8 @@ module.exports = {
 			.finally(()=> this.$loader.stop())
 			.catch(this.$toast.catch)
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div v-if="node" class="directory row">

@@ -1,9 +1,9 @@
-<component>
+<script>
 /**
 * Draw a simple solid background color
 * @param {string} [color="white"] The background color type
 */
-module.exports = {
+app.component('splashSolid', {
 	data: ()=> ({
 	}),
 	methods: {
@@ -11,8 +11,8 @@ module.exports = {
 	props: {
 		background: {type: String, default: 'white'},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="splash splash-solid" :class="`splash-solid-${$props.background}`"/>

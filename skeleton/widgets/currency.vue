@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Component to display a Bootstrap compatible currency selection input box
 * BUGFIX: Mask doesn't work correctly until https://github.com/probil/v-mask/pull/455 has been merged into v-mask
@@ -13,7 +13,7 @@
 * @example Display a currency selection box
 * <currency :value="someValue" @change="someValue = $event">
 */
-module.exports = {
+app.component('currency', {
 	props: {
 		value: {type: [Date, Number, String]}, // Value may be blank
 		min: {type: Number, default: 0},
@@ -36,8 +36,8 @@ module.exports = {
 			},
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="input-group mb-3">

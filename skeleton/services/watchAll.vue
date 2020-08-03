@@ -1,4 +1,4 @@
-<service>
+<script>
 /**
 * Binds a simple vm.$watchAll([props...], handler) function into the prototype scope
 * This works similar to the Angular vm.$watch([...]) function
@@ -11,7 +11,7 @@
 * @param {boolean} [options.needAllLock=true] After accepting all paths in `needAll`, ALWAYS call the callback in future, even if the values become undefined. Set to falsy to always check for the paths presence
 * @param {boolean} [options.preventLoops=true] Assume that the watcher can effect a peer expression and that we should not keep retriggering this watch expression
 */
-module.exports = function(props, callback, options) {
+app.service('$watchAll', function(props, callback, options) {
 	var settings = {
 		needAll: false,
 		needAllLock: true,
@@ -48,5 +48,5 @@ module.exports = function(props, callback, options) {
 
 	// Run handler immediately if needed
 	if (settings.immediate) handler();
-}
-</service>
+});
+</script>

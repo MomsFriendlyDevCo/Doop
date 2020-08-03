@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Component which displays a simple attachment list linked against an API endpoint
 * NOTE: Url is expected to return [{url, deleteUrl?, name, icon?, created? (parseable date string), size (bytes)}]
@@ -27,7 +27,7 @@
 * </div>
 * <attachments ref="attachments" url="/api/uploads"/>
 */
-module.exports = {
+app.component('attachments', {
 	props: {
 		url: {type: String, required: true},
 		view: {type: String, default: 'table'},
@@ -109,8 +109,8 @@ module.exports = {
 	created() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="attachments" :class="!attachments || !attachments.length ? 'empty' : ''">

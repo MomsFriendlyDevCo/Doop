@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component('searchNavbar', {
 	data() { return {
 		searchQuery: this.$route.query.q,
 		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
@@ -144,8 +144,8 @@ module.exports = {
 	beforeDestroy() {
 		this.setHelperVisibility(false); // Clean up body click handlers
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form @submit.prevent="submit" role="search">

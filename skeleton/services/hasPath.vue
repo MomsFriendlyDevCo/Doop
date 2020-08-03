@@ -14,7 +14,7 @@
 * @example Check a deeply nested path, with arrays, assuming VM as the root node
 * vm.$hasPath('foo.1.bar'); // True if vm.$data.foo exists
 */
-Vue.prototype.$hasPath = function(target, path) {
+app.service('$hasPath', function(target, path) {
 	// Argument mangling {{{
 	if (_.isString(target) || _.isArray(target)) { // called as (path)
 		[target, path] = [this, target];
@@ -24,5 +24,5 @@ Vue.prototype.$hasPath = function(target, path) {
 	// }}}
 
 	return this.$getPath(target, path, undefined) !== undefined;
-};
+});
 </script>

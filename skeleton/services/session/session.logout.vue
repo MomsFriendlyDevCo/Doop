@@ -1,9 +1,9 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/logout',
 	render: h => h(),
 	created() {
 		return this.$session.logout();
 	},
-};
-</component>
+});
+</script>

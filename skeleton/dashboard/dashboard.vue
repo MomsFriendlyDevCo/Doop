@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/',
 	data() { return {
 		companies: undefined,
@@ -29,8 +29,8 @@ module.exports = {
 	created() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

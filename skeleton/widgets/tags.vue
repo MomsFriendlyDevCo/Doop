@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Tag selection widget obeying an opinionated internal spec
 *
@@ -22,7 +22,7 @@
 * 
 * @emits change Emitted as `(tags)` when the tag selection changes
 */
-module.exports = {
+app.component('tags', {
 	props: {
 		value: Array,
 		spec: Array,
@@ -71,8 +71,8 @@ module.exports = {
 			return foundSpec.color ? {background: foundSpec.color} : {};
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<v-select

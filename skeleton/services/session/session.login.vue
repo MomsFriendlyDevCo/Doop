@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/login',
 	data: ()=> ({
 		hasError: false,
@@ -27,8 +27,8 @@ module.exports = {
 	// Bind special Login styles
 	beforeCreate: ()=> $('body').addClass('minimal').removeClass('bootstrapping'),
 	destroyed: ()=> $('body').removeClass('minimal'),
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

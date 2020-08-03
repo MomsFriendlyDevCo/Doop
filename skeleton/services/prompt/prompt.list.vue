@@ -10,26 +10,24 @@
 * @param {string} [options.searchMethod='regex'] How to search on the API endpoint. ENUM: 'regex' (use Mongo $regex method), 'q' (allow fuzzy searching)
 * @returns {Promise<Object>} The selected full item (i.e. you need to extract the specific field you want yourself)
 */
-app.ready.then(()=> {
-	Vue.services().$prompt.list = options => Vue.services().$prompt.dialog({
-		list: [],
-		url: undefined,
-		field: 'title',
-		limit: 30,
-		sort: true,
-		searchMethod: 'regex',
+app.service('$prompt').methods.list = options => Vue.services().$prompt.dialog({
+	list: [],
+	url: undefined,
+	field: 'title',
+	limit: 30,
+	sort: true,
+	searchMethod: 'regex',
 
-		title: 'Select an option',
-		component: 'promptList',
-		buttons: null,
-		dialogClose: 'reject',
-		...options,
-	});
-})
+	title: 'Select an option',
+	component: 'promptList',
+	buttons: null,
+	dialogClose: 'reject',
+	...options,
+});
 </script>
 
-<component>
-module.exports = {
+<script>
+app.component('promptList', {
 	data() { return {
 		isLoading: true,
 		search: '',
@@ -88,8 +86,8 @@ module.exports = {
 	mounted() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form class="form-horizontal" @submit.prevent="refresh()">

@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Wrapper around digest which supports lazy loading any entity based on an API endpoint
 * @param {string} url The URL endpoint to retrieve data from
@@ -26,7 +26,7 @@
 * @emits changeData Emitted as `(document)` (i.e. the whole data) as a convenience method to bind to the entire data array
 * @emits changeFIELD Emitted for each field in the resultant document with fields as camelCase with first leter caps, for example {_id: 123, label: 'hello'} emits 'change_id' + 'changeLabel'
 */
-module.exports = {
+app.component('digestSelect', {
 	props: {
 		url: {type: String, required: true},
 		docUrl: {type: String},
@@ -109,8 +109,8 @@ module.exports = {
 			this.emitChanges({}); // Allow bindings to @change to update
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="digest-select btn-group">

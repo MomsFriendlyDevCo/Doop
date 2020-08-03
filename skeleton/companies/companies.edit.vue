@@ -1,5 +1,5 @@
-<component name="companiesEdit">
-module.exports = {
+<script>
+app.component({
 	route: '/companies/:id',
 	data() { return {
 		company: undefined,
@@ -27,8 +27,8 @@ module.exports = {
 	created() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template name="companiesEdit">
 	<form v-if="company" class="form-horizontal" @submit.prevent="save(true, false)">

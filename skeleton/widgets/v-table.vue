@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Customizable table component with auto data retrieval, pagnination and searching
 *
@@ -42,7 +42,7 @@
 * @slot COLUMN Per-column custom cell rendering, if specified each slot gets the "row" data binding
 */
 
-module.exports = {
+app.component('v-table', {
 	data() { return {
 		state: 'init', // ENUM: 'loading', 'ready', 'empty', 'error'
 		error: undefined, // Error from server, if any
@@ -204,8 +204,8 @@ module.exports = {
 		this.$debugging = true;
 		this.$watchAll(['url', 'limit', 'columns'], this.refresh, {immediate: true, deep: true});
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="v-table" :class="layout == 'card' && 'card'">

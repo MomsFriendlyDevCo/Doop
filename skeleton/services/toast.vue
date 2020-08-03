@@ -1,124 +1,122 @@
-<service defer singleton>
-module.exports = function() {
-	var $toast = this;
+<script>
+var $toast = {};
 
-	$toast.settings = {
-		progressRemoveDelay: 2000, // How long to wait before removing completed progress toasts
+$toast.settings = {
+	progressRemoveDelay: 2000, // How long to wait before removing completed progress toasts
+};
+
+var Snotify = Vue.prototype.$snotify;
+Snotify.config.global.preventDuplicates = true;
+
+$toast.primary = Snotify.simple.bind(Snotify);
+$toast.info = Snotify.info.bind(Snotify);
+$toast.success = Snotify.success.bind(Snotify);
+$toast.warn = $toast.warning = Snotify.warning.bind(Snotify);
+$toast.danger = Snotify.error.bind(Snotify);
+$toast.error = Snotify.error.bind(Snotify);
+$toast.confirm = Snotify.confirm.bind(Snotify);
+$toast.prompt = Snotify.prompt.bind(Snotify);
+$toast.clear = Snotify.clear.bind(Snotify);
+
+$toast.save = ()=>
+	Snotify.create({
+		title: 'Saved',
+		config: {
+			position: 'centerTop',
+			showProgressBar: false,
+			timeout: 2000,
+			type: 'save',
+		},
+	})
+
+
+$toast._progress = {}; // Storage of all progress toasts
+
+/**
+* Display a toast with progress
+* @param {string} id A unique ID to identify the toast so it can be changed later
+* @param {string} [text] The text of the progress area
+* @param {number} progress Progress to show between 0 and 100 - at 100 the progress display is removed
+* @param {object} [options] Additional options to pass
+* @param {object} [options.icon="far fa-spinner fa-spin"] Font-Awesome comaptible icon class to use in the side of the toast
+*/
+$toast.progress = (id, text, progress, options) => {
+	var settings = {
+		icon: 'far fa-spinner fa-spin',
 	};
 
-	var Snotify = Vue.prototype.$snotify;
-	Snotify.config.global.preventDuplicates = true;
+	// Argument mangling {{{
+	if (!id) throw new Error('$toast.progress(id, [text], progress) requires an ID');
+	if (_.isNumber(text)) {
+		[text, progress] = [undefined, text];
+	}
+	// }}}
 
-	$toast.primary = Snotify.simple.bind(Snotify);
-	$toast.info = Snotify.info.bind(Snotify);
-	$toast.success = Snotify.success.bind(Snotify);
-	$toast.warn = $toast.warning = Snotify.warning.bind(Snotify);
-	$toast.danger = Snotify.error.bind(Snotify);
-	$toast.error = Snotify.error.bind(Snotify);
-	$toast.confirm = Snotify.confirm.bind(Snotify);
-	$toast.prompt = Snotify.prompt.bind(Snotify);
-	$toast.clear = Snotify.clear.bind(Snotify);
-
-	$toast.save = ()=>
-		Snotify.create({
-			title: 'Saved',
-			config: {
-				position: 'centerTop',
-				showProgressBar: false,
-				timeout: 2000,
-				type: 'save',
-			},
-		})
-
-	
-	$toast._progress = {}; // Storage of all progress toasts
-
-	/**
-	* Display a toast with progress
-	* @param {string} id A unique ID to identify the toast so it can be changed later
-	* @param {string} [text] The text of the progress area
-	* @param {number} progress Progress to show between 0 and 100 - at 100 the progress display is removed
-	* @param {object} [options] Additional options to pass
-	* @param {object} [options.icon="far fa-spinner fa-spin"] Font-Awesome comaptible icon class to use in the side of the toast
-	*/
-	$toast.progress = (id, text, progress, options) => {
-		var settings = {
-			icon: 'far fa-spinner fa-spin',
-		};
-
-		// Argument mangling {{{
-		if (!id) throw new Error('$toast.progress(id, [text], progress) requires an ID');
-		if (_.isNumber(text)) {
-			[text, progress] = [undefined, text];
-		}
-		// }}}
-
-		if (!$toast._progress[id]) { // Create new toast
-			$toast._progress[id] = {
-				text,
-				progress: progress || 0,
-				snotify: Snotify.create({
-					config: {
-						timeout: 0,
-						position: 'rightBottom',
-						showProgressBar: false,
-						type: 'progress',
-						closeOnClick: false,
-						icon: false,
-						html: ''
-							+ '<div class="media col-12">'
-								+ '<div class="mr-2 snotify-fa-icon">'
-									+ `<i class="${settings.icon}"></i>`
-								+ '</div>'
-								+ '<div class="media-body">'
-									+ `<h4 id="toast-text-${id}">${text || ''}</h4>`
-										+ '<div class="progress mb-1">'
-											+`<div id="toast-progress-${id}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${progress || 0}%"></div>`
-										+ '</div>'
+	if (!$toast._progress[id]) { // Create new toast
+		$toast._progress[id] = {
+			text,
+			progress: progress || 0,
+			snotify: Snotify.create({
+				config: {
+					timeout: 0,
+					position: 'rightBottom',
+					showProgressBar: false,
+					type: 'progress',
+					closeOnClick: false,
+					icon: false,
+					html: ''
+						+ '<div class="media col-12">'
+							+ '<div class="mr-2 snotify-fa-icon">'
+								+ `<i class="${settings.icon}"></i>`
+							+ '</div>'
+							+ '<div class="media-body">'
+								+ `<h4 id="toast-text-${id}">${text || ''}</h4>`
+									+ '<div class="progress mb-1">'
+										+`<div id="toast-progress-${id}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${progress || 0}%"></div>`
 									+ '</div>'
 								+ '</div>'
 							+ '</div>'
-					},
-				}),
-			};
-		} else { // Update existing
-			$(`#toast-progress-${id}`).css('width', Math.min(progress, 100) + '%');
-			if (text != $toast._progress[id].text) $(`#toast-text-${id}`).text(text);
-		}
+						+ '</div>'
+				},
+			}),
+		};
+	} else { // Update existing
+		$(`#toast-progress-${id}`).css('width', Math.min(progress, 100) + '%');
+		if (text != $toast._progress[id].text) $(`#toast-text-${id}`).text(text);
+	}
 
-		if (progress === 100) { // Destroy progress
-			if (!$toast._progress[id]) return; // Toast doesn't exist anyway
-			var sid = $toast._progress[id].snotify.id;
-			setTimeout(()=> Snotify.remove(sid), $toast.settings.progressRemoveDelay);
-			delete $toast._progress[id];
-		}
-	};
-
-
-	$toast.catch = (obj, options) => {
-		console.warn('Promise chain threw error:', obj);
-		if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
-		if (obj === 'cancel') return; // Silently ignore user cancelled actions
-
-		$toast.error(
-			_.isUndefined(obj) ? 'An error has occured'
-			: _.isString(obj) ? obj
-			: _.isError(obj) ? obj.toString().replace(/^Error: /, '')
-			: _.has(obj, 'error') && obj.error ? obj.error
-			: _.has(obj, 'data') && _.isString(obj.data) && obj.data ? obj.data
-			: _.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg
-			: _.has(obj, 'data.error') && obj.data.error ? obj.data.error
-			: _.has(obj, 'statusText') && obj.statusText ? obj.statusText
-			: _.has(obj, 'status') && obj.status === -1 ? 'Server connection failed'
-			: _.has(obj, 'message') && /Received: ".+"/.test(obj.message) ? (function(text) { var matches = /^.+Received: "(.+?)"/.exec(text); return matches[1]; }(obj.message))
-			: _.isFunction(obj.toString) && obj.toString() !== '[object Object]' ? obj.toString() :
-			'An error has occured'
-		, options);
-	};
-
-	return $toast;
+	if (progress === 100) { // Destroy progress
+		if (!$toast._progress[id]) return; // Toast doesn't exist anyway
+		var sid = $toast._progress[id].snotify.id;
+		setTimeout(()=> Snotify.remove(sid), $toast.settings.progressRemoveDelay);
+		delete $toast._progress[id];
+	}
 };
-</service>
+
+
+$toast.catch = (obj, options) => {
+	console.warn('Promise chain threw error:', obj);
+	if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
+	if (obj === 'cancel') return; // Silently ignore user cancelled actions
+
+	$toast.error(
+		_.isUndefined(obj) ? 'An error has occured'
+		: _.isString(obj) ? obj
+		: _.isError(obj) ? obj.toString().replace(/^Error: /, '')
+		: _.has(obj, 'error') && obj.error ? obj.error
+		: _.has(obj, 'data') && _.isString(obj.data) && obj.data ? obj.data
+		: _.has(obj, 'data.errmsg') && obj.data.errmsg ? obj.data.errmsg
+		: _.has(obj, 'data.error') && obj.data.error ? obj.data.error
+		: _.has(obj, 'statusText') && obj.statusText ? obj.statusText
+		: _.has(obj, 'status') && obj.status === -1 ? 'Server connection failed'
+		: _.has(obj, 'message') && /Received: ".+"/.test(obj.message) ? (function(text) { var matches = /^.+Received: "(.+?)"/.exec(text); return matches[1]; }(obj.message))
+		: _.isFunction(obj.toString) && obj.toString() !== '[object Object]' ? obj.toString() :
+		'An error has occured'
+	, options);
+};
+
+app.service('$toast', $toast);
+</script>
 
 <style>
 .snotifyToast {
@@ -176,16 +174,16 @@ module.exports = function() {
 /* }}} */
 </style>
 
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/debug/toast',
 	methods: {
 		testToast(method, ...args) {
 			this.$toast[method](...args);
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="card">

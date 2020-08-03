@@ -5,10 +5,10 @@
 
 var _ = require('lodash');
 var fs = require('fs');
+var fspath = require('path');
 var glob = require('globby');
 var gulp = require('gulp');
 var parcel = require('parcel-bundler');
-var os = require('os');
 
 gulp.task('build.vue', ['load:app', 'build.vue.index'], ()=> Promise.resolve()
 	.then(()=> new parcel(`${app.config.paths.root}/app/app.vue`, {
@@ -23,6 +23,7 @@ gulp.task('build.vue', ['load:app', 'build.vue.index'], ()=> Promise.resolve()
 		detailedReport: true,
 	}))
 	.then(bundler => bundler.bundle())
+	.catch(e => process.exit(1)) // Let parcel report the error
 );
 
 gulp.task('build.vue.index', ['load:app'], ()=> Promise.resolve()
@@ -42,7 +43,10 @@ gulp.task('build.vue.index', ['load:app'], ()=> Promise.resolve()
 		`* Last generated: ${(new Date).toISOString()}`,
 		'*/',
 		'',
-		...files.map(file => `import '../${file}'`),
+		..._(files)
+			.sortBy(file => fspath.basename(file, '.vue') == 'index' ? '___' + file : file) // Sort 'index' files first
+			.map(file => `import '../${file}'`)
+			.value(),
 		'</script>',
 	].join('\n')))
 );

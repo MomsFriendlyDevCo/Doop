@@ -10,10 +10,6 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="yes"/>
 	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui"/>
 
-	<!-- Core vendors -->
-	<link rel='stylesheet' href="/dist/vendors.core.css"/>
-	<script src="/dist/vendors.core.js"></script>
-
 	<!-- Favicon -->
 	<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicons/favicon-32x32.png">
@@ -24,11 +20,6 @@
 	<meta name="msapplication-TileColor" content="#2b5797">
 	<meta name="msapplication-config" content="/assets/favicons/browserconfig.xml">
 	<meta name="theme-color" content="#ffffff">
-
-	<!-- App (see end of file for main script loader) -->
-	<link href="/dist/vendors.main.css" rel="stylesheet" type="text/css"/>
-	<link href="/dist/vendors.fonts.css" rel="stylesheet" type="text/css"/>
-	<link href="/dist/app.css" rel="stylesheet" type="text/css"/>
 
 	<!-- Injection scripts -->
 	<%= app.config.layout.headInject.join('\n') %>
@@ -96,7 +87,7 @@
 		<!-- Sidebar {{{ -->
 		<div class="left side-menu">
 			<div id="sidebar-menu">
-				<sitemap-map></sitemap-map>
+				<sitemap-sidebar></sitemap-sidebar>
 				<div class="clearfix"></div>
 			</div>
 			<div class="clearfix"></div>
@@ -129,8 +120,6 @@
 		<!-- }}} -->
 	</div>
 
-	<script src="/dist/vendors.main.js"></script>
-	<script src="/dist/vendors.repack.js"></script>
 	<script src="/dist/app.js"></script>
 </body>
 </html>

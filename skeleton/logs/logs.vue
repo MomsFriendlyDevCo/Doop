@@ -1,8 +1,8 @@
-<component>
+<script>
 /**
 * Simple component to display a table of log elements for a collection / docId tuple
 */
-module.exports = {
+app.component('logs', {
 	props: {
 		collection: {type: String, required: true},
 		id: {type: String, required: true},
@@ -32,7 +32,7 @@ module.exports = {
 				.finally(()=> this.$loader.stop())
 		},
 	},
-};
+});
 </component>
 
 <template>

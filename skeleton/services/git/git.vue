@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script>
+app.component({
 	route: '/debug/git',
 	data() {
 		return {
@@ -20,7 +20,7 @@ module.exports = {
 	created() {
 		this.refresh();
 	},
-}
+});
 </component>
 
 <template>

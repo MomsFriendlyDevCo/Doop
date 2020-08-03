@@ -1,4 +1,4 @@
-<service singleton>
+<script>
 /**
 * Service which guesses the screen display area based on window.resize events
 * This service returns a number of simple variables such as:
@@ -11,46 +11,44 @@
 *
  * In addition the body class `screen-{xs,sm,mg,lg}` is also added
 */
-module.exports = function() {
-	var $screen = this;
+var $screen = {};
 
-	$screen.isXS;
-	$screen.isSM;
-	$screen.isMD;
-	$screen.isLG;
-	$screen.size;
+$screen.isXS;
+$screen.isSM;
+$screen.isMD;
+$screen.isLG;
+$screen.size;
 
-	$screen.recalculate = ()=> {
-		var width = $(document).width();
-		Vue.set($screen, 'isXS', width <= 576);
-		Vue.set($screen, 'isSM', width > 576 && width < 768);
-		Vue.set($screen, 'isMD', width > 768 && width < 1200);
-		Vue.set($screen, 'isLG', width >= 1200);
-		Vue.set($screen, 'isMobile', $screen.isXS);
-		Vue.set($screen, 'isTablet', $screen.isSM || $screen.isMD || $screen.isLG);
-		Vue.set($screen, 'isDesktop', $screen.isLG);
+$screen.recalculate = ()=> {
+	var width = $(document).width();
+	Vue.set($screen, 'isXS', width <= 576);
+	Vue.set($screen, 'isSM', width > 576 && width < 768);
+	Vue.set($screen, 'isMD', width > 768 && width < 1200);
+	Vue.set($screen, 'isLG', width >= 1200);
+	Vue.set($screen, 'isMobile', $screen.isXS);
+	Vue.set($screen, 'isTablet', $screen.isSM || $screen.isMD || $screen.isLG);
+	Vue.set($screen, 'isDesktop', $screen.isLG);
 
-		var newSize =
-			$screen.isXS ? 'xs'
-			: $screen.isSM ? 'sm'
-			: $screen.isMD ? 'md'
-			: 'lg';
+	var newSize =
+		$screen.isXS ? 'xs'
+		: $screen.isSM ? 'sm'
+		: $screen.isMD ? 'md'
+		: 'lg';
 
-		if (newSize != $screen.size) {
-			Vue.set($screen, 'size', newSize);
-			app.ready.then(()=> app.broadcast('$screen.resize', $screen.size));
-		}
+	if (newSize != $screen.size) {
+		Vue.set($screen, 'size', newSize);
+		app.ready.then(()=> app.broadcast('$screen.resize', $screen.size));
+	}
 
-		$('body')
-			.toggleClass('screen-xs', $screen.isXS)
-			.toggleClass('screen-sm', $screen.isSM)
-			.toggleClass('screen-md', $screen.isMD)
-			.toggleClass('screen-lg', $screen.isLG)
-	};
-
-	$(window).on('resize', $screen.recalculate);
-	app.ready.then(()=> $screen.recalculate()); // Trigger initial calculation
-
-	return $screen;
+	$('body')
+		.toggleClass('screen-xs', $screen.isXS)
+		.toggleClass('screen-sm', $screen.isSM)
+		.toggleClass('screen-md', $screen.isMD)
+		.toggleClass('screen-lg', $screen.isLG)
 };
-</service>
+
+$(window).on('resize', $screen.recalculate);
+app.ready.then(()=> $screen.recalculate()); // Trigger initial calculation
+
+app.service('$screen', $screen);
+</script>

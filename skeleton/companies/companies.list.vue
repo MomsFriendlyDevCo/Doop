@@ -1,5 +1,5 @@
-<component name="companysList">
-module.exports = {
+<script>
+app.component({
 	route: '/companies',
 	data() { return {
 		companies: undefined,
@@ -28,10 +28,10 @@ module.exports = {
 	created() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
-<template name="companysList">
+<template>
 	<div v-if="companies" class="card">
 		<div class="btn-group-float">
 			<a v-href="'/companies/create'" class="btn btn-icon btn-circle btn-success fa fa-plus" v-tooltip="'Create a new company'"></a>

@@ -1,31 +1,32 @@
-<service>
-module.exports = {
-	url: 0/* @IMPORT: app.config.url */,
-	apiUrl: 0/* @IMPORT: app.config.apiUrl */,
-	isProduction: 0/* @IMPORT: app.config.isProduction */,
-	title: 0/* @IMPORT: app.config.title */,
-	chat: 0/* @IMPORT: app.config.chat */,
-	git: 0/* @IMPORT: app.config.git */,
-	session: {
-		preference: 0/* @IMPORT: app.config.session.auth.preference */,
-		logoutUrl: 0/* @IMPORT: app.config.session.logoutUrl */,
-		signup: 0/* @IMPORT: app.config.session.signup */,
-		recover: 0/* @IMPORT: app.config.session.recover */,
-	},
-	theme: 0/* @IMPORT: app.config.theme */,
-};
-</service>
+<script>
+/**
+* $config service
+* This is a dumb controller which provides various imports from app.config exposed to the front end
+*/
+app.service('$config', {
+	data() { return {
+		url: 0/* @IMPORT: app.config.url */,
+		apiUrl: 0/* @IMPORT: app.config.apiUrl */,
+		isProduction: 0/* @IMPORT: app.config.isProduction */,
+		title: 0/* @IMPORT: app.config.title */,
+		chat: 0/* @IMPORT: app.config.chat */,
+		git: 0/* @IMPORT: app.config.git */,
+		session: {
+			preference: 0/* @IMPORT: app.config.session.auth.preference */,
+			logoutUrl: 0/* @IMPORT: app.config.session.logoutUrl */,
+			signup: 0/* @IMPORT: app.config.session.signup */,
+			recover: 0/* @IMPORT: app.config.session.recover */,
+		},
+		theme: 0/* @IMPORT: app.config.theme */,
+	}},
+});
+</script>
 
-<component>
-module.exports = {
+<script>
+app.controller({
 	route: '/debug/config',
-	data() {
-		return {
-			$config: this.$config,
-		};
-	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="card">

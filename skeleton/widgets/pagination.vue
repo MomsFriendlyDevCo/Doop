@@ -1,4 +1,4 @@
-<component>
+<script>
 /**
 * Simple pagination controls
 * @param {number} [value=1] The current page number (between min + max)
@@ -13,9 +13,7 @@
 *
 * @emits change Emitted as `(newPageOffset)` when the page number changes
 */
-module.exports = {
-	data() { return {
-	}},
+app.component('pagination', {
 	props: {
 		value: {type: Number, default: 1},
 		min: {type: Number, default: 1},
@@ -45,8 +43,8 @@ module.exports = {
 			if (typeof v == 'number') return this.$emit('change', v);
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<nav>
