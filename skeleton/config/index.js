@@ -202,5 +202,7 @@ module.exports = {
 		cert: undefined, // Path to fullchain.pem
 		key: undefined, // Path to privkey.pem
 	},
-	theme: {},
+	theme: {
+		logo: '/assets/logo/logo.svg',
+	},
 };

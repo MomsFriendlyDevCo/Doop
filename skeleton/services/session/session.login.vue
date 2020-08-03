@@ -36,7 +36,7 @@ app.component({
 		<div class="container-fluid session-login">
 			<div class="row d-flex justify-content-center">
 				<a v-href="'/'">
-					<img class="logo" src="/assets/logo/logo.svg" />
+					<img class="logo" :src="$config.theme.logo" />
 				</a>
 			</div>
 			<div class="row row d-flex justify-content-center">
