@@ -1,5 +1,6 @@
 <server on="middleware, dbMiddleware">
 var _ = require('lodash');
+var stringSplit = require('string-split-by');
 
 /**
 * Database middleware to add a meta 'db.MODEL.search()' method onto a model
@@ -78,18 +79,17 @@ app.middleware.db.search = (model, options) => {
 			// Filter by status
 			// status: (query, val) => query.find({status: val}),
 		},
-		mutateTokens: v => _.chain(v)
+		mutateTokens: (v, settings) => _.chain(v)
 			.toString()
 			.thru(v => v.toUpperCase())
 			.deburr()
 			.replace(/[^A-Z0-9\-:]+/g, ' ')
 			.trim()
 			.value(),
-		searchTermsSplit: v => _.chain(v)
+		searchTermsModify: (v, settings) => _.chain(v)
 			.toString()
 			.thru(v => v.toUpperCase())
 			.deburr()
-			.split(/[^A-Z0-9\-:]/)
 			.value(),
 		docFilter: undefined,
 		docSoftFilter: (next, doc) => next(null, true),
@@ -113,7 +113,7 @@ app.middleware.db.search = (model, options) => {
 				.then(value => ({value, weight: field.weight || 1}))
 			: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
 		))
-			.then(tokens => tokens.map(token => ({...token, value: settings.mutateTokens(token.value)}))) // Mutate tokens
+			.then(tokens => tokens.map(token => ({...token, value: settings.mutateTokens(token.value, settings)}))) // Mutate tokens
 			.then(tokens => tokens.filter(token => token.value)) // Remove falsy tokens
 			.then(tokens => _.set(doc, settings.path, tokens))
 			.then(()=> done())
@@ -139,6 +139,7 @@ app.middleware.db.search = (model, options) => {
 	* @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
 	* @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
 	* @param {RegExp} [options.tagsRe] RegExp used to split tags
+	* @param {boolean} [options.wholeTerm=false] Assume multi word sequences wrap in speachmarks to keep them together. i.e. when searching `foo bar baz` and true - `+foo +bar +baz` else when false `+"foo bar baz"`
 	* @returns {array<Object>} An array of matching documents with the meta `_score` field
 	*/
 	model.search = function(terms, options) {
@@ -150,12 +151,21 @@ app.middleware.db.search = (model, options) => {
 			skip: 0,
 			select: undefined,
 			count: false,
+			wholeTerm: false,
 			..._.cloneDeep(settings),
 			...options,
 		};
 
 		var termsRE = _.chain(terms)
-			.split(/\s+/) // Simple split by whitespace to detect tags
+			.thru(terms => settings.wholeTerm // Wrap terms in speachmarks if we only accept wholeTerm (and they are not already)
+				? '"' + _.trim(terms, '"').replace(/"/g, '\\"') + '"'
+				: terms
+			)
+			.thru(terms => stringSplit(terms, /\s+/, {
+				ignore: ['"', "'", '()'], // Preserve compound terms with speachmarks + brackets
+				escape: true, // Allow escaping of terms
+			}))
+			.map(term => /^["'\(].+["'\)]$/.test(term) ? term.slice(1, -1) : term) // Remove wrapping for combined terms
 			.filter(term => { // Remove tags
 				var tagBits = searchSettings.tagsRe.exec(term);
 				if (tagBits && searchSettings.acceptTags && searchSettings.tags[tagBits.groups.tag.toLowerCase()]) { // Found a valid tag and we are accepting tags
@@ -171,8 +181,7 @@ app.middleware.db.search = (model, options) => {
 					return true;
 				}
 			})
-			.thru(terms => terms.join(' ')) // Put array back together as a string now we've removed terms
-			.thru(terms => searchSettings.searchTermsSplit(terms)) // Split into an array of search terms...
+			.map(term => searchSettings.searchTermsModify(term, settings)) // Mangle terms to remove burring etc.
 			.map(term => new RegExp(RegExp.escape(term), 'i')) // Encode each term as a RegExp
 			.value();
 
@@ -185,6 +194,7 @@ app.middleware.db.search = (model, options) => {
 				.map((v, k) => app.log.colors.cyan.bold(k) + ':' + app.log.colors.cyan(v))
 				.thru(v => v.length > 0 ? v.join(', ') : app.log.colors.grey('none'))
 				.value(),
+			settings.wholeTerm ? '(whole term mode)' : '(word split mode)',
 		);
 
 		return new Promise((resolve, reject) => {
