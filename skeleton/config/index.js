@@ -123,6 +123,10 @@ module.exports = {
 		expiry: 1000 * 60 * 60, // 1 hour
 		mongodb: {
 			uri: config => config.mongo.uri,
+			options: {
+				useNewUrlParser: true,
+				useUnifiedTopology: true,
+			},
 			collection: 'locks',
 		},
 	},
@@ -145,9 +149,7 @@ module.exports = {
 	mongo: {
 		hooks: false, // Overridden during Doop bootstrap (otherwise ignore all hook calls)
 		uri: 'mongodb://localhost/FIXME-name',
-		options: {
-			useUnifiedTopology: true,
-		},
+		options: {},
 		plugins: ['iterators', 'promises', 'rest'],
 	},
 	papertrail: {
