@@ -24,6 +24,7 @@ Vue.assets = {
 	/**
 	* Thin wrapper around Vue.component() that adds `route` support
 	* @alias Vue.component
+	* @returns {VueComponent}
 	*/
 	component: (id, config) => {
 		if (config && config.route) {
@@ -31,13 +32,22 @@ Vue.assets = {
 				Vue.assets.$assets.routes.push({path: route, component: id});
 			});
 		}
-		Vue.component(id, config);
+		return Vue.component(id, config);
 	},
+
+
+	/**
+	* Init a MacGyver component
+	* @alias Vue.mgComponent
+	* @returns {VueComponent}
+	*/
+	macgyver: (id, config) => Vue.mgComponent(id, config),
 
 
 	/**
 	* Thin wrapper around Vue.directive() that may add some extra magic in the future
 	* @alias Vue.directive
+	* @returns {VueDirective}
 	*/
 	directive: (id, config) => Vue.directive(id, config),
 
@@ -45,6 +55,7 @@ Vue.assets = {
 	/**
 	* Thin wrapper around Vue.filter() that may add some extra magic in the future
 	* @alias Vue.filter
+	* @returns {VueFilter}
 	*/
 	filter: (id, config) => Vue.filter(id, config),
 
@@ -106,14 +117,6 @@ Vue.assets = {
 
 		Vue.assets.$assets.templates[id] = template;
 	},
-
-
-	/**
-	* Register a MacGyver widget
-	* @param {string} id The name of the MacGyver widget to register
-	* @param {string} config The MacGyver widget to register
-	*/
-	macgyver: (id, config) => Vue.assets.$assets.macgyver[id] = config,
 };
 
 /**

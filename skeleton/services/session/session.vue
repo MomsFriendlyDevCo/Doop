@@ -145,7 +145,7 @@ module.exports = function() {
 						&& !$session.isRefreshed
 					) {
 						$session.$debug('Network error during preBootData on first fetch');
-						app.crash('Can\'t connect to the SiteMobi servers', showReload=true);
+						app.crash('Can\'t connect to the server', showReload=true);
 					} else {
 						$session.$debug('Caught error during preBootData', err);
 						throw err;
@@ -268,7 +268,7 @@ module.exports = function() {
 	*/
 	$session.permissions = {};
 
-	
+
 	/**
 	* Query whether a user has a given or array of permissions
 	* @param {string|array<string>} permission Single or multiple permissions to check, if an array all must be present
