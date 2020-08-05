@@ -1,6 +1,6 @@
 <endpoint>
 var _ = require('lodash');
-var basicAuth = require('basic-auth-connect');
+var basicAuth = require('express-basic-auth');
 var fspath = require('path');
 var glob = require('globby');
 
@@ -27,15 +27,18 @@ app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sa
 */
 app.get(
 	'/api/sanity',
-	basicAuth((user, pass) => user == app.config.sanity.user && pass == app.config.sanity.pass),
-	// FIXME: Missing cache
+	basicAuth({
+		challenge: true,
+		realm: app.config.title,
+		users: {[app.config.sanity.user]: app.config.sanity.pass},
+	}),
 	(req, res) => {
 		res.type('text');
 
 		Promise.all(sanityChecks.map(s =>
 			Promise.resolve(s.func())
-				.then(m => `SANITY-PASS@${s.id}:${m || 'OK'}`)
-				.catch(e => `SANITY-FAIL@${s.id}:${e.toString()}`)
+				.then(m => `PASS ${s.id} - ${m || 'OK'}`)
+				.catch(e => `FAIL ${s.id} - ${e.toString()}`)
 		))
 			.then(results => {
 				var fail = results.some(r => typeof r == 'string' && r.startsWith('SANITY-FAIL@'));
