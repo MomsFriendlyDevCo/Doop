@@ -42,7 +42,7 @@ if [[ `pm2 show doop-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
 	pm2 start --name 'doop-d' server/index.js -- -e production -o port=10004 -o papertrail.program=doop-d
 else
 	echo "Rebooting PM2 process..."
-	pm2 restart doop-a doop-b doop-c doop-d
+	pm2 restart --wait-ready doop-a doop-b doop-c doop-d
 fi
 
 echo "done."
