@@ -166,6 +166,10 @@ module.exports = {
 		dist: path.normalize(`${__dirname}/../dist`),
 		root: path.normalize(`${__dirname}/..`),
 	},
+	sanity: {
+		user: 'sanity',
+		pass: '{{FIXME}}', // Used as as basic-auth on /sanity checks, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
+	},
 	sentry: {
 		enabled: false,
 		device: 'server',

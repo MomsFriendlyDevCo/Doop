@@ -1,0 +1,53 @@
+<endpoint>
+var _ = require('lodash');
+var basicAuth = require('basic-auth-connect');
+var fspath = require('path');
+var glob = require('globby');
+
+/**
+* Compute an array of sanity checks to run from all fiels in /sanity/*.js
+* @type {array}
+*/
+var sanityChecks = glob.sync(`${app.config.paths.root}/sanity/*.js`)
+	.map(path => {
+		var id = fspath.basename(path, '.js');
+		var func = require(path);
+		if (typeof func != 'function') throw new Error(`Recieved non-function return in "${path}" - expected a function or promise factory`);
+
+		return {id, func};
+	})
+	.sort((a, b) => a.id > b.id ? 1 : -1)
+
+app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sanityChecks.map(s => s.id).map(i => app.log.colors.cyan(i)).join(', '));
+
+
+/**
+* Endpoint for basic server santity checks
+* This endpoint runs all /sanity/*.js scripts scripts (resolving promises) and only returns `"SANITY:OK"` if everything passes, otherwise errors are shown
+*/
+app.get(
+	'/api/sanity',
+	basicAuth((user, pass) => user == app.config.sanity.user && pass == app.config.sanity.pass),
+	// FIXME: Missing cache
+	(req, res) => {
+		res.type('text');
+
+		Promise.all(sanityChecks.map(s =>
+			Promise.resolve(s.func())
+				.then(m => `SANITY-PASS@${s.id}:${m || 'OK'}`)
+				.catch(e => `SANITY-FAIL@${s.id}:${e.toString()}`)
+		))
+			.then(results => {
+				var fail = results.some(r => typeof r == 'string' && r.startsWith('SANITY-FAIL@'));
+
+				if (fail) res.status(500);
+
+				res.send(
+					(fail ? 'SANITY:FAIL\n' : 'SANITY:OK\n')
+					+ results.join('\n')
+				);
+			})
+			.catch(e => res.send(`SANITY:FAULT:${e.toString()}`)) // Generic fallback
+	}
+);
+</endpoint>
