@@ -1,0 +1,52 @@
+<server on="init, dbInit">
+var os = require('os');
+var exec = require('@momsfriendlydevco/exec');
+var readable = require('@momsfriendlydevco/readable');
+
+app.utils.sanity = {};
+
+
+/**
+* Check the diskspace (and other meta information) available at a given path
+* @param {string} path Path to retrieve information for
+* @param {number} [minPercent=10] Percentage minimum to accept before throwing
+* @returns {Promise<string>} Status of the disk
+*/
+app.utils.sanity.diskSpace = (path, minPercent = 10) => {
+	var platform = os.platform();
+
+	if (!['darwin', 'freebsd', 'linux', 'openbsd', 'sunos'].includes(platform)) {
+		app.log.warn('Cannot check diskspace on non Unix compatible systems');
+		return Promise.resolve();
+	}
+
+	return Promise.resolve()
+		.then(()=> exec([
+			'df',
+			path,
+		].filter(i => i), {buffer: true}))
+		.then(res => res.split('\n').slice(1)[0]) // Remove first line (headers)
+		.then(res => res.split(/\s+/)) // Split by whitespace
+		.then(res => { // Decipher df output based on OS
+			if (platform == 'darwin') {
+				[device, size, used, avail, usePercent, iUsePercent, iUseFree, iUsePercent, mounted] = res;
+			} else {
+				[device, size, used, avail, usePercent, mounted] = res;
+			}
+
+			return {device, size, used, avail, usePercent, mounted};
+		})
+		.then(data => {
+			data.usePercent = parseFloat(data.usePercent);
+			data.freePercent = 100 - data.usePercent;
+			return data;
+		})
+		.then(data => {
+			if (data.freePercent <= minPercent) {
+				return Promise.reject(`Only ${data.freePercent}% disk remaining - ${readable.fileSize(data.used)} / ${readable.fileSize(data.size)} @ ${data.usePercent}% used for ${path} mount point ${data.mounted}`);
+			} else {
+				return `${readable.fileSize(data.used)} / ${readable.fileSize(data.size)} @ ${data.freePercent}% free for ${path} mount point ${data.mounted}`;
+			}
+		});
+};
+</server>
