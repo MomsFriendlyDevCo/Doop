@@ -1,0 +1,59 @@
+<endpoint>
+var email = require('@momsfriendlydevco/email');
+
+/**
+* Accept a simple config for an existing user and try to reset their password
+* @param {Object} req.body.email The email address of the user to reset
+*/
+app.post('/api/session/recover', (req, res) => Promise.resolve()
+	// Sanity checks {{{
+	.then(()=> {
+		if (!app.config.session.recover.enabled) throw new Error('403: Password recovery is disabled');
+		if (!req.body) throw new Error('No credentials provided');
+		if (!req.body.email) throw new Error('400: No email address provided');
+	})
+	// }}}
+	// Generate signup token {{{
+	.then(user => user.setToken('recover').then(token => ({user, token})))
+	// }}}
+	// Dispatch signup email to user {{{
+	.then(({user, token}) => email().send({
+		to: user.email,
+		subject: `${app.config.title} - recover login`,
+		template: `${app.config.paths.root}/services/session/session.recover.email.html`,
+		templateParams: {
+			user,
+			config: app.config,
+			url: `${app.config.publicUrl}/go/recover/accept/${token}`,
+		},
+	}))
+	// }}}
+	// End {{{
+	.then(()=> res.sendStatus(200))
+	.catch(res.sendError)
+	// }}}
+);
+</endpoint>
+
+
+<endpoint>
+/**
+* Accept an recovery token
+* @param {string} req.params.token The token related to accept
+* @returns {Object} Redirect request to /
+*/
+app.get('/go/recover/accept/:token', (req, res) => {
+	app.db.users.findOne({
+		_token: req.params.token,
+		_tokenPurpose: 'recover', // Restrict the token usage to users requesting recovery only
+	})
+		.then(user => {
+			user.status = 'active';
+			return user.save();
+		})
+		.then(user => req.logIn(user).then(output => ({output, user})))
+		.then(({output, user}) => user.releaseToken().then(()=> output))
+		.then(output => res.redirect('/'))
+		.catch(()=> res.sendError(403, 'Recovery token invalid'))
+});
+</endpoint>

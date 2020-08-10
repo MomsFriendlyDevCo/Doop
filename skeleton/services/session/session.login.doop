@@ -41,21 +41,8 @@ app.post([
 			.then(()=> user)
 		)
 		// }}}
-		// Generate UUID {{{
-		.then(user => app.utils.uuid.generate().then(token => [user, token]))
-		// }}}
-		// Create cookie against user login {{{
-		.then(data => {
-			var [user, token] = data;
-
-			var output;
-			app.log('Successful login for', user.username || user.email);
-
-			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
-			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
-
-			return app.cache.set(app.config.session.cache.prefix + token, {_id: user._id}).then(()=> output);
-		})
+		// Perform the login {{{
+		.then(user => req.logIn(user))
 		// }}}
 		// End {{{
 		.then(output => res.format({

@@ -200,6 +200,12 @@ module.exports = {
 				// debug: true,
 			},
 		},
+		recover: {
+			enabled: true,
+		},
+		signup: {
+			enabled: true,
+		},
 	},
 	ssl: {
 		enabled: false,

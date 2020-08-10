@@ -228,7 +228,7 @@ module.exports = function() {
 	/**
 	* Attempt to log in the user
 	* @param {Object} user The user object to login
-	* @param {string} user.username The username to login
+	* @param {string} user.email The username / email to login
 	* @param {string} user.password The password to login
 	* @return {Promise} The promise object for the server request
 	*/
@@ -258,6 +258,25 @@ module.exports = function() {
 		.then(()=> this.$http.post('/api/session/logout'))
 		.then(()=> window.location.reload())
 		.finally(()=> Vue.services().$loader.stop('$session.logout'))
+
+
+	/**
+	* Attempt to sign up a new user
+	* @param {Object} user The user object to create
+	* @param {string} user.email The email address to create
+	* @param {string} user.password The password to create
+	* @return {Promise} The promise object for the server request
+	*/
+	$session.signup = user => Promise.resolve()
+		// Sanity checks {{{
+		.then(()=> {
+			if (!user) throw new Error('No user details provided');
+			if (!user.email) throw new Error('Email address required');
+			if (!user.password) throw new Error('Password required');
+		})
+		// }}}
+		.then(()=> Vue.services().$http.post('/api/session/signup', user))
+		.finally(()=> Vue.services().$loader.stop('$session.login'))
 
 
 	// $session.permissions - mirror or app.utils.permissions {{{

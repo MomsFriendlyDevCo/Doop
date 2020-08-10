@@ -49,12 +49,12 @@ app.post('/api/session/invite', (req, res) => {
 		// Dispatch invite email {{{
 		.then(token => email().send({
 			to: session.user.email,
-			subject: `You have been invited to ${app.config.name}`,
+			subject: `You have been invited to ${app.config.title}`,
 			template: `${app.config.paths.root}/users/session.invite.email.html`,
 			templateParams: {
 				...session,
 				config: app.config,
-				url: `/go/invite/accept/${token}`,
+				url: `${app.config.publicUrl}/go/invite/accept/${token}`,
 			},
 		}))
 		// }}}
@@ -64,6 +64,7 @@ app.post('/api/session/invite', (req, res) => {
 		// }}}
 });
 </endpoint>
+
 
 <endpoint>
 /**
@@ -77,15 +78,12 @@ app.get('/go/invite/accept/:token', (req, res) => {
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
 	})
 		.then(user => {
-			console.log('Would accept token for user', user);
-			throw new Error('NOPE!');
+			user.status = 'active';
+			return user.save();
 		})
-		.then(user => new Promise((resolve, reject) => req.logIn(user, err => {
-			if (err) return reject(err);
-			resolve();
-		})))
-		.then(()=> req.user.releaseToken())
-		.then(()=> res.redirect('/'))
+		.then(user => req.logIn(user).then(output => ({output, user})))
+		.then(({output, user}) => user.releaseToken().then(()=> output))
+		.then(output => res.redirect('/'))
 		.catch(()=> res.sendError(403, 'Login token invalid'))
 });
 </endpoint>
