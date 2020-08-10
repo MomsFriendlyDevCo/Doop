@@ -1,6 +1,6 @@
 <component>
 module.exports = {
-	route: '/users/invite',
+	route: '/session/invite',
 	data() { return {
 		user: {
 			email: undefined,
@@ -11,7 +11,7 @@ module.exports = {
 		submit() {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
-				.then(()=> this.$http.post('/api/users/invite', this.user))
+				.then(()=> this.$http.post('/api/session/invite', this.user))
 				.then(()=> this.$toast.success(`Invite sent to ${this.user.name || this.user.email}`))
 				.then(res => this.$router.go(`/users/${res.data._id}`))
 				.catch(this.$toast.catch)

@@ -9,7 +9,7 @@ var email = require('@momsfriendlydevco/email');
 * @param {Object} [req.body.permissions] Optional permissions to set for the user against the project, only available if the current user has usersPromote
 * @returns {Object} The newly created user object consisting of `{_id}`
 */
-app.post('/api/users/invite', (req, res) => {
+app.post('/api/session/invite', (req, res) => {
 	var session = {user: undefined};
 
 	Promise.resolve()
@@ -32,6 +32,13 @@ app.post('/api/users/invite', (req, res) => {
 			return app.db.users.create({ // User not fund - create a new user with provided details
 				email: req.body.email,
 				name: req.body.name || req.body.email,
+				emails: [{
+					email: req.body.email,
+					quote: true,
+					invoice: true,
+					delivery: true,
+					newsletter: true,
+				}],
 			})
 		})
 		.then(user => session.user = user)
@@ -43,11 +50,11 @@ app.post('/api/users/invite', (req, res) => {
 		.then(token => email().send({
 			to: session.user.email,
 			subject: `You have been invited to ${app.config.name}`,
-			template: `${app.config.paths.root}/users/users.invite.email.html`,
+			template: `${app.config.paths.root}/users/session.invite.email.html`,
 			templateParams: {
 				...session,
 				config: app.config,
-				url: `/invite/accept/${token}`,
+				url: `/go/invite/accept/${token}`,
 			},
 		}))
 		// }}}
@@ -64,7 +71,7 @@ app.post('/api/users/invite', (req, res) => {
 * @param {string} req.params.token The token related to accept
 * @returns {Object} Redirect request to /
 */
-app.get('/invite/accept/:token', (req, res) => {
+app.get('/go/invite/accept/:token', (req, res) => {
 	app.db.users.findOne({
 		_token: req.params.token,
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
