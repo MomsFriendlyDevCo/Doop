@@ -202,7 +202,7 @@ app.middleware.db.search = (model, options) => {
 					.map(termRE => ({
 						[`${settings.path}.value`]: termRE,
 					}))
-					.thru(v => ({$or: v})) // Wrap multiple field checks in $or
+					.thru(v => _.isEmpty(v) ? {} : {$or: v}) // Wrap multiple field checks in $or
 					.value()
 				);
 
