@@ -9,14 +9,14 @@ set -euo pipefail
 echo "Requesting cert renewal via Certbot..."
 sudo certbot certonly \
 	--cert-name doop.mfdc.dev \
+        --webroot \
+        -w /var/www \
 	-d doop.mfdc.dev \
 	-d *.doop.mfdc.dev \
 	-m daemons@mfdc.biz \
 	--agree-tos \
 	--eff-email \
-	--manual-public-ip-logging-ok \
-	--dns-dnsmadeeasy \
-	--dns-dnsmadeeasy-credentials "$HOME/.dnsmadeeasy" \
+	--manual-public-ip-logging-ok
 
 
 echo "Reloading Nginx..."
