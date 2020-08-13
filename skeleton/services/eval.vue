@@ -46,7 +46,7 @@ module.exports = function() {
 
 
 	/**
-	* Attempt to savely evaluate a subject as a JSON object
+	* Attempt to safely evaluate a subject as a JSON object
 	* @param {string} subject Subject expression to evaluate
 	* @param {boolean} [wantObject=true] Allow object returns
 	* @param {boolean} [wantArray=true] Allow array returns

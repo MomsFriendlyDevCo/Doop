@@ -4,6 +4,13 @@ module.exports = function() {
 	$sitemap.$debugging = false;
 
 	// Raw sitemap (uncomputed) {{{
+	/**
+	* Sitemap layout
+	* @property {string} title Human readable title for each sitemap entry
+	* @property {string} href Href to redirect to
+	* @property {string} icon The icon class to use when displaying in the sidebar
+	* @property {function} [onNav] Function called as `(to, from)` when navigating to this link dynamically, can be used to check `this.$route` for existing params to copy them over. Return parameter can be a replacement route to naviate to as either a string or object
+	*/
 	$sitemap.map = [
 		{
 			title: 'Dashboard',
