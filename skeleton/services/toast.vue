@@ -87,7 +87,7 @@ module.exports = function() {
 		}
 
 		if (progress === 100) { // Destroy progress
-			if (!$toast._progress[id]) return; // Toast doesn't exist anyway
+			if (!$toast._progress[id] || !$toast._progress[id].snotify) return; // Toast doesn't exist anyway
 			var sid = $toast._progress[id].snotify.id;
 			setTimeout(()=> Snotify.remove(sid), $toast.settings.progressRemoveDelay);
 			delete $toast._progress[id];
