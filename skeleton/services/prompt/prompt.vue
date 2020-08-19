@@ -151,7 +151,7 @@ module.exports = function() {
 	* Display a dialog with various customisations
 	* This is the main $prompt worker - all the other $prompt.* functions are really just wrappers for this function
 	* @param {Object} options Dialog options to use
-	* @param {string} [options.title='Dialog'] The dialog title
+	* @param {string} [options.title='Dialog'] The dialog title, HTML is supported
 	* @param {string} [options.body=''] The dialog body (usually the message to display)
 	* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
 	* @param {string} [options.bodyHeader] Additional HTML to render above the main body area (this is always HTML rendered)
@@ -281,6 +281,7 @@ module.exports = function() {
 	* @param {boolean} [ok=false] Whether the dialog contents we're accepted - this is used to determine whether resolve/reject should be called on close
 	* @param {*} [payload] Payload to pass to resolve / reject handlers
 	* @emits $prompt.close Message to the promptHelper that it should close the dialog
+	* @returns {Promise} A promise object which resolves when the dialog has closed
 	*/
 	$prompt.close = (ok = false, payload) => {
 		if (!$prompt.settings) {
@@ -307,6 +308,8 @@ module.exports = function() {
 			$prompt.settings = $prompt.settingsNested.pop();
 			this.$debug('Pop $prompt session', $prompt.settings);
 		}
+
+		return Promise.resolve();
 	};
 
 
@@ -404,7 +407,7 @@ module.exports = {
 			<div v-if="isShowing" class="modal-dialog" :class="settings.modalClass">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title">{{settings.title}}</h4>
+						<h4 class="modal-title" v-html="settings.title"/>
 						<a class="close" @click="$prompt.close(false, 'cancel')"><i class="far fa-times fa-lg"/></a>
 					</div>
 					<div class="modal-body">
