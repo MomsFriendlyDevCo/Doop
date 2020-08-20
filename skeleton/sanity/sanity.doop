@@ -41,7 +41,7 @@ app.get(
 				.catch(e => `FAIL ${s.id} - ${e.toString()}`)
 		))
 			.then(results => {
-				var fail = results.some(r => typeof r == 'string' && r.startsWith('SANITY-FAIL@'));
+				var fail = results.some(r => typeof r == 'string' && r.startsWith('FAIL '));
 
 				if (fail) res.status(500);
 

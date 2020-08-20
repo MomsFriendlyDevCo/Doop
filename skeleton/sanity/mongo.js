@@ -6,4 +6,5 @@ var _ = require('lodash');
 
 module.exports = ()=> Promise.resolve()
 	.then(()=> db[_.get(app, 'config.sanity.mongo.collection', 'users')].count())
+	.then(count => count > 0 ? true : Promise.reject('user table is answering but no users found'))
 	.then(()=> 'Mongo is accessible')
