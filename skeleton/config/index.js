@@ -72,6 +72,46 @@ module.exports = {
 	dates: {
 		parseFormats: ['YYYY-MM-DD', 'D/M/YYYY', 'D/M/YYYY', 'D/M/YY', 'D/M'], // Array of formats to pass to moment(value, FORMATS) to parse dates
 	},
+	deploy: {
+		historyBookmark: 'deploy:mfdc:FIXME', // Reference to feed to app.git.historySinceBookmark() to get history since last deploy
+		actions: [ // Actions to run on `gulp preDeploy` + `gulp postDeploy`
+			/*
+			{ // Example Slack post
+				event: 'postDeploy',
+				type: 'slack',
+				token: 'FIXME:TOKEN',
+				channel: '#FIXME:CHANNEL',
+				username: 'FIXME:USERNAME',
+				body: ()=> (app, history) =>
+					`:zap: Deployed ${app.config.publicUrl} to \`${app.git.current.shortHash}\``
+					+ (history.length
+						? '\n' + history
+							.map(h =>
+								`:black_small_square: \`${h.shortHash}\` (${h.committer}) - ${h.subject}`
+							)
+							.join('\n')
+						: ''
+					)
+			},
+			*/
+			/* // Example Freedcamp post
+			{
+				event: 'postDeploy',
+				type: 'freedcamp',
+				secret: 'FIXME:FC-SECRET',
+				apiKey: 'FIXME:FC-APIKEY',
+				projectId: 'FIXME:PROJECTID',
+				subject: ()=> (app, history) => `DEPLOY: ${app.config.publicUrl} to "${app.git.current.release}" (${app.git.current.shortHash})`,
+				body: ()=> (app, history) =>
+					`<p>The server <a href="${app.config.publicUrl}" target="_blank">${app.config.publicUrl}</a> has been deployed to "${app.git.current.release}" (hash <code>${app.git.current.shortHash}</code>)</p>`
+					+ '<ul>'
+						+ history.map(h => `<li><code>${h.shortHash}</code> - ${h.subject}</li>`).join('\n')
+					+ '</ul>',
+				notify: [], // RegExp matches of users who should be notified
+			},
+			*/
+		],
+	},
 	email: {
 		enabled: true,
 		method: 'mailgun',
