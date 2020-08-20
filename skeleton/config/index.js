@@ -139,9 +139,6 @@ module.exports = {
 		watchModulesInclude: [], // Additional globs to count as modules when `watchModules` is enabled
 		watchVendors: false,
 		fontGlob: '*.{css,eot,svg,ttf,woff,woff2}', // Fonts to cache internally, can be tweaked by Cordova or other build process
-		slack: [
-			// Slack boards to call during deploy stages, each should conform to {event: ['postDeploy'], token, channel, username, body} body is a function called as (app)
-		],
 	},
 	layout: {
 		headInject: [ // Aditional HTML compliant content to inject into the page header (line feeds added automatically)
