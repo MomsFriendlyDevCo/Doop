@@ -94,6 +94,7 @@ global.app = {
 						_.set(total, key, // Set the key, accepting various shorthand boolean values
 							val === 'true' ? true
 							: val === 'false' ? false
+							: isFinite(val) ? +val
 							: val
 						);
 					} else {
