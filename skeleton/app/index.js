@@ -34,7 +34,7 @@ global.app = {
 	},
 
 	refresh: {
-		log: ()=> {
+		log(console) {
 			app.log = function(...msg) {
 				if (this.id || app.log.forceId) {
 					console.log.apply(this, [app.log.colors.blue(`[${this.id || app.log.forceId}]`)].concat(msg));
@@ -191,7 +191,7 @@ global.app = {
 };
 // }}}
 // Setup initial logging (likely to be called again later or overridden) {{{
-app.refresh.log();
+app.refresh.log(console);
 // }}}
 // Bootstrap {{{
 app.configLoad = app.log.wrap('config', app.configLoad);

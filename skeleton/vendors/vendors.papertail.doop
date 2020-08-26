@@ -48,8 +48,8 @@ console.info = console.log;
 console.warn = (...msg) => logger.log('warn', msg.join(' '));
 console.error = (...msg) => logger.log('error', msg.join(' '));
 
-app.refresh.log(); // Reload main loggers
+app.refresh.log(console); // Reload main loggers
 
 // Add Papertrail if its enabled
-if (app.config.papertrail.enabled) app.log('Registered with Papertail as', app.log.colors.cyan(app.config.papertrail.hostname));
+if (app.config.papertrail.enabled) app.log('Registered with Papertail as', app.log.colors.cyan(app.config.papertrail.hostname), '/', app.log.colors.cyan(app.config.papertrail.program || 'no program'));
 </server>
