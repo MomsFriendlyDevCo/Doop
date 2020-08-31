@@ -1,0 +1,6 @@
+<server on="ready">
+/**
+* Middleware to transmit the 'ready' signal to PM2 to signal that the server is now listening
+*/
+if (process.send) process.send('ready');
+</server>
