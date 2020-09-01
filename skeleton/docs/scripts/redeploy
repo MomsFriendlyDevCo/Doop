@@ -36,10 +36,10 @@ fi
 
 if [[ `pm2 show doop-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
 	echo "Starting PM2 process for the first time..."
-	pm2 start --name 'doop-a' server/index.js -- -e production -o port=10001 -o papertrail.program=doop-a -o cache.cleanAuto=true
-	pm2 start --name 'doop-b' server/index.js -- -e production -o port=10002 -o papertrail.program=doop-b
-	pm2 start --name 'doop-c' server/index.js -- -e production -o port=10003 -o papertrail.program=doop-c
-	pm2 start --name 'doop-d' server/index.js -- -e production -o port=10004 -o papertrail.program=doop-d
+	pm2 start --name 'doop-a' --time server/index.js -- -e production -o port=10001 -o papertrail.program=doop-a -o cache.cleanAuto=true
+	pm2 start --name 'doop-b' --time server/index.js -- -e production -o port=10002 -o papertrail.program=doop-b
+	pm2 start --name 'doop-c' --time server/index.js -- -e production -o port=10003 -o papertrail.program=doop-c
+	pm2 start --name 'doop-d' --time server/index.js -- -e production -o port=10004 -o papertrail.program=doop-d
 else
 	echo "Rebooting PM2 process..."
 	pm2 restart --wait-ready --listen-timeout=10000 doop-a doop-b doop-c doop-d
