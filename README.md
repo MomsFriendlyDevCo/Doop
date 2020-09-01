@@ -16,13 +16,6 @@ Basic principles:
 * Doop units are designed to be as generic and transferable between projects as possible
 
 
-References:
-
-* [Doop back-end reference](BACKEND.md)
-* [Doop front-end reference](FRONTEND.md)
-* [Doop command-line interface](https://github.com/MomsFriendlyDevCo/doop-cli)
-
-
 Terminology:
 
 * The Doop documentation endeavour to use requirement levels that abide by the definitions specified by [RFC 2119 (Requirement Levels)](http://www.ietf.org/rfc/rfc2119.txt)
