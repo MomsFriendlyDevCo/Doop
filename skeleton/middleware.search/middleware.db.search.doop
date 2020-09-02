@@ -18,6 +18,7 @@ var stringSplit = require('string-split-by');
 * @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
 * @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
 * @param {RegExp} [options.tagsRe] RegExp used to split tags
+* @param {boolean} [options.sort="_score"] Sort results by this field, defaults to the most relevent by score
 *
 * @param {array<Object>} [options.fields] Field definition for each item that should be indexed
 * @param {string} [options.fields.name] Optional reference name for the field, useful when debugging
@@ -68,6 +69,7 @@ app.middleware.db.search = (model, options) => {
 	// Settings {{{
 	var settings = {
 		path: '_searchTokens',
+		sort: '_score',
 		fields: [
 			// Use static path
 			// {path: 'lastName', weight: 10},
@@ -130,7 +132,7 @@ app.middleware.db.search = (model, options) => {
 	* @param {string} terms Search terms to filter
 	* @param {Object} [options] Additional options
 	* @param {Object} [options.filter] Additional Mongo compatible expression to filter on the database
-	* @param {boolean} [options.sort="_score"] Sort results by field automatically
+	* @param {boolean} [options.sort="_score"] Sort results by this field, defaults to the most relevent by score
 	* @param {function} [options.softFilter] Addtional "soft" filter to apply, added after the main settings.docFilter, called as `(next, doc)`
 	* @param {function} [options.limit=100] How many records to "soft" limit by
 	* @param {function} [options.skip=0] How many records to "soft" skip by
@@ -143,10 +145,10 @@ app.middleware.db.search = (model, options) => {
 	* @returns {array<Object>} An array of matching documents with the meta `_score` field
 	*/
 	model.search = function(terms, options) {
+		var searchStart = Date.now();
 		var searchSettings = {
 			filter: undefined,
 			softFilter: (next, doc) => next(null, true),
-			sort: '_score',
 			limit: 50,
 			skip: 0,
 			select: undefined,
@@ -194,7 +196,8 @@ app.middleware.db.search = (model, options) => {
 				.map((v, k) => app.log.colors.cyan.bold(k) + ':' + app.log.colors.cyan(v))
 				.thru(v => v.length > 0 ? v.join(', ') : app.log.colors.grey('none'))
 				.value(),
-			settings.wholeTerm ? '(whole term mode)' : '(word split mode)',
+			searchSettings.limit || searchSettings.skip ? `limit=${searchSettings.limit}, skip=${searchSettings.skip}` : app.log.colors.yellow('no limit/skip'),
+			searchSettings.wholeTerm ? '(whole term mode)' : '(word split mode)',
 		);
 
 		return new Promise((resolve, reject) => {
@@ -204,9 +207,11 @@ app.middleware.db.search = (model, options) => {
 					}))
 					.thru(v => _.isEmpty(v) ? {} : {$or: v}) // Wrap multiple field checks in $or
 					.value()
-				);
+				)
+				.limit(searchSettings.limit)
+				.skip(searchSettings.skip)
 
-			// Include tag mongo filters if there are any {{{
+			// Include mongo tag filters if there are any {{{
 			_.forEach(searchSettings.mergeTags, (val, tag) => {
 				if (!searchSettings.tags[tag]) return app.log.warn('No handler for tag', app.log.colors.cyan.bold(tag) + ':' + app.log.colors.cyan(val), '- skipping query filter');
 				if (_.isFunction(searchSettings.tags[tag])) {
@@ -257,9 +262,14 @@ app.middleware.db.search = (model, options) => {
 						.then(fieldScores => doc._score = fieldScores.reduce((t, v) => t + v, 0))
 						.then(()=> next(null, doc))
 				)
-				.thru((next, docs) => next(null, !searchSettings.count && searchSettings.sort ? _.sortBy(docs, searchSettings.sort) : docs)) // Sort by score
+				.thru((next, docs) => next(null,
+					!searchSettings.count && searchSettings.sort && /^(\+|[^\-])/.test(searchSettings.sort) ? _.sortBy(docs, searchSettings.sort) // Sort by criteria forwards
+					: !searchSettings.count && searchSettings.sort ? _.sortBy(docs, searchSettings.sort).reverse() // Sort by criteria backwards
+					: docs
+				))
 				.thru((next, docs) => next(null, !searchSettings.count && (searchSettings.skip || searchSettings.limit) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs))
 				.exec((err, items) => {
+					app.log((searchSettings.count ? 'Search-count' : 'Search') + ' complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
 					if (err) {
 						reject(err);
 					} else if (searchSettings.count) {
