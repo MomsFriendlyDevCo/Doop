@@ -196,14 +196,16 @@ app.middleware.db.search = (model, options) => {
 				.map((v, k) => app.log.colors.cyan.bold(k) + ':' + app.log.colors.cyan(v))
 				.thru(v => v.length > 0 ? v.join(', ') : app.log.colors.grey('none'))
 				.value(),
-			searchSettings.limit || searchSettings.skip ? `limit=${searchSettings.limit}, skip=${searchSettings.skip}` : app.log.colors.yellow('no limit/skip'),
+			searchSettings.count ? app.log.colors.gray('count mode')
+				: searchSettings.limit || searchSettings.skip ? `limit=${searchSettings.limit}, skip=${searchSettings.skip}`
+				: app.log.colors.yellow('no limit/skip'),
 			searchSettings.wholeTerm ? '(whole term mode)' : '(word split mode)',
 		);
 
 		return new Promise((resolve, reject) => {
 			var query = model.find(_.chain(termsRE) // Setup object query from TermsRE extracted RegExps
 					.map(termRE => ({
-						[`${settings.path}.value`]: termRE,
+						[`${searchSettings.path}.value`]: termRE,
 					}))
 					.thru(v => _.isEmpty(v) ? {} : {$or: v}) // Wrap multiple field checks in $or
 					.value()
@@ -222,15 +224,30 @@ app.middleware.db.search = (model, options) => {
 			});
 			// }}}
 
+			// If we can optimise counting records (all Mongo filters, no soft filters) do that and return the simple total {{{
+			if (
+				searchSettings.count // In count mode
+				&& _.isEmpty(searchSettings.softFilter) // No global soft filters
+				&& _.chain(searchSettings.mergeTags) // No soft filters per tag
+					.some((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter))
+					.isEmpty()
+					.value()
+			) {
+				query.query.$count = true;
+				return query.then(resolve)
+			}
+			// }}}
+
+
 			query
 				.find(searchSettings.filter) // Apply other filters
 				.select(
-					settings.count ? '_id' // Only pick the _id if we're in count mode to save memory
-					: settings.select ? settings.select.split(',') // Otherwise assume settings.select is a CSV
+					searchSettings.count ? '_id' // Only pick the _id if we're in count mode to save memory
+					: searchSettings.select ? searchSettings.select.split(',') // Otherwise assume searchSettings.select is a CSV
 					: searchSettings.select ? searchSettings.select.split(',') // or fall back to main search setting
 					: undefined
 				)
-				// .filter(searchSettings.softFilter) // Apply soft filters
+				.filter(searchSettings.softFilter) // Apply soft filters
 				.filter(function(cb, doc) { // Handle Monoxide "soft" filters if there are any
 					_.chain(searchSettings.mergeTags)
 						.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
@@ -251,7 +268,7 @@ app.middleware.db.search = (model, options) => {
 				})
 				.map((next, doc) => // Remap each found doc...
 					!searchSettings.count ? next(null, doc) // We dont need to do any document mangling for count operations
-					: Promise.all(settings.fields.map((field, fieldIndex) =>
+					: Promise.all(searchSettings.fields.map((field, fieldIndex) =>
 						Promise.resolve(
 							field.path ? _.get(doc, field.path)
 							: field.handler ? field.handler(doc)
