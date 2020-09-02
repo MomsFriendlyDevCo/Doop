@@ -57,10 +57,10 @@ var logger = winston.createLogger({
 Object.assign(console, {
 	isWinston: true,
 	logRaw: console.log,
-	log: (...msg) => logger.log('info', msg.join(' ')),
-	info: console.log,
-	warn: (...msg) => logger.log('warn', msg.join(' ')),
-	error: (...msg) => logger.log('error', msg.join(' ')),
+	log: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	info: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	warn: (...msg) => logger.log('warn', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	error: (...msg) => logger.log('error', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
 });
 
 app.refresh.log(); // Reload main loggers
