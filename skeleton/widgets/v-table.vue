@@ -290,7 +290,13 @@ module.exports = {
 					<slot name="table-footer-center"/>
 					<slot name="table-footer-right">
 						<div class="text-muted">
-							Displaying {{entity}} {{limit * endpointPage + 1}} - {{Math.min(rowCount, limit * (endpointPage + 1))}} of {{rowCount}}
+							Displaying
+							{{entity}}
+							{{limit * (endpointPage-1) + 1 | number}}
+							-
+							{{Math.min(rowCount, limit * (endpointPage)) | number}}
+							of
+							{{rowCount | number}}
 						</div>
 					</slot>
 				</div>
