@@ -20,6 +20,7 @@
 *
 * @param {array<Object>} columns Column definition
 * @param {string} columns.id ID of a specific column, used as the field name in dotted notation, must be unique
+* @param {string} columns.slot The name of the Vue slot to map to the column (since Vue stuggles with dotted notation in names), defaults to camelCase
 * @param {string} [column.title] Title of the column, if omitted the ID via _.startCase is used
 * @param {string} [column.type] Optional columnType behaviour to inherit
 * @param {boolean} [column.sortable=false] Whether the column can be sorted
@@ -246,7 +247,7 @@ module.exports = {
 					<tr v-for="row in rows" :key="row[rowKey]">
 						<td v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
 							<a v-href="cellHref ? cellHref(row) : false">
-								<slot :name="col.id" :row="row">
+								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
 									{{_.get(row, col.id)}}
 								</slot>
 							</a>
