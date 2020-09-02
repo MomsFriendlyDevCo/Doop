@@ -26,6 +26,8 @@ global.app = {
 	config: {}, // Loaded in next step
 	db: {}, // DB stub - gets populate when the driver is loaded
 
+	logger: console, // Console output stub, replaced by Winston or something else later
+
 	// Stub structures which get populated out by event handlers later
 	middleware: {
 		business: {},
@@ -34,7 +36,7 @@ global.app = {
 	},
 
 	refresh: {
-		log(console) {
+		log() {
 			app.log = function(...msg) {
 				if (this.id || app.log.forceId) {
 					console.log.apply(this, [app.log.colors.blue(`[${this.id || app.log.forceId}]`)].concat(msg));
