@@ -13,8 +13,8 @@ gulp.task('search.reindex', 'load:app.db', ()=> {
 			app.db[model].find()
 				.forEach((next, doc) => {
 					gulp.log('Reindex', gulp.colors.cyan(model), '/', gulp.colors.cyan(`#${doc._id}`));
-					doc.save(next);
 					reindexed++;
+					doc.save(next);
 				})
 				.exec(err => err ? reject(err) : resolve())
 		))

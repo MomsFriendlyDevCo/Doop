@@ -23,7 +23,7 @@ var stringSplit = require('string-split-by');
 * @param {array<Object>} [options.fields] Field definition for each item that should be indexed
 * @param {string} [options.fields.name] Optional reference name for the field, useful when debugging
 * @param {string} [options.fields.path] Dotted notation path from where the value should be fetch if its a simple non-lookup value, can use either this or `option.fields.handler`
-* @param {function} [options.fields.handler] Function called as `(doc)` which is expected to return a single string to index, can use either this or `option.fields.path`
+* @param {function} [options.fields.handler] Function called as `(doc)` which is expected to return a single string to index, can use either this or `option.fields.path`, if the return is an object of the form `{mutate: false, value: Any}` the value is used as is and will not be run via mutateTokens before storage
 * @param {number} [options.fields.weight=1] Weighting during search
 *
 * @param {Object<function>|Object<Object>} [options.tags] Define custom tag behaviour, tag keys are always lower case. If value is a function it is assumed to populate the `mongo` property.
@@ -115,8 +115,15 @@ app.middleware.db.search = (model, options) => {
 				.then(value => ({value, weight: field.weight || 1}))
 			: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
 		))
-			.then(tokens => tokens.map(token => ({...token, value: settings.mutateTokens(token.value, settings)}))) // Mutate tokens
+			.then(tokens => tokens.map(token => ({ // Mutate tokens (by default or if of the form `{mutate: true, value: Any}`)
+				...token,
+				value:
+					_.isPlainObject(token.value) && token.mutate ? settings.mutateTokens(token.value.value, settings) // Returned object with mutation enabled
+					: _.isPlainObject(token.value) ? token.value.value // Returned object response with instrutions not to mutate
+					: settings.mutateTokens(token.value, settings),
+			})))
 			.then(tokens => tokens.filter(token => token.value)) // Remove falsy tokens
+			.then(tokens => _.uniqBy(tokens, 'value')) // Remove duplicates (of lower weights)
 			.then(tokens => _.set(doc, settings.path, tokens))
 			.then(()=> done())
 	};
