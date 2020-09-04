@@ -27,7 +27,7 @@
 	left: 300px;
 }
 
-.btn-group-float > .btn {
+.btn-group-float .btn {
 	font-size: 12pt;
 	padding: 15px;
 	width: 55px;
@@ -38,14 +38,14 @@
 	align-items: center;
 }
 
-.btn-group-float > .btn.btn-sm {
+.btn-group-float .btn.btn-sm {
 	font-size: 12pt;
 	padding: 10px;
 	height: 40px;
 	width: 40px;
 }
 
-.btn-group-float > .btn.btn-lg {
+.btn-group-float .btn.btn-lg {
 	font-size: 16pt;
 	padding: 16px;
 	width: 70px;
@@ -53,8 +53,8 @@
 }
 
 /* Nudge large 'Save' buttons into the shoulder of smaller delete buttons */
-.btn-group-float > .btn.btn-sm.btn-danger + .btn.btn-lg.btn-success,
-.btn-group-float > .btn.btn-sm.btn-secondary + .btn.btn-lg.btn-success {
+.btn-group-float .btn.btn-sm.btn-danger + .btn.btn-lg.btn-success,
+.btn-group-float .btn.btn-sm.btn-secondary + .btn.btn-lg.btn-success {
 	margin-left: -10px;
 }
 
@@ -71,11 +71,11 @@ body.loading .btn-group-float {
 /* }}} */
 
 /* Shadowing (mainly fixes with .waves-circle) {{{ */
-.btn-group-float > .btn {
+.btn-group-float .btn {
 	box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.5) !important;
 }
 
-.btn-group-float > .btn.waves-circle {
+.btn-group-float .btn.waves-circle {
 	-webkit-mask-image: none !important;
 }
 /* }}} */
@@ -89,12 +89,12 @@ body.loading .btn-group-float {
 /* }}} */
 
 /* Nudge smaller buttons slightly behind larger ones {{{ */
-.btn-group-float > .btn.btn-sm {
-	margin-right: -15px;
+.btn-group-float .btn.btn-sm {
+	margin-right: -10px;
 	transition: margin-right 0.4s ease-out, padding 0.4s ease-out;
 }
 
-.btn-group-float > .btn.btn-sm:hover {
+.btn-group-float .btn.btn-sm:hover {
 	margin-right: 2px;
 	padding: 25px;
 }
