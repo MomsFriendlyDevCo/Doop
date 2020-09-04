@@ -62,6 +62,9 @@ window.onload = ()=> {
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
 	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window
+	* @param {function} [before] Async function called as `(settings)` to wait for before performing the action
+	* @param {function} [after] Function called as `(settings)` after performing the action (since actions are pretty much instant async is ignored)
+	* @returns {Promise} A promise which will resolve when the navigation completes
 	*/
 	window.app.router.go = location => {
 		var settings = {
@@ -73,32 +76,39 @@ window.onload = ()=> {
 
 		Vue.services().$transitions.set(settings.transition);
 
-		if (settings.target == '_blank') {
-			if (_.isNumber(location.url)) throw new Error('History navigation with targets is not allowed');
-			console.log(`%cNew tab/window naviation to ${settings.url}`);
-			window.open(settings.url);
-		} else if (_.isFunction(settings.url)) {
-			console.log('%cNavigate to function', settings.url);
-			settings.url();
-		} else if (_.isNumber(location.url)) {
-			console.log(`%c$route.goHistory(${settings.url})`, 'color: #00F');
-			window.app.router.routeVersion++;
-			app.router._go(settings.url);
-		} else if (/^https?:\/\//.test(settings.url) || /\/go\//.test(settings.url)) {
-			console.log(`%cAbsolute redirection to ${settings.url}`);
-			window.location = settings.url;
-		} else if (app.router.currentRoute && app.router.currentRoute.fullPath == settings.url) {
-			if (settings.force) {
-				console.log(`%c$route.go('${settings.url}') (FORCED, same URL)`, 'color: #00F');
-				window.app.router.routeVersion++;
-				return app.router.push(settings.url);
-			} else {
-				console.log(`%c$route.go('${settings.url}') (skipped, same URL)`, 'color: #00F');
-			}
-		} else {
-			console.log(`%c$route.go('${settings.url}')`, 'color: #00F');
-			return app.router.push(settings.url);
-		}
+		return Promise.resolve()
+			.then(()=> settings.before ? settings.before(settings) : undefined)
+			// Open the link {{{
+			.then(()=> {
+				if (settings.target == '_blank') {
+					if (_.isNumber(location.url)) throw new Error('History navigation with targets is not allowed');
+					console.log(`%cNew tab/window naviation to ${settings.url}`);
+					window.open(settings.url);
+				} else if (_.isFunction(settings.url)) {
+					console.log('%cNavigate to function', settings.url);
+					settings.url();
+				} else if (_.isNumber(location.url)) {
+					console.log(`%c$route.goHistory(${settings.url})`, 'color: #00F');
+					window.app.router.routeVersion++;
+					app.router._go(settings.url);
+				} else if (/^https?:\/\//.test(settings.url) || /\/go\//.test(settings.url)) {
+					console.log(`%cAbsolute redirection to ${settings.url}`);
+					window.location = settings.url;
+				} else if (app.router.currentRoute && app.router.currentRoute.fullPath == settings.url) {
+					if (settings.force) {
+						console.log(`%c$route.go('${settings.url}') (FORCED, same URL)`, 'color: #00F');
+						window.app.router.routeVersion++;
+						return app.router.push(settings.url);
+					} else {
+						console.log(`%c$route.go('${settings.url}') (skipped, same URL)`, 'color: #00F');
+					}
+				} else {
+					console.log(`%c$route.go('${settings.url}')`, 'color: #00F');
+					return app.router.push(settings.url);
+				}
+			})
+			// }}}
+			.then(()=> settings.after ? settings.after(settings) : undefined)
 	};
 	// }}}
 
