@@ -15,51 +15,32 @@ app.use(cookieParser({
 *          3. Lookup full user object from Dynamo via user._id
 */
 app.use((req, res, next) => {
-	var lookupToken;
 	if (app.config.session.cookie.enabled && req.cookies && req.cookies[app.config.session.cookie.name]) { // Cookie mode
-		lookupToken = req.cookies[app.config.session.cookie.name];
+		app.cache.get(app.config.session.cache.prefix + req.cookies[app.config.session.cookie.name]) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
+			.then(session => session._id ? session : Promise.reject('Invalid session state'))
+			.then(session => app.db.users.findOneByID(session._id))
+			.then(user => user || Promise.reject('Invalid user ID'))
+			.then(user => req.user = user)
+			.then(()=> next())
+			.catch(()=> next()) // Ignore cache faults - probably expired user session or other cache fault
 	} else if (app.config.session.authHeader.enabled && req.headers.auth) { // 'Auth' header token method
-		lookupToken = req.headers.auth;
-	} else { // Either no method is enabled or no token / cookie has been provided
+		app.cache.get(app.config.session.cache.prefix + req.headers.auth) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
+			.then(session => session._id ? session : Promise.reject('Invalid session state'))
+			.then(session => app.db.users.findOneByID(session._id))
+			.then(user => user || Promise.reject('Invalid user ID'))
+			.then(user => req.user = user)
+			.then(()=> next())
+			.catch(()=> next())
+	} else if (app.config.session.apiKey.enabled && req.headers.apikey) { // 'apikey' header token method
+		Promise.resolve()
+			.then(()=> app.db.users.findOne({'apiKeys.key': req.headers.apiKey}))
+			.then(user => user || Promise.reject('Invalid API-Key'))
+			.then(user => req.user = user)
+			.then(()=> next())
+			.catch(()=> next())
+	} else { // Either no method is enabled or no token / cookie has been provided - req.user remains unpopulated
 		return next();
 	}
 
-	app.cache.get(app.config.session.cache.prefix + lookupToken) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
-		.then(session => session._id ? session : Promise.reject('Invalid session state'))
-		.then(session => app.db.users.findOneByID(session._id))
-		.then(user => user || Promise.reject('Invalid user ID'))
-		.then(user => req.user = user)
-		.then(()=> next()) // Defer to remaining Express middleware
-		.catch(()=> next()) // Ignore cache faults - probably expired user session or other cache fault
-
-
-	// Glue meta req.logIn method to req {{{
-	/**
-	* Login the current user session as the given user document
-	* This function assumes username + password || token validation has already taken place
-	* @param {Object} user The user document to log the current session in as
-	* @returns {Promise<Object>} A promise which will resolve when the user login has completed the result of this Promise should be sent to req.send()
-	*
-	* @example Find and login a user by a document
-	* db.users.findOne({username: 'admin')
-	*   .then(user => req.logIn(user))
-	*   .then(body => res.send(body))
-	*/
-	req.logIn = user => Promise.resolve()
-		// Generate UUID {{{
-		.then(()=> app.utils.uuid.generate().then(token => token))
-		// }}}
-		// Create cookie against user login {{{
-		.then(token => {
-			var output;
-			app.log('Successful login for', user.username || user.email);
-
-			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
-			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
-
-			return app.cache.set(app.config.session.cache.prefix + token, {_id: user._id}).then(()=> output);
-		})
-		// }}}
-	// }}}
 });
 </server>

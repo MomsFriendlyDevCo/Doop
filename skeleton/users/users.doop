@@ -15,6 +15,9 @@ var Users = app.middleware.db.schema('users', {
 	company: {type: 'pointer', ref: 'companies', index: true}, // FIXME: Is this used?
 	settings: {
 	},
+	apiKeys: [{
+		key: {type: 'string'},
+	}],
 	permissions: {
 		debug: {type: 'boolean', default: false},
 		companiesEdit: {type: 'boolean', default: false},

@@ -223,6 +223,9 @@ module.exports = {
 		authHeader: {
 			enabled: true, // Support 'auth' header token method in backend
 		},
+		apiKey: {
+			enabled: false, // Support 'apikey' header token method in backend (case insensitive)
+		},
 		cache: {
 			prefix: 'session-',
 		},
