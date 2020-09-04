@@ -9,15 +9,18 @@ gulp.task('search.reindex', 'load:app.db', ()=> {
 
 	return Promise.all(Object.keys(app.db)
 		.filter(model => _.isFunction(app.db[model].search)) // Has search attached to the model
-		.map(model => new Promise((resolve, reject) =>
-			app.db[model].find()
-				.forEach((next, doc) => {
-					gulp.log('Reindex', gulp.colors.cyan(model), '/', gulp.colors.cyan(`#${doc._id}`));
-					reindexed++;
-					doc.save(next);
-				})
-				.exec(err => err ? reject(err) : resolve())
-		))
+		.map(model => new Promise((resolve, reject) => {
+			var docNumber = 0;
+			app.db[model].count()
+				.then(totalDocs => app.db[model].find()
+					.forEach((next, doc) => {
+						gulp.log('Reindex', gulp.colors.cyan(model), '/', gulp.colors.cyan(`#${doc._id}`), gulp.colors.gray(`${docNumber} / ${totalDocs} ~ ${Math.round(++docNumber / totalDocs * 100)}%`));
+						reindexed++;
+						doc.save(next);
+					})
+					.exec(err => err ? reject(err) : resolve())
+				)
+		}))
 	)
 		.then(()=> gulp.log('Reindex complete. Processed', gulp.colors.cyan(reindexed), 'documents'));
 });
