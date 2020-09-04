@@ -3,6 +3,11 @@
 * Overload `v-href` to act like `<router-link/>` for regular elements and also help with table rows
 * NOTE: This directive uses $router.go() behind the scenes so see its API definition on what you can pass as an object
 *
+* @param {string|number|Object|function} location The URL to navigate to or the number of steps forward / backward to navigate, if this is a function it is executed inline
+* @see go() for other parameters
+* @param {boolean} [stop=true] Fire event.stopPropagation() on click
+* @param {boolean} [prevent=true] Fire event.preventDefault() on click, disabling this will likely cause the link to be clicked twice
+*
 * @example Make <a/> tags act like `<router-link/>`
 * <a v-href="'/link/to/somewhere'">Text</a>
 *
@@ -20,11 +25,9 @@
 module.exports = {
 	bind(el, binding) {
 		var settings = {
-			...(typeof binding.value == 'object' ? binding.value : null),
-			href:
-				typeof binding.value == 'string' ? binding.value
-				: binding.value ? binding.value.href
-				: null,
+			stop: true,
+			prevent: true,
+			...(typeof binding.value == 'string' ? {href: binding.value} : binding.value),
 		};
 
 		if (settings.url) {
@@ -43,8 +46,8 @@ module.exports = {
 				if (!$el.hasClass('v-href')) {
 					$el.addClass('v-href');
 					$el[0].addEventListener('click', e => {
-						e.preventDefault();
-						e.stopPropagation();
+						if (settings.prevent) e.preventDefault();
+						if (settings.stop) e.stopPropagation();
 						app.router.go(settings);
 					});
 				}
@@ -61,7 +64,7 @@ module.exports = {
 					$td
 						.addClass('clickable')
 						.on('click', 'a', e => {
-							e.preventDefault();
+							if (settings.prevent) e.preventDefault();
 							app.router.go(settings);
 						})
 				});
