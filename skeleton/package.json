@@ -18,8 +18,9 @@
     "url": "https://github.com/MomsFriendlyDevCo/{{FIXME:repoBasename}}/issues"
   },
   "homepage": "https://github.com/MomsFriendlyDevCo/{{FIXME:repoBasename}}#readme",
+  "engineStrict" : true,
   "engines": {
-    "node": "12.16.2"
+    "node": ">=14.8.0"
   },
   "dependencies": {
     "@babel/core": "^7.10.1",

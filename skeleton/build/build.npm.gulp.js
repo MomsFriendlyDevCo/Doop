@@ -61,11 +61,16 @@ gulp.task('npm.update', ['load:app', 'load:app.git'], ()=> {
 });
 
 
-gulp.task('npm.engineCheck', ['load:app'], done => {
-	var needVersion = require(`${app.config.paths.root}/package.json`).engines.node;
+gulp.task('npm.engineCheck', ['load:app'], ()=> {
+	var package = require(`${app.config.paths.root}/package.json`);
+	var hasVersion = process.version;
+	var needVersion = package.engines.node;
 
-	if (!semver.satisfies(process.version, needVersion)) {
-		gulp.log(gulp.colors.yellow('WARNING'), 'Recommended Node version is', gulp.colors.bold.blue(needVersion) + '.', 'Current Node version is', gulp.colors.bold.blue(process.version), '- while things may work its recommended you update');
+	if (!semver.satisfies(hasVersion, needVersion)) {
+		if (package.engineStrict) {
+			gulp.log(gulp.colors.red.bold('DANGER'), 'Required Node engine spec is', gulp.colors.bold.blue(needVersion) + '.', 'Current Node version is', gulp.colors.bold.blue(hasVersion), '- things are likely to break!');
+		} else {
+			gulp.log(gulp.colors.yellow('WARNING'), 'Recommended Node engine spec is', gulp.colors.bold.blue(needVersion) + '.', 'Current Node version is', gulp.colors.bold.blue(hasVersion), '- while things may work, its recommended you update');
+		}
 	}
-	done();
 });
