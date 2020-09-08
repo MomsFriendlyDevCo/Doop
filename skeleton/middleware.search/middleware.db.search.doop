@@ -241,7 +241,9 @@ app.middleware.db.search = (model, options) => {
 					.value()
 			) {
 				query.query.$count = true;
-				return query.then(resolve)
+				return query
+					.find(searchSettings.filter) // Apply other filters
+					.then(resolve)
 			}
 			// }}}
 
