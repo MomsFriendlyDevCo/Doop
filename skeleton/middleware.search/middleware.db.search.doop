@@ -18,7 +18,8 @@ var stringSplit = require('string-split-by');
 * @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
 * @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
 * @param {RegExp} [options.tagsRe] RegExp used to split tags
-* @param {boolean} [options.sort="_score"] Sort results by this field, defaults to the most relevent by score
+* @param {string} [options.sort="_score"] Sort results by this field (use the '-' prefix to reverse sort)
+* @param {string} [options.softSort] Soft sort results by this field (slower as its sorted in memory, use the '-' prefix to reverse sort)
 *
 * @param {array<Object>} [options.fields] Field definition for each item that should be indexed
 * @param {string} [options.fields.name] Optional reference name for the field, useful when debugging
@@ -139,7 +140,8 @@ app.middleware.db.search = (model, options) => {
 	* @param {string} terms Search terms to filter
 	* @param {Object} [options] Additional options
 	* @param {Object} [options.filter] Additional Mongo compatible expression to filter on the database
-	* @param {boolean} [options.sort="_score"] Sort results by this field, defaults to the most relevent by score
+	* @param {string} [options.sort="_score"] Sort results by this field (use the '-' prefix to reverse sort)
+	* @param {string} [options.softSort] Soft sort results by this field (slower as its sorted in memory, use the '-' prefix to reverse sort)
 	* @param {function} [options.softFilter] Addtional "soft" filter to apply, added after the main settings.docFilter, called as `(next, doc)`
 	* @param {function} [options.limit=100] How many records to "soft" limit by
 	* @param {function} [options.skip=0] How many records to "soft" skip by
@@ -161,6 +163,8 @@ app.middleware.db.search = (model, options) => {
 			select: undefined,
 			count: false,
 			wholeTerm: false,
+			sort: '_score',
+			softSort: undefined,
 			..._.cloneDeep(settings),
 			...options,
 		};
@@ -219,6 +223,7 @@ app.middleware.db.search = (model, options) => {
 				)
 				.limit(searchSettings.limit)
 				.skip(searchSettings.skip)
+				.sort(searchSettings.sort)
 
 			// Include mongo tag filters if there are any {{{
 			_.forEach(searchSettings.mergeTags, (val, tag) => {
@@ -289,8 +294,8 @@ app.middleware.db.search = (model, options) => {
 						.then(()=> next(null, doc))
 				)
 				.thru((next, docs) => next(null,
-					!searchSettings.count && searchSettings.sort && /^(\+|[^\-])/.test(searchSettings.sort) ? _.sortBy(docs, searchSettings.sort) // Sort by criteria forwards
-					: !searchSettings.count && searchSettings.sort ? _.sortBy(docs, searchSettings.sort).reverse() // Sort by criteria backwards
+					!searchSettings.count && searchSettings.softSort && /^(\+|[^\-])/.test(searchSettings.softSort) ? _.sortBy(docs, searchSettings.softSort) // Sort by criteria forwards
+					: !searchSettings.count && searchSettings.softSort ? _.sortBy(docs, searchSettings.sort).reverse() // Sort by criteria backwards
 					: docs
 				))
 				.thru((next, docs) => next(null, !searchSettings.count && (searchSettings.skip || searchSettings.limit) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs))
