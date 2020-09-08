@@ -8,6 +8,7 @@
 * @param {number} [limit=30] How many records to show per page
 *
 * @param {boolean|function} [showSearch=true] Show the search interface
+* @param {boolean} [autoScroll=true] Scroll to the top of the table on refresh
 *
 * @param {boolean|function} [cellHref=false] If a function is specified its called as `(row)` per row to determine a `v-href` compatible per-cell link
 * @param {string} [rowKey="_id"] Key to use when looping over data to ensure minimal DOM re-rendering
@@ -30,6 +31,8 @@
 *
 * @param {string|array|Object} [tableClass="table"] CSS classes to add to the <table/> element
 *
+* @slot olverlay-loading Slot template to display if over the top of existing data when refreshing
+* @slot state-init Slot template to display (briefly) when the table is bootstrapping
 * @slot state-loading Slot template to display if table data is being loaded
 * @slot state-empty Slot template to display if no data is found to display in the table
 * @slot table-header Slot to template as the header area - wraps pagination and item counts
@@ -50,6 +53,7 @@ module.exports = {
 		rows: undefined,
 		rowCount: undefined,
 		pages: undefined, // Number of pages based on rowCount
+		reloadCount: 0, // Number of times we've reloaded, really just used to figure out if this is the first hit
 
 		endpointFilters: {},
 		endpointSearch: '',
@@ -77,6 +81,7 @@ module.exports = {
 		}}}, /* }}} */
 
 		showSearch: {type: Boolean, default: true},
+		autoScroll: {type: Boolean, default: true},
 
 		cellHref: {type: [Boolean, Function], default: false},
 		rowKey: {type: String, default: '_id'},
@@ -95,7 +100,7 @@ module.exports = {
 		* @returns {Promise} A promise which will resolve when the table has finished loading
 		*/
 		refresh() {
-			this.$debug('Refresh', this.url);
+			this.$debug('Refresh', this.reloadCount, this.url);
 			if (this.state == 'loading') return; // Already refreshing
 			if (!this.url) return this.$debug('Skipping refresh due to falsy URL'); // No URL available yet, URL is probably dynamic - do nothing
 			if (_.isPlainObject(this.url) && !this.url.url) throw new Error('No "url" key provided in v-table object');
@@ -104,6 +109,12 @@ module.exports = {
 			if (this.endpointSortAsc === undefined) this.endpointSortAsc = this.sortAsc;
 
 			return Promise.resolve()
+				.then(()=> {
+					if (this.reloadCount > 0) {
+						var vtBody = $(this.$el).find('.v-table-body');
+						vtBody.css('height', vtBody.height() + 'px'); // Force CSS height of table to lock
+					}
+				})
 				.then(()=> this.state = 'loading')
 				.then(()=> this.$loader.start(`v-table-${this._uid}`, this.loadForeground && !this.row.length))
 				.then(()=> _.merge( // Calculate Axios request object
@@ -154,6 +165,17 @@ module.exports = {
 					this.error = e;
 				})
 				.finally(()=> this.$loader.stop(`v-table-${this._uid}`))
+				.finally(()=> { // If its not the first time refreshing - reposition the table
+					if (this.reloadCount > 0 && this.autoScroll) {
+						$('html, body').animate({
+							scrollTop: $(this.$el).position().top
+						}, {
+							duration: 'slow',
+							queue: false,
+						})
+					}
+				})
+				.finally(()=> this.reloadCount++)
 		},
 
 
@@ -230,9 +252,21 @@ module.exports = {
 			</slot>
 		</div>
 		<!-- }}} -->
+		<!-- Body loading overlay {{{ -->
+		<slot v-if="state == 'loading'" name="overlay-loading">
+			<div class="v-table-overlay-loading text-center">
+				<div>
+					<i class="v-table-overlay-loading-spinner far fa-4x fa-spinner fa-spin"/>
+					<div class="v-table-overlay-loading-text ">
+						{{textLoading}}
+					</div>
+				</div>
+			</div>
+		</slot>
+		<!-- }}} -->
 		<!-- Body {{{ -->
-		<div :class="layout == 'card' && 'card-body'">
-			<table v-if="state == 'ready'" :class="tableClass">
+		<div class="v-table-body" :class="layout == 'card' && 'card-body'">
+			<table v-if="state == 'ready' || (state == 'loading' && rows && rows.length > 0)" :class="tableClass">
 				<thead>
 					<tr>
 						<th v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
@@ -258,22 +292,18 @@ module.exports = {
 				</tfoot>
 			</table>
 			<slot v-else-if="state == 'empty'" name="state-empty">
-				<div class="alert alert-warning">
+				<div class="v-table-state-empty alert alert-warning">
 					{{textEmpty}}
 				</div>
 			</slot>
-			<slot v-else-if="state == 'loading'" name="state-loading">
-				<div class="text-center">
-					<i class="far fa-spinner fa-spin"/>
-					{{textLoading}}
-				</div>
-			</slot>
+			<slot v-else-if="state == 'loading'" name="state-loading"/>
 			<slot v-else-if="state == 'error'" name="state-error">
-				<div class="alert alert-danger">
+				<div class="v-table-state-error alert alert-danger">
 					<h3>An error has occured</h3>
 					<pre>{{error}}</pre>
 				</div>
 			</slot>
+			<slot v-else-if="state == 'init'" name="state-init"/>
 			<div v-else class="alert alert-danger">Invalid state {{state}}</div>
 		</div>
 		<!-- }}} -->
@@ -308,6 +338,10 @@ module.exports = {
 </template>
 
 <style>
+.v-table {
+	min-height: 350px;
+}
+
 .v-table .v-table-footer {
 	display: flex;
 	justify-content: space-between;
@@ -316,5 +350,25 @@ module.exports = {
 
 .v-table .pagination {
 	margin-bottom: 0;
+}
+
+.v-table .v-table-overlay-loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	opacity: 0.7;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	right: 0px;
+	border: 0px;
+	background: var(--white);
+	z-index: 10;
+}
+
+.v-table .v-table-overlay-loading-spinner {
+	margin-bottom: 25px;
+	font-size: 120px;
 }
 </style>
