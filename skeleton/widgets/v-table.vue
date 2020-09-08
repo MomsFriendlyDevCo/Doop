@@ -9,6 +9,7 @@
 *
 * @param {boolean|function} [showSearch=true] Show the search interface
 * @param {boolean} [autoScroll=true] Scroll to the top of the table on refresh
+* @param {string|number} [autoScrollOffset=0] Autoscroll Y offset if it needs manually tweaking, strings are automaticaly converted to numbers
 *
 * @param {boolean|function} [cellHref=false] If a function is specified its called as `(row)` per row to determine a `v-href` compatible per-cell link
 * @param {string} [rowKey="_id"] Key to use when looping over data to ensure minimal DOM re-rendering
@@ -82,6 +83,7 @@ module.exports = {
 
 		showSearch: {type: Boolean, default: true},
 		autoScroll: {type: Boolean, default: true},
+		autoScrollOffset: {type: [Number, String], default: 0},
 
 		cellHref: {type: [Boolean, Function], default: false},
 		rowKey: {type: String, default: '_id'},
@@ -165,16 +167,6 @@ module.exports = {
 					this.error = e;
 				})
 				.finally(()=> this.$loader.stop(`v-table-${this._uid}`))
-				.finally(()=> { // If its not the first time refreshing - reposition the table
-					if (this.reloadCount > 0 && this.autoScroll) {
-						$('html, body').animate({
-							scrollTop: $(this.$el).position().top
-						}, {
-							duration: 'slow',
-							queue: false,
-						})
-					}
-				})
 				.finally(()=> this.reloadCount++)
 		},
 
@@ -221,6 +213,19 @@ module.exports = {
 		search(query) {
 			this.endpointSearch = query;
 			return this.refresh();
+		},
+
+
+		/**
+		* Scroll to the top of the table
+		*/
+		scrollIntoView() {
+			$('html, body').animate({
+				scrollTop: $(this.$el).position().top + +this.autoScrollOffset,
+			}, {
+				duration: 'slow',
+				queue: false,
+			});
 		},
 	},
 	created() {
@@ -315,7 +320,7 @@ module.exports = {
 						<pagination
 							:value="endpointPage"
 							:max="pages"
-							@change="setPage($event)"
+							@change="setPage($event).then(scrollIntoView)"
 						/>
 					</slot>
 					<slot name="table-footer-center"/>
