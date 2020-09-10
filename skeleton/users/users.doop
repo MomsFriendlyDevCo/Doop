@@ -161,8 +161,15 @@ Users.method('hasPermission', function(...permissions) {
 <endpoint>
 app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
-	get: app.middleware.express.isUser(),
-	query: app.middleware.express.isUser(),
+	get: [
+		(req, res, next) => {
+			req.query.select = '_id,username,name,email,emails,company,abn,billing,shipping,totalDiscount,minPayment'; // Force safe selection for Users
+			if (req.user.permissions.usersEdit) req.query.select += ',permissions'; // Can also edit other users permissions
+			next();
+		},
+		app.middleware.express.isUser(),
+	],
+	query: 'get',
 	count: app.middleware.express.isUser(),
 	create: false,
 	save: app.middleware.express.hasPermission('usersEdit'),
@@ -171,8 +178,5 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 		app.middleware.express.hasPermission('usersDelete'),
 		app.middleware.express.setDocStatus({collection: 'users', status: 'deleted'}),
 	],
-	queryForce: req => {
-		if (!req.user.permissions.usersEdit) return {select: '_id,username,name,email,company'};
-	},
 }));
 </endpoint>

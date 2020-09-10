@@ -57,10 +57,11 @@ module.exports = {
 		<!-- }}} -->
 
 		<!-- Card: Permissions {{{ -->
-		<div class="card" fixme="Should only be visible if user has project.members[].usersPromote">
+		<div v-if="$session.hasPermission('usersEdit')" class="card">
 			<div class="card-header">Permissions</div>
 			<div class="card-body">
 				<permissions
+					v-if="spec"
 					:selected="user.permissions"
 					:spec="spec"
 					spec-prefix="permissions."
