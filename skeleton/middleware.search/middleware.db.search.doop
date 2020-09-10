@@ -159,7 +159,9 @@ app.middleware.db.search = (model, options) => {
 			filter: undefined,
 			softFilter: (next, doc) => next(null, true),
 			limit: 50,
+			softLimit: undefined,
 			skip: 0,
+			softSkip: undefined,
 			select: undefined,
 			count: false,
 			wholeTerm: false,
@@ -298,7 +300,7 @@ app.middleware.db.search = (model, options) => {
 					: !searchSettings.count && searchSettings.softSort ? _.sortBy(docs, searchSettings.sort).reverse() // Sort by criteria backwards
 					: docs
 				))
-				.thru((next, docs) => next(null, !searchSettings.count && (searchSettings.skip || searchSettings.limit) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs))
+				.thru((next, docs) => next(null, !searchSettings.count && (searchSettings.softSkip || searchSettings.softLimit) ? docs.slice(searchSettings.softSkip, searchSettings.softSkip + searchSettings.softLimit) : docs))
 				.exec((err, items) => {
 					app.log((searchSettings.count ? 'Search-count' : 'Search') + ' complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
 					if (err) {
