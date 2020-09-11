@@ -41,7 +41,7 @@ module.exports = {
 			ref="logTable"
 			:url="`/api/logs?col=${$props.collection}&doc=${$props.id}`"
 			sort="created"
-			sort-asc="false"
+			:sort-asc="false"
 			entity="logs"
 			:show-search="false"
 			:columns="[
