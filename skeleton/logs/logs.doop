@@ -5,10 +5,10 @@
 *
 * Body elements should wrap simple classes in span elements
 * Inserts: {body: 'Order created'}
-* Changes: {body: 'Status changed<span class="from">Foo</span><span class="to">Bar</span>'
+* Changes: {body: 'Status changed<code>Foo</code> to <code>Bar</code>'
 */
 app.middleware.db.schema('logs', {
-	created: {type: Date, default: Date.now, index: true},
+	created: {type: Date, default: ()=> new Date(), index: true},
 	creator: {type: 'pointer', ref: 'users', index: true},
 	col: {type: 'string'},
 	doc: {type: 'pointer', ref: 'users'},

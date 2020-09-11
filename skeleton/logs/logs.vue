@@ -40,11 +40,16 @@ module.exports = {
 		<v-table
 			ref="logTable"
 			:url="`/api/logs?col=${$props.collection}&doc=${$props.id}`"
+			sort="created"
+			sort-asc="false"
+			entity="logs"
+			:show-search="false"
 			:columns="[
 				{
 					id: 'created',
 					type: 'date',
 					title: 'Date',
+					sortable: true,
 				},
 				{
 					id: 'creator',
@@ -57,9 +62,6 @@ module.exports = {
 					title: 'Change',
 				},
 			]"
-			sort="-created"
-			entity="logs"
-			:show-search="false"
 		>
 			<template #created="{row}">
 				<date :date="row.created"/>

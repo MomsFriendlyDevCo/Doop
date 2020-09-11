@@ -19,7 +19,11 @@ app.middleware.db.statusChange = (model, options) => {
 				created: new Date(),
 				col: model.$collection,
 				doc: newDoc._id,
-				body: `Status changed<span class="from">${oldDoc.status}</span><span class="to">${newDoc.status}</span>`,
+				body: ''+
+					+ 'Status changed'
+					+ `<code>${oldDoc.status}</code>`
+					+ '<i class="fas fa-arrow-alt-right"></i>'
+					+ `<code>${newDoc.status}</code>`
 			}),
 		...options,
 	};
