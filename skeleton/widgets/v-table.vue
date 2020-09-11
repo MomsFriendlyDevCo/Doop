@@ -296,7 +296,7 @@ module.exports = {
 				<tbody>
 					<tr v-for="row in rows" :key="row[rowKey]">
 						<td v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
-							<a v-href="cellHref ? cellHref(row) : false">
+							<a v-href="cellHref ? cellHref(row) : false" :class="!cellHref && 'no-click'">
 								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
 									{{_.get(row, col.id)}}
 								</slot>
