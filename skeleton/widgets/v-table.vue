@@ -10,6 +10,7 @@
 * @param {boolean|function} [showSearch=true] Show the search interface
 * @param {boolean} [autoScroll=true] Scroll to the top of the table on refresh
 * @param {string|number} [autoScrollOffset=0] Autoscroll Y offset if it needs manually tweaking, strings are automaticaly converted to numbers
+* @param {boolean} [autoResetPagination=true] Detect URL changes and reset pagination when it occurs (usually the upstream component clobbering the `url` property during a search)
 *
 * @param {boolean|function} [cellHref=false] If a function is specified its called as `(row)` per row to determine a `v-href` compatible per-cell link
 * @param {string} [rowKey="_id"] Key to use when looping over data to ensure minimal DOM re-rendering
@@ -84,6 +85,7 @@ module.exports = {
 		showSearch: {type: Boolean, default: true},
 		autoScroll: {type: Boolean, default: true},
 		autoScrollOffset: {type: [Number, String], default: 0},
+		autoResetPagination: {type: Boolean, default: true},
 
 		cellHref: {type: [Boolean, Function], default: false},
 		rowKey: {type: String, default: '_id'},
@@ -95,6 +97,14 @@ module.exports = {
 		textLoading: {type: String, default() { return `Loading ${this.entity}...` }},
 
 		tableClass: {type: String, default: 'table'},
+	},
+	watch: {
+		url() {
+			if (this.autoResetPagination) {
+				this.$debug('autoResetPagination');
+				this.endpointPage = 1;
+			}
+		},
 	},
 	methods: {
 		/**
