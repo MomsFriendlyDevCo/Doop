@@ -46,6 +46,7 @@ module.exports = function() {
 				{title: 'Session', href: '/debug/session'},
 				{title: 'Transitions', href: '/debug/transitions'},
 				{title: 'Toasts', href: '/debug/toast'},
+				{title: 'Validate', href: '/debug/v-validate'},
 			],
 		},
 	];
