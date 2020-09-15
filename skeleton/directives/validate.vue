@@ -12,6 +12,8 @@
 *
 * @param {array} settings.rules rules to use (implied if settings is an array), rules are evaulated in order. Some rules are sync (`endpoint` + functions if a promise is returned) which may take time to evaluate
 * @param {string} [settings.rules.err="Invalid"] The error message to display if the validation checks fail
+* @param {function} [settings.onData] Function called as `(data, value, settings)` when data is pulled for `endpoint` rules, expected to return the data (after any possible rewrites)
+* @param {function} [settings.onValid] Function called as `(isValid, error, settings)` when the validation recalculates
 *
 * @param {RegExp} [settings.rules.regExp] Validate a regular expression
 *
@@ -20,7 +22,7 @@
 * @param {function} [settings.satisifies] Validate against a (possibly async) function called as `(value, settings)`. Should return true for passing, all other values are treated as the basic error message, async responses are waited on (see `settings.rules`)
 *
 * @param {string|Object} [settings.rules.endpoint] Either a string URL to satisfy or a set of options, NOTE: This is an async rule (see `settings.rules`)
-* @param {string} [settings.rules.endpoint.url] URL to query, use `:value` as the value of the input
+* @param {string|function} [settings.rules.endpoint.url] URL to query, use `:value` as the value of the input or specify a function which is called as `(value, settings)` which returns the Axios request
 * @param {Object} [settings.rules.endpoint.expect={count:0}] Object which satisifes the condition
 *
 *
@@ -45,6 +47,8 @@ module.exports = {
 			events: 'blur',
 			immediate: false,
 			layout: 'title',
+			onValid: (isValid, error, data, settings) => {},
+			onData: (data, value, settings) => data,
 			...binding.value,
 			rules: Array.isArray(binding.value) ? binding.value // Given only an array
 				: binding.value.rules && _.isPlainObject(binding.value.rules) ? [binding.value.rules] // Given {rules: Object}
@@ -87,14 +91,17 @@ module.exports = {
 						return failedValidate = res;
 					}
 				} else if (validator.endpoint) {
+					if (!_.isString(validator.endpoint) && !validator.endpoint?.url) throw new Error('v-validate endpoint rule requires a string URL or {url: String} property');
 					Vue.services().$http(
-						_.isString(validator.endpoint) ? {method: 'GET', url: validator.endpoint.replace(/:value/g, value)}
+						_.isString(validator.endpoint) ? {method: 'GET', url: validator.endpoint.replace(/:value/g, value)} // Simple string, replace :value
+						: _.isFunction(validator.endpoint?.url) ? validator.endpoint?.url(value, settings)
 						: _.omit({...validator.endpoint, url: validator.endpoint.url.replace(/:value/g, value)}, 'expect')
 					).then(res => {
-						if (_.isEqual(res.data, validator.endpoint?.expect || {count: 0})) return; // Validation passed - do nothing
+						var data = settings.onData(res.data, value, settings);
+						if (_.isEqual(data, validator.endpoint?.expect || {count: 0})) return; // Validation passed - do nothing
 						invalidate( // Use the error message specified or the server basic text if any
 							_.isString(validator.err) ? validator.err
-							: _.isString(res.data) ? res.data
+							: _.isString(data) ? data
 							: 'Invalid'
 						);
 					})
@@ -128,6 +135,8 @@ module.exports = {
 		* @param {boolean|string} [status=false] Either boolean false if every validation passed OR a string error message if something failed
 		*/
 		var invalidate = (status = false) => {
+			settings.onValid(status === false, status, settings);
+
 			// Apply failed / valid classes {{{
 			if (status) {
 				$el.addClass(settings.classInvalid).removeClass(settings.classValid);
