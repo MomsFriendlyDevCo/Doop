@@ -61,7 +61,7 @@ window.onload = ()=> {
 	* @param {string|number} [location.url] Alternate method of passing the URL to navigate to
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
-	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window
+	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window, use '_self' to redirec the entire document
 	* @param {function} [before] Async function called as `(settings)` to wait for before performing the action
 	* @param {function} [after] Function called as `(settings)` after performing the action (since actions are pretty much instant async is ignored)
 	* @returns {Promise} A promise which will resolve when the navigation completes
@@ -82,17 +82,20 @@ window.onload = ()=> {
 			.then(()=> {
 				if (settings.target == '_blank') {
 					if (_.isNumber(location.url)) throw new Error('History navigation with targets is not allowed');
-					console.log(`%cNew tab/window naviation to ${settings.url}`);
+					console.log(`%cNew tab/window naviation to ${settings.url}`, 'color: #00F');
 					window.open(settings.url);
+				} else if (settings.target == '_self') {
+					console.log(`%cNavigate self to ${settings.url}`, 'color: #00F');
+					window.location = settings.url;
 				} else if (_.isFunction(settings.url)) {
-					console.log('%cNavigate to function', settings.url);
+					console.log('%cNavigate to function', 'color: #00F', settings.url);
 					settings.url();
 				} else if (_.isNumber(location.url)) {
 					console.log(`%c$route.goHistory(${settings.url})`, 'color: #00F');
 					window.app.router.routeVersion++;
 					app.router._go(settings.url);
 				} else if (/^https?:\/\//.test(settings.url) || /\/go\//.test(settings.url)) {
-					console.log(`%cAbsolute redirection to ${settings.url}`);
+					console.log(`%cAbsolute redirection to ${settings.url}`, 'color: #00F');
 					window.location = settings.url;
 				} else if (app.router.currentRoute && app.router.currentRoute.fullPath == settings.url) {
 					if (settings.force) {
