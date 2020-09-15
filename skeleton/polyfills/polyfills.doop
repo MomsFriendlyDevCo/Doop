@@ -10,6 +10,7 @@ var polyfills = [
 	{id: 'promise.allLimit', test: ()=> true},
 	{id: 'promise.allSeries', test: ()=> true},
 	{id: 'promise.defer', test: ()=> true},
+	{id: 'promise.isPromiseLike', test: ()=> true},
 	{id: 'promise.tap', test: ()=> Promise.prototype.tap === undefined},
 	{id: 'promise.timeout', test: ()=> true},
 	{id: 'regexp.escape', test: ()=> RegExp.escape === undefined},

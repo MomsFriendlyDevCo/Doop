@@ -7,6 +7,7 @@ import './polyfills/array.flatMap';
 import './polyfills/promise.allLimit';
 import './polyfills/promise.allSeries';
 import './polyfills/promise.defer';
+import './polyfills/promise.isPromiseLike';
 import './polyfills/promise.tap';
 import './polyfills/promise.timeout';
 import './polyfills/regexp.escape';
