@@ -172,10 +172,6 @@ app.middleware.db.search = (model, options) => {
 		};
 
 		var termsRE = _.chain(terms)
-			.thru(terms => settings.wholeTerm // Wrap terms in speachmarks if we only accept wholeTerm (and they are not already)
-				? '"' + _.trim(terms, '"').replace(/"/g, '\\"') + '"'
-				: terms
-			)
 			.thru(terms => stringSplit(terms, /\s+/, {
 				ignore: ['"', "'", '()'], // Preserve compound terms with speachmarks + brackets
 				escape: true, // Allow escaping of terms
@@ -196,6 +192,10 @@ app.middleware.db.search = (model, options) => {
 					return true;
 				}
 			})
+			.thru(terms => settings.wholeTerm && terms.length > 0 // Wrap terms in speachmarks if we only accept wholeTerm (and they are not already)
+				? [_.trim(terms.join(' '))]
+				: terms
+			)
 			.map(term => searchSettings.searchTermsModify(term, settings)) // Mangle terms to remove burring etc.
 			.map(term => new RegExp(RegExp.escape(term), 'i')) // Encode each term as a RegExp
 			.value();
