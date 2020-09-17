@@ -34,7 +34,7 @@ var transform = (content, path, block) => {
 			log: (...msg) => console.log.apply(sandbox.app, [sandbox.app.log.colors.blue(`[${id}]`)].concat(msg)),
 		},
 		setTimeout, clearTimeout, setInterval, clearInterval,
-		require: require('module').createRequireFromPath(path), // Make require work as a relative path
+		require: require('module').createRequire(path), // Make require work as a relative path
 	});
 
 	var isExporter = /^\s*(module\.)?exports\s*=/m.test(content); // Module exports something
