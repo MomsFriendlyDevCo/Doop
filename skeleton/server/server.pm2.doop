@@ -1,6 +1,11 @@
 <server on="ready">
+var _ = require('lodash');
+
 /**
 * Middleware to transmit the 'ready' signal to PM2 to signal that the server is now listening
 */
-if (process.send) process.send('ready');
+if (_.isObject(global.process) && _.isFunction(global.process.send)) {
+	app.log('Sending IPC to PM2 that the server is ready');
+	global.process.send('ready');
+}
 </server>
