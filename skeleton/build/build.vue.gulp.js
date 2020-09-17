@@ -102,6 +102,9 @@ gulp.task('build.vue', ['load:app'], ()=>
 							.replace(/module.exports\s*=\s*{/, `{\n\ttemplate: Vue.assets.template('${_.camelCase(block.attr.name || fspath.basename(path, '.vue'))}'),`)
 						+ ')'
 				},
+				import: { // Process but drop all <import/> content - handled by vendors include anyway
+					transform: ()=> '',
+				},
 			},
 		}))
 		.pipe(replace(/\s*module.exports =\s*/, ''))
