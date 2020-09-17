@@ -6,7 +6,6 @@ var eval = require('gulp-eval');
 var gulp = require('gulp');
 var monoxide = require('monoxide');
 var scenario = require('gulp-mongoose-scenario');
-var runSequence = require('run-sequence');
 
 gulp.task('db', 'scenario');
 
