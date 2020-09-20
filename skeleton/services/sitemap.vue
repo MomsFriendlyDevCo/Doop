@@ -325,7 +325,7 @@ module.exports = {
 </component>
 
 <template name="sitemapMap">
-	<ul class="nav flex-column flex-nowrap flex-grow-1 flex-shrink-1 overflow-auto">
+	<ul class="nav flex-column flex-nowrap flex-grow-1 flex-shrink-1 overflow-auto h-100">
 		<li class="nav-item" v-for="node in sitemapTree" :class="[node.opened ? 'opened' : 'closed', node.selected && 'active']">
 			<a @click="itemClick(node)" v-href="node.href" class="nav-link d-flex align-items-center flex-nowrap">
 				<i class="flex-grow-0 flex-shrink-0 mr-3" :class="node.icon"></i>
