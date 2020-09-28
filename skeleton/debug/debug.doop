@@ -5,24 +5,42 @@
 app.all('/api/debug/http/200', function(req, res) {
 	res.send('Everything is ok, relax');
 });
+</endpoint>
 
 
+<endpoint>
 /**
 * Test response with a 403 response code
 */
 app.all('/api/debug/http/403', function(req, res) {
 	res.status(403).send('You are forbidden from doing that. Forbidden I say!');
 });
+</endpoint>
 
 
+<endpoint>
 /**
 * Test response with a 500 response code throwing an intentional error
 */
 app.all('/api/debug/http/500', app.middleware.express.isProduction(false), function(req, res) {
 	throw new Error('Intentional test error');
 });
+</endpoint>
 
 
+<endpoint>
+/**
+* Crash the Node instance
+*/
+app.all('/api/debug/crash', app.middleware.express.isProduction(false), function(req, res) {
+	setTimeout(function() {
+		throw new Error('Intentional server crash via /api/debug/crash');
+	}, 10);
+});
+</endpoint>
+
+
+<endpoint>
 /**
 * Dummy file area
 */
@@ -34,4 +52,21 @@ app.all('/api/debug/files/:file?', app.middleware.express.isProduction(false), a
 	query: true,
 	delete: true,
 }));
+</endpoint>
+
+
+<endpoint>
+var crypto = require('crypto');
+
+/**
+* Generate a Bcyrpt compatible password from a string
+* @param {string} req.query.pass Password string to encrypt
+*/
+app.get('/api/debug/pass', app.middleware.express.isProduction(false), (req, res) => {
+	if (!req.query.pass) return res.sendError('400: No pass specified');
+	var salt = crypto.randomBytes(16).toString('base64');
+	var saltBuffer = Buffer.from(salt, 'base64');
+	var hash = crypto.pbkdf2Sync(req.query.pass, saltBuffer, 10000, 64, 'sha512').toString('base64');
+	res.send({salt, hash});
+});
 </endpoint>
