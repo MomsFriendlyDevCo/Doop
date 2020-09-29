@@ -1,0 +1,81 @@
+<server on="middleware">
+var _ = require('lodash');
+var timestring = require('timestring');
+/**
+* Returns a middleware layer which will throttle a request, optionally dropping leading/tailing requests that come in while an existing request is in progress
+* This module is cross-process safe as it uses the cache/locking modules
+*
+* NOTE: Currently this middleware does not hang onto the response and re-report it after locking but before the timeout has expired - use app.middleware.cache for that functionality
+*
+* @param {Object|string|number|function} [options] Options to pass to the middleware, if a non-object is provided its assumed to be the value of `options.wait`
+* @param {function} [options.hash] Promisable function return, called as `(req, res)` used to hash the request, defaults to simply hashing `{path: req.path, query: req.query, params: req.params}`, uses app.lock.hash to hash objects or can return a unique ID/string identifier
+* @param {function} [options.response] Function called as `(req, res)` to run if the incomming request is locked (in progress), can call res.send() etc. to close the request
+* @param {function|number} [options.wait='10s'] Promiseable function return, called as `(req, res)` and expected to provide a timestring parsable time to declare the function as working, we wait this amount of time AFTER resolving the output before declaring the function 'unlocked' again
+* @param {boolean} [options.leading=true] Drop any requests that come in while an existing request is in progress
+*
+* @example Throttle an endpoint so multiple people hitting it all get the same random number for 30s
+* app.get('/api/randomNumber', app.middleware.express.throttle('10s'), (req, res) => res.send({random: _.random(0, 9999))});
+*
+* @example Throttle a long running process so only one "worker" can execute at once, others simply return 420
+* app.get('/api/longProcess', app.middleware.express.throttle({response: (req, res) => res.sendStatus(420)}), (req, res) => {
+*   someLongRunningPromise.then(output => res.send(output))
+* });
+*/
+app.middleware.express.throttle = options => {
+	var settings = {
+		hash: (req, res) => ({path: req.path, query: req.query, params: req.params}),
+		response: (req, res) => res.sendStatus(200),
+		wait: !_.isPlainObject(options) ? options : '10s',
+		leading: true,
+		..._.isPlainObject(options) ? options : {},
+		last: undefined,
+		prevResponse: undefined,
+	};
+	return (req, res, next) => {
+		var hash, wait; // Calculated state variables
+		Promise.resolve()
+			.then(()=> Promise.all([
+				// Resolve settings.wait
+				Promise.resolve(_.isFunction(settings.wait) ? settings.wait(req, res) : settings.wait)
+					.then(resWait => wait = isFinite(resWait) ? +resWait : timestring(resWait, 'ms')),
+				// Resolve settings.hash
+				Promise.resolve(settings.hash(req, res))
+					.then(resHash => hash = app.lock.hash(resHash)),
+			]))
+			.then(()=> app.lock.create(hash)) // Try to lock
+			.then(didLock => {
+				if (didLock) { // New request - pass on middleware and wait until its concludes
+					var oldResEnd = res.end; // Replace res.end with our own handler
+					res.end = (...args) => {
+						oldResEnd(...args); // Let Express handle the usual end output
+						setTimeout(()=> { // Cue up timer to execute after wait
+							app.lock.release(hash);
+
+							if (!settings.leading && _.isFunction(settings.last)) {
+								var callback = settings.last;
+								settings.last = undefined;
+								settings.prevResponse = undefined;
+								callback();
+							}
+
+						}, wait);
+					};
+
+					// Call next item in middleware which (should) eventually call res.end() which gets duck-typed above
+					next();
+				} else { // Already locked
+					if (settings.leading){ // Execute response() and exit
+						return settings.response(req, res);
+					} else { // Queue most recent request
+						if (settings.last && settings.prevResponse) { // Resolve previously queued request
+							settings.response(null, settings.prevResponse);
+						}
+
+						settings.last = next;
+						settings.prevResponse = res;
+					}
+				}
+			})
+	};
+};
+</server>
