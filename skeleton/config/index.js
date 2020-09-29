@@ -209,10 +209,7 @@ module.exports = {
 	},
 	sentry: {
 		enabled: false,
-		device: 'server',
 		dsn: '{{FIXME:sentryDSN}}',
-		slug: '{{FIXME:sentrySlug}}',
-		token: '{{FIXME:sentryToken}}', // Created via https://sentry.io/api/
 	},
 	session: {
 		auth: {

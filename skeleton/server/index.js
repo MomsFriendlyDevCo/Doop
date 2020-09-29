@@ -34,7 +34,7 @@ Promise.resolve()
 	.then(()=> app.emit('endpoints'))
 	.then(()=> app.emit('postEndpoints'))
 	.then(()=> app.emit('preServer'))
-	.then(()=> app.emit('server'))
+	.then(()=> app.emit('server')) // Also emits preExpress + postExpress when express loads
 	.then(()=> app.emit('postServer'))
 	.then(()=> app.emit('preReady'))
 	.then(()=> app.log(app.log.colors.bold.blue('⚝  Doop! ⚝')))

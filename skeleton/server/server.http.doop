@@ -34,7 +34,10 @@ var historyFallback = require('connect-history-api-fallback-exclusions');
 var helmet = require('helmet');
 var express = require('express');
 
+app.emit('preExpress');
 app.express = express();
+app.emit('postExpress');
+
 
 // NOTE: We're using app.express rather than app.use as we want the raw express hook rather than our custom wrapped one
 app.express.use(helmet());
@@ -112,7 +115,7 @@ _(app.endpoints)
 delete app.endpoints; // Prevent usage of endpoints now its been processed
 
 // Replace all app methods with warnings
-['all', 'delete', 'get', 'post', 'set', 'use'].forEach(method =>
+['all', 'delete', 'get', 'patch', 'post', 'set', 'use'].forEach(method =>
 	app[method] = path => app.log.warn('Attemping to set up express path at', app.log.colors.cyan(path), 'after server hook has fired - request rejected')
 );
 </server>
