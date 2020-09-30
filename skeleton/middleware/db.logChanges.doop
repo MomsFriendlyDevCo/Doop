@@ -27,7 +27,7 @@ var _ = require('lodash');
 * })
 */
 
-app.db.middleware.db.logChanges = (model, options) => {
+app.middleware.db.logChanges = (model, options) => {
 	var settings = {
 		action: (model, doc, changes, settings) => db[settings.logTable].insertOne({
 			[settings.logFieldDate]: new Date(),
@@ -43,7 +43,7 @@ app.db.middleware.db.logChanges = (model, options) => {
 		...options,
 	};
 
-	model.hook('save', function(query, next, doc) => {
+	model.hook('save', (query, next, doc) => {
 		var changes = _.mapValues(doc.isModified(), k => _.get(doc, k)); // Compute dotted-notation object for changes
 
 		return Promise.resolve(settings.action(model, doc, changes, settings))
@@ -51,3 +51,4 @@ app.db.middleware.db.logChanges = (model, options) => {
 			.catch(next)
 	});
 };
+</server>
