@@ -21,23 +21,23 @@ gulp.task('search.reindex', 'load:app.db', ()=> {
 	if (filterCollections.length) gulp.log('Only reindexing collections:', filterCollections.map(c => gulp.colors.cyan(c)).join(', '));
 	if (filterIds.length) gulp.log('Only reindexing IDs:', filterIds.map(id => gulp.colors.cyan(id)).join(', '));
 
-	return Promise.all(Object.keys(app.db)
+	return Promise.allSeries(Object.keys(app.db)
 		.filter(model => _.isFunction(app.db[model].search)) // Has search attached to the model
 		.filter(model => !filterCollections.length || filterCollections.includes(model))
-		.map(model => new Promise((resolve, reject) => {
+		.map(model => {
 			var docNumber = 0;
 			var docQuery = filterIds.length ? {_id: {$in: filterIds}} : undefined;
 
-			app.db[model].count(docQuery)
-				.then(totalDocs => app.db[model].find(docQuery)
+			return ()=> app.db[model].count(docQuery)
+				.then(totalDocs => new Promise((resolve, reject) => app.db[model].find(docQuery)
 					.forEach((next, doc) => {
 						gulp.log('Reindex', gulp.colors.cyan(model), '/', gulp.colors.cyan(`#${doc._id}`), gulp.colors.gray(`${docNumber} / ${totalDocs} ~ ${Math.round(++docNumber / totalDocs * 100)}%`));
 						reindexed++;
 						doc.save(next);
 					})
 					.exec(err => err ? reject(err) : resolve())
-				)
-		}))
+				))
+		})
 	)
 		.then(()=> gulp.log('Reindex complete. Processed', gulp.colors.cyan(reindexed), 'documents'));
 });
