@@ -109,13 +109,24 @@ app.middleware.db.search = (model, options) => {
 	// }}}
 
 	// Apply create / save / update hooks to documents to calculate the token storage {{{
-	var applyTokens = function(done, doc) {
-		Promise.all(settings.fields.map((field, fieldIndex) =>
-			field.path ? Promise.resolve({value: _.get(doc, field.path), weight: field.weight || 1}) // Static path
-			: field.handler ? Promise.resolve(field.handler(doc))
-				.then(value => ({value, weight: field.weight || 1}))
-			: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
-		))
+	var applyTokens = function(done, patch) {
+		var doc; // Complete document, either deteremined from the patch or pulled from DB if its only partial
+
+		Promise.resolve()
+			.then(()=> { // If we are given a partial save patch correct it into the full document, NOTE: This goes away when moving Monoxide -> Mongoosy
+				if (patch.hasOwnProperty('$collection')) { // Incomming patch is really a patch
+					return model.findOneById(patch._id) // Go fetch full doc by ID
+						.then(res => doc = res)
+				} else { // Assume patch is actually a document
+					doc = rawDoc;
+				}
+			})
+			.then(()=> Promise.all(settings.fields.map((field, fieldIndex) =>
+				field.path ? Promise.resolve({value: _.get(doc, field.path), weight: field.weight || 1}) // Static path
+				: field.handler ? Promise.resolve(field.handler(doc))
+					.then(value => ({value, weight: field.weight || 1}))
+				: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
+			)))
 			.then(tokens => tokens.map(token => ({ // Mutate tokens (by default or if of the form `{mutate: true, value: Any}`)
 				...token,
 				value:
@@ -125,7 +136,7 @@ app.middleware.db.search = (model, options) => {
 			})))
 			.then(tokens => tokens.filter(token => token.value)) // Remove falsy tokens
 			.then(tokens => _.uniqBy(tokens, 'value')) // Remove duplicates (of lower weights)
-			.then(tokens => _.set(doc, settings.path, tokens))
+			.then(tokens => _.set(patch, settings.path, tokens))
 			.then(()=> done())
 	};
 
