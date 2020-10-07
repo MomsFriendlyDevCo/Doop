@@ -118,7 +118,7 @@ app.middleware.db.search = (model, options) => {
 					return model.findOneById(patch._id) // Go fetch full doc by ID
 						.then(res => doc = res)
 				} else { // Assume patch is actually a document
-					doc = rawDoc;
+					doc = patch;
 				}
 			})
 			.then(()=> Promise.all(settings.fields.map((field, fieldIndex) =>
