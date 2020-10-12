@@ -16,8 +16,11 @@ var _ = require('lodash');
 */
 app.endpoints = [];
 
-['all', 'delete', 'get', 'post', 'set', 'use'].forEach(method =>
-	app[method] = (path, ...args) => app.endpoints.push({method, path, args})
+['all', 'delete', 'get', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
+	app[method] = (path, ...args) => {
+		if (!app.config.isProduction && app.endpoints.some(e => e.method == method && e.path == path)) app.log.warn('Duplicate endpoint registered -', app.log.colors.blue(`app.${method}('${path}')`));
+		app.endpoints.push({method, path, args})
+	}
 );
 </server>
 
@@ -115,7 +118,7 @@ _(app.endpoints)
 delete app.endpoints; // Prevent usage of endpoints now its been processed
 
 // Replace all app methods with warnings
-['all', 'delete', 'get', 'patch', 'post', 'set', 'use'].forEach(method =>
+['all', 'delete', 'get', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
 	app[method] = path => app.log.warn('Attemping to set up express path at', app.log.colors.cyan(path), 'after server hook has fired - request rejected')
 );
 </server>
