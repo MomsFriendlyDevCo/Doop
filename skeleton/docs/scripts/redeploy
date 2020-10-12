@@ -34,6 +34,9 @@ else
 	gulp postDeploy
 fi
 
+# Force Chalk color support within PM2
+export FORCE_COLOR=2
+
 if [[ `pm2 show doop-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
 	echo "Starting PM2 process for the first time..."
 	pm2 start --name 'doop-a' --time server/index.js -- -e production -o port=10001 -o papertrail.program=doop-a -o cache.cleanAuto=true
