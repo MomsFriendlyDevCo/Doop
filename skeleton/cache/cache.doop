@@ -54,6 +54,9 @@ var _ = require('lodash');
 * @param {boolean} [options.enabled=true] Whether to use the cache at all, set to false to debug the function worker each time
 * @param {string} [options.expiry="1h"] Any timesting valid entry to determine the maximum cache time
 * @param {boolean} [options.rejectAs=undefined] Cache throwing promises as this value rather than repeating them each hit
+* @param {number} [options.retry=0] If a promise rejects retry it this many times before giving up
+* @param {number|function} [options.retryDelay=100] Delay between promise retries, if a function is called as `(attempt, settings)` and expected to return the delay amount
+* @param {function} [options.onRetry] Function to call as `(error)` when a retryable operation fails
 * @param {*} [options.invalidStore] Value use to detect the absence of a value in the cache (so we can detect null/undefined values even though they are falsy)
 * @param {function} worker The worker PROMISE FACTORY function to execute if the cache value does not exist, the result of this is used for the subsequent cache value
 * @returns {Promise<*>} A promise which will return with the result of worker - or the cached value of worker until it expires
@@ -67,6 +70,9 @@ app.cache.function = (options, worker) => {
 		enabled: true,
 		expiry: '1h',
 		// rejectAs: undefined, // If set we use rejectAs, otherwise leave unset so we can also detect `undefined` value
+		retry: 0,
+		retryDelay: 100,
+		onRetry: e => console.warn(e),
 		invalidStore: '!!!UNKNOWN!!!',
 		...options,
 	};
@@ -78,21 +84,37 @@ app.cache.function = (options, worker) => {
 	if (!settings.enabled) return Promise.resolve(worker());
 
 	return app.cache.get(settings.id, settings.invalidStore)
-		.then(res => {
-			if (res !== settings.invalidStore) return res; // Result found
+		.then(res => new Promise((resolve, reject) => {
+			var attempt = 0; // What attempt we are at now, increments for each `retry`
+			if (res !== settings.invalidStore) return resolve(res); // Result found
 
-			app.log('Cache function refresh for', app.log.colors.cyan(settings.id));
-			return Promise.resolve(worker()) // Execute worker as promisable
-				.then(value => app.cache.set(settings.id, value, settings.expiry).then(()=> value)) // Cache output result and return
-				.catch(e => {
-					if (settings.hasOwnProperty('rejectAs')) {
-						app.log.warn('Cache func function refresh for', settings.id, 'threw', 'using fallback', settings.rejectAs);
-						return app.cache.set(settings.id, settings.rejectAs).then(()=> rejectAs);
-					} else {
-						app.log.warn('Cache func function refresh for', settings.id, 'threw', e.toString());
-						throw e;
-					}
-				})
-		})
+			var tryResolve = ()=> { // Create repeatable promise factory function (so we can retry on fail)
+				app.log('Cache function refresh for', app.log.colors.cyan(settings.id));
+				Promise.resolve(worker()) // Execute worker as promisable
+					.then(value => app.cache.set(settings.id, value, settings.expiry).then(()=> value)) // Cache output result and return
+					.then(value => resolve(value))
+					.catch(e => {
+						if (settings.hasOwnProperty('rejectAs')) {
+							app.log.warn('Cache func function refresh for', settings.id, 'threw', 'using fallback', settings.rejectAs);
+							return app.cache.set(settings.id, settings.rejectAs).then(()=> rejectAs);
+						} else if (settings.hasOwnProperty('retry') && settings.hasOwnProperty('retry') > 0) {
+							if (++attempt > settings.retry) { // Exhausted retry limit - reject
+								reject(e);
+							} else {
+								app.log.warn('Cache func function refresh for', settings.id, `threw on attempt ${attempt}. Retrying...`);
+								settings.onRetry(e);
+								var useDelay = _.isFunction(settings.retryDelay) ? settings.retryDelay(attempt, settings) : settings.retryDelay;
+								if (!isFinite(useDelay)) return reject('Got non-numeric delay for retryDelay');
+								setTimeout(tryResolve, useDelay);
+							}
+						} else {
+							app.log.warn('Cache func function refresh for', settings.id, 'threw', e.toString());
+							reject(e);
+						}
+					})
+			};
+
+			tryResolve();
+		}))
 };
 </server>
