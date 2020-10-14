@@ -21,6 +21,13 @@ Terminology:
 * The Doop documentation endeavour to use requirement levels that abide by the definitions specified by [RFC 2119 (Requirement Levels)](http://www.ietf.org/rfc/rfc2119.txt)
 
 
+Major releases:
+
+* **V3 - Cubert** - Unstable work in progress (Vue@3 frontend)
+* **[V2 - Bender](https://github.com/MomsFriendlyDevCo/Doop/tree/master)** - Current stable release (Vue@2 frontend)
+* **[V1 - Amy](https://github.com/MomsFriendlyDevCo/Doop/releases/tag/V1-Amy)** - Initial Doop implementation
+
+
 General concept
 ===============
 Doop is made up of two types of files. Files ending in `.vue` are front-end Vue framework(esk) and `.doop` are back-end Express framework(esk).
