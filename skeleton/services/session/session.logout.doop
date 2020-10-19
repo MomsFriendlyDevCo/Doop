@@ -10,7 +10,7 @@ app.post('/api/session/logout', (req, res) => {
 		app.cache.unset(app.config.session.cache.prefix + req.headers.auth)
 			.then(()=> res.sendStatus(200))
 	} else {
-		app.sendError(400, 'No valid auth token found');
+		res.sendError(400, 'No valid auth token found');
 	}
 });
 </server>
