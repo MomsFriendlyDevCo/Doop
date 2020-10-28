@@ -35,13 +35,16 @@ app.express.use(Sentry.Handlers.tracingHandler());
 var _ = require('lodash');
 var crash = require('@momsfriendlydevco/crash');
 var Sentry = require('@sentry/node');
-app.express.use(Sentry.Handlers.errorHandler({
-	shouldHandleError(err) {
-		var res = _.isError(err) || !err.status || err.status >= 500; // Capture only pure errors, undefined statuses or >=500 errors
-		if (res) app.log(app.log.colors.bold.blue('--- Dispatch error to sentry ---'));
-		return res;
-	},
-}));
+
+if (app.config.sentry) {
+	app.express.use(Sentry.Handlers.errorHandler({
+		shouldHandleError(err) {
+			var res = _.isError(err) || !err.status || err.status >= 500; // Capture only pure errors, undefined statuses or >=500 errors
+			if (res) app.log(app.log.colors.bold.blue('--- Dispatch error to sentry ---'));
+			return res;
+		},
+	}));
+}
 
 app.express.use((err, req, res, next) => {
 	crash.trace(err, {prefix: 'Server error'});
