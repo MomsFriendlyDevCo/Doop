@@ -326,4 +326,24 @@ app.middleware.db.search = (model, options) => {
 	};
 	// }}}
 };
+
+// Inject universal search engine expose if enabled
+if (app.config.search.exposeEngine) {
+	app.log('Exposing search engine as', app.log.colors.cyan(app.config.publicUrl));
+	app.config.layout.headInject.push(
+		'<script type="application/ld+json">'
+		+ JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'WebSite',
+			url: app.config.publicUrl,
+			name: app.config.title,
+			potentialAction: [{
+				'@type': 'SearchAction',
+				target: app.config.search.exposeSearchUrl,
+				'query-input': 'required name=search_term_string'
+			}]
+		})
+		+ '</script>'
+	);
+}
 </server>
