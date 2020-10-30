@@ -5,7 +5,7 @@
 
 Doop!
 =====
-The MEAN micro-framework used by [MomsFriendlyDevCo](http://mfdc.biz).
+The MEVN micro-framework used by [MomsFriendlyDevCo](http://mfdc.biz).
 
 **If we hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate - Zapp Brannigan**
 
