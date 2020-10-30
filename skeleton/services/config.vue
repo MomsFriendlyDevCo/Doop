@@ -4,8 +4,12 @@ module.exports = {
 	apiUrl: 0/* @IMPORT: app.config.apiUrl */,
 	isProduction: 0/* @IMPORT: app.config.isProduction */,
 	title: 0/* @IMPORT: app.config.title */,
+	tagline: 0/* @IMPORT: app.config.tagline */,
 	chat: 0/* @IMPORT: app.config.chat */,
-	git: 0/* @IMPORT: app.config.git */,
+	git: {
+		url: 0/* @IMPORT: app.config.git.url */,
+		current: 0/* @IMPORT: app.git.current */,
+	},
 	session: {
 		preference: 0/* @IMPORT: app.config.session.auth.preference */,
 		logoutUrl: 0/* @IMPORT: app.config.session.logoutUrl */,

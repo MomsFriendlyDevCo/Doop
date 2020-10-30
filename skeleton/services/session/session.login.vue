@@ -88,7 +88,11 @@ module.exports = {
 
 <template>
 	<div>
-		<splash-solid background="white"/>
+		<splash-popsquares
+			:colors="['#e5d5ca', '#eadacf', '#f5e5da']"
+			duration="5s"
+			background="#faeadf"
+		/>
 		<div class="container-fluid session-login">
 			<div class="row d-flex justify-content-center">
 				<a v-href="'/'">
@@ -179,7 +183,7 @@ module.exports = {
 }
 
 .session-login img.logo {
-	max-height: 40vh;
+	max-height: 30vh;
 }
 
 .session-login .card {
@@ -192,8 +196,8 @@ module.exports = {
 
 .session-login .logo {
 	width: 50vh;
-	margin-top: 10vh;
-	margin-bottom: 5vh;
+	margin-top: 15vh;
+	margin-bottom: 15vh;
 }
 
 .session-login .footer {

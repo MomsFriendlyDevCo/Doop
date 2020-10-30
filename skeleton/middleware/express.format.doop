@@ -1,0 +1,29 @@
+<server on="middleware">
+/**
+* Express middleware for formatting API results
+*
+* In addition to the default @momsfriendlydevco/express-middleware-formatter properties this function has the following extra parameters:
+* @param {Object} [options] Options to use
+* @param {string} [options.collection] Collection to examine when adopting `toScalar()` schema properties
+* @param {boolean} [options.warnNoScalar=true] Warn when no `toScalar()` properties are detected but `collection` is specified
+* @returns {ExpressMiddleware} An express middleware layer
+*
+* @example Use formatter in a middleware chain
+* app.get('/api/widgets', app.middleware.express.format(), (req, res) => { ... })
+*/
+
+
+var _ = require('lodash');
+var emf = require('@momsfriendlydevco/express-middleware-formatter');
+
+app.middleware.express.format = options => {
+	if (options && options.unpack && _.isFunction(options.unpack)) options.unpack = _.castArray(options.unpack);
+	var settings = _.defaults(options, {
+		unpack: [],
+		warnNoScalars: true,
+	});
+
+	return emf(settings);
+};
+
+</server>

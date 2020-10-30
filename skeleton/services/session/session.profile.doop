@@ -13,6 +13,7 @@ app.get('/api/session', (req, res) => {
 		_id: req.user._id,
 		email: req.user.email,
 		name: req.user.name,
+		username: req.user.username,
 		settings: req.user.settings || {},
 		avatarUrl: 'https://www.gravatar.com/avatar/' + crypto.createHash('md5').update(req.user.email).digest('hex'),
 		permissions: {
@@ -28,10 +29,10 @@ app.get('/api/session', (req, res) => {
 * Save (limited) user data back to the current users document
 * @param {Object} [req.body.settings] The user settings to save (treated as an assignment)
 */
-app.post('/api/session/profile', (req, res) => {
+app.post('/api/session', (req, res) => {
 	if (!req.user) return res.sendStatus(403);
 
-	Object.assign(req.user, _.pick(req.body, ['settings']));
+	Object.assign(req.user, _.pick(req.body, ['name', 'settings']));
 
 	req.user.save()
 		.then(()=> res.sendStatus(200));

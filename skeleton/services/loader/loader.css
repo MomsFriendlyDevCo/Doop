@@ -1,5 +1,5 @@
 /* Bootstrapping overlay {{{ */
-body.bootstrapping #app {
+body.bootstrapping #wrapper {
 	display: none;
 }
 
@@ -23,7 +23,7 @@ body.bootstrapping .splash.splash-init {
 }
 
 body.bootstrapping .splash.splash-init > img {
-	width: 50vw;
+	width: 10vw;
 	max-width: 700px;
 }
 /* }}} */
@@ -47,9 +47,17 @@ body.bootstrapping .splash.splash-init > img {
 }
 /* }}} */
 /* Loader bar styles {{{ */
-.loader-bar {
-	height: 5px !important;
-	z-index: 1 !important;
+
+/* Disable hiding of body */
+body.loading {
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+/* Instead hide wrapper when foreground loading */
+body.loading-foreground.loading #wrapper {
+	visibility: hidden;
+	opacity: 0;
 }
 
 .loader-bar::before, .loader-bar::after {
@@ -81,5 +89,22 @@ body.loading-foreground .loader-spinner {
 	border-width: 4px;
 	border-bottom-color: transparent;
 	border-left-color: transparent;
+}
+/* }}} */
+/* Foreground loader spinner {{{ */
+.splash.splash-loading-foreground .splah-loading-foreground-spinner {
+	position: absolute;
+	display: block;
+	width: 16rem;
+	height: 16rem;
+	border-top: 3px solid var(--main);
+	border-right: 3px solid transparent;
+	border-radius: 50%;
+	animation: splah-loading-foreground-spinner-spin 2s linear infinite;
+}
+
+@keyframes splah-loading-foreground-spinner-spin {
+	from{transform: rotate(0deg)}
+	to{transform: rotate(360deg)}
 }
 /* }}} */

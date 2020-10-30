@@ -115,7 +115,7 @@ module.exports = {
 <template>
 	<div class="attachments" :class="!attachments || !attachments.length ? 'empty' : ''">
 		<div v-if="loading">
-			<i class="fa fa-spinner fa-spin"/>
+			<i class="far fa-spinner fa-spin"/>
 			Loading attachments...
 		</div>
 		<div v-else>

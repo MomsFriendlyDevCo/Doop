@@ -11,4 +11,7 @@ import './polyfills/promise.isPromiseLike';
 import './polyfills/promise.tap';
 import './polyfills/promise.timeout';
 import './polyfills/regexp.escape';
+
+// Misc polyfills needed by MS Edge >=41
+import 'core-js/features/object/from-entries';
 </script>

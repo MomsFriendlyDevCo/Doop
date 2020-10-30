@@ -1,0 +1,274 @@
+<server on="middleware, dbMiddleware">
+var _ = require('lodash');
+
+/**
+* Database middleware to add a meta 'db.MODEL.search()' method onto a model
+*
+* Search works by attaching to save / update / create hooks and populating an array of searchable tokens per document
+* Searching then performs a RegExp against this (now flattened) array of items, calculating weight for each document
+*
+* The Monoxide ReST API is automatically compatible with this middleware adding a `db.MODEL.search(someFuzzyText)` method and `/api/MODEL?q=someFuzzyText` methods to the endpoint if search is enabled (the default). See examples.
+*
+* @param {MongoosySchema} schema Attach to this schema
+* @param {Object} options Options to pass when initalizing
+* @param {string} [options.path="_searchTokens"] Dotted notation path of where to store search meta information in each doc
+* @param {Object} [options.docFilter] Additional filter to apply to all `.search()` calls on the database
+* @param {function} [options.docSoftFilter] Additonal Monoxide filter to apply to all documents on each '.search()' call. Called as `(next, doc)`
+* @param {string} [options.select] Optional CSV of fields to limit by
+* @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
+* @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
+* @param {RegExp} [options.tagsRe] RegExp used to split tags
+*
+* @param {array<Object>} [options.fields] Field definition for each item that should be indexed
+* @param {string} [options.fields.name] Optional reference name for the field, useful when debugging
+* @param {string} [options.fields.path] Dotted notation path from where the value should be fetch if its a simple non-lookup value, can use either this or `option.fields.handler`
+* @param {function} [options.fields.handler] Function called as `(doc)` which is expected to return a single string to index, can use either this or `option.fields.path`
+* @param {number} [options.fields.weight=1] Weighting during search
+*
+* @param {Object<function>|Object<Object>} [options.tags] Define custom tag behaviour, tag keys are always lower case. If value is a function it is assumed to populate the `mongo` property.
+* @param {function} [options.tags.mongo] Called as `(query, val)` to mutate a Mongo query
+* @param {function} [options.tags.filter] Called as `(doc, val)` to filter documents after they have been fetched from Mongo, expected to return a (promisable) boolean indicating if the document should be included in the search
+*
+* @returns {function} Database middleware
+*
+* @example Attach search functionality to a model
+*   app.middleware.db.schema('users', { ... })
+*     .plugin(app.middleware.db.search, {
+*       fields: [
+*         {path: 'lastName', weight: 10},
+*         {path: 'firstName', weight: 5},
+*         {name: 'ageInYears', weight: 1, handler: doc => { // NOTE: Would only calculate on save, not on each run
+*           var ageDifMs = Date.now() - doc.dob.getTime(); // Assumes DoB field
+*           var ageDate = new Date(ageDifMs);
+*           return Math.abs(ageDate.getUTCFullYear() - 1970);
+*         }}
+*       ],
+*       tags: {
+*         is: (query, val) => query.find({status: val}), // Filter docs to those of a specific status (e.g. `IS:active`) via Mongo
+*         after: { // More explcit way of detailing how the tag should be handled
+*           mongo: (query, val) => query.find({created: {$gt: moment(val).toDate()}}), // Filter docs via Mongo to those created after the specified date (e.g. `AFTER:2020-02-28`)
+*         },
+*         dayOfWeek: {
+*           filter: (doc, val) => moment(doc.created).format('ddd') == val), // "Soft" filter using JS after the doc has been pulled to the day of the week (e.g. `DAY:Mon`)
+*         },
+*       },
+*     }))
+*
+* @example Fuzzy search the model returning matches as a weighted list
+*   db.users.search('smith 20')
+*     .then(users => {...}) // Users are sorted by the meta `_score` field, each document also returns with a `_score` field
+*
+* @example Ask the ReST end point for fuzzy search results
+*   GET /api/users?q=smith+20
+*
+* @example Ask the ReST end point for fuzzy search results including tags (assumes the `after` tag is defined as per the first example)
+*   GET /api/users?q=smith+20+after:2020-01-01
+*/
+app.middleware.db.search = (schema, options) => {
+	// Settings {{{
+	var settings = {
+		path: '_searchTokens',
+		fields: [
+			// Use static path
+			// {path: 'lastName', weight: 10},
+
+			// Use (sync/async) handler function, can be a promise return
+			// {name: 'ref', weight: 20, handler() {...}}
+		],
+		tags: {
+			// Filter by status
+			// status: (query, val) => query.find({status: val}),
+		},
+		mutateTokens: v => _.chain(v)
+			.toString()
+			.thru(v => v.toUpperCase())
+			.deburr()
+			.replace(/[^A-Z0-9\-:]+/g, ' ')
+			.trim()
+			.value(),
+		searchTermsSplit: v => _.chain(v)
+			.toString()
+			.thru(v => v.toUpperCase())
+			.deburr()
+			.split(/[^A-Z0-9\-:]/)
+			.value(),
+		docFilter: undefined,
+		docSoftFilter: (next, doc) => next(null, true),
+		select: undefined,
+		acceptTags: true,
+		mergeTags: {},
+		tagsRe: /^(?<tag>.+?):(?<val>.+)$/,
+		...options,
+	};
+	// }}}
+
+	// Inject index field into existing schema {{{
+	schema.add({ [settings.path]: {type: Array} });
+	// }}}
+
+	// Create index for the field we will be tokenizing into {{{
+	schema.index(`${settings.path}.value`);
+	// }}}
+
+	// Apply create / save / update hooks to documents to calculate the token storage {{{
+	var hookFactory = function(path) {
+		return function(next) {
+			var doc = (path && Object.prototype.hasOwnProperty.call(this, path)) ? this[path] : this;
+			Promise.all(settings.fields.map((field, fieldIndex) =>
+				field.path ? Promise.resolve({value: _.get(doc, field.path), weight: field.weight || 1}) // Static path
+				: field.handler ? Promise.resolve(field.handler(doc))
+					.then(value => ({value, weight: field.weight || 1}))
+				: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for collection ${schema.id} - specify "path" or "handler" at least`)
+			))
+				.then(tokens => tokens.map(token => ({...token, value: settings.mutateTokens(token.value)}))) // Mutate tokens
+				.then(tokens => tokens.filter(token => token.value)) // Remove falsy tokens
+				.then(tokens => {
+					console.log('set', settings.path, tokens);
+					_.set(doc, settings.path, tokens);
+				})
+				.then(()=> next())
+				.catch(next);
+		};
+	};
+
+	// TODO: Are others among these inside _update?
+	schema.pre(['save', 'update', 'updateOne', 'updateMany'], hookFactory());
+	schema.pre('findOneAndUpdate', hookFactory('_update'));
+	// }}}
+
+	// Add the schema.search() method {{{
+	/**
+	* Fuzzy search using the declared search fields
+	* @param {string} terms Search terms to filter
+	* @param {Object} [options] Additional options
+	* @param {Object} [options.filter] Additional Mongo compatible expression to filter on the database
+	* @param {boolean} [options.sort="_score"] Sort results by field automatically
+	* @param {function} [options.softFilter] Addtional "soft" filter to apply, added after the main settings.docFilter, called as `(next, doc)`
+	* @param {function} [options.limit=100] How many records to "soft" limit by
+	* @param {function} [options.skip=0] How many records to "soft" skip by
+	* @param {string} [options.select] Optional CSV of fields to limit by, overrides settings.select if present
+	* @param {boolean} [options.count=false] Return an object with the count of objects rather than those that match
+	* @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
+	* @param {Object} [options.mergeTags={}] Tags to merge into the terms tags, if `acceptTags=false` this is used instead of any user provided tags
+	* @param {RegExp} [options.tagsRe] RegExp used to split tags
+	* @returns {array<Object>} An array of matching documents with the meta `_score` field
+	*/
+	schema.static('search', function(terms, options) {
+		console.log('search', terms, options);
+		var searchSettings = {
+			filter: undefined,
+			softFilter: (next, doc) => next(null, true),
+			sort: '_score',
+			limit: 50,
+			skip: 0,
+			select: undefined,
+			count: false,
+			..._.cloneDeep(settings),
+			...options,
+		};
+
+		var termsRE = _.chain(terms)
+			.split(/\s+/) // Simple split by whitespace to detect tags
+			.filter(term => { // Remove tags
+				var tagBits = searchSettings.tagsRe.exec(term);
+				if (tagBits && searchSettings.acceptTags && searchSettings.tags[tagBits.groups.tag.toLowerCase()]) { // Found a valid tag and we are accepting tags
+					searchSettings.mergeTags[tagBits.groups.tag.toLowerCase()] = tagBits.groups.val;
+					return false; // Remove from output list of terms
+				} else if (tagBits && !searchSettings.acceptTags) { // Found a tag but we're ignoring them anyway
+					// Do nothing
+					return false;
+				} else if (tagBits && searchSettings.acceptTags && !searchSettings.tags[tagBits.groups.tag.toLowerCase()]) { // Found a tag but its invalid
+					app.log.warn('Invalid tag passed in search query', app.log.colors.cyan.bold(tagBits.groups.tag) + ':' + app.log.colors.cyan(tagBits.groups.val), '- tag ignored');
+					return false; // Remove from output list of terms
+				} else {
+					return true;
+				}
+			})
+			.thru(terms => terms.join(' ')) // Put array back together as a string now we've removed terms
+			.thru(terms => searchSettings.searchTermsSplit(terms)) // Split into an array of search terms...
+			.map(term => new RegExp(RegExp.escape(term), 'i')) // Encode each term as a RegExp
+			.value();
+
+		app.log(
+			`Performing ${!searchSettings.count ? 'search' : 'search-count'} on`,
+			'collection=', app.log.colors.cyan(schema.id),
+			'raw query=', app.log.colors.cyan(`"${terms}"`),
+			'RE query=', termsRE.map(t => app.log.colors.cyan(t.toString())).join(', '),
+			'tags=', _(searchSettings.mergeTags)
+				.map((v, k) => app.log.colors.cyan.bold(k) + ':' + app.log.colors.cyan(v))
+				.thru(v => v.length > 0 ? v.join(', ') : app.log.colors.grey('none'))
+				.value(),
+		);
+
+		return new Promise((resolve, reject) => {
+			var query = app.db[schema.id].find(_.chain(termsRE) // Setup object query from TermsRE extracted RegExps
+					.map(termRE => ({
+						[`${settings.path}.value`]: termRE,
+					}))
+					.thru(v => ({$or: v})) // Wrap multiple field checks in $or
+					.value()
+				);
+
+			// Include tag mongo filters if there are any {{{
+			_.forEach(searchSettings.mergeTags, (val, tag) => {
+				if (!searchSettings.tags[tag]) return app.log.warn('No handler for tag', app.log.colors.cyan.bold(tag) + ':' + app.log.colors.cyan(val), '- skipping query filter');
+				if (_.isFunction(searchSettings.tags[tag])) {
+					searchSettings.tags[tag].call(query, query, val);
+				} else if (_.isFunction(searchSettings.tags[tag].mongo)) {
+					searchSettings.tags[tag].mongo.call(query, query, val);
+				} // Implied else - tag is defined but has no Mongo query mutator, probably will just mutate on find
+			});
+			// }}}
+
+			query
+				.select(
+					settings.count ? '_id' // Only pick the _id if we're in count mode to save memory
+					: settings.select ? settings.select.split(',') // Otherwise assume settings.select is a CSV
+					: searchSettings.select ? searchSettings.select.split(',') // or fall back to main search setting
+					: undefined
+				)
+				// .filter(searchSettings.softFilter) // Apply soft filters
+				.exec((err, items) => {
+					if (err) {
+						reject(err);
+					} else if (searchSettings.count) {
+						resolve(items.length);
+					} else {
+						var res = _.chain(items)
+							.filter(doc => { // Handle Monoxide "soft" filters if there are any
+								return _.chain(searchSettings.mergeTags)
+									.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
+									.map((val, tag) => // Map all filters into a promise array
+										Promise.resolve(searchSettings.tags[tag].filter.call(doc, doc, val))
+									)
+									.thru(promises => Promise.all(promises)
+										.then(results => {
+											return (!results.length || results.every(r => r)); // No filters or all values are truthy
+										})
+									)
+									.value();
+							})
+							.map(doc => { // Remap each found doc...
+								if (!searchSettings.count) return doc; // We dont need to do any document mangling for count operations
+								return Promise.all(settings.fields.map((field, fieldIndex) =>
+									Promise.resolve(
+										field.path ? _.get(doc, field.path)
+										: field.handler ? field.handler(doc)
+										: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
+									)
+									.then(fieldVal => fieldVal && termsRE.some(re => re.test(fieldVal)) ? field.weight : 0)
+								))
+								.then(fieldScores => doc._score = fieldScores.reduce((t, v) => t + v, 0))
+								.then(()=> doc);
+							})
+							.thru(docs => (!searchSettings.count && searchSettings.sort) ? _.sortBy(docs, searchSettings.sort) : docs) // Sort by score
+							.thru(docs => (!searchSettings.count && (searchSettings.skip || searchSettings.limit)) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs)
+							.value();
+						resolve(res);
+					}
+				})
+		})
+	});
+	// }}}
+};
+</server>

@@ -13,7 +13,7 @@
 /* Sidebar animation */
 @media (max-width: 767px) {
 	/* Expanded */
-	.left.side-menu {
+	.left-side-menu {
 		transition: width 200ms ease-in-out;
 	}
 
@@ -28,7 +28,7 @@
 		min-height: 0 !important;
 		padding: 12px 20px !important;
 	}
-	#wrapper.enlarged .left.side-menu #sidebar-menu > ul > li > a i {
+	#wrapper.enlarged .left-side-menu #sidebar-menu > ul > li > a i {
 		font-size: 16px !important;
 		line-height: 17px;
 		margin-right: 15px !important;
@@ -43,7 +43,7 @@
 	}
 
 	/* Collapsed */
-	.enlarged .left.side-menu {
+	.enlarged .left-side-menu {
 		margin-left: 0 !important;
 		pointer-events: none;
 		transition-delay: 250ms;
@@ -63,7 +63,7 @@
 
 @media (min-width: 768px) {
 	/* Expanded */
-	.left.side-menu {
+	.left-side-menu {
 		transition: width 200ms ease-in-out;
 	}
 
@@ -109,6 +109,8 @@
 	.logo-inner-sm {
 		opacity: 0;
 		transition: opacity 200ms ease-in-out;
+		width: 80%;
+		margin-left: 5%;
 	}
 	.logo-inner-lg {
 		opacity: 1;
@@ -117,7 +119,7 @@
 	}
 
 	/* Collapsed */
-	.enlarged .left.side-menu {
+	.enlarged .left-side-menu {
 		transition-delay: 250ms;
 	}
 
@@ -159,10 +161,10 @@
 	}
 
 	/* General */
-	#wrapper.enlarged .left.side-menu #sidebar-menu > ul > li > a i {
+	#wrapper.enlarged .left-side-menu #sidebar-menu > ul > li > a i {
 		margin-right: 15px !important;
 	}
-	#wrapper.enlarged .left.side-menu #sidebar-menu ul > li > a span {
+	#wrapper.enlarged .left-side-menu #sidebar-menu ul > li > a span {
 		padding-left: 0;
 	}
 }

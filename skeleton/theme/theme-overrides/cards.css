@@ -8,6 +8,12 @@
 }
 /* }}} */
 
+/* Better spacing for cards {{{ */
+.card .card-body {
+	padding: 0.8rem 1.25rem 0.5rem;
+}
+/* }}} */
+
 /* Multiple cards all get squished up {{{ */
 .card + .card {
 	margin-top: 20px;

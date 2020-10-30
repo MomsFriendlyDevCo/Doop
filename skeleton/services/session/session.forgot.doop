@@ -1,0 +1,87 @@
+<endpoint>
+/**
+* Accept a user token to perform an immediate login
+* @param {string} req.params.token The token used to login the user
+*/
+app.get('/go/forgot/:token', (req, res) => {
+	app.db.users.findOne({
+		_token: req.params.token,
+		_tokenPurpose: 'forgot', // Restrict the token usage to users requesting logins only
+		//$errNotFound: false,
+	})
+		.then(user => user || Promise.reject('Password reset token invalid'))
+		.then(user => user.logIn(res).then(()=> user))
+		.then(user => user.releaseToken())
+		.then(()=> res.redirect('/forgot'))
+		.catch(e => res.sendError(403, e.toString()))
+});
+</endpoint>
+
+<server on="postEndpoints">
+var _ = require('lodash');
+var email = require('@momsfriendlydevco/email');
+
+app.post([
+	'/api/session/forgot',
+	...(app.config.session.auth.allowPost ? ['/forgot'] : []),
+], (req, res) => Promise.resolve()
+		// Sanity checks {{{
+		.then(()=> {
+			if (!req.body) throw new Error('No login credentials');
+			if (app.config.session.signup.emailAsUsername && !req.body.email) throw new Error('400: No email address provided');
+			if (!app.config.session.signup.emailAsUsername) req.body.email = req.body.username;
+			if (!app.config.session.signup.emailAsUsername && !req.body.username) throw new Error('400: No username provided');
+		})
+		// }}}
+		// Fetch user {{{
+		.then(()=> app.log('Check login for', req.body.email))
+		.then(()=> app.db.users.findOne({
+			//$errNotFound: false,
+			$or: [
+				{email: req.body.email},
+				{username: req.body.username},
+			],
+		}))
+		// FIXME: User enumeration
+		.then(user => user || Promise.reject('403: Unknown email address'))
+		// }}}
+		// Generate Token {{{
+		.then(user => user.setToken('forgot').then(token => {
+			user._token = token;
+			return user;
+		}))
+		// }}}
+		// TODO: Reset the password to lock out any malicious user. Potential back-fire as DoS?
+		// Dispatch email {{{
+		.then(user => {
+			app.log('Email', user.email, `/go/forgot/${user._token}`);
+			if (!app.config.email.enabled) return user;
+
+			email().send({
+				to: user.email,
+				subject: `Someone has requested a password reset on ${app.config.title}`,
+				template: `${app.config.paths.root}/services/session/session.forgot.email.html`,
+				templateParams: {
+					...user,
+					config: app.config,
+					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+					url: `/go/forgot/${user._token}`,
+				},
+			});
+			return user;
+		})
+		// }}}
+		
+		// End {{{
+		.then(user => res.send({_id: user._id}))
+		/*
+		.then(output => res.format({
+			html: ()=> res.redirect('/'),
+			json: ()=> res.status(200).send(output),
+			default: ()=> res.status(406).send('Not an acceptable login accept type'),
+		}))
+		*/
+		.catch(res.sendError)
+		// }}}
+);
+</server>

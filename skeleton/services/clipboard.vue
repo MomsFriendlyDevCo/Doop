@@ -18,7 +18,7 @@ module.exports = function() {
 			copyDiv.setAttribute('style', 'position: fixed; left: 50%; top: 50%'); // Kludge to not force the screen to scoll since we're appending to the end of the DOM
 			copyDiv.contentEditable = true;
 			document.body.appendChild(copyDiv);
-			copyDiv.innerHTML = text;
+			copyDiv.innerHTML = text.replace(/\n/g, '<br/>');
 			copyDiv.unselectable = "off";
 			copyDiv.focus();
 			document.execCommand('SelectAll');

@@ -1,6 +1,7 @@
 <component>
 module.exports = {
 	data() { return {
+		searchHasFocus: false,
 		searchQuery: this.$route.query.q,
 		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
 		helper: {
@@ -18,7 +19,13 @@ module.exports = {
 		* Submit the search form
 		*/
 		submit() {
-			this.$router.push({path: '/orders', query: {q: this.searchQuery}});
+			const search = { path: '/orders' };
+
+			if (this.searchQuery) {
+				search.query = {q: this.searchQuery};
+			}
+			this.$router.push(search).catch(_.noop);
+			this.setHelperVisibility(false)
 		},
 
 
@@ -148,11 +155,19 @@ module.exports = {
 </component>
 
 <template>
-	<form @submit.prevent="submit" role="search">
-		<input v-model="searchQuery" type="text" placeholder="Search orders..." class="form-control">
+	<form @submit.prevent="submit" role="search" :class="searchHasFocus && 'app-search-focus'">
+		<input
+			v-model="searchQuery"
+			type="text"
+			placeholder="Search orders..."
+			class="form-control app-search-input"
+			@keydown.enter="submit"
+			@focus="searchHasFocus = true"
+			@blur="searchHasFocus = false"
+		/>
 		<a @click="submit" class="far fa-search"/>
 		<a @click="setHelperVisibility('toggle')" class="far fa-chevron-down"/>
-		<div class="app-search-helper form-horizontal container" :class="showHelper && 'open'">
+		<div class="app-search-helper form-horizontal container pt-1" :class="showHelper && 'open'">
 			<div class="form-group row">
 				<label class="col-sm-3 col-form-label">Search</label>
 				<div class="col-sm-9">
@@ -215,6 +230,21 @@ module.exports = {
 </template>
 
 <style>
+/* Search input area {{{ */
+.app-search .app-search-focus input.app-search-input {
+	background: var(--white);
+	color: var(--dark);
+}
+
+.app-search .app-search-focus > a.far {
+	color: var(--dark);
+}
+
+.app-search input.app-search-input::placeholder {
+	color: var(--muted) !important;
+}
+/* }}} */
+
 /* Search helper {{{ */
 .navbar-custom .menu-left {
 	overflow: visible;
@@ -272,6 +302,23 @@ module.exports = {
 .app-search a.fa-chevron-down {
 	left: auto;
 	right: 5px;
+}
+/* }}} */
+
+/* Theme fixes {{{*/
+.app-search .digest-select a {
+	position: inherit;
+	top: initial;
+	left: initial;
+	height: auto;
+	line-height: 1;
+	width: auto;
+}
+.app-search .digest-select a.btn-hover-danger {
+	flex-grow: 0;
+	color: inherit;
+	border-radius: 0;
+	width: 31px;
 }
 /* }}} */
 </style>

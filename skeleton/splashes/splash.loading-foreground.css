@@ -1,8 +1,8 @@
 .splash.splash-loading-foreground {
 	background: #f3f3f3;
 	position: fixed;
-	top: 70px;
-	left: 240px;
+	top: 0;
+	left: 0;
 	right: 0;
 	bottom: 0;
 	z-index: 5; /* Must be >.navbar-main */

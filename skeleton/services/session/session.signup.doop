@@ -1,72 +1,94 @@
 <endpoint>
-var email = require('@momsfriendlydevco/email');
-
+var promisify = require('util').promisify;
 /**
-* Accept a simple config for a new user setup and attempt to create a new user
-* @param {Object} req.body.email The email address to create the new user with
-* @param {Object} req.body.password The password to create the new user with
+* Accept a user token to confirm email address
+* @param {string} req.params.token The token used to login the user
 */
-app.post('/api/session/signup', (req, res) => Promise.resolve()
-	// Sanity checks {{{
-	.then(()=> {
-		if (!app.config.session.signup.enabled) throw new Error('403: Signup is disabled');
-		if (!req.body) throw new Error('No login credentials');
-		if (!req.body.email) throw new Error('400: No email address provided');
-		if (!req.body.password) throw new Error('400: No password provided');
-	})
-	// }}}
-	// Check for existing user {{{
-	.then(()=> db.users.findOne({username: req.body.email, $errNotFound: false}))
-	.then(existing => existing && Promise.reject('400: Email already exists'))
-	// }}}
-	// Create new user stub {{{
-	.then(()=> app.db.users.create({ // User not fund - create a new user with provided details
-		email: req.body.email,
-		password: req.body.password,
-		status: 'signupPending',
-	}))
-	// }}}
-	// Generate signup token {{{
-	.then(user => user.setToken('signup').then(token => ({user, token})))
-	// }}}
-	// Dispatch signup email to user {{{
-	.then(({user, token}) => email().send({
-		to: user.email,
-		subject: `${app.config.title} - signup`,
-		template: `${app.config.paths.root}/services/session/session.signup.email.html`,
-		templateParams: {
-			user,
-			config: app.config,
-			url: `${app.config.publicUrl}/go/signup/accept/${token}`,
-		},
-	}))
-	// }}}
-	// End {{{
-	.then(()=> res.sendStatus(200))
-	.catch(res.sendError)
-	// }}}
-);
-</endpoint>
-
-
-<endpoint>
-/**
-* Accept an email signup token
-* @param {string} req.params.token The token related to accept
-* @returns {Object} Redirect request to /
-*/
-app.get('/go/signup/accept/:token', (req, res) => {
+// TODO: Could be more universal if `/go/:type/:token` was able to lookup a redirect URL also.
+// TODO: Could simply use the password confirmation endpoint
+app.get('/go/signup/:token', (req, res) => {
 	app.db.users.findOne({
 		_token: req.params.token,
-		_tokenPurpose: 'signup', // Restrict the token usage to users requesting signups only
+		_tokenPurpose: 'signup',
+		//$errNotFound: false,
 	})
-		.then(user => {
-			user.status = 'active';
-			return user.save();
-		})
-		.then(user => req.logIn(user).then(output => ({output, user})))
-		.then(({output, user}) => user.releaseToken().then(()=> output))
-		.then(output => res.redirect('/'))
-		.catch(()=> res.sendError(403, 'Signup token invalid'))
+		.then(user => user || Promise.reject('Signup token invalid'))
+		.then(user => user.logIn(res).then(()=> user))
+		.then(user => user.releaseToken())
+		.then(()=> res.redirect('/forgot'))
+		.catch(e => res.sendError(403, e.toString()))
 });
 </endpoint>
+
+<server on="postEndpoints">
+var _ = require('lodash');
+
+app.post([
+	'/api/session/signup',
+	...(app.config.session.auth.allowPost ? ['/signup'] : []),
+], (req, res) => Promise.resolve()
+		// Sanity checks {{{
+		.then(()=> {
+			if (!req.body) throw new Error('No login credentials');
+			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
+			if (!req.body.email) throw new Error('400: No email address provided');
+			if (!req.body.username) throw new Error('400: No username provided');
+			// TODO: Check valid email
+		})
+		// }}}
+		// Validate and create user {{{
+		.then(()=> app.log('Check login for', req.body.username))
+
+		// TODO: When permitted email domain list is defined ensure users domain matches
+
+		.then(()=> app.db.users.findOne({
+			//$errNotFound: false,
+			username: req.body.username,
+		}))
+		// FIXME: User enumeration
+		.then(user => user ? Promise.reject('403: User already exists'):user)
+		.then(()=> app.db.users.create({
+			email: req.body.email,
+			name: req.body.name || req.body.username || req.body.email,
+			username: req.body.username,
+		}))
+		// }}}
+		// Generate Token {{{
+		.then(user => user.setToken('signup').then(token => {
+			user._token = token;
+			return user;
+		}))
+		// }}}
+		// Dispatch email {{{
+		.then(user => {
+			app.log('Email', user.email, `/go/signup/${user._token}`);
+			if (!app.config.email.enabled) return user;
+
+			email().send({
+				to: user.email,
+				subject: `Welcome to ${app.config.title}`,
+				template: `${app.config.paths.root}/services/session/session.signup.email.html`,
+				templateParams: {
+					...user,
+					config: app.config,
+					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+					url: `/go/signup/${user._token}`,
+				},
+			});
+			return user;
+		})
+		// }}}
+		// End {{{
+		.then(user => res.send({_id: user._id}))
+		/*
+		.then(output => res.format({
+			html: ()=> res.redirect('/'),
+			json: ()=> res.status(200).send(output),
+			default: ()=> res.status(406).send('Not an acceptable login accept type'),
+		}))
+		*/
+		// FIXME: Hide nature of error.
+		.catch(res.sendError)
+		// }}}
+);
+</server>

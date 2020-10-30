@@ -22,6 +22,7 @@ module.exports = {
 		events: {type: Object},
 	},
 	render: function(h) {
+		// TODO: Could this use functional pattern with passing through context?
 		return h(this.$props.component, {
 			props: this.$props.props,
 			on: this.$props.events,

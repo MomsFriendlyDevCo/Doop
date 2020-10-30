@@ -1,6 +1,38 @@
+/*
 .topbar .topbar-title {
 	font-size: 28px;
 	color: var(--light);
 	text-align: center;
 	padding-top: 13px;
 }
+*/
+
+/*
+.button-menu-mobile,
+.topbar .topbar-left,
+*/
+.left-side-menu .logo-box,
+#wrapper .navbar-custom {
+	background-color: #222;
+}
+
+/*
+.topbar .nav-user.dropdown-toggle {
+	background: #eee;
+	border-radius: 50%;
+	height: 40px;
+	margin: 15px 10px;
+	padding: 0;
+	position: relative;
+	width: 40px;
+}
+
+.topbar .nav-user.dropdown-toggle > img {
+	height: 100%;
+	left: 0;
+	object-fit: cover;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+*/

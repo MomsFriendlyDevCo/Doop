@@ -21,27 +21,29 @@
 	<link rel="manifest" href="/assets/favicons/site.webmanifest">
 	<link rel="mask-icon" href="/assets/favicons/safari-pinned-tab.svg" color="#5bbad5">
 	<link rel="shortcut icon" href="/assets/favicons/favicon.ico">
-	<meta name="msapplication-TileColor" content="#2b5797">
-	<meta name="msapplication-config" content="/assets/favicons/browserconfig.xml">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#9f00a7">
 	<meta name="theme-color" content="#ffffff">
 
 	<!-- App (see end of file for main script loader) -->
 	<link href="/dist/vendors.main.css" rel="stylesheet" type="text/css"/>
-	<link href="/dist/vendors.fonts.css" rel="stylesheet" type="text/css"/>
+	<link href="/dist/vendors.fonts.fa5.css" rel="stylesheet" type="text/css"/>
+	<link href="/dist/vendors.fonts.minton.css" rel="stylesheet" type="text/css"/>
+	<link href="/dist/vendors.repack.css" rel="stylesheet" type="text/css"/>
 	<link href="/dist/app.css" rel="stylesheet" type="text/css"/>
 
 	<!-- Injection scripts -->
 	<%= app.config.layout.headInject.join('\n') %>
 </head>
 
-<body class="bootstrapping widescreen fixed-left <%- app.config.theme.theme %>">
+<body class="loading bootstrapping">
 	<!-- Splashes {{{ -->
 	<div class="splash splash-init">
 		<img src="/assets/logo/logo.svg"/>
 	</div>
 
 	<div class="splash splash-crash">
-		<img src="/assets/logo/logo.svg"/>
+		<img src="/assets/logo/logo-full-h.svg"/>
 		<div class="splash-crash-text">
 			<h3>Can't connect to server</h3>
 		</div>
@@ -55,58 +57,134 @@
 
 	<div class="splash splash-loading-foreground">
 		<img src="/assets/logo/logo.svg"/>
+		<div class="splah-loading-foreground-spinner"></div>
 	</div>
 	<!-- }}} -->
 
-	<div id="wrapper" class="forced">
-		<!-- Topbar {{{ -->
-		<div class="topbar">
-			<div class="topbar-left">
-				<div class="text-center">
-					<a v-href="'/'" class="logo">
-						<span class="logo-inner-sm">
-							<img src="/assets/logo/logo.svg"/>
-						</span>
-						<span class="logo-inner-lg">
-							<img src="/assets/logo/logo.svg"/>
-						</span>
-					</a>
-				</div>
-			</div>
-
-			<nav class="navbar-custom">
-				<ul class="list-inline float-right mb-0">
-					<user-dropdown></user-dropdown>
-				</ul>
-
-				<ul class="list-inline menu-left mb-0">
-					<li class="float-left">
-						<button class="button-menu-mobile open-left far fa-bars waves-effect" @click="toggleSidebar()">
-							<i class="mdi mdi-menu"></i>
-						</button>
-					</li>
-					<li class="hide-phone app-search float-left">
-						<search-navbar></search-navbar>
-					</li>
-				</ul>
-			</nav>
-		</div>
-		<!-- }}} -->
+	<div id="wrapper">
 
 		<!-- Sidebar {{{ -->
-		<div class="left side-menu">
-			<div id="sidebar-menu">
-				<sitemap-map></sitemap-map>
+		<div class="left-side-menu">
+
+			<!-- LOGO {{{ -->
+			<div class="logo-box">
+				<!--a href="/" class="logo logo-dark text-center">
+					<span class="logo-sm">
+						<img src="/assets/logo/logo.svg" alt="" height="24">
+					</span>
+					<span class="logo-lg">
+						<img src="/assets/logo/logo-full-h.svg" alt="" height="20">
+					</span>
+				</a-->
+
+				<a href="/" class="logo logo-light text-center">
+					<span class="logo-sm">
+						<img src="/assets/logo/logo-full-h.svg" alt="" height="24">
+					</span>
+					<span class="logo-lg">
+						<img src="/assets/logo/logo-full-h.svg" alt="" height="24">
+					</span>
+				</a>
+			</div>
+			<!-- }}} -->
+
+			<div class="h-100" data-simplebar>
+
+				<!-- User box {{{ -->
+				<!-- TODO: ??? -->
+				<!-- }}} -->
+
+				<div id="sidebar-menu">
+					<sitemap-map id="side-menu"></sitemap-map>
+				</div>
 				<div class="clearfix"></div>
 			</div>
-			<div class="clearfix"></div>
 		</div>
 		<!-- }}} -->
 
 		<!-- Content area {{{ -->
 		<div class="content-page">
 			<div class="content">
+
+				<!-- Topbar {{{ -->
+				<div class="navbar-custom">
+					<div class="container-fluid">
+						<ul class="list-unstyled topnav-menu float-right mb-0">
+							<!-- Search: Desktop {{{ -->
+							<li class="d-none d-lg-block">
+								<search-navbar></search-navbar>
+							</li>
+							<!-- }}} -->
+
+							<!-- Search: Mobile {{{ -->
+							<li class="dropdown d-inline-block d-lg-none">
+								<a class="nav-link dropdown-toggle arrow-none waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+									<i class="fe-search noti-icon"></i>
+								</a>
+								<div class="dropdown-menu dropdown-lg dropdown-menu-right p-0">
+									<form class="p-3" method="get" action="/search" role="search">
+										<input name="q" type="text" class="form-control" placeholder="Search ..." aria-label="Search">
+									</form>
+								</div>
+							</li>
+							<!-- }}} -->
+
+							<user-dropdown></user-dropdown>
+						</ul>
+
+						<!-- TODO: Logo here too? -->
+
+						<ul class="list-unstyled topnav-menu topnav-menu-left m-0">
+							<li>
+								<button class="button-menu-mobile waves-effect waves-light">
+									<i class="fe-menu"></i>
+								</button>
+							</li>
+
+							<li>
+								<!-- Mobile menu toggle (Horizontal Layout)-->
+								<a class="navbar-toggle nav-link" data-toggle="collapse" data-target="#topnav-menu-content">
+									<div class="lines">
+										<span></span>
+										<span></span>
+										<span></span>
+									</div>
+								</a>
+								<!-- End mobile menu toggle-->
+							</li>
+
+							<!--li class="hide-phone app-search float-left">
+								<form role="search" class="">
+									<input type="text" placeholder="Search..." class="form-control">
+									<a><i class="far fa-search"></i></a>
+								</form>
+							</li-->
+						</ul>
+						<div class="clearfix"></div>
+					</div>
+				</div>
+				<!-- }}} -->
+
+				<!-- Start Content {{{ -->
 				<div class="container-fluid">
+
+					<!-- start page title -->
+					<!--div class="row">
+						<div class="col-12">
+							<div class="page-title-box">
+								<h4 class="page-title">Welcome !</h4>
+								<div class="page-title-right">
+									<ol class="breadcrumb m-0">
+										<li class="breadcrumb-item"><a href="javascript: void(0);">Minton</a></li>
+										<li class="breadcrumb-item"><a href="javascript: void(0);">Dashboards</a></li>
+										<li class="breadcrumb-item active">Sales</li>
+									</ol>
+								</div>
+							</div>
+						</div>
+					</div-->
+					<!-- end page title --> 
+
 					<sitemap-breadcrumbs></sitemap-breadcrumbs>
 					<!-- Page transitions are managed by $transitions service -->
 					<transition
@@ -119,15 +197,48 @@
 						</div>
 					</transition>
 				</div>
+				<!-- }}} -->
+
+				<!-- Footer Start {{{ -->
+				<!--footer class="footer">
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-md-6">
+								<script>document.write(new Date().getFullYear())</script> &copy;
+							</div>
+							<div class="col-md-6">
+								<div class="text-md-right footer-links d-none d-sm-block">
+									<a href="javascript:void(0);">About Us</a>
+									<a href="javascript:void(0);">Help</a>
+									<a href="javascript:void(0);">Contact Us</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</footer-->
+				<!-- }}} -->
 			</div>
 		</div>
 		<!-- }}} -->
+
 
 		<!-- Helpers / Plugins {{{ -->
 		<vue-snotify></vue-snotify>
 		<prompt-injector></prompt-injector>
 		<!-- }}} -->
 	</div>
+
+	<!-- Right Sidebar {{{ -->
+	<div class="right-bar">
+		<div class="h-100" data-simplebar>
+			<div>Right-bar...</div>
+		</div>
+	</div>
+	<!-- }}} -->
+
+	<!-- Right bar overlay {{{ -->
+	<div class="rightbar-overlay"></div>
+	<!-- }}} -->
 
 	<script src="/dist/vendors.main.js"></script>
 	<script src="/dist/vendors.repack.js"></script>

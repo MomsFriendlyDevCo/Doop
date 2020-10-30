@@ -1,9 +1,9 @@
 <server on="middleware, dbMiddleware">
 /**
-* Wrapper for the Monoxide schema function
+* Wrapper for the schema function
 */
 
-var monoxide = require('monoxide');
+var mongoosy = require('@momsfriendlydevco/mongoosy');
 
-app.middleware.db.schema = monoxide.schema;
+app.middleware.db.schema = mongoosy.schema.bind(mongoosy);
 </server>

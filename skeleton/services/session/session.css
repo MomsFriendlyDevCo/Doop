@@ -1,0 +1,27 @@
+.session-float {
+	z-index: 150; /* Appear on top of particles splash screen */
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	overflow: auto;
+}
+
+.session-float .card {
+	box-shadow: 0 1px 20px 0 rgba(69,90,100,.8);
+}
+
+.session-float .card {
+	border-radius: 5px;
+}
+
+.session-float .logo {
+	width: 50vh;
+	margin-top: 5vh;
+	margin-bottom: 5vh;
+}
+
+.session-float .footer {
+	z-index: 1000;
+}

@@ -4,7 +4,7 @@
 * @param {string} permission... The permission or permissions the user requires to resolve the middleware
 * @return {function} Express middleware
 */
-
+// TODO: Ensure matches client-side version.
 app.middleware.express.hasPermission = (...permissions) => {
 	return function(req, res, next) {
 		if (!req.user) {

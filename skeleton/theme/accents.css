@@ -2,7 +2,8 @@
 * Color scheme variable additions
 */
 :root {
-	--main: #32a4d5;
+	--main: #32a4d5 !important;
+	--main-darker: #32a4d5;
 	--main-highlight: #9dd5ec;
 
 	/* Misc assistant colors */

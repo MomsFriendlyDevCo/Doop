@@ -4,8 +4,9 @@
 
 var eval = require('gulp-eval');
 var gulp = require('gulp');
-var monoxide = require('monoxide');
+var mongoosy = require('@momsfriendlydevco/mongoosy');
 var scenario = require('gulp-mongoose-scenario');
+var runSequence = require('run-sequence');
 
 gulp.task('db', 'scenario');
 
@@ -25,13 +26,16 @@ gulp.task('scenario', 'db:nuke', 'load:app.db', ()=> {
 		.pipe(eval())
 		.pipe(scenario({
 			nuke: true,
-			connection: monoxide.connection,
+			connection: mongoosy.connection,
 			getModels: ()=> Object.keys(app.db),
 			getCollection: collection => app.db[collection],
+			/*
+			// FIXME: Not needed with mongoosy?
 			getCollectionSchema: collection => {
 				if (!app.db[collection]) throw new Error('Scenario failed attempting to populate unknown database collection: ' + collection);
 				return app.db[collection].$mongooseModel.schema;
 			},
+			*/
 		}))
 		.on('error', err => finish('Error loading scenario:' + err.toString()));
 });

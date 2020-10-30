@@ -120,6 +120,10 @@ module.exports = {
 			if (this.endpointSort === undefined) this.endpointSort = this.sort || this.rowKey; // Set intial sort state
 			if (this.endpointSortAsc === undefined) this.endpointSortAsc = this.sortAsc;
 
+			// Omit empty keys from url object
+			if (_.isObject(this.url))
+				this.$setPath(this.url, 'params', _.pickBy(this.url.params, _.identity));
+
 			return Promise.resolve()
 				.then(()=> {
 					if (this.reloadCount > 0) {
@@ -226,6 +230,16 @@ module.exports = {
 			return this.refresh();
 		},
 
+		/**
+		* Apply any filters to output
+		* @param {string} value The raw value before formatting
+		* @param {function} formatter Function returning the formatted string
+		* @returns {string} Final formatted string
+		*/
+		format(value, formatter) {
+			if (typeof formatter === 'function') return formatter.call(Vue, value);
+			return value;
+		},
 
 		/**
 		* Scroll to the top of the table
@@ -298,7 +312,7 @@ module.exports = {
 						<td v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
 							<a v-href="cellHref ? cellHref(row) : false" :class="!cellHref && 'no-click'">
 								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
-									{{_.get(row, col.id)}}
+									{{format(_.get(row, col.id, col.format))}}
 								</slot>
 							</a>
 						</td>
@@ -341,7 +355,7 @@ module.exports = {
 							{{entity}}
 							{{limit * (endpointPage-1) + 1 | number}}
 							-
-							{{Math.min(rowCount, limit * (endpointPage)) | number}}
+							{{Math.min(rowCount, limit * (endpointPage -1) + 1) | number}}
 							of
 							{{rowCount | number}}
 						</div>

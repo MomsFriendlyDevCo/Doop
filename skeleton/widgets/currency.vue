@@ -24,7 +24,7 @@ module.exports = {
 		valueDisplay: undefined,
 	}},
 	methods: {
-		change(e) {
+		changeHandler(e) {
 			this.$emit('change', parseFloat(e.target.value));
 		},
 	},
@@ -51,7 +51,7 @@ module.exports = {
 			class="form-control"
 			:value="valueDisplay"
 			:min="$props.min"
-			@input="change"
+			@input="changeHandler"
 		>
 	</div>
 </template>

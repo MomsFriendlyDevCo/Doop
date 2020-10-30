@@ -66,7 +66,7 @@ module.exports = {
 			<th class="col-verbs"/>
 		</thead>
 		<tbody>
-			<tr v-for="(email, emailIndex) in emails">
+			<tr v-for="(email, emailIndex) in emails" :key="emailIndex">
 				<td class="pl-4">
 					<input
 						v-model="email.email"

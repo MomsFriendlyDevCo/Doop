@@ -1,4 +1,28 @@
 <endpoint>
+/**
+* Accept an email invite via token
+* @param {string} req.params.token The token used to login the user
+*/
+app.get('/go/invite/:token', (req, res) => {
+	app.db.users.findOne({
+		_token: req.params.token,
+		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
+		//$errNotFound: false,
+	})
+		// TODO: Disabled? Configurable.
+		.then(user => {
+			console.log('Would accept token for user', user);
+			throw new Error('NOPE!');
+		})
+		.then(user => user || Promise.reject('Password reset token invalid'))
+		.then(user => user.logIn(res).then(()=> user))
+		.then(user => user.releaseToken())
+		.then(()=> res.redirect('/'))
+		.catch(e => res.sendError(403, e.toString()))
+});
+</endpoint>
+
+<server on="postEndpoints">
 var _ = require('lodash');
 var email = require('@momsfriendlydevco/email');
 
@@ -9,81 +33,68 @@ var email = require('@momsfriendlydevco/email');
 * @param {Object} [req.body.permissions] Optional permissions to set for the user against the project, only available if the current user has usersPromote
 * @returns {Object} The newly created user object consisting of `{_id}`
 */
-app.post('/api/session/invite', (req, res) => {
-	var session = {user: undefined};
-
-	Promise.resolve()
+app.post([
+	'/api/session/invite',
+	...(app.config.session.auth.allowPost ? ['/invite'] : []),
+], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
 			if (!req.body.email) throw new Error('An email must be provided to invite a new user');
-			req.body.email = req.body.email.toLowerCase();
+			// TODO: Check valid email
 		})
 		// }}}
 		// Sanity check against the requesting user {{{
 		.then(()=> {
+			// FIXME: Use hasPermissions
 			if (!req.user.permissions.usersInvite) throw new Error('You are not permitted to invite new members');
 		})
 		// }}}
 		// Either find existing user or create stub account {{{
-		.then(()=> app.db.users.findOne({email: req.body.email, $errNotFound: false}))
+		.then(()=> app.db.users.findOne({
+			email: req.body.email,
+			//$errNotFound: false
+		}))
 		.then(user => {
 			if (user) return user; // Found existing user - pass on details
 
-			return app.db.users.create({ // User not fund - create a new user with provided details
+			return app.db.users.create({ // User not found - create a new user with provided details
 				email: req.body.email,
-				name: req.body.name || req.body.email,
-				emails: [{
-					email: req.body.email,
-					quote: true,
-					invoice: true,
-					delivery: true,
-					newsletter: true,
-				}],
-			})
+				name: req.body.name || req.body.username || req.body.email,
+				username: req.body.username
+			});
 		})
-		.then(user => session.user = user)
+		// TODO: async-chainable?
+		//.then(user => session.user = user)
 		// }}}
 		// Generate invite token {{{
-		.then(()=> session.user.setToken('invite'))
-		// }}}
-		// Dispatch invite email {{{
-		.then(token => email().send({
-			to: session.user.email,
-			subject: `You have been invited to ${app.config.title}`,
-			template: `${app.config.paths.root}/users/session.invite.email.html`,
-			templateParams: {
-				...session,
-				config: app.config,
-				url: `${app.config.publicUrl}/go/invite/accept/${token}`,
-			},
+		.then(user => user.setToken('invite').then(token => {
+			user._token = token;
+			return user;
 		}))
 		// }}}
+		// Dispatch email {{{
+		.then(user => {
+			app.log('Email', user.email, `/go/invite/${user._token}`);
+			if (!app.config.email.enabled) return user;
+
+			email().send({
+				to: user.email,
+				subject: `You have been invited to ${app.config.title}`,
+				template: `${app.config.paths.root}/services/session/session.invite.email.html`,
+				templateParams: {
+					...user,
+					config: app.config,
+					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+					url: `/go/invite/${user._token}`,
+				},
+			});
+			return user;
+		})
+		// }}}
 		// End {{{
-		.then(()=> res.send({_id: session.user._id}))
+		.then(user=> res.send({data: {_id: user._id}}))
 		.catch(res.sendError)
 		// }}}
 });
 </endpoint>
 
-
-<endpoint>
-/**
-* Accept an email invite via token
-* @param {string} req.params.token The token related to accept
-* @returns {Object} Redirect request to /
-*/
-app.get('/go/invite/accept/:token', (req, res) => {
-	app.db.users.findOne({
-		_token: req.params.token,
-		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
-	})
-		.then(user => {
-			user.status = 'active';
-			return user.save();
-		})
-		.then(user => req.logIn(user).then(output => ({output, user})))
-		.then(({output, user}) => user.releaseToken().then(()=> output))
-		.then(output => res.redirect('/'))
-		.catch(()=> res.sendError(403, 'Login token invalid'))
-});
-</endpoint>

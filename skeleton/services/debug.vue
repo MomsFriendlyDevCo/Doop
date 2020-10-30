@@ -39,7 +39,7 @@ module.exports = function() {
 				if (!callerBits) return;
 				return callerBits[1];
 
-			})() || 'UNKOWN SOURCE'
+			})() || 'UNKNOWN SOURCE'
 
 		// Allocate color {{{
 		if ($debug.seen[prefix] === undefined) { // Not seen this prefix before

@@ -1,0 +1,169 @@
+<endpoint>
+// TODO: Output formats
+
+var _ = require('lodash');
+
+/**
+* Get a list of supported aggregation queries from the glob of ./queries/*.js
+* @returns {array <Object>} An array representing each file
+*/
+app.get('/api/reports', app.middleware.express.isUser(), (req, res) => {
+	app.agents.get('reportFileRead')
+		.then(data => res.send(data.map(i => _.omit(i, ['email', 'emailSubject', 'emailTemplate']))))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+var _ = require('lodash');
+
+/**
+* Get a count of supported aggregation queries from the glob of ./queries/*.js
+* @returns {number} Number of files returned
+*/
+app.get('/api/reports/count', app.middleware.express.isUser(), (req, res) => {
+	app.agents.get('reportFileRead')
+		.then(data => res.send({ count: data.length }))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+var _ = require('lodash');
+var colors = require('chalk');
+
+/**
+* Run an aggregation query and return the result
+* @param {string} req.params.name The basename of the query to run
+* @param {number} [req.query.skip] Optional number of rows to skip (if the output is an array)
+* @param {number} [req.query.limit] Optional number of rows to limit to (if the output is an array)
+* @returns {*} The result of the aggregation query
+*/
+app.get('/api/reports/:name', app.middleware.express.isUser(), (req, res) => {
+	console.log(colors.green('[Reports: requested] ') + colors.cyan(`${req.params.name}`) + ' was requested by user: ' + colors.cyan(`${req.user.name}`) + ' (' + '_id: ' +  colors.cyan(`${req.user._id}`) + ')');
+	app.agents.run('report', {file: req.params.name})
+		.then(data => res.send(data))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+var _ = require('lodash');
+var fs = require('fs').promises;
+var fspath = require('path');
+var globby = require('globby');
+var readable = require('@momsfriendlydevco/readable');
+var dump = require('dumper.js').dump;
+
+/**
+* Get a list of historic data we have for a specific report
+* @param {string} req.params.name The name of the report to query
+* @param {string} req.query.sort The key to sort by
+* @param {number} req.query.skip The number of results to skip at the begining
+* @param {number} req.query.limit The maximum number of results to return
+* @returns {Array <Object>} Collection of historical data
+*/
+app.get('/api/reports/:name/history', app.middleware.express.isUser(), (req, res) => {
+	globby(`${app.config.paths.data}/reports/${req.params.name}/*.json`)
+		.then(files => Promise.all(
+			files.map(file =>
+				fs.stat(file)
+					.then(stats => ({
+						...stats,
+						// Filename is the date.
+						date: fspath.basename(file, '.json'),
+					}))
+			)
+		))
+		.then(files => files.map(file => ({
+			date: file.date,
+			size: file.size,
+			sizeReadable: readable.fileSize(file.size),
+			ctime: file.ctime,
+		})))
+		// TODO: Simple use SIFT and support queries from v-table search feature also?
+		.then(files => {
+			if (req.query.sort && req.query.sort.indexOf('-') === 0) {
+				return _.sortBy(files, req.query.sort.substring(1)).reverse();
+			} else {
+				return _.sortBy(files, req.query.sort || 'date');
+			}
+		})
+		.then(files => {
+			if (parseInt(req.query.skip) > 0)
+				files.splice(0, parseInt(req.query.skip));
+			return files;
+		})
+		.then(files => {
+			if (parseInt(req.query.limit) > 0)
+				files.splice(parseInt(req.query.limit));
+			return files;
+		})
+		.then(files => res.send(files))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+var _ = require('lodash');
+var fs = require('fs').promises;
+var fspath = require('path');
+var globby = require('globby');
+var readable = require('@momsfriendlydevco/readable');
+
+/**
+* Get a count of historic data we have for a specific report
+* @param {string} req.params.name The name of the report to query
+* @returns {Array <Object>} Collection of historical data
+*/
+app.get('/api/reports/:name/history/count', app.middleware.express.isUser(), (req, res) => {
+	globby(`${app.config.paths.data}/reports/${req.params.name}/*.json`)
+		.then(files => Promise.all(
+			files.map(file =>
+				fs.stat(file)
+					.then(stats => ({
+						...stats,
+						// Filename is the date.
+						date: fspath.basename(file, '.json'),
+					}))
+			)
+		))
+		.then(files => files.map(file => ({
+			date: file.date,
+			size: file.size,
+			sizeReadable: readable.fileSize(file.size),
+			ctime: file.ctime,
+		})))
+		.then(files => res.send({count: files.length}))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+var _ = require('lodash');
+var fs = require('fs').promises;
+var fspath = require('path');
+
+/**
+* Get a historical data snapshot
+* @param {string} req.params.name The name of the report to query
+* @param {string} req.params.date The date (ISO format) of the file to retrieve
+* @returns {Object} JSON data (unless overriden using the formatting middleware
+*/
+app.get('/api/reports/:name/history/:date', app.middleware.express.isUser(), app.middleware.express.format(), (req, res) => {
+	fs.readFile(`${app.config.paths.data}/reports/${req.params.name}/${fspath.basename(req.params.date)}.json`)
+		.then(buf => JSON.parse(buf))
+		.then(data => res.send(data))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+
+
+
+
+
+
+
+
+

@@ -15,11 +15,13 @@ app.middleware.db.timestamps = options => {
 	// Settings {{{
 	var settings = {
 		key: 'status',
-		path: doc => `timestamps.${doc.status}`,
+		// FIXME: Doesn't use key for status...
+		path: doc => `timestamps.${doc.status}`, 
 		...options,
 	};
 	// }}}
 
+	// FIXME: Update to pre style with `this` instead of `doc`
 	return function(done, doc) {
 		if (!doc[settings.key]) return done(); // Not changing status
 

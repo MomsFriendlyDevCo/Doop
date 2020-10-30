@@ -1,6 +1,23 @@
-/* Modal headers look weird */
-.modal .modal-dialog .modal-content .modal-header {
-	border-bottom-width: 1px;
+.modal-dialog {
+	box-shadow: 0 0 15px 1px rgba(50, 50, 50, 0.75);
+}
+
+.modal-content {
+	border: 0;
+}
+
+.modal-header {
+	background-color: #222;
+	color: var(--white);
+	letter-spacing: 0.075em;
+	text-transform: uppercase;
+	word-spacing: 0.2em;
+}
+
+.modal-header > h4 {
+	color: var(--white);
+	text-align: center;
+	width: 100%;
 }
 
 /* Support for modal sizes */
@@ -14,9 +31,8 @@
 
 /* Close buttons look weird */
 .modal .modal-dialog .close {
-	text-align: center;
-	padding-top: 6px;
-	font-size: 20px;
+	color: var(--white);
+	line-height: inherit;
 }
 
 .modal .modal-dialog .close:hover {

@@ -1,9 +1,6 @@
-<import>
-./node_modules/vue-select/dist/vue-select.css
-</import>
-
 <script repack>
 import {VueSelect} from 'vue-select';
+import './node_modules/vue-select/dist/vue-select.css';
 Vue.component('v-select', VueSelect);
 </script>
 

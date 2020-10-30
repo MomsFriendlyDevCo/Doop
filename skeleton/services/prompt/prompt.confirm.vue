@@ -22,7 +22,7 @@ app.ready.then(()=> {
 					title: 'Cancel',
 					method: 'reject',
 					class: 'btn btn-danger',
-					icon: 'fa fa-times',
+					icon: 'far fa-times',
 				}],
 				right: [{
 					id: 'confirm',

@@ -1,0 +1,1 @@
+$(document).ready(function(){$("#addproduct-nav-pills-wizard").bootstrapWizard({tabClass:"nav nav-pills nav-justified"}),$("#product-description").summernote({height:180,minHeight:null,maxHeight:null,focus:!1}),$(".select2").select2()});

@@ -35,9 +35,9 @@ module.exports = {
 					if (_.isObject(i) && i.user) { // Only user linkage
 						var foundUser = (this.options || []).find(o => o.id == i.user);
 						if (foundUser) { // We know this user from the available options data
-							return {id: i.user, label: foundUser.label};
-						} else if (foundUser = this.$digest.getSync(`/api/users/${i.user}`, 'name')) { // Does $digest have the lookup cached?
-							return {id: i.user, label: foundUser};
+							return {id: i.user, label: foundUser.label, email: foundUser.email};
+						} else if (foundUser = this.$digest.getSync(`${this.$props.userUrl}/${i.user}`, 'name')) { // Does $digest have the lookup cached?
+							return {id: i.user, label: foundUser, email: foundUser.email};
 						} else if (this.userCache[i.user]) { // Do we have this in the user cache?
 							return this.userCache[i.user];
 						} else { // Make a lazy fetch request to find the user and dynamically update their name
@@ -48,9 +48,10 @@ module.exports = {
 							});
 
 							// Make a passive request to get the users name
-							this.$digest.get(`/api/users/${i.user}`, 'name')
-								.then(name => {
-									this.$set(this.userCache[i.user], 'label', name);
+							this.$digest.get(`${this.$props.userUrl}/${i.user}`)
+								.then(user => {
+									this.$set(this.userCache[i.user], 'label', user.name);
+									this.$set(this.userCache[i.user], 'email', user.email);
 									this.$set(this.userCache[i.user], 'loading', false);
 								});
 
@@ -66,16 +67,20 @@ module.exports = {
 				})
 				.filter(i => i);
 		},
+		url(){
+			return `${this.$props.userUrl}?select=${this.$props.idField},${this.$props.labelField},${this.$props.emailField}`
+		},
 	},
 	methods: {
-		change(value) {
-			this.$emit('change', value.map(v => v.id ? {user: v.id} : {email: v.label}));
-			this.$emit('change-emails', value.map(v => v.email || v.label));
+		changeHandler(value) {
+			this.$emit('change', value.map(v => v.id ? {user: v.id, email: v.email } : {email: v.label || v}));
+			this.$emit('change-emails', value.map(v => v.email || v.label || v));
 		},
-		refresh() {
+		refresh(term) {
+			if (!term) return;
 			return Promise.resolve()
 				.then(()=> this.$loader.startBackground())
-				.then(()=> this.$digest.get(this.$props.userUrl))
+				.then(()=> this.$digest.get(`${this.url}&q=${term}`))
 				.then(res => this.options = res.map(u => ({
 					id: u[this.$props.idField],
 					label: u[this.$props.labelField],
@@ -86,6 +91,9 @@ module.exports = {
 		lazyRefresh() {
 			if (!this.options) return this.refresh();
 		},
+		search: _.debounce(function(...args){
+			return this.refresh(...args);
+		}, 350),
 	},
 };
 </component>
@@ -99,8 +107,8 @@ module.exports = {
 			multiple
 			taggable
 			select-on-tab
-			@input="change"
-			@search:focus="lazyRefresh()"
+			@input="changeHandler"
+			@search="search"
 		>
 			<template slot="option" slot-scope="option">
 				<i class="fas fa-user"/>

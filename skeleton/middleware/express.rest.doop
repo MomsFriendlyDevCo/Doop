@@ -1,6 +1,6 @@
 <server on="middleware">
 /**
-* Wrapper around monoxide that provides a ReST interface on a named model with options
+* Wrapper around ReST interface on a named model with options
 *
 * @example expose the widgets collection as a ReST interface
 * app.use('/api/widgets/:id?', app.middleware.express.rest('templates', {
@@ -14,7 +14,7 @@
 *   delete: app.middleware.express.hasLogin,
 * }));
 */
-var monoxide = require('monoxide');
+var mongoosy = require('@momsfriendlydevco/mongoosy');
 
-app.middleware.express.rest = monoxide.express.middleware;
+app.middleware.express.rest = mongoosy.serve.bind(mongoosy);
 </server>

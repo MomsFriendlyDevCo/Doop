@@ -18,7 +18,7 @@ module.exports = {
 		'node_modules/popper.js/dist/umd/popper.js', // Needed by Bootstrap
 
 		// --- 2. DEPENDENT packages below this line --- //
-		'node_modules/bootstrap/dist/css/bootstrap.css',
+		//'node_modules/bootstrap/dist/css/bootstrap.css', // Using customised version from Minton
 		'node_modules/bootstrap/dist/js/bootstrap.js',
 		'node_modules/vue/dist/vue.js',
 

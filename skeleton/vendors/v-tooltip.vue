@@ -1,6 +1,7 @@
-<import>
-./node_modules/v-tooltip/dist/v-tooltip.umd.js
-</import>
+<script repack>
+import {VTooltip} from 'v-tooltip';
+Vue.component('v-tooltip', VTooltip);
+</script>
 
 <style>
 /* .tooltip {{{ */

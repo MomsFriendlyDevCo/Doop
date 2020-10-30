@@ -24,6 +24,7 @@ app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sa
 /**
 * Endpoint for basic server santity checks
 * This endpoint runs all /sanity/*.js scripts scripts (resolving promises) and only returns `"SANITY:OK"` if everything passes, otherwise errors are shown
+* Workers can throw - in which case sanity fails or return a string (shows as the passing text string)
 */
 app.get(
 	'/api/sanity',

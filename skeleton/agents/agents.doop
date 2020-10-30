@@ -1,0 +1,114 @@
+<server on="agents">
+var Agents = require('@momsfriendlydevco/agents');
+
+exports = ()=> new Promise(resolve => {
+	app.log('Initialising');
+	app.agents = new Agents(app.config.agents);
+
+	app.agents
+		.on('init', ()=> app.log('Created agents interface'))
+		.on('ready', ()=> {
+			app.log('Agents interface ready');
+			resolve();
+		})
+		.on('destroy', ()=> app.log('Destroying agents interface'))
+		.on('destroyed', ()=> app.log('Destroyed agents interface'))
+		.on('refreshWarn', (path, msg) => app.log(app.log.colors.yellow('WARNING'), app.log.colors.cyan(path), msg))
+		.on('refresh', ids => app.log('Loaded agents:', ids.map(i => app.log.colors.cyan(i)).join(', ')))
+		.on('tick', id => app.log('Refreshing agent', app.log.colors.cyan(id), 'from cron timing', app.log.colors.cyan(app.agents._agents[id].timing)))
+		.on('scheduled', id => app.log('Installed agent', app.log.colors.cyan(id), 'with timing', app.log.colors.cyan(app.agents._agents[id].timing)))
+		.on('runImmediate', id => app.log('Agent', app.log.colors.cyan(id), 'marked for immediate run!'))
+		.on('log', (session, ...args) => app.log.apply(this, [app.log.colors.blue(`[agents / ${session.cacheKey}]`)].concat(args)))
+		.on('warn', (session, ...args) => app.log.apply(this, [app.log.colors.blue(`[agents / ${session.cacheKey}]`), 'WARN'].concat(args)))
+
+	app.on('exit', ()=>
+		app.agents.destroy()
+			.then(()=> app.log('Agents Destroyed'))
+	);
+
+	app.agents.init()
+});
+</server>
+
+<endpoint>
+var _ = require('lodash');
+
+/**
+* Get a list of agents
+* @returns {array <Object>} An array representing each agent
+*/
+// FIXME: More restrictive permissions?
+app.get('/api/agents', app.middleware.express.isUser(), (req, res) => {
+	app.agents.list()
+		.then(data => res.send(data.map(i => _.omit(i, ['email', 'emailSubject', 'emailTemplate']))))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+var _ = require('lodash');
+
+/**
+* Get a list of agents
+* @returns {array <Object>} An array representing each agent
+*/
+// FIXME: More restrictive permissions?
+app.get('/api/agents/count', app.middleware.express.isUser(), (req, res) => {
+	app.agents.list()
+		.then(data => res.send({ count: data.length }))
+		.catch(err => res.sendError(err))
+});
+</endpoint>
+
+<endpoint>
+/**
+* Get the CACHED return value of a given agent
+* NOTE: This does not regenerate the answer - only pull the last calculated value. Add `/regenerate` as a suffix if you want the fresh value calculated
+* @param {string} req.param.id The ID of the agent to fetch the value of
+* @returns {Object} The JSON object return of the agent
+*/
+app.get('/api/agents/:id', app.middleware.express.isUser(), (req, res) => {
+	app.agents.get(req.params.id)
+		.then(contents => res.send(contents))
+		.catch(res.sendError)
+});
+</endpoint>
+
+<endpoint>
+/**
+* Force regenerate a given agent
+* @param {string} req.param.id The ID of the agent to regenerate
+* @returns {Object} An empty object representing success
+*/
+app.get('/api/agents/:id/regenerate', app.middleware.express.isUser(), (req, res) => {
+	app.agents.run(req.params.id)
+		.then(contents => res.sendStatus(200))
+		.catch(res.sendError);
+});
+</endpoint>
+
+<endpoint>
+/**
+* Invalidate a cached agent response
+* @param {string} req.param.id The ID of the agent to invalidate
+* @returns {Object} An empty object representing success
+*/
+app.get('/api/agents/:id/invalidate', app.middleware.express.isUser(), (req, res) => {
+	app.agents.invalidate(req.params.id)
+		.then(()=> res.sendStatus(200))
+		.catch(res.sendError)
+});
+</endpoint>
+
+<endpoint>
+/**
+* Lazy fetcher to return the size of a agent
+* @param {string} req.param.id The ID of the agent to fetch the response size of
+* @returns {Object} An object with a single key 'size' which is a number
+*/
+app.get('/api/agents/:id/size', app.middleware.express.isUser(), (req, res) => {
+	app.agents.getSize(req.params.id)
+		.then(size => res.send({size: size || false}))
+		.catch(res.sendError)
+});
+</endpoint>

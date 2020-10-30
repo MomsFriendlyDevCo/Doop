@@ -9,6 +9,9 @@
 * `$changed(key)` (returns a boolean if the specified key has changed)
 * `$clear()` (sets the dirty bit to false, reimages the object and returns the new value. Effectively recreating the proxy)
 * `$diff` (object difference by key)
+* `$assign(newObject)` Splice one object into the one being monitored, does not call $clear() automatically
+* `$drop()` Drop all existing keys for the object - sets the object state to empty, does not call $clear() automatically
+* `$overwrite(newObject)` Overwrite all keys of an object without breaking its pointer - convenience wrapper for $drop() + $assign(newObject) + $clear()
 *
 * NOTE: This function uses 'lazy' dirty checking which locks as 'dirty' on the first detected change. Changing the value BACK will not reset this
 *
@@ -45,9 +48,31 @@ module.exports = function() {
 					};
 				} else if (prop == '$diff') {
 					return _.pickBy(src, (v, k) => $changed(k));
+				} else if (prop == '$assign') {
+					return newObj => {
+						Vue.prototype.$assign(obj, newObj);
+						return obj;
+					};
+				} else if (prop == '$drop') {
+					return ()=> {
+						for (var k in obj) {
+							Vue.delete(obj, k);
+						}
+						return obj;
+					};
+				} else if (prop == '$overwrite') {
+					return newObj => {
+						for (var k in obj) {
+							Vue.delete(obj, k);
+						}
+						Vue.prototype.$assign(obj, newObj);
+						originalDoc = _.cloneDeep(obj);
+						isDirty = false;
+						return obj;
+					};
+				} else { // Drop through to direct access for everything else
+					return obj[prop];
 				}
-
-				return obj[prop];
 			},
 		});
 	};
@@ -129,6 +154,9 @@ module.exports = {
 					<a class="list-group-item" @click="changeQuz()">Change Quz</a>
 					<a class="list-group-item" @click="changeFoo(); changeBar(); changeBaz(); changeQuz()">Change All</a>
 					<a class="list-group-item" @click="data.$clear()">Clear</a>
+					<a class="list-group-item" @click="data.$assign({quark: 1})">Assign Quark</a>
+					<a class="list-group-item" @click="data.$overwrite({flarp: 1})">Overwrite Flarp</a>
+					<a class="list-group-item" @click="data.$drop()">Drop</a>
 					<a class="list-group-item" @click="reset()">Reset</a>
 				</div>
 			</div>

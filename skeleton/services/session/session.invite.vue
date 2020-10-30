@@ -1,67 +1,81 @@
 <component>
 module.exports = {
-	route: '/session/invite',
+	route: '/invite',
 	data() { return {
-		user: {
+		data: {
+			_id: undefined,
 			email: undefined,
 			name: undefined,
+			username: undefined,
+		},
+		spec: {
+			type: 'mgContainer',
+			layout: 'card',
+			items: [
+				{
+					type: 'mgText',
+					id: 'username',
+					title: 'Username',
+					required: true,
+					showIf: () => !this.$config.session.signup.emailAsUsername
+				},
+				{
+					type: 'mgEmail',
+					id: 'email',
+					title: 'Email',
+					required: true,
+				},
+				{
+					type: 'mgText',
+					id: 'name',
+					title: 'Name',
+					required: true,
+				},
+			]
 		},
 	}},
 	methods: {
-		submit() {
+		submit(notification = false, redirect = false) {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
-				.then(()=> this.$http.post('/api/session/invite', this.user))
-				.then(()=> this.$toast.success(`Invite sent to ${this.user.name || this.user.email}`))
-				.then(res => this.$router.go(`/users/${res.data._id}`))
+				.then(()=> this.$http.post('/api/session/invite', this.data))
+				.then(res=> this.data._id = res.data._id)
+				.then(()=> notification && this.$toast.success(`Invite sent to ${this.data.name || this.data.email}`))
+				.then(()=> redirect && this.$router.push(`/users/${this.data._id}`))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop())
 		},
+	},
+	created() {
+		this.$debugging = true;
 	},
 };
 </component>
 
 <template>
-	<form class="form-horizontal" @submit.prevent="submit()">
+	<form class="form-horizontal" @submit.prevent="submit(true, true)">
 		<div class="btn-group-float">
-			<a @click="submit()" class="btn btn-icon btn-lg btn-circle btn-success fa fa-check" v-tooltip="'Send user invite'"></a>
+			<button
+				v-tooltip="'Send invite'"
+				type="submit"
+				class="btn btn-icon btn-lg btn-circle btn-success"
+				><i class="fa fa-check" /></button>
 		</div>
 
-		<!-- Card: User information {{{ -->
-		<div class="card">
-			<div class="card-header">User information</div>
+		<mg-form
+			:config="$data.spec"
+			:data="$data.data"
+			@changeItem="$setPath($data.data, $event.path, $event.value)"
+		/>
+
+		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
+			<div class="card-header">
+				Raw data
+				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>
+			</div>
 			<div class="card-body">
-				<div class="form-group row">
-					<label class="col-4 col-form-label">Email</label>
-					<div class="col-8 col-form-label">
-						<input
-							v-model="user.email"
-							type="email"
-							class="form-control"
-							data-lpignore="true"
-							autocomplete="off"
-							required
-							autofocus
-						/>
-					</div>
-				</div>
-				<div class="form-group row">
-					<label class="col-4 col-form-label">Name (optional)</label>
-					<div class="col-8 col-form-label">
-						<input
-							v-model="user.name"
-							type="text"
-							class="form-control"
-							data-lpignore="true"
-							autocomplete="off"
-							@keyup.enter="submit()"
-						/>
-					</div>
-				</div>
+				<pre>{{$data}}</pre>
 			</div>
 		</div>
-		<!-- }}} -->
-
 	</form>
 </template>
-

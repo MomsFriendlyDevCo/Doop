@@ -9,5 +9,5 @@ gulp.task('db:nuke', 'load:app', ()=> {
 	return Promise.resolve()
 		.then(()=> _.last(app.config.mongo.uri.split('/')))
 		.then(dbName => dbName || Promise.reject('Cannot determine DB name from app.config.mongo.uri'))
-		.then(dbName => exec(['mongo', dbName, '--eval', 'db.dropDatabase()'], {log: gulp.log}))
+		.then(dbName => exec(['/usr/bin/mongo', dbName, '--eval', 'db.dropDatabase()'], {log: gulp.log}))
 });

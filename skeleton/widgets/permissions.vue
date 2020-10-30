@@ -1,52 +1,73 @@
 <component>
 /**
-* Display a permission setting UI
-* The current permissions are specified with `selected` and their spec available with `spec`
-* @param {Object} selected The currently selected permissions
-* @param {Object} spec The specification (retrieved via /api/widgets/meta)
-* @param {string} [specPerfix=""] How to filter the flat `spec` object to the permissions list
-* @emits change Event emitted as `(selected)` when the user changes the permissions
+* Check permissions on a session object
+* @param {String/Array/Object} allow String, Array or SIFT of required permissions
+* @param {String/Boolean} any When checking for an array of permissions use OR rather than AND logic
+
+* @example Check for a single permission
+* <permissions allow="debug">
+*   <div class="card">
+*     <div class="card-header">
+*       Permissions (Wrapped)
+*     </div>
+*     <div class="card-body">
+*       string
+*     </div>
+*   </div>	
+* </permissions>
+*
+* @example Ensure user has all listed permissions
+* <permissions :allow="['debug','foo']">
+*   <div class="card">
+*     <div class="card-header">
+*       Permissions (Wrapped)
+*     </div>
+*     <div class="card-body">
+*       array (all)
+*     </div>
+*   </div>	
+* </permissions>
+*
+* @example Ensure user has any of the listed permissions
+* <permissions :allow="['debug','foo']" any="true">
+*   <div class="card">
+*     <div class="card-header">
+*       Permissions (Wrapped)
+*     </div>
+*     <div class="card-body">
+*       array (any)
+*     </div>
+*   </div>	
+* </permissions>
+*
+* @example Customise query to include further conditions
+* <permissions :allow="{ $or: [{'debug': false},{'foo': true}]}">
+*   <div class="card">
+*     <div class="card-header">
+*       Permissions (Wrapped)
+*     </div>
+*     <div class="card-body">
+*       SIFT
+*     </div>
+*   </div>
+* </permissions>
+
 */
 module.exports = {
 	props: {
-		selected: {type: Object, required: true},
-		spec: {type: Object, required: true},
-		specPrefix: {type: String, default: ''},
+    allow: {type: [String,Array,Object], required: true},
+    any: {type:[String,Boolean], required: false},
 	},
-	computed: {
-		permissions() {
-			return Object.keys(this.spec)
-				.filter(k => k.startsWith(this.$props.specPrefix))
-				.map(k => ({
-					...this.spec[k],
-					key: k.substr(this.$props.specPrefix.length),
-					title: _.startCase(k.substr(this.$props.specPrefix.length))
-						.split(' ')
-						.map(word => `${word} >`)
-						.join(' ')
-						.replace(/ >$/, ''),
-				}))
-		},
-	},
-	methods: {
-		change(key) {
-			this.$props.selected[key] = ! this.$props.selected[key];
-			this.$emit('change', this.selected);
-		},
+	functional: true,
+	render: function (createElement, context) {
+		
+		var $session = Vue.services().$session;
+		//$session.$debugging = true;
+		$session.$debug('permissions', context.props.allow, context.props.any, $session.hasPermission(context.props.allow));
+		if (context.props.allow.any && !$session.hasPermission.any(context.props.allow)) return;
+		if (!$session.hasPermission(context.props.allow)) return;
+		// Transparently pass any attributes, event listeners, children, etc.
+		return createElement('div', context.data, context.children)
 	},
 };
 </component>
-
-<template>
-	<div>
-		<div v-for="permission in permissions" :key="permission.key" class="form-group row m-b-0">
-			<div class="col-11 col-form-label">
-				<toggle-button
-					:value="$props.selected[permission.key]"
-					@change="change(permission.key)"
-				/>
-				{{permission.title}}
-			</div>
-		</div>
-	</div>
-</template>

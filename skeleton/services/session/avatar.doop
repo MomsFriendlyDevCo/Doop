@@ -1,0 +1,81 @@
+<endpoint>
+var _ = require('lodash');
+var async = require('async-chainable');
+var colors = require('chalk');
+var crypto = require('crypto');
+var fs = require('fs');
+var fspath = require('path');
+var superagent = require('superagent');
+
+/**
+* Serve a users Gravatar icon
+*
+* Process:
+*     1. Does ./data/avatars/generated/${user.username}.png exist? - if so use that
+*     2. Does ./data/avatars/override/${user.username}.png exist? - if so use that
+*     3. Generate / fetch the icon from gravatar.com
+*
+* This is really just a local-caching proxy for the Gravatar service
+* The icon size is always app.config.session.avatar.size (default: 100)
+* NOTE: For caching reasons you must ALWAYS specify the user ID, even if the user you want is already logged in
+*       If multiple people are logged in on the same box, they would get one-anothers avatars
+* @param {string} req.params.user The user ID to return
+*/
+app.get('/api/session/avatar/:user', function(req, res) {
+	async()
+		// Fetch the basic user info {{{
+		.then('user', function(next) {
+			return app.db.users.findById(req.params.user)
+				.select(['email', 'username'])
+				.promise();
+		})
+		.parallel({
+			filePathGenerated: function(next) { next(null, `${app.config.paths.data}/avatars/generated/${this.user.username}.png`) },
+			filePathOverride: function(next) { next(null, `${app.config.paths.data}/avatars/override/${this.user.username}.png`) },
+		})
+		// }}}
+		.parallel({
+			// Check that the hash file already exists {{{
+			fileExistsGenerated: function(next) {
+				fs.access(this.filePathGenerated, err => next(null, err ? false : true));
+			},
+			// }}}
+			// Check that an override file already exists {{{
+			fileExistsOverride: function(next) {
+				fs.access(this.filePathOverride, err => next(null, err ? false : true));
+			},
+			// }}}
+			// Check the avatar cache dir exists {{{
+			mkdirpGenerated: ()=> fs.promises.mkdir(fspath.dirname(this.filePathGenerated), {recursive: true}),
+			// }}}
+		})
+		// Grab the icon from the Gravatar server {{{
+		.then('filePath', function(next) {
+			if (this.fileExistsOverride) return next(null, this.filePathOverride);
+			if (this.fileExistsGenerated) return next(null, this.filePathGenerated);
+			var hash = crypto.createHash('md5').update(this.user.email.toLowerCase()).digest('hex');
+			console.log(colors.blue('[session]'), 'Requesting gravatar for user', colors.cyan(this.user.username));
+			var avatarStream =
+				superagent
+					.get(`https://www.gravatar.com/avatar/${hash}`)
+					.query({
+						size: _.get(app, 'config.session.avatar.size', 100),
+						default: _.get(app, 'config.session.avatar.set', 'identicon'),
+						r: _.get(app, 'config.session.avatar.rating', 'g'),
+					})
+
+			var fileStream = fs.createWriteStream(this.filePathGenerated);
+
+			avatarStream.pipe(fileStream)
+				.on('error', next)
+				.on('close', ()=> next(null, this.filePathGenerated))
+		})
+		// }}}
+		// End {{{
+		.end(function(err) {
+			if (err) return res.sendError(err);
+			res.sendFile(this.filePath);
+		})
+		// }}}
+});
+</endpoint>

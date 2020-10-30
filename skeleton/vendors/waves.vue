@@ -1,6 +1,7 @@
-<import>
-./node_modules/node-waves/dist/waves.min.js
-</import>
+<script repack>
+import Waves from 'node-waves';
+global.Waves = Waves;
+</script>
 
 <script>
 /**

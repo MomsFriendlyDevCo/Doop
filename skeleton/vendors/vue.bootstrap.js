@@ -61,7 +61,7 @@ window.onload = ()=> {
 	* @param {string|number} [location.url] Alternate method of passing the URL to navigate to
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
-	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window, use '_self' to redirec the entire document
+	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window, use '_self' to redirect the entire document
 	* @param {function} [before] Async function called as `(settings)` to wait for before performing the action
 	* @param {function} [after] Function called as `(settings)` after performing the action (since actions are pretty much instant async is ignored)
 	* @returns {Promise} A promise which will resolve when the navigation completes
@@ -140,14 +140,17 @@ window.onload = ()=> {
 	window.app.router.beforeEach((to, from, next) => {
 		Vue.assets.service('$session').promise()
 			.then(()=> app.vue.$emit('$beforeRoute', {to, from}))
-			.then(user => next())
+			.then(() => next())
 			.catch(()=> { // Forbid nav if not logged in an the path is in a whitelist
-				if (['/login'].includes(to.path)) return next(); // Let whitelisted paths continue
+				console.log('path', from.path, to.path);
+				if (['/login','/signup'].includes(to.path)) return next(); // Let whitelisted paths continue
+				if (to.path !== '/logout') Vue.services().$session.settings.set('redirect', to.path, 'local');
 				console.log('No profile present, redirect to /login', Vue.services().$session);
 				next({path: '/login'}); // Redirect everything else
 			})
 			.finally(()=> {
-				if (to.path != '/login') $('body').removeClass('bootstrapping'); // Let the login page handle its own bootstrapping overrides (so we dont get screen flash-in)
+				if (to.path != '/login' && to.path != '/signup')
+					$('body').removeClass('bootstrapping'); // Let the login page handle its own bootstrapping overrides (so we dont get screen flash-in)
 			})
 
 		if (app.vue && app.vue.$emit) app.broadcast('$router.change');
@@ -166,11 +169,13 @@ window.onload = ()=> {
 			sidebarExpanded: true,
 		}},
 		methods: {
+			/*
 			toggleSidebar() {
 				$('#wrapper').toggleClass('enlarged');
 				this.sidebarExpanded = ! $('#wrapper').hasClass('enlarged');
 				Vue.services().$session.settings.set('theme.sidebarExpanded', this.sidebarExpanded, 'session');
 			},
+			*/
 		},
 		created() {
 			// Glue all late loading services into their early-loading counterparts
@@ -180,8 +185,10 @@ window.onload = ()=> {
 			});
 		},
 		mounted() {
-			Vue.services().$session.settings.get('theme.sidebarExpanded', true)
-				.then(res => !res && this.$screen.size != 'xs' && this.toggleSidebar()) // Do initial toggle if the user left it that way
+			//Vue.services().$session.settings.get('theme.sidebarExpanded', true)
+			//	.then(res => !res && this.$screen.size != 'xs' && this.toggleSidebar()) // Do initial toggle if the user left it that way
+			// Reinitialise minton
+			$.App.init();
 		},
 	});
 	// }}}

@@ -1,0 +1,9 @@
+<server on="middleware">
+if (!app.config.logRocket.enabled) return;
+
+app.log('Enabling LogRocket as', app.log.colors.cyan(app.config.logRocket.profile));
+app.config.layout.headInject.push(
+	'<script src="https://cdn.lr-ingest.io/LogRocket.min.js" crossorigin="anonymous"></script>',
+	`<script>window.LogRocket && window.LogRocket.init('${app.config.logRocket.profile}');</script>`,
+);
+</server>

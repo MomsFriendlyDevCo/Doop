@@ -24,7 +24,7 @@ var superagent = require('superagent');
 app.get('/api/users/:user/avatar', function(req, res) {
 	async()
 		// Fetch the basic user info {{{
-		.then('user', ()=> db.users.findOneByID(req.params.user))
+		.then('user', ()=> db.users.findById(req.params.user))
 		// }}}
 		// Generate source paths {{{
 		.parallel({

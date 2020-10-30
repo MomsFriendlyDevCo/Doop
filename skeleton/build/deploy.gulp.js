@@ -98,7 +98,7 @@ gulp.task('postDeploy', ['load:app.git', 'load:app.slack'], ()=> Promise.resolve
 				Promise.resolve(msg.body(app, history))
 					.then(body => app.slack.post({...msg, body}))
 					.catch(e => {
-						gulp.log(gulp.colors.red('postDeploy failedi with Slack Post'), e);
+						gulp.log(gulp.colors.red('postDeploy failed with Slack Post'), e);
 						return Promise.resolve(); // Accept the output and continue on with deploy anyway
 					})
 			),

@@ -25,7 +25,8 @@ module.exports = {
 		},
 	},
 	methods: {
-		change(newVal, fromFormat) {
+		changeHandler(newVal, fromFormat) {
+			// FIXME: Emit as toISOString() duration.
 			this.$emit('change', 
 				moment.duration()
 					.add(newVal, fromFormat)
@@ -43,14 +44,14 @@ module.exports = {
 			:value="displayValue"
 			class="form-control dropdown-toggle"
 			data-toggle="dropdown"
-			@change="change($event, $props.displayFormat)"
+			@change="changeHandler($event, $props.displayFormat)"
 		/>
 		<div v-if="$props.options && $props.options.length" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 			<a
 				class="dropdown-item"
 				v-for="item in $props.options"
 				:key="item.value"
-				@click="change(item.value, $props.optionsFormat)"
+				@click="changeHandler(item.value, $props.optionsFormat)"
 			>
 				{{item.title}}
 			</a>

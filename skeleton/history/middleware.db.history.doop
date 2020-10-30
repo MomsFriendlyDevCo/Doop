@@ -1,0 +1,88 @@
+<server on="middleware, dbMiddleware">
+var _ = require('lodash');
+var jsondiffpatch = require('jsondiffpatch');
+
+/**
+* Mongo Document versioning middleware
+* This middleware intercepts all save calls and writes the delta to a nominated collection as a streaming log
+*
+* @param {MongoosySchema} schema Attach to this schema
+* @param {Object} [options] Options structure to use
+* @param {function} [options.action] Promisable function to call as `(model, doc, history, settings)` when history occur, if omitted the default beahaviour is to insert history into `options.collection`
+* @param {string} [options.collection='history'] Collection to append to if `options.action` isn't specified
+* @param {string} [options.fieldCollection='col'] Field to recieve the changing collection
+* @param {string} [options.fieldId='doc'] Field to recieve the changing document ID
+* @param {string} [options.fieldDiff='body'] Field to recieve the change object (each key in dotted notation)
+*
+* @example Monitor a collection using defaults
+* app.middleware.db.schema('collection', {
+*   created: {type: 'date', default: Date.now},
+*   edited: {type: 'date', default: Date.now},
+*   foo: {type: 'string', default: 'Foo'},
+*   bar: {type: 'object', default: {}},
+* }).use(app.middleware.db.history)
+*
+* @example Monitor a collection overriding the destination
+* app.middleware.db.schema('collection', {
+*   created: {type: 'date', default: Date.now},
+*   edited: {type: 'date', default: Date.now},
+*   foo: {type: 'string', default: 'Foo'},
+*   bar: {type: 'object', default: {}},
+* }).use(app.middleware.db.history, {
+*   collection: 'myhistorycollection',
+*   fieldDiff: 'body',
+*   fieldCollection: 'col',
+*   fieldId: 'doc',
+* });
+*/
+
+app.middleware.db.history = (schema, options) => {
+	var settings = {
+		// TODO: Save the user who made the change
+		action: (id, diff, settings) => {
+			return app.db[settings.collection].create({
+				[settings.fieldCollection]: schema.id,
+				[settings.fieldId]: id,
+				[settings.fieldDiff]: diff,
+			});
+		},
+		collection: 'history',
+		// TODO: digest configuration
+		fieldDiff: 'body',
+		fieldCollection: 'col',
+		fieldId: 'doc',
+		...options,
+	};
+
+	var sanitise = function(val) {
+		return JSON.parse(JSON.stringify(
+			_.cloneDeepWith(val, c => _.isDate(c) ? c.toISOString() : undefined)
+		));
+	};
+
+	var hookFactory = function(path) {
+		return function(next) {
+			if (schema.id === settings.collection) return next();
+			//if (!app.db[schema.id]) return next();
+			var after = (path && Object.prototype.hasOwnProperty.call(this, path)) ? this[path] : this;
+
+			return app.db[schema.id].findById(after._id)
+				.then(before => settings.action(
+					after._id,
+					jsondiffpatch.create().diff(
+						sanitise(before),
+						sanitise(after),
+					),
+					settings
+				))
+				.then(() => next())
+				.catch(next);
+		};
+	};
+
+	// FIXME: A record may be created even if the save subsequently fails
+	// FIXME: Test each update method and determine what type of signature it has
+	schema.pre(['save', 'update', 'updateOne', 'updateMany'], hookFactory());
+	schema.pre('findOneAndUpdate', hookFactory('_update'));
+};
+</server>

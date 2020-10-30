@@ -1,6 +1,7 @@
 <server on="middleware">
 var _ = require('lodash');
 var timestring = require('timestring');
+
 /**
 * Returns a middleware layer which will throttle a request, optionally dropping leading/tailing requests that come in while an existing request is in progress
 * This module is cross-process safe as it uses the cache/locking modules
@@ -17,9 +18,33 @@ var timestring = require('timestring');
 * app.get('/api/randomNumber', app.middleware.express.throttle('10s'), (req, res) => res.send({random: _.random(0, 9999))});
 *
 * @example Throttle a long running process so only one "worker" can execute at once, others simply return 420
-* app.get('/api/longProcess', app.middleware.express.throttle({response: (req, res) => res.sendStatus(420)}), (req, res) => {
-*   someLongRunningPromise.then(output => res.send(output))
-* });
+* app.get('/api/longProcess',
+* 	app.middleware.express.throttle(
+* 		{
+* 			wait: 0,
+* 			leading: true,
+* 			response: (req, res) => res.sendStatus(420)
+* 		}
+* 	),
+* 	(req, res) => {
+* 		someLongRunningPromise.then(output => res.send(output))
+* 	}
+* );
+*
+* @example Throttle a long running process so one "worker" will be queued, if a subsequent hit arrives the previously queued request will return 420
+* app.get('/api/longProcess',
+* 	app.middleware.express.throttle(
+* 		{
+* 			wait: 0,
+* 			leading: false,
+* 			queue: 1,
+* 			response: (req, res) => res.sendStatus(420)
+* 		}
+* 	),
+* 	(req, res) => {
+* 		someLongRunningPromise.then(output => res.send(output))
+* 	}
+* );
 */
 app.middleware.express.throttle = options => {
 	var settings = {
@@ -27,17 +52,21 @@ app.middleware.express.throttle = options => {
 		response: (req, res) => res.sendStatus(200),
 		wait: !_.isPlainObject(options) ? options : '10s',
 		leading: true,
+		queue: 1,
 		..._.isPlainObject(options) ? options : {},
-		last: undefined,
-		prevResponse: undefined,
 	};
-	return (req, res, next) => {
+
+	var pending = [];
+
+	var handler = (req, res, next) => {
 		var hash, wait; // Calculated state variables
+
 		Promise.resolve()
 			.then(()=> Promise.all([
 				// Resolve settings.wait
 				Promise.resolve(_.isFunction(settings.wait) ? settings.wait(req, res) : settings.wait)
 					.then(resWait => wait = isFinite(resWait) ? +resWait : timestring(resWait, 'ms')),
+
 				// Resolve settings.hash
 				Promise.resolve(settings.hash(req, res))
 					.then(resHash => hash = app.lock.hash(resHash)),
@@ -48,14 +77,14 @@ app.middleware.express.throttle = options => {
 					var oldResEnd = res.end; // Replace res.end with our own handler
 					res.end = (...args) => {
 						oldResEnd(...args); // Let Express handle the usual end output
+
 						setTimeout(()=> { // Cue up timer to execute after wait
+							// FIXME: Edge-case where lock exists but server has rebooted meaning the lock is never released.
 							app.lock.release(hash);
 
-							if (!settings.leading && _.isFunction(settings.last)) {
-								var callback = settings.last;
-								settings.last = undefined;
-								settings.prevResponse = undefined;
-								callback();
+							if (pending.length > 0) {
+								// Execute first pending request
+								handler(...pending.shift());
 							}
 
 						}, wait);
@@ -63,19 +92,29 @@ app.middleware.express.throttle = options => {
 
 					// Call next item in middleware which (should) eventually call res.end() which gets duck-typed above
 					next();
-				} else { // Already locked
-					if (settings.leading){ // Execute response() and exit
-						return settings.response(req, res);
-					} else { // Queue most recent request
-						if (settings.last && settings.prevResponse) { // Resolve previously queued request
-							settings.response(null, settings.prevResponse);
-						}
+				} else { // Already locked - execute response() and exit
 
-						settings.last = next;
-						settings.prevResponse = res;
+					// TODO: `settings.leading = true`, could be `settings.queue = 0`
+					if (settings.leading) {
+						settings.response(req, res);
+					} else {
+						// Respond to first pending when over queue length
+						while (pending.length >= settings.queue) {
+							settings.response(...pending.shift());
+						}
+						if (settings.queue > 0) {
+							// Add request to pending
+							pending.unshift([req, res, next]);
+							pending.length = settings.queue;
+						}
 					}
+
 				}
+
 			})
 	};
+
+	return handler;
+
 };
 </server>

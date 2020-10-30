@@ -9,7 +9,7 @@
 * @param {string} [options.value='delted'] The value to set the field to
 * @returns {function} Express middleware
 */
-var monoxide = require('monoxide');
+var mongoosy = require('@momsfriendlydevco/mongoosy');
 
 app.middleware.express.setDocStatus = options => {
 	var settings = {
@@ -26,7 +26,7 @@ app.middleware.express.setDocStatus = options => {
 
 		console.log(`Setting document ID ${id} {${settings.key}: '${settings.value}'}`);
 
-		monoxide.save({
+		mongoosy.save({
 			$collection: settings.collection,
 			$id: req.params.id,
 			$refetch: false,

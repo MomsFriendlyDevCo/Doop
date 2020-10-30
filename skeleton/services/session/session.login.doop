@@ -4,11 +4,12 @@ var promisify = require('util').promisify;
 * Accept a user token to perform an immediate login
 * @param {string} req.params.token The token used to login the user
 */
+// TODO: Could be more universal if `/go/:type/:token` was able to lookup a redirect URL also.
 app.get('/go/login/:token', (req, res) => {
-	db.users.findOne({
+	app.db.users.findOne({
 		_token: req.params.token,
 		_tokenPurpose: 'login', // Restrict the token usage to users requesting logins only
-		$errNotFound: false,
+		//$errNotFound: false,
 	})
 		.then(user => user || Promise.reject('Login token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
@@ -28,14 +29,22 @@ app.post([
 		// Sanity checks {{{
 		.then(()=> {
 			if (!req.body) throw new Error('No login credentials');
-			if (!req.body.email) throw new Error('400: No email address provided');
+			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
+			if (!req.body.username) throw new Error('400: No username provided');
 			if (!req.body.password) throw new Error('400: No password provided');
 		})
 		// }}}
 		// Fetch user and verify password {{{
-		.then(()=> app.log('Check login for', app.log.colors.cyan(req.body.email)))
-		.then(()=> app.db.users.findOne({$errNotFound: false, $or: [{username: req.body.email}, {email: req.body.email}]}))
-		.then(user => user || Promise.reject('403: Unknown email address'))
+		.then(()=> app.log('Check login for', req.body.username))
+		.then(()=> app.db.users.findOne({
+			//$errNotFound: false,
+			$or: [
+				{email: req.body.username},
+				{username: req.body.username},
+			],
+		}))
+		// FIXME: User enumeration
+		.then(user => user || Promise.reject('403: Unknown user'))
 		.then(user => user.checkPassword(req.body.password)
 			.then(res => !res && Promise.reject('403: Invalid password'))
 			.then(()=> user)

@@ -1,0 +1,92 @@
+/* Offset mainnav height */
+.mgfe-aside.mgfe-aside.aside-right {
+	top: 71px;
+	height: calc(100% - 71px);
+}
+.mgfe-aside.aside-right.aside-sm {
+	height: auto;
+}
+
+/*
+ * Override the set heigh rule:;
+ * .aside-body { height: calc(100vh - 80px) }
+ * in the mgfe-aside/aside-right.
+ * Using flexbox instead.
+ */
+.mgfe-aside.aside-right .mg-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.mgfe-aside.aside-right .mg-container  > .aside-body {
+	flex-grow: 1;
+	flex-shrink: 1;
+	overflow: auto;
+}
+
+.mgfe-aside.aside-right .mg-form,
+.mgfe-aside.aside-right .mg-container,
+.mgfe-aside.aside-right .mg-container  > .aside-body {
+	height: 100%;
+}
+
+
+
+
+/*
+ * Map view questionaire specific styles
+ */
+.mg-poll-choice > a {
+	margin: 5px !important;
+}
+
+.mg-poll-priority > .list-group {
+	counter-reset: priorityCounter;
+}
+
+.mg-poll-priority > .list-group > .list-group-item {
+	border: 0;
+	border-radius: 3px;
+	counter-increment: priorityCounter;
+	padding: 5px 5px 5px 40px;
+	position: relative;
+}
+
+.mg-poll-priority > .list-group > .list-group-item::after {
+	background-color: #222;
+	border-radius: 50%;
+	color: white;
+	content: counter(priorityCounter);
+	display: block;
+	height: 30px;
+	left: 4px;
+	line-height: 30px;
+	position: absolute;
+	text-align: center;
+	top: 5px;
+	width: 30px;
+	z-index: 2;
+}
+
+.mg-poll-priority > .list-group > .list-group-item::before {
+	border-right: 2px dotted #222;
+	content: '';
+	display: block;
+	height: 100%;
+	left: 18px;
+	position: absolute;
+	top: calc(100% - 5px);
+	z-index: 1;
+}
+
+.mg-poll-priority > .list-group > .list-group-item:last-child::before {
+	display: none;
+}
+
+.mg-poll-priority > .list-group > .list-group-item .btn.disabled {
+	color: #aaa;
+}
+
+.mg-table .mg-text input {
+	min-width: 100px;
+}

@@ -8,7 +8,7 @@ var Users = app.middleware.db.schema('users', {
 	_passhash2: {type: String},
 	_passsalt: {type: String},
 	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
-	_tokenPurpose: {type: 'string', enum: ['resetPassword', 'login', 'invite']},
+	_tokenPurpose: {type: 'string', enum: ['forgot', 'invite', 'login', 'signup', 'resetPassword', ]},
 	name: {type: String},
 	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
@@ -16,7 +16,7 @@ var Users = app.middleware.db.schema('users', {
 	settings: {
 	},
 	apiKeys: [{
-		key: {type: 'string'},
+		key: {type: 'string', index: {unqiue: true}},
 	}],
 	permissions: {
 		debug: {type: 'boolean', default: false},
@@ -25,17 +25,15 @@ var Users = app.middleware.db.schema('users', {
 		usersDelete: {type: 'boolean', default: false},
 		usersEdit: {type: 'boolean', default: false},
 		usersInvite: {type: 'boolean', default: false},
+		usersPromote: {type: 'boolean', default: false},
 	},
 });
 
 // Logins + user passwords {{{
 var crypto = require('crypto');
 
+// FIXME: Method works still? Not 'static()'? Why 'static()' in "search"?
 Users
-	.virtual('password', null, function(password) { // Allow write but not read
-		this._passsalt = crypto.randomBytes(16).toString('base64');
-		this._passhash = this.encryptPass(this._passsalt, password);
-	})
 	.method('encryptPass', function(salt, password) {
 		var saltBuffer = Buffer.from(salt, 'base64');
 		return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64, 'sha512').toString('base64');
@@ -44,6 +42,12 @@ Users
 		return Promise.resolve(this.encryptPass(this._passsalt || '', candidate) == this._passhash);
 	});
 
+// Allow write but not read
+Users
+	.virtual('password', null, function(password) {
+		this._passsalt = crypto.randomBytes(16).toString('base64');
+		this._passhash = this.encryptPass(this._passsalt, password);
+	});
 
 /**
 * Login a user and mutate the req object with cookie / header with session information
@@ -56,7 +60,10 @@ Users.method('logIn', function(res) {
 
 	return Promise.resolve()
 		// Update last login details {{{
-		.then(()=> user.save({$ignoreModified: true, lastLogin: new Date()}))
+		.then(()=> user.save({
+			$ignoreModified: true,
+			lastLogin: new Date()
+		}))
 		// }}}
 		// Generate UUID {{{
 		.then(()=> app.utils.uuid.generate().then(token => [user, token]))
@@ -120,28 +127,38 @@ Users.method('releaseToken', function() {
 // }}}
 
 // Whenever we are saving and we dont have a username use the email address {{{
+/*
 Users
-	.hook('create', function(next, query) {
-		if (!query.username) query.username = query.email;
-		if (query.username) query.username = query.username.toLowerCase(); // Username should always be lower case
-		next();
-	})
-	.hook('save', function(next, query) {
-		if (!query.username && query.email) query.username = query.email; // Username should be the email address if we have email but not the username
-		if (query.username) query.username = query.username.toLowerCase(); // Username should always be lower case
+	.pre('save', function(next) {
+		if (!this.username && this.email) this.username = this.email; // Username should be the email address if we have email but not the username
 		next();
 	});
+*/
+// }}}
+
+// TODO: Ensure user is not adjusting their own permissions on "save"
+
+// Alias username/email when using email as username
+/*
+Users.hook('save', function(next, q) {
+	if (app.config.session.signup.emailAsUsername) q.username = q.email;
+	next();
+});
+*/
 // }}}
 
 // Force username to ALWAYS be lower case {{{
-Users.hook('save', function(done, q) {
-	if (q.username) q.username = q.username.toLowerCase();
-	done();
+// FIXME: Mongoosy
+Users.pre('save', function(next) {
+	if (this.email) this.email = this.email.toLowerCase();
+	if (this.username) this.username = this.username.toLowerCase();
+	next();
 });
 // }}}
 
 // Timestamp status tracking {{{
-Users.hook('save', app.middleware.db.timestamps())
+// TODO: Re-implement for mongoosy
+//Users.pre('save', app.middleware.db.timestamps())
 // }}}
 
 // Permission Utilities {{{ */
@@ -151,10 +168,12 @@ Users.hook('save', app.middleware.db.timestamps())
 * @param {string|array<string>} permission... Permission(s) to check
 * @returns boolean True if the user has all permissions
 */
+/*
 Users.method('hasPermission', function(...permissions) {
 	var user = this;
 	return permissions.every(p => user.permissions[p]);
 });
+*/
 // }}}
 </schema>
 
@@ -172,7 +191,12 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	query: 'get',
 	count: app.middleware.express.isUser(),
 	create: false,
-	save: app.middleware.express.hasPermission('usersEdit'),
+	// FIXME: Does this allow user to hack their own permissions?
+	save: (req, res, next) => {
+		// Allow user to save their own profile
+		if (req.user && req.params.id === req.user._id) return next();
+		return app.middleware.express.hasPermission('usersEdit');
+	},
 	meta: true,
 	delete: [
 		app.middleware.express.hasPermission('usersDelete'),

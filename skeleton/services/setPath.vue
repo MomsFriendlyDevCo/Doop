@@ -47,7 +47,7 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 				this.$set(node, chunk, value);
 			}
 		} else if (node[chunk] === undefined) { // This chunk (and all following chunks) does't exist - populate from here
-			chunks.slice(chunkIndex).forEach(chunk => {
+			chunks.slice(chunkIndex, chunks.length - 1).forEach(chunk => {
 				if (settings.arrayNumeric && isFinite(chunk)) {
 					this.$set(node, chunk, []);
 				} else {
@@ -55,6 +55,7 @@ Vue.prototype.$setPath = function(target, path, value, options) {
 				}
 				node = node[chunk];
 			});
+			this.$set(node, chunks[chunks.length - 1], value);
 			return true;
 		} else {
 			node = node[chunk];

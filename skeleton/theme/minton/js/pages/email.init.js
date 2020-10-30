@@ -1,0 +1,1 @@
+$(document).ready(function(){$("#summernote-basic").summernote({placeholder:"Write something...",height:180,callbacks:{onInit:function(o){$(o.editor).find(".custom-control-description").addClass("custom-control-label").parent().removeAttr("for")}}})});

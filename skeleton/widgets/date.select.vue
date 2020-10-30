@@ -1,8 +1,8 @@
-<import>
-./node_modules/luxon/build/global/luxon.js
-./node_modules/vue-datetime/dist/vue-datetime.js
-./node_modules/vue-datetime/dist/vue-datetime.css
-</import>
+<script repack>
+import 'luxon';
+import {Datetime} from 'vue-datetime';
+import './node_modules/vue-datetime/dist/vue-datetime.css';
+</script>
 
 <component>
 /**
@@ -29,7 +29,7 @@ module.exports = {
 		value: '',
 	}},
 	methods: {
-		change(newVal) {
+		changeHandler(newVal) {
 			var outMoment = moment(newVal);
 
 			if (this.$props.type == 'date' && this.$props.contrainDate) {
@@ -79,7 +79,7 @@ module.exports = {
 			:minute-step="$props.minuteStep"
 			use12-hour
 			auto
-			@input="change"
+			@input="changeHandler"
 		/>
 	</div>
 </template>

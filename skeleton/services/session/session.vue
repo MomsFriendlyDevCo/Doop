@@ -145,7 +145,7 @@ module.exports = function() {
 						&& !$session.isRefreshed
 					) {
 						$session.$debug('Network error during preBootData on first fetch');
-						app.crash('Can\'t connect to the server', showReload=true);
+						app.crash('Can not connect to the server', showReload=true);
 					} else {
 						$session.$debug('Caught error during preBootData', err);
 						throw err;
@@ -224,6 +224,18 @@ module.exports = function() {
 	*/
 	$session.refresh = ()=> { throw new Error('$session.refresh is depreciated! Use $session.stage.preBootData if you really have to refresh directly') };
 
+	/**
+	* Attempt to create a new user
+	* @param {Object} user The user object to create
+	* @param {string} user.email The email address to create
+	* @return {Promise} The promise object for the server request
+	*/
+	$session.signup = user => Promise.resolve()
+		.then(()=> Vue.services().$loader.start('$session.signup'))
+		.then(()=> Vue.services().$http.post('/api/session/signup', user))
+		.then(()=> $session.$debug('signup done'))
+		.finally(()=> Vue.services().$loader.stop('$session.signup'))
+
 
 	/**
 	* Attempt to log in the user
@@ -259,25 +271,17 @@ module.exports = function() {
 		.then(()=> window.location.reload())
 		.finally(()=> Vue.services().$loader.stop('$session.logout'))
 
-
-	/**
-	* Attempt to sign up a new user
-	* @param {Object} user The user object to create
-	* @param {string} user.email The email address to create
-	* @param {string} user.password The password to create
+/**
+	* Attempt to initiate password reset
+	* @param {Object} user The user object to login
+	* @param {string} user.email The username to login
 	* @return {Promise} The promise object for the server request
 	*/
-	$session.signup = user => Promise.resolve()
-		// Sanity checks {{{
-		.then(()=> {
-			if (!user) throw new Error('No user details provided');
-			if (!user.email) throw new Error('Email address required');
-			if (!user.password) throw new Error('Password required');
-		})
-		// }}}
-		.then(()=> Vue.services().$http.post('/api/session/signup', user))
-		.finally(()=> Vue.services().$loader.stop('$session.login'))
-
+	$session.forgot = user => Promise.resolve()
+		.then(()=> Vue.services().$loader.start('$session.forgot'))
+		.then(()=> Vue.services().$http.post('/api/session/forgot', user))
+		.then(()=> $session.$debug('forgot done'))
+		.finally(()=> Vue.services().$loader.stop('$session.forgot'))
 
 	// $session.permissions - mirror or app.utils.permissions {{{
 	/**
@@ -290,26 +294,35 @@ module.exports = function() {
 
 	/**
 	* Query whether a user has a given or array of permissions
-	* @param {string|array<string>} permission Single or multiple permissions to check, if an array all must be present
+	* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
 	* @returns {boolean} A boolean if the permission statement matches
 	* @see $session.hasPermission.any()
 	*/
-	$session.hasPermission = permission =>
-		_.isArray(permission) ? permission.every(p => _.get($session, ['data', 'permissions', p]))
-		: _.isString(permission) ? _.get($session, ['data', 'permissions', permission], false)
-		: false;
+	$session.hasPermission = permission => {
+		var expression = permission;
 
+		// Convert string to single clause
+		if (_.isString(expression)) expression = {[expression]: true};
+		// Convert array to multiple clauses
+		if (_.isArray(expression)) expression = { $and: expression.map(value => ({[value]: true})) };
+
+		return (sift(expression, [$session.data.permissions]).length > 0);
+	};
 
 	/**
 	* Similar to $session.hasPermission but applies an "OR" condition to arrays
-	* @param {string|array<string>} permission Single or multiple permissions to check, if an array any item must be present
+	* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array any item must be present
 	* @returns {boolean} A boolean if the permission statement matches
 	* @see $session.hasPermission()
 	*/
-	$session.hasPermission.any = permission =>
-		_.isArray(permission) ? permission.some(p => _.get($session, ['data', 'permissions', p]))
-		: _.isString(permission) ? _.get($session, ['data', 'permissions', permission], false)
-		: false;
+	$session.hasPermission.any = permission => {
+		var expression = permission;
+
+		// Convert array to multiple clauses
+		if (_.isArray(expression)) expression = { $or: expression.map(value => ({[value]: true})) };
+
+		return $session.hasPermission(expression);
+	};
 	// }}}
 
 
@@ -351,7 +364,7 @@ module.exports = function() {
 		switch (method) {
 			case 'server':
 				_.set($session.data.settings, key, value);
-				return this.$http.post('/api/session/profile', {
+				return this.$http.post('/api/session', {
 					settings: this.$session.data.settings,
 				});
 			case 'local': return Promise.resolve(localStorage.setItem(key, JSON.stringify(value)));
@@ -367,14 +380,16 @@ module.exports = function() {
 	* @param {string} [method='server'] Where to store the setting. ENUM: 'server' (store on the server against user document), 'local' (use localStorage), 'session', (use sessionStorage)
 	* @returns {Promise} A promise which will resolve when the setting has been removed
 	*/
+	// FIXME: Default storage method should be same as `set`
 	$session.settings.unset = (key, method = 'local') => {
 		switch (method) {
 			case 'server':
 				_.unset($session.data.settings, key, value);
-				return this.$http.post('/api/session/profile', {
+				return this.$http.post('/api/session', {
 					settings: this.$session.data.settings,
 				});
 			case 'local': return Promise.resolve(localStorage.removeItem(key));
+			// FIXME: Observed issues with this not removing the entry in Chrome.
 			case 'session': return Promise.resolve(sessionStorage.removeItem(key));
 			default: throw new Error(`Unknown setting unset method "${method}"`);
 		}
@@ -405,6 +420,7 @@ module.exports = {
 	</div>
 </template>
 
+<!-- TODO: user.dropdown used instead? {{{
 <component name="session-menu">
 module.exports = {
 	mounted() {
@@ -426,6 +442,7 @@ module.exports = {
 		</ul>
 	</li>
 </template>
+}}} -->
 
 <style>
 .session-menu .username {

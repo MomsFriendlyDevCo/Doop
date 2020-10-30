@@ -25,14 +25,16 @@ var transform = (content, path, block) => {
 		.value();
 
 	var sandbox = vm.createContext({
-		app, global, module,  // Import the standard modules
+		app, global, module, process, // Import the standard modules
 		Array, Buffer, Promise, RegExp, // Import standard classes
 		id, // Glue the module ID onto the base structure
 		db: app.db,
-		console: rawModules.console ? console : {
-			...console,
-			log: (...msg) => console.log.apply(sandbox.app, [sandbox.app.log.colors.blue(`[${id}]`)].concat(msg)),
-		},
+		console: new Proxy(console, {
+			get: (obj, prop) => // Wrapper to fetch either app.logger.METHOD or fallback to console.METHOD
+				_.isFunction(app.logger[prop])
+					? app.logger[prop].bind(sandbox.app, sandbox.app.log.colors.blue(`[${id}]`))
+					: app.logger[prop]
+		}),
 		setTimeout, clearTimeout, setInterval, clearInterval,
 		require: require('module').createRequire(path), // Make require work as a relative path
 	});

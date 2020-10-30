@@ -1,5 +1,5 @@
 var gulp = require('@momsfriendlydevco/gulpy');
-var monoxide = require('monoxide');
+var mongoosy = require('@momsfriendlydevco/mongoosy');
 
 var hasLoaded = false;
 
@@ -11,7 +11,7 @@ gulp.task.once('load:app.db', 'load:app', ()=>
 		.then(()=> hasLoaded = true)
 		.then(()=> {
 			gulp.on('finish', ()=> // Clean up the database connection when we finish
-				monoxide.disconnect()
+				mongoosy.disconnect()
 					.then(()=> gulp.log('DB Disconnected'))
 			);
 		})

@@ -1,20 +1,23 @@
 <server on="init, dbInit">
-var monoxide = require('monoxide');
-var promisify = require('util').promisify;
+var mongoosy = require('@momsfriendlydevco/mongoosy');
+
 exports = ()=> Promise.resolve()
-	.then(()=> app.config.mongo.hooks = true) // Enabled specificaly to queue DB middleware calls
+	//.then(()=> app.config.mongo.hooks = true) // Enabled specificaly to queue DB middleware calls
 	.then(()=> app.log('Connecting to', app.log.colors.cyan(app.config.mongo.uri)))
-	.then(()=> promisify(monoxide.use)(app.config.mongo.plugins)) // Setup plugins - NOTE that since we've not set up the promises plugin yet this needs to be promisified
-	.then(()=> monoxide.connect(app.config.mongo.uri, app.config.mongo.options))
+	.then(()=> mongoosy.connect(app.config.mongo.uri, app.config.mongo.options))
 	.then(()=> {
-		app.on('postSchemas', ()=> {
-			app.log('Loaded', app.log.colors.cyan(Object.keys(monoxide.models).length), 'DB schemas:', Object.keys(monoxide.models).map(m => app.log.colors.cyan(m)).join(', '))
-			Object.assign(app.db, monoxide.models);
-			global.db = app.db;
-		});
+		app.on('postSchemas', ()=>
+			mongoosy.compileModels()
+				.then(models => {
+					Object.assign(app.db, models); // Note that we have to extend the existing global, we can't clobber it or we loose the reference
+					global.db = app.db;
+				})
+				.then(()=> app.log('Loaded', app.log.colors.cyan(Object.keys(app.db).length), 'DB schemas:', Object.keys(app.db).map(m => app.log.colors.cyan(m)).join(', ')))
+				.then(()=> app.emit('postDb'))
+		);
 
 		app.on('exit', ()=>
-			monoxide.disconnect()
+			mongoosy.disconnect()
 				.then(()=> app.log('DB Disconnected'))
 		);
 	});

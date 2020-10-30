@@ -20,7 +20,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var stripAnsi = require('strip-ansi');
 var uglify = require('gulp-uglify');
 
-gulp.task('build.vue', ['load:app'], ()=>
+gulp.task('build.vue', ['load:app', 'load:app.git'], ()=>
 	gulp.src(glob.sync([
 		'vendors/vue.*.js', // Early injection workers
 		'**/*.vue',

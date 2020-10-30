@@ -16,7 +16,9 @@ sudo certbot certonly \
 	-m daemons@mfdc.biz \
 	--agree-tos \
 	--eff-email \
-	--manual-public-ip-logging-ok
+	--manual-public-ip-logging-ok \
+	--dns-dnsmadeeasy \
+	--dns-dnsmadeeasy-credentials "$HOME/.dnsmadeeasy" \
 
 
 echo "Reloading Nginx..."

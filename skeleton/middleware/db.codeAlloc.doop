@@ -1,14 +1,14 @@
 <server on="middleware, dbMiddleware">
 var _ = require('lodash');
 var handlebars = require('handlebars');
-var monoxide = require('monoxide');
+var mongoosy = require('@momsfriendlydevco/mongoosy');
 
 /**
 * Attempt to generate a short code for a document when saving
 * This function accepts a handlebars template and checks for collisions within an existing MongoDB collection
 * If a collision is found the '{{unique}}' part of the pattern is incremented until the output no longer collides
 *
-* @param {MonoxideModel} model The monoxide model to attach to
+* @param {MonoxideModel} model The mongoosy model to attach to
 * @param {Object} [options] Options structure to use
 * @param {string|function} [options.template="{{unique}}"] The handlebars template to use when generating the code, if this is a function it is executed as (doc) and may return a promise
 * @param {boolean} [options.allocateUndefined=true] Whether to process undefined values when creating a record
@@ -70,7 +70,7 @@ app.middleware.db.codeAlloc = (model, options) => {
 		var templateData;
 
 		if (newDoc) Object.assign(doc, newDoc); // Copy any data from post hooks
-		// FIXME: We end up back here during the `monoxide.save()` need to be sure we don't assign twice.
+		// FIXME: We end up back here during the `mongoosy.save()` need to be sure we don't assign twice.
 		if (settings.shouldAllocateInit(doc, settings)) return done(); // Field already allocated
 
 		Promise.resolve()
@@ -95,7 +95,10 @@ app.middleware.db.codeAlloc = (model, options) => {
 
 				// The incomming document is missing the field we need to check - go fetch it
 				model
-					.findOne({_id: doc._id, $errNotFound: false})
+					.findOne({
+						_id: doc._id,
+						//$errNotFound: false
+					})
 					.select(settings.field)
 					.exec((err, found) => {
 						if (err) {
@@ -108,6 +111,7 @@ app.middleware.db.codeAlloc = (model, options) => {
 							found[settings.field] === undefined && settings.allocateUndefineda // Undefined and we need to allocate OR
 							|| !found[settings.field] // No value anyway
 						) {
+							app.log('Fetched code for partial document', app.log.colors.cyan(model.$collection), '#', app.log.colors.cyan(doc._id), settings.field, '=', app.log.colors.cyan(found[settings.field]));
 							doc[settings.field] = found[settings.field]; // Glue fetched field to document
 							if (_.isString(doc[settings.field]) && doc[settings.field]) return reject('SKIP');
 							return resolve();
@@ -218,18 +222,20 @@ app.middleware.db.codeAlloc = (model, options) => {
 									resolve();
 								} else if (lockAllocated) {
 									app.log(app.log.colors.green('Saving'), 'Allocating code', app.log.colors.cyan(tryCode), 'to', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id));
-									model.$mongooseModel.updateOne( // Use Mongoose to update so we don't fire any more postUpdate hooks
-										{_id: doc._id},
-										{$set: {[settings.field]: tryCode}},
-										err => {
-											if (err) {
-												app.log.warn('Allocating code', app.log.colors.red('FAILED'), app.log.colors.cyan(tryCode), 'to', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id));
-												return reject(err);
-											}
-											app.log(app.log.colors.green('Success'), 'Allocated code', app.log.colors.cyan(tryCode), 'to', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id));
-											return resolve();
-										},
-									);
+									mongoosy.save({
+										$collection: model.$collection,
+										$id: doc._id,
+										$refetch: false,
+										$data: {user: null},
+										[settings.field]: tryCode,
+									}, err => {
+										if (err) {
+											app.log.warn('Allocating code', app.log.colors.red('FAILED'), app.log.colors.cyan(tryCode), 'to', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id));
+											return reject(err);
+										}
+										app.log(app.log.colors.green('Success'), 'Allocated code', app.log.colors.cyan(tryCode), 'to', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id));
+										return resolve();
+									});
 								} else {
 									var newBias = biasOffset + settings.uniqueIncrement;
 									app.log.warn('Code', app.log.colors.cyan(tryCode), 'for', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id), 'is locked - retrying with new increment bias', newBias);

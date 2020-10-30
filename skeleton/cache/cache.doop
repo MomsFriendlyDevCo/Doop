@@ -37,9 +37,7 @@ exports = ()=>
 			app.middleware.express.cache = middlewareCache;
 			return promisify(app.middleware.express.cache.setup)(app.config.cache);
 		})
-		.then(()=> {
-			app.on('exit', ()=> app.cache.destroy());
-		});
+		.then(()=> app.on('exit', ()=> app.cache.destroy()))
 
 </server>
 
@@ -56,7 +54,7 @@ var _ = require('lodash');
 * @param {boolean} [options.rejectAs=undefined] Cache throwing promises as this value rather than repeating them each hit
 * @param {number} [options.retry=0] If a promise rejects retry it this many times before giving up
 * @param {number|function} [options.retryDelay=100] Delay between promise retries, if a function is called as `(attempt, settings)` and expected to return the delay amount
-* @param {function} [options.onRetry] Function to call as `(error)` when a retryable operation fails
+* @param {function} [options.onRetry] Sync function to call as `(error, attempt)` when a retryable operation fails, if any non-undefined is returned the retry cycle is aborted and the value used as the promise resolve value, if the function throws the entire promise retry cycle is exited with the thrown error as the rejection
 * @param {*} [options.invalidStore] Value use to detect the absence of a value in the cache (so we can detect null/undefined values even though they are falsy)
 * @param {function} worker The worker PROMISE FACTORY function to execute if the cache value does not exist, the result of this is used for the subsequent cache value
 * @returns {Promise<*>} A promise which will return with the result of worker - or the cached value of worker until it expires
@@ -101,11 +99,17 @@ app.cache.function = (options, worker) => {
 							if (++attempt > settings.retry) { // Exhausted retry limit - reject
 								reject(e);
 							} else {
-								app.log.warn('Cache func function refresh for', settings.id, `threw on attempt ${attempt}. Retrying...`);
-								settings.onRetry(e);
-								var useDelay = _.isFunction(settings.retryDelay) ? settings.retryDelay(attempt, settings) : settings.retryDelay;
-								if (!isFinite(useDelay)) return reject('Got non-numeric delay for retryDelay');
-								setTimeout(tryResolve, useDelay);
+								app.log.warn('Cache func function refresh for', settings.id, `threw on attempt ${attempt}`);
+								try {
+									var retryValue = settings.onRetry(e, attempt);
+									if (retryValue !== undefined) return resolve(retryValue); // Did onRetry give us a value to use instead?
+									var useDelay = _.isFunction(settings.retryDelay) ? settings.retryDelay(attempt, settings) : settings.retryDelay;
+									if (!isFinite(useDelay)) return reject('Got non-numeric delay for retryDelay');
+									setTimeout(tryResolve, useDelay);
+								} catch (e) {
+									app.log.warn('Cache func function refresh for', settings.id, `threw on attempt ${attempt}, rejecting with`, e.toString());
+									return reject(e);
+								}
 							}
 						} else {
 							app.log.warn('Cache func function refresh for', settings.id, 'threw', e.toString());

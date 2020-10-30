@@ -1,6 +1,6 @@
-<import>
-./node_modules/@momsfriendlydevco/readable/dist/readable.js
-</import>
+<script repack>
+import '@momsfriendlydevco/readable';
+</script>
 
 <script>
 readable.defaults.fileSize.formatters.fallback = '0b';
