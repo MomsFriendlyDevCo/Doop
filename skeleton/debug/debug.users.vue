@@ -1,8 +1,7 @@
 <component>
 module.exports = {
 	data() { return {
-		selectedLocal: undefined,
-		selectedMerged: undefined,
+		selected: undefined,
 	}},
 	route: '/debug/users',
 };
@@ -13,10 +12,10 @@ module.exports = {
 		<div class="card-body form-horizontal">
 			<!-- Local users only {{{ -->
 			<div class="form-group row">
-				<label class="col-sm-3 col-form-label">Local user select</label>
+				<label class="col-sm-3 col-form-label">User select</label>
 				<div class="col-sm-6 form-control-plaintext">
 					<digest-select
-						:selected="selectedLocal"
+						:selected="selected"
 						field="name"
 						url="/api/users"
 						doc-url="/api/users/:id"
@@ -25,14 +24,14 @@ module.exports = {
 						class-invalid="badge badge-danger"
 						text-invalid="Invalid user"
 						class="col-sm-8 form-control-plaintext"
-						select-text="Search accounts..."
-						title="Search existing accounts"
+						select-text="Search users..."
+						title="Search existing users"
 						:allow-remove="false"
-						@change="selectedLocal = $event"
+						@change="selected = $event"
 					/>
 				</div>
 				<div class="col-sm-3">
-					<pre>Value: {{selectedLocal || 'none'}}</pre>
+					<pre>Value: {{selected || 'none'}}</pre>
 				</div>
 			</div>
 			<!-- }}} -->
