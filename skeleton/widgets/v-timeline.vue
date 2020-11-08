@@ -2,7 +2,7 @@
 /**
 * Customizable timeline component with auto data retrieval and searching
 *
-* TODO: JSDocs.
+* TODO: JSDocs. Pagination.
 */
 
 module.exports = {
