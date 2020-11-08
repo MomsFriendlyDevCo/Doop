@@ -1,4 +1,0 @@
-<endpoint>
-// TODO: Should this be a static nginx route?
-app.use('/fonts', app.middleware.express.static(`${app.config.paths.dist}/fonts`, {fallback: true}));
-</endpoint>
