@@ -1,4 +1,4 @@
-<server on="postEndpoints">
+<endpoint>
 /**
 * Destroy cookie / auth linkage and return 200
 */
@@ -13,4 +13,4 @@ app.post('/api/session/logout', (req, res) => {
 		res.sendError(400, 'No valid auth token found');
 	}
 });
-</server>
+</endpoint>

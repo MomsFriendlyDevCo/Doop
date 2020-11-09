@@ -28,6 +28,7 @@ app.post([
 ], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
+			if (!app.config.session.login.enabled) throw new Error('403: User login is disabled');
 			if (!req.body) throw new Error('No login credentials');
 			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
 			if (!req.body.username) throw new Error('400: No username provided');
