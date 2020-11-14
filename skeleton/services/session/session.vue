@@ -6,7 +6,7 @@
 */
 module.exports = function() {
 	var $session = this;
-	$session.$debugging = false;
+	$session.$debugging = true;
 
 	$session.data = {permissions: {}}; // User session data
 	$session.isRefreshed = false; // Have we pinged the server yet
@@ -277,11 +277,11 @@ module.exports = function() {
 	* @param {string} user.email The username to login
 	* @return {Promise} The promise object for the server request
 	*/
-	$session.forgot = user => Promise.resolve()
-		.then(()=> Vue.services().$loader.start('$session.forgot'))
-		.then(()=> Vue.services().$http.post('/api/session/forgot', user))
-		.then(()=> $session.$debug('forgot done'))
-		.finally(()=> Vue.services().$loader.stop('$session.forgot'))
+	$session.recover = user => Promise.resolve()
+		.then(()=> Vue.services().$loader.start('$session.recover'))
+		.then(()=> Vue.services().$http.post('/api/session/recover', user))
+		.then(()=> $session.$debug('recover done'))
+		.finally(()=> Vue.services().$loader.stop('$session.recover'))
 
 	// $session.permissions - mirror or app.utils.permissions {{{
 	/**

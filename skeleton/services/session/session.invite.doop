@@ -72,14 +72,11 @@ app.post([
 		//.then(user => session.user = user)
 		// }}}
 		// Generate invite token {{{
-		.then(user => user.setToken('invite').then(token => {
-			user._token = token;
-			return user;
-		}))
+		.then(user => user.setToken('invite').then(token => [user, token]))
 		// }}}
 		// Dispatch email {{{
-		.then(user => {
-			app.log('Email', user.email, `/go/invite/${user._token}`);
+		.then(([user, token]) => {
+			app.log('Email', user.email, `/go/invite/${token}`);
 			if (!app.config.email.enabled) return user;
 
 			email().send({
@@ -90,7 +87,7 @@ app.post([
 					...user,
 					config: app.config,
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-					url: `/go/invite/${user._token}`,
+					url: `/go/invite/${token}`,
 				},
 			});
 			return user;
@@ -100,6 +97,6 @@ app.post([
 		.then(user=> res.send({data: {_id: user._id}}))
 		.catch(res.sendError)
 		// }}}
-});
+);
 </endpoint>
 

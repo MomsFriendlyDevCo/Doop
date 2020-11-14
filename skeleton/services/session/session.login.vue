@@ -21,10 +21,10 @@ module.exports = {
 				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))
 				.finally(()=> this.$loader.stop())
 		},
-		forgot(notification = false, redirect = false) {
+		recover(notification = false, redirect = false) {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
-				.then(()=> this.$session.forgot(this.data))
+				.then(()=> this.$session.recover(this.data))
 				//.then(()=> $('body').removeClass('minimal'))
 				.then(()=> notification && this.$toast.success('Check your email'))
 				.then(()=> redirect && this.$router.push('/login'))
@@ -77,7 +77,7 @@ module.exports = {
 						</div>
 
 						<button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
-						<button v-on:click.prevent="forgot(true, false)" class="btn btn-secondary btn-lg btn-block">Forgot Password</button>
+						<button v-on:click.prevent="recover(true, false)" class="btn btn-secondary btn-lg btn-block">Forgot Password</button>
 					</form>
 				</div>
 			</div>

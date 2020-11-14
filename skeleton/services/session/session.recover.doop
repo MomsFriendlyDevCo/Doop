@@ -8,11 +8,12 @@ app.get('/go/recover/:token', (req, res) => {
 		_token: req.params.token,
 		_tokenPurpose: 'recover', // Restrict the token usage to users requesting logins only
 	})
-		.then(user => user || Promise.reject('Password reset token invalid'))
+		.then(user => user || Promise.reject('403: Password reset token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken())
 		.then(()=> res.redirect('/recover'))
-		.catch(e => res.sendError(403, e.toString()))
+		// TODO: Wrap error in a page.
+		.catch(res.sendError);
 });
 </endpoint>
 
@@ -45,15 +46,12 @@ app.post([
 		.then(user => user || Promise.reject('403: Unknown email address'))
 		// }}}
 		// Generate Token {{{
-		.then(user => user.setToken('recover').then(token => {
-			user._token = token;
-			return user;
-		}))
+		.then(user => user.setToken('recover').then(token => [user, token]))
 		// }}}
 		// TODO: Reset the password to lock out any malicious user. Potential back-fire as DoS?
 		// Dispatch email {{{
-		.then(user => {
-			app.log('Email', user.email, `/go/recover/${user._token}`);
+		.then(([user, token]) => {
+			app.log('Email', user.email, `/go/recover/${token}`);
 			if (!app.config.email.enabled) return user;
 
 			email().send({
@@ -64,7 +62,7 @@ app.post([
 					...user,
 					config: app.config,
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-					url: `/go/recover/${user._token}`,
+					url: `/go/recover/${token}`,
 				},
 			});
 			return user;

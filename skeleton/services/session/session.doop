@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 	if (app.config.session.cookie.enabled && req.cookies && req.cookies[app.config.session.cookie.name]) { // Cookie mode
 		app.cache.get(app.config.session.cache.prefix + req.cookies[app.config.session.cookie.name]) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
 			.then(session => session._id ? session : Promise.reject('Invalid session state'))
-			.then(session => app.db.users.findOneByID(session._id))
+			.then(session => app.db.users.findOne({_id: session._id}))
 			.then(user => user || Promise.reject('Invalid user ID'))
 			.then(user => req.user = user)
 			.then(()=> next())
@@ -26,12 +26,12 @@ app.use((req, res, next) => {
 	} else if (app.config.session.authHeader.enabled && req.headers.auth) { // 'Auth' header token method
 		app.cache.get(app.config.session.cache.prefix + req.headers.auth) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
 			.then(session => session._id ? session : Promise.reject('Invalid session state'))
-			.then(session => app.db.users.findOneByID(session._id))
+			.then(session => app.db.users.findOne({_id: session._id}))
 			.then(user => user || Promise.reject('Invalid user ID'))
 			.then(user => req.user = user)
 			.then(()=> next())
 			.catch(()=> next())
-	} else if (app.config.session.apiKey.enabled && req.headers.apikey) { // 'apikey' header token method
+	} else if (app.config.session.authApiKey.enabled && req.headers.apiKey) { // 'apikey' header token method
 		Promise.resolve()
 			.then(()=> app.db.users.findOne({'apiKeys.key': req.headers.apiKey}))
 			.then(user => user || Promise.reject('Invalid API-Key'))

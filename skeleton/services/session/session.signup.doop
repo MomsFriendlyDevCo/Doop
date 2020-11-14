@@ -20,12 +20,12 @@ app.get('/go/signup/:token', (req, res) => {
 			return user.save();
 		})
 		// Utilising forgot password functionality to prompt user.
-		.then(()=> res.redirect('/forgot'))
+		.then(()=> res.redirect('/recover'))
 		.catch(e => res.sendError(403, e.toString()))
 });
 </endpoint>
 
-<server on="postEndpoints">
+<endpoint>
 var _ = require('lodash');
 
 app.post([
@@ -60,14 +60,11 @@ app.post([
 		}))
 		// }}}
 		// Generate Token {{{
-		.then(user => user.setToken('signup').then(token => {
-			user._token = token;
-			return user;
-		}))
+		.then(user => user.setToken('signup').then(token => [user, token]))
 		// }}}
 		// Dispatch email {{{
-		.then(user => {
-			app.log('Email', user.email, `/go/signup/${user._token}`);
+		.then(([user, token]) => {
+			app.log('Email', user.email, `/go/signup/${token}`);
 			if (!app.config.email.enabled) return user;
 
 			email().send({
@@ -78,7 +75,7 @@ app.post([
 					...user,
 					config: app.config,
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-					url: `/go/signup/${user._token}`,
+					url: `/go/signup/${token}`,
 				},
 			});
 			return user;
@@ -97,4 +94,4 @@ app.post([
 		.catch(res.sendError)
 		// }}}
 );
-</server>
+</endpoint>

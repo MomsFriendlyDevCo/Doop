@@ -7,7 +7,7 @@ var _ = require('lodash');
 * Search works by attaching to save / update / create hooks and populating an array of searchable tokens per document
 * Searching then performs a RegExp against this (now flattened) array of items, calculating weight for each document
 *
-* The Monoxide ReST API is automatically compatible with this middleware adding a `db.MODEL.search(someFuzzyText)` method and `/api/MODEL?q=someFuzzyText` methods to the endpoint if search is enabled (the default). See examples.
+* The Mongoosy ReST API is automatically compatible with this middleware adding a `db.MODEL.search(someFuzzyText)` method and `/api/MODEL?q=someFuzzyText` methods to the endpoint if search is enabled (the default). See examples.
 *
 * @param {MongoosySchema} schema Attach to this schema
 * @param {Object} options Options to pass when initalizing
@@ -134,6 +134,9 @@ app.middleware.db.search = (schema, options) => {
 	// TODO: Are others among these inside _update?
 	schema.pre(['save', 'update', 'updateOne', 'updateMany'], hookFactory());
 	schema.pre('findOneAndUpdate', hookFactory('_update'));
+	// schema.hook('create', hookFactory());
+	// schema.hook('save', hookFactory());
+	// schema.hook('update', hookFactory());
 	// }}}
 
 	// Add the schema.search() method {{{
@@ -158,6 +161,7 @@ app.middleware.db.search = (schema, options) => {
 		var searchSettings = {
 			filter: undefined,
 			softFilter: (next, doc) => next(null, true),
+			populate: undefined,
 			sort: '_score',
 			limit: 50,
 			skip: 0,
@@ -227,44 +231,43 @@ app.middleware.db.search = (schema, options) => {
 					: searchSettings.select ? searchSettings.select.split(',') // or fall back to main search setting
 					: undefined
 				)
+				.populate(searchSettings.populate ? searchSettings.populate : undefined)
 				// .filter(searchSettings.softFilter) // Apply soft filters
 				.exec((err, items) => {
 					if (err) {
 						reject(err);
-					} else if (searchSettings.count) {
-						resolve(items.length);
 					} else {
-						var res = _.chain(items)
-							.filter(doc => { // Handle Monoxide "soft" filters if there are any
-								return _.chain(searchSettings.mergeTags)
-									.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
-									.map((val, tag) => // Map all filters into a promise array
-										Promise.resolve(searchSettings.tags[tag].filter.call(doc, doc, val))
-									)
-									.thru(promises => Promise.all(promises)
-										.then(results => {
-											return (!results.length || results.every(r => r)); // No filters or all values are truthy
-										})
-									)
-									.value();
-							})
-							.map(doc => { // Remap each found doc...
-								if (!searchSettings.count) return doc; // We dont need to do any document mangling for count operations
-								return Promise.all(settings.fields.map((field, fieldIndex) =>
-									Promise.resolve(
+						// Apply filters
+						async function filterAsync(array, callbackfn) {
+							const filterMap = await Promise.all(array.map(callbackfn));
+							return array.filter((value, index) => filterMap[index]);
+						}
+
+						filterAsync(items, doc => {
+							var filters = _(searchSettings.mergeTags)
+								.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
+								.map((val, tag) => Promise.resolve(searchSettings.tags[tag].filter.call(doc, doc, val))) // Map all filters into a promise array
+								.value();
+							return (!filters.length || Promise.all(filters).then(f => f.every(r => r))); // No filters or all values are truthy
+						}).then(docs => {
+							if (searchSettings.count) return resolve(docs.length); // We dont need to do any document mangling for count operations
+
+							Promise.all(docs.map(doc => // Remap each found doc...
+								Promise.all(settings.fields.map((field, fieldIndex) => Promise.resolve(
 										field.path ? _.get(doc, field.path)
-										: field.handler ? field.handler(doc)
+										: _.isFunction(field.handler) ? field.handler(doc) // FIXME: Use call with a context?
 										: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
 									)
 									.then(fieldVal => fieldVal && termsRE.some(re => re.test(fieldVal)) ? field.weight : 0)
 								))
 								.then(fieldScores => doc._score = fieldScores.reduce((t, v) => t + v, 0))
-								.then(()=> doc);
-							})
-							.thru(docs => (!searchSettings.count && searchSettings.sort) ? _.sortBy(docs, searchSettings.sort) : docs) // Sort by score
-							.thru(docs => (!searchSettings.count && (searchSettings.skip || searchSettings.limit)) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs)
-							.value();
-						resolve(res);
+								.then(()=> doc)
+							))
+							.then(docs => searchSettings.sort ? _.orderBy(docs, searchSettings.sort.replace(/^-/, ''), searchSettings.sort.indexOf('-') === 0 ? 'desc':'asc' ) : docs)
+							.then(docs => (searchSettings.skip || searchSettings.limit) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs)
+							.then(docs => resolve(docs))
+							.catch(e => reject(e));
+						});
 					}
 				})
 		})
