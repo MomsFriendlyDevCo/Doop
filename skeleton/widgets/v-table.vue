@@ -8,6 +8,10 @@
 * @param {number} [limit=30] How many records to show per page
 *
 * @param {boolean|function} [showSearch=true] Show the search interface
+* @param {boolean} [searchImmediate=false] Perform a search when the user doesn't hit a key for `searchDebounce` timeout rather than waiting for enter
+* @param {number} [searchDebounce=250] Debounce rate if `searchImmediate` is true
+* @param {number} [searchMin=3] Only perform a search if the search string length is above this minimum
+*
 * @param {boolean} [autoScroll=true] Scroll to the top of the table on refresh
 * @param {string|number} [autoScrollOffset=0] Autoscroll Y offset if it needs manually tweaking, strings are automaticaly converted to numbers
 * @param {boolean} [autoResetPagination=true] Detect URL changes and reset pagination when it occurs (usually the upstream component clobbering the `url` property during a search)
@@ -83,6 +87,10 @@ module.exports = {
 		}}}, /* }}} */
 
 		showSearch: {type: Boolean, default: true},
+		searchImmediate: {type: Boolean, default: false},
+		searchDebounce: {type: Number, default: 250},
+		searchMin: {type: Number, default: 3},
+
 		autoScroll: {type: Boolean, default: true},
 		autoScrollOffset: {type: [Number, String], default: 0},
 		autoResetPagination: {type: Boolean, default: true},
@@ -254,8 +262,11 @@ module.exports = {
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debugging = false;
 		this.$watchAll(['url', 'limit', 'columns'], this.refresh, {immediate: true, deep: true});
+
+		// Add searchDebounced() methods which is the same as search but... well... debounced
+		this.searchDebounced = _.debounce(this.search, this.searchDebounce);
 	},
 };
 </component>
@@ -269,7 +280,13 @@ module.exports = {
 					<slot name="table-header-left">
 						<form v-if="showSearch" @submit.prevent="search(searchInput)" class="form-inline">
 							<div class="input-group">
-								<input v-model.trim="searchInput" type="search" class="form-control" :placeholder="`Search ${entity}...`"/>
+								<input
+									v-model.trim="searchInput"
+									type="search"
+									class="form-control"
+									:placeholder="`Search ${entity}...`"
+									@input="searchImmediate && searchInput.length >= searchMin && searchDebounced(searchInput)"
+								/>
 								<div class="input-group-append">
 									<a @click="search(searchInput)" class="btn btn-light far fa-search"/>
 								</div>
