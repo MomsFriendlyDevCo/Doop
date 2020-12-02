@@ -208,6 +208,10 @@ module.exports = {
 		user: 'sanity',
 		pass: '{{FIXME}}', // Used as as basic-auth on /sanity checks, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
 	},
+	search: {
+		exposeEngine: false, // Whether to expose the search engine in Searchbox compatible browsers like Chrome - https://developers.google.com/search/docs/data-types/sitelinks-searchbox
+		exposeSearchUrl: 'https://query.example.com/search?q={search_term_string}',
+	},
 	sentry: {
 		enabled: false,
 		dsn: '{{FIXME:sentryDSN}}',
