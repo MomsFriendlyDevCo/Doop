@@ -37,6 +37,9 @@ app.utils.sanity.diskSpace = (path, minPercent = 10) => {
 			return {device, size, used, avail, usePercent, mounted};
 		})
 		.then(data => {
+			data.size *= 1000;
+			data.used *= 1000;
+			data.avail *= 1000;
 			data.usePercent = parseFloat(data.usePercent);
 			data.freePercent = 100 - data.usePercent;
 			return data;
