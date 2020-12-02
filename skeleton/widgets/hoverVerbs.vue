@@ -71,6 +71,7 @@ module.exports = {
 				<a
 					v-for="verb in calculatedVerbs"
 					:class="verb.class"
+					v-tooltip="verb.tooltip"
 					@click.prevent.stop="verb.click"
 				/>
 			</slot>
@@ -88,10 +89,18 @@ module.exports = {
 	display: none; /* Hide by default, overridden if the item has content (see .hasContent) */
 	position: absolute;
 	top: 0px;
-	margin-right: 6%;
+	margin-right: 0;
 	right: -10px;
 	opacity: 0.5;
 	transition: opacity 0.25s ease-out;
+}
+
+.hover-verbs .hover-verbs-items > .btn.btn-sm {
+	padding: 3px;
+}
+
+.hover-verbs .hover-verbs-items > .btn + .btn {
+	margin-left: 2px;
 }
 
 .hover-verbs.hasContent:hover .hover-verbs-items {
