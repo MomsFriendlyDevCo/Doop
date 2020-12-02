@@ -9,7 +9,7 @@
 *       $screen.isDesktop - Shorthand accessor if the screen is LG
 *	$screen.size - String indicating the minimum Bootstrap definition of size (e.g. 'md', 'lg')
 *
- * In addition the body class `screen-{xs,sm,mg,lg}` is also added
+* In addition the body class `screen-{xs,sm,mg,lg}` is also added
 */
 module.exports = function() {
 	var $screen = this;
