@@ -81,7 +81,8 @@ gulp.task('build.vue', ['load:app', 'load:app.git'], ()=>
 				},
 				template: {
 					sort: 5,
-					transform: (content, path, block) => `Vue.assets.template('${_.camelCase(block.attr.name || fspath.basename(path, '.vue'))}', '`
+					transform: (content, path, block) =>
+						`Vue.assets.template('${_.camelCase(block.attr.name || fspath.basename(path, '.vue'))}', '`
 						+ _.trimEnd(content, ';')
 							.replace(os.EOL == '\n' ? /\n/g : /\r\n/g, os.EOL == '\n' ? '\\n' : '\\r\\n') // Convert linefeeds (for each OS type) into escaped char sequences
 							.replace(/\t/g, '\\t')
@@ -90,8 +91,12 @@ gulp.task('build.vue', ['load:app', 'load:app.git'], ()=>
 				},
 				macgyver: {
 					sort: 9, // Add after templates
-					transform: (content, path) =>
-						`Vue.assets.macgyver('${fspath.basename(path, '.vue')}', ${_.trimEnd(content, ';')});`,
+					transform: (content, path, block) =>
+						`Vue.assets.macgyver('${_.camelCase(block.attr.name || fspath.basename(path, '.vue'))}', `
+						+ _.trimEnd(content, ';')
+							.replace(/\/\*\*.*?\*\//sg, '') // Remove /** ... */ blocks
+							.replace(/module.exports\s*=\s*{/, `{\n\ttemplate: Vue.assets.template('${_.camelCase(block.attr.name || fspath.basename(path, '.vue'))}'),`)
+						+ ')'
 				},
 				component: {
 					sort: 9, // Add after templates
