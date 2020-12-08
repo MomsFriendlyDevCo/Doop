@@ -1,0 +1,3 @@
+<endpoint>
+app.use('/fonts', app.middleware.express.static(`${app.config.paths.dist}/fonts`, {fallback: true}));
+</endpoint>

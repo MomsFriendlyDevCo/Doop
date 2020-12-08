@@ -1,5 +1,6 @@
 <server on="init, dbInit">
 var _ = require('lodash');
+var sift = require('sift');
 
 /**
 * User permissions handling
@@ -8,14 +9,37 @@ var _ = require('lodash');
 */
 app.utils.permissions = {};
 
-
 /**
 * Query whether a user has a given or array of permissions
-* @param {string|array <string>} permission Single or multiple permissions to check, if an array all must be present
-* @param {Object} [from=app.utils.permissions.data.permissions] Where to look for permissions
+* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
+* @param {Object} [from=app.utils.permissions] Where to look for permissions
+* @returns {boolean} A boolean if the permission statement matches
+* @see $session.hasPermission.any()
 */
-app.utils.permissions.has = (permission, from = _.get(app.utils.permissions, 'data.permissions')) =>
-	_.isArray(permission) ? permission.every(p => from[p])
-	: _.isString(permission) ? !! from[permission]
-	: false;
+app.utils.permissions.has = (permission, from = app.utils.permissions) => {
+	var expression = permission;
+
+	// Convert string to single clause
+	if (_.isString(expression)) expression = {[expression]: true};
+	// Convert array to multiple clauses
+	if (_.isArray(expression)) expression = { $and: expression.map(value => ({[value]: true})) };
+
+	return ([from].filter(sift(expression)).length > 0);
+};
+
+/**
+* Similar to $session.hasPermission but applies an "OR" condition to arrays
+* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array any item must be present
+* @param {Object} [from=app.utils.permissions] Where to look for permissions
+* @returns {boolean} A boolean if the permission statement matches
+* @see app.utils.permissions.has()
+*/
+app.utils.permissions.has.any = (permission, from = app.utils.permissions) => {
+	var expression = permission;
+
+	// Convert array to multiple clauses
+	if (_.isArray(expression)) expression = { $or: expression.map(value => ({[value]: true})) };
+
+	return app.utils.permissions.has(expression, from);
+};
 </server>

@@ -8,10 +8,8 @@
 * @param {number} [limit=30] How many records to show per page
 *
 * @param {boolean|function} [showSearch=true] Show the search interface
-* @param {boolean} [searchImmediate=false] Perform a search when the user doesn't hit a key for `searchDebounce` timeout rather than waiting for enter
-* @param {number} [searchDebounce=250] Debounce rate if `searchImmediate` is true
-* @param {number} [searchMin=3] Only perform a search if the search string length is above this minimum
-*
+* @param {boolean|function} [showSearchBefore=false] Show the search before date
+* @param {boolean|function} [showSearchAfter=false] Show the search after date
 * @param {boolean} [autoScroll=true] Scroll to the top of the table on refresh
 * @param {string|number} [autoScrollOffset=0] Autoscroll Y offset if it needs manually tweaking, strings are automaticaly converted to numbers
 * @param {boolean} [autoResetPagination=true] Detect URL changes and reset pagination when it occurs (usually the upstream component clobbering the `url` property during a search)
@@ -20,7 +18,7 @@
 * @param {string} [rowKey="_id"] Key to use when looping over data to ensure minimal DOM re-rendering
 * @param {boolean} [loadForeground=false] Use the foreground loader rather than the background one
 *
-* @param {string} [layout="card"] How to layout the element, ENUM: 'card' (use BS4 cards), 'none' (use no styling)
+* @param {string} [layout="card"] How to layout the element, ENUM: 'card' (use BS4 cards), 'cards' (Convert table to flex boxes), 'none' (use no styling)
 * @param {string} [entity="items"] Shorthand to quickly set various text messages (used to compose the textEmpty etc.)
 * @param {string} [textEmpty="No ${entity} found"] Text to display when the table data is empty, use the slot 'state-empty' for more advanced content
 * @param {string} [textLoading="Loading ${entity}..."] Text to display when the table data is loading, use the slot 'state-loading' for more advanced content
@@ -67,7 +65,12 @@ module.exports = {
 		endpointSortAsc: undefined, // ^^^
 		endpointPage: 1,
 
-		searchInput: '', // Ubsubmitted query the user is typing
+		// Unsubmitted query
+		searchInputs: {
+			text: '',
+			before: null,
+			after: null,
+		}
 	}},
 	props: {
 		url: {type: [String, Object], required: true},
@@ -84,12 +87,12 @@ module.exports = {
 			number: {cellClass: 'col-number text-right'},
 			thumbnail: {cellClass: 'col-thumbnail text-center'},
 			verbs: {cellClass: 'col-verbs text-right'},
+			card: {cellClass: 'col-text text-left card'},
 		}}}, /* }}} */
 
 		showSearch: {type: Boolean, default: true},
-		searchImmediate: {type: Boolean, default: false},
-		searchDebounce: {type: Number, default: 250},
-		searchMin: {type: Number, default: 3},
+		showSearchBefore: {type: Boolean, default: false},
+		showSearchAfter: {type: Boolean, default: false},
 
 		autoScroll: {type: Boolean, default: true},
 		autoScrollOffset: {type: [Number, String], default: 0},
@@ -120,13 +123,13 @@ module.exports = {
 		* @returns {Promise} A promise which will resolve when the table has finished loading
 		*/
 		refresh() {
-			this.$debug('Refresh', this.reloadCount, this.url);
+			this.$debug('refresh', this.reloadCount, this.url, this.endpointSearch);
 			if (this.state == 'loading') return; // Already refreshing
 			if (!this.url) return this.$debug('Skipping refresh due to falsy URL'); // No URL available yet, URL is probably dynamic - do nothing
 			if (_.isPlainObject(this.url) && !this.url.url) throw new Error('No "url" key provided in v-table object');
 
-			if (this.endpointSort === undefined) this.endpointSort = this.sort || this.rowKey; // Set intial sort state
-			if (this.endpointSortAsc === undefined) this.endpointSortAsc = this.sortAsc;
+			this.endpointSort = this.sort || this.rowKey; // Set intial sort state
+			this.endpointSortAsc = this.sortAsc;
 
 			// Omit empty keys from url object
 			if (_.isObject(this.url))
@@ -230,11 +233,15 @@ module.exports = {
 
 		/**
 		* Search by a given fuzzy query
-		* @param {string} [query] The incomming query to search by, if omitted all results (filters depending) are returned
 		* @returns {Promise} A promise when the data has finished refreshing
 		*/
-		search(query) {
-			this.endpointSearch = query;
+		search() {
+			this.$debug('search', this.searchInputs);
+			this.endpointSearch = [
+				this.searchInputs.text,
+				this.$props.showSearchAfter && this.searchInputs.after ? `after:${moment(this.searchInputs.after).format('YYYY-MM-DD')}` : '',
+				this.$props.showSearchBefore && this.searchInputs.before ? `before:${moment(this.searchInputs.before).format('YYYY-MM-DD')}` : '',
+			].filter(i => i).join(' ');
 			return this.refresh();
 		},
 
@@ -262,41 +269,40 @@ module.exports = {
 		},
 	},
 	created() {
-		this.$debugging = false;
+		this.$debugging = true;
 		this.$watchAll(['url', 'limit', 'columns'], this.refresh, {immediate: true, deep: true});
 
+		// TODO: Debounce
 		// Add searchDebounced() methods which is the same as search but... well... debounced
-		this.searchDebounced = _.debounce(this.search, this.searchDebounce);
+		//this.searchDebounced = _.debounce(this.search, this.searchDebounce);
 	},
 };
 </component>
 
 <template>
-	<div class="v-table" :class="layout == 'card' && 'card'">
+	<div v-bind="$attrs" class="v-table" :class="layout">
 		<!-- Header {{{ -->
-		<div :class="layout == 'card' && 'card-header'">
-			<slot name="table-header">
-				<div class="v-table-header">
-					<slot name="table-header-left">
-						<form v-if="showSearch" @submit.prevent="search(searchInput)" class="form-inline">
-							<div class="input-group">
-								<input
-									v-model.trim="searchInput"
-									type="search"
-									class="form-control"
-									:placeholder="`Search ${entity}...`"
-									@input="searchImmediate && searchInput.length >= searchMin && searchDebounced(searchInput)"
-								/>
-								<div class="input-group-append">
-									<a @click="search(searchInput)" class="btn btn-light far fa-search"/>
+		<div :class="layout != 'card' && 'card'">
+			<div class="card-header">
+				<slot name="table-header">
+					<div class="v-table-header">
+						<slot name="table-header-left">
+							<form v-if="showSearch" @submit.prevent="search()" class="form-inline">
+								<div class="input-group">
+									<input v-model.trim="searchInputs.text" type="search" class="form-control" :placeholder="`Search ${entity}...`"/>
+									<input v-if="showSearchAfter" v-model="searchInputs.after" @change="search()" type="date" class="form-control" v-tooltip="'After'"/>
+									<input v-if="showSearchBefore" v-model="searchInputs.before" @change="search()" type="date" class="form-control" v-tooltip="'Before'"/>
+									<div class="input-group-append">
+										<a @click="search()" class="btn btn-light far fa-search"/>
+									</div>
 								</div>
-							</div>
-						</form>
-					</slot>
-					<slot name="table-header-center"/>
-					<slot name="table-header-right"/>
-				</div>
-			</slot>
+							</form>
+						</slot>
+						<slot name="table-header-center"/>
+						<slot name="table-header-right"/>
+					</div>
+				</slot>
+			</div>
 		</div>
 		<!-- }}} -->
 		<!-- Body loading overlay {{{ -->
@@ -329,7 +335,7 @@ module.exports = {
 						<td v-for="col in columns" :key="col.id" :class="col.type && columnTypes[col.type].cellClass">
 							<a v-href="cellHref ? cellHref(row) : false" :class="!cellHref && 'no-click'">
 								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
-									{{format(_.get(row, col.id, col.format))}}
+									{{format(_.get(row, col.id), col.format)}}
 								</slot>
 							</a>
 						</td>
@@ -417,5 +423,30 @@ module.exports = {
 .v-table .v-table-overlay-loading-spinner {
 	margin-bottom: 25px;
 	font-size: 120px;
+}
+
+.v-table-header {
+	display: flex;
+	justify-content: space-between;
+}
+
+.v-table.cards table {
+	display: block;
+}
+
+.v-table.cards thead {
+	display: none;
+}
+
+.v-table.cards tbody {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.v-table.cards tr {
+	flex: 1;
+	min-width: 50%;
+	min-height: 320px;
+	overflow: hidden;
 }
 </style>

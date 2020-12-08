@@ -1,21 +1,32 @@
 <server on="middleware">
 /**
 * Middleware layer to resolve a task only if a given set of permissions resolve
-* @param {string} permission... The permission or permissions the user requires to resolve the middleware
+* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
+* @param {function} handler Function used to check permissions
 * @return {function} Express middleware
 */
-// TODO: Ensure matches client-side version.
-app.middleware.express.hasPermission = (...permissions) => {
+app.middleware.express.hasPermission = (permission, handler = app.utils.permissions.has) => {
 	return function(req, res, next) {
 		if (!req.user) {
 			app.log.warn('User is not logged in');
 			res.sendError(403, 'Login required');
-		} else if (permissions.every(p => req.user.permissions[p])) {
+		} else if (handler && handler(permission, req.user.permissions)) {
+			//app.log('Permitted', permission);
 			next();
 		} else {
-			app.log.warn('User', app.log.colors.cyan(req.user.username), 'does not have permissions', permissions);
+			app.log.warn('User', app.log.colors.cyan(req.user.username), 'does not have permission', permission);
 			res.sendError(403, 'Insufficient permissions');
 		}
 	};
+};
+
+/**
+* Similar to hasPermission but applies an "OR" condition to arrays
+* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array any item must be present
+* @return {function} Express middleware
+* @see app.middleware.express.hasPermission()
+*/
+app.middleware.express.hasPermission.any = permission => {
+	return app.middleware.express.hasPermission(permission, app.utils.permissions.has.any);
 };
 </server>

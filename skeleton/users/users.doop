@@ -8,9 +8,9 @@ var Users = app.middleware.db.schema('users', {
 	_passhash2: {type: String},
 	_passsalt: {type: String},
 	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
-	_tokenPurpose: {type: 'string', enum: ['forgot', 'invite', 'login', 'signup', 'resetPassword', ]},
+	_tokenPurpose: {type: String, enum: ['invite', 'login', 'recover', 'signup']},
 	name: {type: String},
-	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
+	status: {type: String, enum: ['inactive', 'active', 'deleted'], default: 'inactive', index: true},
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
 	company: {type: 'pointer', ref: 'companies', index: true}, // FIXME: Is this used?
 	settings: {
@@ -56,29 +56,24 @@ Users
 * @returns {Promise<Object>} A promise which will return when the login sequence completes, the return value is an object which should be passed to res.send() when completing the transaction
 */
 Users.method('logIn', function(res) {
-	var user = this;
+	this.lastLogin = new Date();
 
 	return Promise.resolve()
 		// Update last login details {{{
-		.then(()=> user.save({
-			$ignoreModified: true,
-			lastLogin: new Date()
-		}))
+		.then(()=> this.save())
 		// }}}
 		// Generate UUID {{{
-		.then(()=> app.utils.uuid.generate().then(token => [user, token]))
+		.then(()=> app.utils.uuid.generate())
 		// }}}
 		// Create cookie against user login {{{
-		.then(data => {
-			var [user, token] = data;
-
+		.then(token => {
 			var output;
-			app.log('Successful login for', user.username || user.email);
+			app.log('Successful login for', this.username || this.email);
 
 			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
 			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
 
-			return app.cache.set(app.config.session.cache.prefix + token, {_id: user._id}).then(()=> output);
+			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}).then(()=> output);
 		})
 		// }}}
 });
@@ -102,12 +97,13 @@ Users.method('setToken', function(purpose) {
 				.digest('base64')
 				.replace(/[^a-z0-9]+/ig, '');
 
-			this.save({
-				$ignoreModified: true,
-				_token: tryToken,
-				_tokenPurpose: purpose,
-			})
-				.then(()=> resolve(tryToken))
+			this._token = tryToken;
+			this._tokenPurpose = purpose;
+			this.save()
+				.then(()=> {
+					//app.log('Token saved', purpose, tryToken);
+					return resolve(tryToken);
+				})
 				.catch(e => { // Possible unique collisision, wait a random amount of time and retry
 					app.log('Failed to allocate user token -', e.toString());
 					setTimeout(trySet, _.random(100, 500));
@@ -118,11 +114,10 @@ Users.method('setToken', function(purpose) {
 })
 
 Users.method('releaseToken', function() {
-	return this.save({
-		$ignoreModified: true,
-		_token: undefined,
-		_tokenPurpose: undefined,
-	})
+	//app.log('releaseToken');
+	this._token = undefined;
+	this._tokenPurpose = undefined;
+	return this.save();
 });
 // }}}
 

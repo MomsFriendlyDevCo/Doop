@@ -91,6 +91,7 @@ body.loading-foreground .loader-spinner {
 	border-left-color: transparent;
 }
 /* }}} */
+
 /* Foreground loader spinner {{{ */
 .splash.splash-loading-foreground .splah-loading-foreground-spinner {
 	position: absolute;
