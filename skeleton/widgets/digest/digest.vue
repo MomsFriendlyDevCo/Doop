@@ -6,7 +6,7 @@
 *
 * It is also possible to force this element to display values using the emitter events `digest.force.{class,icon,text,valid}`
 *
-* @param {string} [url] The URL to fetch data from (instead of specifying `collection` + `id`)
+* @param {string|Object} [url] The URL or AxiosRequest to fetch data (instead of specifying `collection` + `id`)
 * @param {string} [field="title"] Field to display the title of, if using slots specify "*" to populate `data` with the raw data object
 * @param {string} [filter] Optional Vue filter to run the result through before outputting
 * @param {string} [label] Use this label before fetching a remote one, if specifed the entity is treated as valid (including valid class and icon)
@@ -20,6 +20,7 @@
 * @param {string} [iconValid] Optional icon to display next to the context when loaded
 * @param {string} [iconInvalid] Optional icon to display next to the `textInvalid` text when an error occurs
 * @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into this.$toast.catch
+* @param {string} [hashMethod='urlField] How to cache the digest result, see the $digest service for more info
 *
 * @slot [loading] What to display when loading - defaults to a FA5 loading spinner. Bindings are `{config}`
 * @slot [display] What to display when data is loaded. Bindings are `{config, data, displayContent}`
@@ -55,7 +56,7 @@ module.exports = {
 		useLabel: true, // Whether to display the $props.label content if its present, set to false on incomming events or overrides
 	}),
 	props: {
-		url: {type: String, required: true},
+		url: {type: [Object, String], required: true},
 		field: {type: String, default: "title"},
 		filter: {type: String},
 		label: {type: String},
@@ -69,6 +70,7 @@ module.exports = {
 		iconValid: {type: String},
 		iconInvalid: {type: String},
 		ignoreErrors: {type: Boolean, default: false},
+		hashMethod: {type: String, defualt: 'urlField', validator: v => ['urlField', 'url', 'urlQuery'].includes(v)},
 	},
 	methods: {
 		refresh() {
@@ -78,7 +80,7 @@ module.exports = {
 				this.displayIcon = this.$props.iconValid;
 				this.loading = false;
 			} else { // Fetch remote data
-				this.$digest.get(this.$props.url, this.$props.field)
+				this.$digest.get(this.$props.url, this.$props.field, {hashMethod: this.$props.hashMethod})
 					.then(value => {
 						this.data = value;
 						this.displayContent = typeof this.$props.textValid == 'string' ? this.$props.textValid
@@ -201,20 +203,22 @@ module.exports = function() {
 	/**
 	* Lazily fetch a URL and hold it in a memory cache until it expires
 	* NOTE: Requesting an expired cache entry will automatically cause it to be re-fetched
-	* @param {string} [url] The URL to fetch, if not speicifed in the options object
+	* @param {string|Object} [url] The URL or AxiosRequest to fetch, if not speicifed in the options object
 	* @param {string} [field] Optional field to restrict the response to, if omitted the entire raw response is set, use the special case "*" to return only the data portion (implies `{rawResponse: false}`)
 	* @param {object} [options] Additional options to pass
 	* @param {string} [options.url] Alternate method to specify the URL
 	* @param {string|undefined} [options.field] The field to retrieve or the special case "*" for everything
 	* @param {string} [options.hash] Hashing string to use when caching, automatically calculated from the URL + field if omitted
+	* @param {string} [options.hashMethod='urlField] How to hash + cache the digest result. ENUM: 'urlField' (use both url + field as hash), 'url' (use URL only disguarding other fields - useful if all endpoints are the same with but the field being different)
 	* @returns {Promise} A promise which will resolve with either the specificly requested field value or the Axios response for the request
 	*/
 	$digest.get = (url, field, options) => {
 		// Argument mangling {{{
 		if (
-			typeof url == 'string' && typeof field == 'string'
-			|| typeof url == 'string' && field === undefined && options === undefined
-		) { // Called as full function // (url) only
+			typeof url == 'string' && typeof field == 'string' // Called as (url, field)
+			|| typeof url == 'string' && field === undefined && options === undefined // Called as (url)
+			|| typeof url == 'object' && typeof field == 'string' // Called as (axiosOptions, field)
+		) {
 			// Pass
 		} else if (typeof url == 'string' && typeof field == 'object') { // Called as (url, options)
 			[url, field, options] = [url, undefined, field];
@@ -224,52 +228,86 @@ module.exports = function() {
 			throw new Error(`Unknown call signature for $digest.get(${typeof url}, ${typeof field}, ${typeof options})`);
 		}
 		// }}}
-		var settings = {
+		var settings = _.defaults(options, {
 			url,
 			field: field === '*' ? undefined : field, // Either use the provided field name or set to undefined if the special case "*"
 			hash: undefined, // Set below
 			rawResponse: true,
-			...options,
-		};
-		settings.hash = settings.hash ? settings.hash : settings.field ? `${url}@${settings.field}` : url;
+			hashMethod: 'urlField',
+		});
 
+		// Determine hash to use {{{
+		settings.hash = settings.hash ? settings.hash // Hash pre-computed for us - use that
+			: settings.hashMethod == 'urlField' && typeof url == 'string' ? `${url}@${settings.field || '*'}` // url is a string and we have a valid field - combine
+			: settings.hashMethod == 'urlField' && typeof url == 'object' ? `${url.url}@${settings.field || '*'}` // url is an Axios endpoint - use URL po
+			: settings.hashMethod == 'url' && typeof url == 'string' ? url // url is a string and we have a valid field - combine
+			: settings.hashMethod == 'url' && typeof url == 'object' ? url.url // url is an Axios endpoint - use URL po
+			: settings.hashMethod == 'urlQuery' && typeof url == 'string' ? false // url + query - not supported yet
+			: settings.hashMethod == 'urlQuery' && typeof url == 'object' ? `${url.url}?${_.map(url.params || {}, (v, k) => `${k}=${v}`).join('&')}` // url is an Axios endpoint - collapse params into a string
+			: false;
+		if (settings.hash === false) throw new Error('Unable to determine hash method with digest input or hash method not supported yet');
+		// }}}
+
+		var digestPromise; // Which promise we need to attach to
 		if (
 			$digest.cache[settings.hash] // We already have a cache entry
 			&& !$digest.hasExpired($digest.cache[settings.hash].created) // ... and its still valid
-		) return $digest.cache[settings.hash].promise;
+		) {
+			digestPromise = $digest.cache[settings.hash].promise; // Use cached promise
+		} else {
+			$digest.cache[settings.hash] = { // Create new request
+				created: new Date(),
+				value: undefined,
+				promise: (
+					typeof url == 'object'
+						? this.$http(url) // Passed full Axios request - use it as is
+						: this.$http.get(url, { // Passed URL + [field] - Break into URL + options
+							...(settings.field ? {params: {select: settings.field}} : null)
+						})
+				).then(({data}) => { // Mangle response into just the cachable part + perform some sanity checks
+					$digest.cache[settings.hash].value = data; // Cache server response
 
-		$digest.cache[settings.hash] = {
-			created: new Date(),
-			value: undefined,
-			promise: this.$http.get(url, {
-				...(settings.field ? {params: {select: settings.field}} : null)
-			})
-				.then(res => { // Pick the specific field value if requested, otherwise return full response
-					if (!settings.field) return res.data; // No field specified - return entire data response
+					if (!settings.field) return data; // No field specified - return entire data response
 
-					if (_.isArray(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got an array`);
-					if (!_.isObject(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got a non-object`);
-					if (_.isEmpty(res.data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got empty object`);
-					if (/,/.test(settings.field)) { // Given a CSV of fields - use the first one
-						var useField = settings.field.split(/\s*,\s*/, 2)[0];
-						if (!res.data[useField]) throw new Error(`Expected the field "${useField}" (as first field of CSV "${settings.field}") in single document response from URL "${url}". Got keys: ${Object.keys(res.data).join(', ')}`);
-						return res.data[useField];
-					} else { // Extract single key specified by settings.field
-						if (!_.has(res.data, settings.field)) throw new Error(`Expected the field "${settings.field}" in single document response from URL "${url}". Got keys: ${Object.keys(res.data).join(', ')}`);
+					// Validation checking in dev mode
+					if (_.isArray(data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got an array`);
+					if (!_.isObject(data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got a non-object`);
+					if (_.isEmpty(data)) throw new Error(`Expected a single object response rendering a <digest/> from URL "${url}" - got empty object`);
 
-						return res.data[settings.field];
-					}
+					return data;
 				})
-				.then(payload => $digest.cache[settings.hash].value = payload),
-		};
+			};
+			digestPromise = $digest.cache[settings.hash].promise; // Return the promise part only
+		}
 
-		return $digest.cache[settings.hash].promise;
+		return digestPromise // Attach to either the cached promise or the new one...
+			.then(data => { // Pick the specific field value if requested, otherwise return full response
+				if (!settings.field) {
+					return data;
+				} else if (/,/.test(settings.field)) { // Given a CSV of fields - use the first one
+					var useField = settings.field.split(/\s*,\s*/, 2)[0];
+					if (!data[useField]) throw new Error(`Expected the field "${useField}" (as first field of CSV "${settings.field}") in single document response from URL "${url}". Got keys: ${Object.keys(data).join(', ')}`);
+					return data[useField];
+				} else { // Extract single key specified by settings.field
+					if (!_.has(data, settings.field)) throw new Error(`Expected the field "${settings.field}" in single document response from URL "${url}". Got keys: ${Object.keys(data).join(', ')}`);
+					return data[settings.field];
+				}
+			})
 	};
 
 
+	/**
+	* Sync version of $digest.get cache fetcher
+	* This either succeeds with the cached value or returns undefined - no new request for data is made
+	* @param {string} url URL to request from
+	* @param {string} [field] Specific field requested, if any
+	* @returns {*} Either the cached value (with optional sub-key) or undefined
+	*/
 	$digest.getSync = (url, field) => {
 		var hash = field ? url + '@' + field : url;
-		return $digest.cache[hash] ? $digest.cache[hash].value : undefined;
+		return $digest.cache[hash] && field ? $digest.cache[hash].value[field] // Asked for field
+			: $digest.cache[hash] ? $digest.cache[hash].value // Asked for entire data
+			: undefined;
 	};
 
 
