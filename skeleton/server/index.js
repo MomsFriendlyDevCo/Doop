@@ -30,7 +30,7 @@ Promise.resolve()
 	.then(()=> app.emit('preSchemas'))
 	.then(()=> app.emit('schemas'))
 	.then(()=> app.emit('postSchemas'))
-	.then(()=> app.emit('preEndpoints'))
+	.then(()=> app.emit('preEndpoints')) // Also emits migrations
 	.then(()=> app.emit('endpoints'))
 	.then(()=> app.emit('postEndpoints'))
 	.then(()=> app.emit('preServer'))
