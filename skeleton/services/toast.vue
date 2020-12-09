@@ -173,6 +173,9 @@ module.exports = function() {
 	margin: auto;
 	font-size: 1.5em;
 }
+.snotify {
+	z-index: 99999;
+}
 /* }}} */
 </style>
 
