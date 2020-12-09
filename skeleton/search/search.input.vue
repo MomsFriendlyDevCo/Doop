@@ -3,7 +3,9 @@
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
 *
 * @param {string|boolean} [readQuery='q'] If non-falsy, try to read the query from $router.query into the current state
-
+*
+* @param {string} [placeholder="Search..."] Placeholder text to display
+*
 * @param {string} [redirect] Front end URL to redirect to on submission (rather than just emitting)
 * @param {string} [redirectQuery='q'] Query element to set to the new search parameter when redirecting
 *
@@ -39,6 +41,7 @@ module.exports = {
 	},
 	props: {
 		readQuery: {type: [String, Boolean], default: 'q'},
+		placeholder: {type: String, default: 'Search...'},
 		redirect: {type: String},
 		redirectQuery: {type: String, default: 'q'},
 		tags: {type: Array, required: true},
@@ -198,6 +201,7 @@ module.exports = {
 			_.forEach(tagValues, (v, k) => this.$set(this.tagValues, k, v)); // Assign Vue managed tagValues to the defaults we allocated above
 		},
 
+
 		/**
 		* Compute local state into a search query (also set the search query display)
 		*/
@@ -249,19 +253,8 @@ module.exports = {
 		* @param {string} query String query to decode back into its component parts
 		*/
 		decodeQuery(query) {
-			var fuzzyQuery = []; // Extracted fuzzy query parts, extracted from all queryHash parts that don't look like tags
-			var queryHash = _.chain(query) // Break query into a lookup hash of tag:values
-				.split(/\s+/) // FIXME: Needs to be speach mark compatible
-				.filter(v => {
-					if (/:/.test(v)) return true;
-					fuzzyQuery.push(v); // Not a tag add to fuzzy query part
-					return false;
-				})
-				.map(v => v.split(/:/, 2))
-				.fromPairs()
-				.value();
-
-			this.fuzzyQuery = fuzzyQuery.join(' ');
+			var queryHash = this.$search.parseTags(query);
+			this.fuzzyQuery = queryHash.$fuzzy;
 
 			this.computedTags.forEach(tag => {
 				switch (tag.type) {
@@ -354,7 +347,7 @@ module.exports = {
 		<input
 			v-model="searchQuery"
 			type="text"
-			placeholder="Search orders..."
+			:placeholder="placeholder"
 			class="form-control search-input-fuzzy"
 			@focus="searchHasFocus = true"
 			@blur="searchHasFocus = false"
