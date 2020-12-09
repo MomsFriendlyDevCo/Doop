@@ -185,6 +185,7 @@ module.exports = {
 	},
 	mongo: {
 		version: undefined, // Database version, stored locally in .git/.doop-db-version, if this mongo version is older than any migration steps it will be migrated
+		migration: true, // Whether migration is enabled for this thread, enabled for dev disabled for all but one production thread
 		hooks: false, // Overridden during Doop bootstrap (otherwise ignore all hook calls)
 		uri: 'mongodb://localhost/FIXME-name',
 		options: {},

@@ -26,7 +26,10 @@ var fs = require('fs');
 app.dbMigration = function(version, title, handler) {
 	if (!_.isNumber(version) || !_.isString(title) || !_.isFunction(handler)) throw new Error('app.dbMigration expects (version<Number>, title<String>, handler<function>)');
 
-	if (app.config.mongo.version >= version) return; // Database is already old enough, no need to migrate
+	if (
+		!app.config.mongo.migration // Migration is disabled
+		|| app.config.mongo.version >= version  // Database is already old enough
+	) return; // Ignore this migration listing
 
 	app.dbMigration.migrations.push({version, title, handler});
 };
@@ -66,7 +69,7 @@ var _ = require('lodash');
 return Promise.resolve()
 	.then(()=> app.emit('migrations'))
 	.then(()=> {
-		if (!app.dbMigration.migrations.length) return; // Nothing to do
+		if (!app.config.mongo.migration || !app.dbMigration.migrations.length) return; // Nothing to do
 
 		var targetVersion = Math.max(...app.dbMigration.migrations.map(m => m.version));
 		app.log('Applying database migration', app.log.colors.cyan(app.config.mongo.version), '->', app.log.colors.cyan(targetVersion));
