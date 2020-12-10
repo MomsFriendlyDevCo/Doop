@@ -1,0 +1,107 @@
+<server on="middleware, dbMiddleware">
+var _ = require('lodash');
+
+/**
+* Mongo Document bi-directional linking middleware
+* Whenever a document is written (created, updated etc.) the links data is refreshed monitoring all the other documents this links to.
+*
+* @param {MongoosySchema} schema Attach to this schema
+* @param {Object} [options] Options structure to use
+* @param {function} [options.action] Promisable function to call as `(model, doc, history, settings)` when history occur, if omitted the default beahaviour is to insert history into `options.collection`
+* @param {string} [options.collection='history'] Collection to append to if `options.action` isn't specified
+* @param {string} [options.fieldCollection='col'] Field to recieve the changing collection
+* @param {string} [options.fieldId='doc'] Field to recieve the changing document ID
+* @param {string} [options.fieldDiff='body'] Field to recieve the change object (each key in dotted notation)
+*
+* @example Monitor a collection using defaults
+* app.middleware.db.schema('collection', {
+*   created: {type: 'date', default: Date.now},
+*   edited: {type: 'date', default: Date.now},
+*   foo: {type: 'string', default: 'Foo'},
+*   bar: {type: 'object', default: {}},
+* }).use(app.middleware.db.links)
+*
+* @example Monitor a collection overriding the destination
+* app.middleware.db.schema('collection', {
+*   created: {type: 'date', default: Date.now},
+*   edited: {type: 'date', default: Date.now},
+*   foo: {type: 'string', default: 'Foo'},
+*   bar: {type: 'object', default: {}},
+* }).use(app.middleware.db.links, {
+*   collection: 'links',
+*   fieldLinks: 'links',
+*   fieldCollection: 'col',
+*   fieldId: 'doc',
+* });
+*
+* @example Refresh links on a specific MongooseDocument (needs the middleware applying to the model first)
+* doc.$relink()
+*/
+app.middleware.db.links = function(schema, options) {
+	var settings = {
+		collection: 'links',
+		fieldLinks: 'links',
+		fieldCollection: 'col',
+		fieldId: 'doc',
+		...options,
+	};
+
+	/*
+	var sanitise = function(val) {
+		return JSON.parse(JSON.stringify(
+			_.cloneDeepWith(val, c => _.isDate(c) ? c.toISOString() : undefined)
+		));
+	};
+	*/
+
+	var hookFactory = function(path) {
+		return function(next) {
+			if (schema.id === settings.collection) return next();
+
+			app.log('Computing links data', this._id);
+			var links = [];
+
+			_.cloneDeepWith(this.toObject(), v => { // Use Lodash's cloneDeep to walk down an object tree
+				// String that looks like an Oid
+				if (/^[0-9a-f]{24}$/.test(v) && v != this._id)
+					links.push({
+						[settings.fieldCollection]: undefined, // TODO: Need to lookup collection for given ID... or use field name?
+						[settings.fieldId]: v,
+					});
+			});
+
+			return app.db[settings.collection].findOne({
+				[settings.fieldCollection]: schema.id,
+				[settings.fieldId]: this._id,
+			})
+			.then(doc => {
+				if (!doc) {
+					return app.db[settings.collection].create({
+						[settings.fieldCollection]: schema.id,
+						[settings.fieldId]: this._id,
+						[settings.fieldLinks]: links,
+					});
+				} else {
+					doc[settings.fieldLinks] = links;
+					return doc.save();
+				}
+			})
+			.then(() => next())
+			.catch(e => next(e));
+		};
+	};
+
+	schema.pre('save', hookFactory());
+
+	/**
+	* Refresh all links for a specifc document
+	* @returns {Promise} A promise which resolves when the relinking process has completed
+	*/
+	/*
+	schema.method('$relink', doc => {
+		console.log('RELINK', doc);
+		return Promise.resolve();
+	});
+	*/
+};
+</server>

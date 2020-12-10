@@ -8,8 +8,9 @@ var stringSplit = require('string-split-by');
 * Search works by attaching to save / update / create hooks and populating an array of searchable tokens per document
 * Searching then performs a RegExp against this (now flattened) array of items, calculating weight for each document
 *
-* The Monoxide ReST API is automatically compatible with this middleware adding a `db.MODEL.search(someFuzzyText)` method and `/api/MODEL?q=someFuzzyText` methods to the endpoint if search is enabled (the default). See examples.
+* The Mongoosy ReST API is automatically compatible with this middleware adding a `db.MODEL.search(someFuzzyText)` method and `/api/MODEL?q=someFuzzyText` methods to the endpoint if search is enabled (the default). See examples.
 *
+* @param {MongoosySchema} schema Attach to this schema
 * @param {Object} options Options to pass when initalizing
 * @param {string} [options.path="_searchTokens"] Dotted notation path of where to store search meta information in each doc
 * @param {Object} [options.docFilter] Additional filter to apply to all `.search()` calls on the database
@@ -35,7 +36,7 @@ var stringSplit = require('string-split-by');
 *
 * @example Attach search functionality to a model
 *   app.middleware.db.schema('users', { ... })
-*     .use(app.middleware.db.search, {
+*     .plugin(app.middleware.db.search, {
 *       fields: [
 *         {path: 'lastName', weight: 10},
 *         {path: 'firstName', weight: 5},
@@ -43,7 +44,7 @@ var stringSplit = require('string-split-by');
 *           var ageDifMs = Date.now() - doc.dob.getTime(); // Assumes DoB field
 *           var ageDate = new Date(ageDifMs);
 *           return Math.abs(ageDate.getUTCFullYear() - 1970);
-*         },
+*         }}
 *       ],
 *       tags: {
 *         is: (query, val) => query.find({status: val}), // Filter docs to those of a specific status (e.g. `IS:active`) via Mongo
@@ -66,7 +67,7 @@ var stringSplit = require('string-split-by');
 * @example Ask the ReST end point for fuzzy search results including tags (assumes the `after` tag is defined as per the first example)
 *   GET /api/users?q=smith+20+after:2020-01-01
 */
-app.middleware.db.search = (model, options) => {
+app.middleware.db.search = (schema, options) => {
 	// Settings {{{
 	var settings = {
 		path: '_searchTokens',
@@ -104,8 +105,12 @@ app.middleware.db.search = (model, options) => {
 	};
 	// }}}
 
+	// Inject index field into existing schema {{{
+	schema.add({ [settings.path]: {type: Array} });
+	// }}}
+
 	// Create index for the field we will be tokenizing into {{{
-	model.index(`${settings.path}.value`);
+	schema.index(`${settings.path}.value`);
 	// }}}
 
 	// Apply create / save / update hooks to documents to calculate the token storage {{{
@@ -164,8 +169,8 @@ app.middleware.db.search = (model, options) => {
 	* @param {boolean} [options.wholeTerm=false] Assume multi word sequences wrap in speachmarks to keep them together. i.e. when searching `foo bar baz` and true - `+foo +bar +baz` else when false `+"foo bar baz"`
 	* @returns {array<Object>} An array of matching documents with the meta `_score` field
 	*/
-	model.search = function(terms, options) {
-		var searchStart = Date.now();
+	schema.static('search', function(terms, options) {
+		console.log('search', terms, options);
 		var searchSettings = {
 			filter: undefined,
 			softFilter: (next, doc) => next(null, true),
@@ -213,7 +218,7 @@ app.middleware.db.search = (model, options) => {
 
 		app.log(
 			`Performing ${!searchSettings.count ? 'search' : 'search-count'} on`,
-			'collection=', app.log.colors.cyan(model.$collection),
+			'collection=', app.log.colors.cyan(schema.id),
 			'raw query=', app.log.colors.cyan(`"${terms}"`),
 			'RE query=', termsRE.map(t => app.log.colors.cyan(t.toString())).join(', '),
 			'tags=', _(searchSettings.mergeTags)
@@ -227,9 +232,9 @@ app.middleware.db.search = (model, options) => {
 		);
 
 		return new Promise((resolve, reject) => {
-			var query = model.find(_.chain(termsRE) // Setup object query from TermsRE extracted RegExps
+			var query = app.db[schema.id].find(_.chain(termsRE) // Setup object query from TermsRE extracted RegExps
 					.map(termRE => ({
-						[`${searchSettings.path}.value`]: termRE,
+						[`${settings.path}.value`]: termRE,
 					}))
 					.thru(v => _.isEmpty(v) ? {} : {$or: v}) // Wrap multiple field checks in $or
 					.value()
@@ -267,59 +272,49 @@ app.middleware.db.search = (model, options) => {
 
 
 			query
-				.find(searchSettings.filter) // Apply other filters
 				.select(
-					searchSettings.count ? '_id' // Only pick the _id if we're in count mode to save memory
-					: searchSettings.select ? searchSettings.select.split(',') // Otherwise assume searchSettings.select is a CSV
+					settings.count ? '_id' // Only pick the _id if we're in count mode to save memory
+					: settings.select ? settings.select.split(',') // Otherwise assume settings.select is a CSV
 					: searchSettings.select ? searchSettings.select.split(',') // or fall back to main search setting
 					: undefined
 				)
-				.filter(searchSettings.softFilter) // Apply soft filters
-				.filter(function(cb, doc) { // Handle Monoxide "soft" filters if there are any
-					_.chain(searchSettings.mergeTags)
-						.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
-						.map((val, tag) => // Map all filters into a promise array
-							Promise.resolve(searchSettings.tags[tag].filter.call(doc, doc, val))
-						)
-						.thru(promises => Promise.all(promises)
-							.then(results => {
-								if (!results.length) return cb(null, true); // No filters - approve all documents by default
-								if (results.every(r => r)) { // All results are truthy - approve doc
-									cb(null, true);
-								} else { // At least one filter returned false - filter out doc
-									cb(null, false);
-								}
-							})
-						)
-						.value()
-				})
-				.map((next, doc) => // Remap each found doc...
-					!searchSettings.count ? next(null, doc) // We dont need to do any document mangling for count operations
-					: Promise.all(searchSettings.fields.map((field, fieldIndex) =>
-						Promise.resolve(
-							field.path ? _.get(doc, field.path)
-							: field.handler ? field.handler(doc)
-							: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
-						)
-							.then(fieldVal => fieldVal && termsRE.some(re => re.test(fieldVal)) ? field.weight : 0)
-					))
-						.then(fieldScores => doc._score = fieldScores.reduce((t, v) => t + v, 0))
-						.then(()=> next(null, doc))
-				)
-				.thru((next, docs) => next(null,
-					!searchSettings.count && searchSettings.softSort && /^(\+|[^\-])/.test(searchSettings.softSort) ? _.sortBy(docs, searchSettings.softSort) // Sort by criteria forwards
-					: !searchSettings.count && searchSettings.softSort ? _.sortBy(docs, searchSettings.sort).reverse() // Sort by criteria backwards
-					: docs
-				))
-				.thru((next, docs) => next(null, !searchSettings.count && (searchSettings.softSkip || searchSettings.softLimit) ? docs.slice(searchSettings.softSkip, searchSettings.softSkip + searchSettings.softLimit) : docs))
+				.populate(searchSettings.populate ? searchSettings.populate : undefined)
+				// .filter(searchSettings.softFilter) // Apply soft filters
 				.exec((err, items) => {
-					app.log((searchSettings.count ? 'Search-count' : 'Search') + ' complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
 					if (err) {
 						reject(err);
-					} else if (searchSettings.count) {
-						resolve(items.length);
 					} else {
-						resolve(items);
+						// Apply filters
+						async function filterAsync(array, callbackfn) {
+							const filterMap = await Promise.all(array.map(callbackfn));
+							return array.filter((value, index) => filterMap[index]);
+						}
+
+						filterAsync(items, doc => {
+							var filters = _(searchSettings.mergeTags)
+								.pickBy((val, tag) => _.isPlainObject(searchSettings.tags[tag]) && _.isFunction(searchSettings.tags[tag].filter)) // Has a filter function
+								.map((val, tag) => Promise.resolve(searchSettings.tags[tag].filter.call(doc, doc, val))) // Map all filters into a promise array
+								.value();
+							return (!filters.length || Promise.all(filters).then(f => f.every(r => r))); // No filters or all values are truthy
+						}).then(docs => {
+							if (searchSettings.count) return resolve(docs.length); // We dont need to do any document mangling for count operations
+
+							Promise.all(docs.map(doc => // Remap each found doc...
+								Promise.all(settings.fields.map((field, fieldIndex) => Promise.resolve(
+										field.path ? _.get(doc, field.path)
+										: _.isFunction(field.handler) ? field.handler(doc) // FIXME: Use call with a context?
+										: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
+									)
+									.then(fieldVal => fieldVal && termsRE.some(re => re.test(fieldVal)) ? field.weight : 0)
+								))
+								.then(fieldScores => doc._score = fieldScores.reduce((t, v) => t + v, 0))
+								.then(()=> doc)
+							))
+							.then(docs => searchSettings.sort ? _.orderBy(docs, searchSettings.sort.replace(/^-/, ''), searchSettings.sort.indexOf('-') === 0 ? 'desc':'asc' ) : docs)
+							.then(docs => (searchSettings.skip || searchSettings.limit) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs)
+							.then(docs => resolve(docs))
+							.catch(e => reject(e));
+						});
 					}
 				})
 		})

@@ -1,17 +1,16 @@
 <component>
 module.exports = {
 	data() { return {
-		searchHasFocus: false,
 		searchQuery: this.$route.query.q,
-		showHelper: false, // Whether the helper area is visible, use setHelperVisibility() to change
 		helper: {
 			search: '',
 			after: undefined,
 			before: undefined,
-			statusInvoice: false,
-			statusProcessing: false,
-			statusCompleted: false,
-			payment: 'all',
+			//statusDraft: false,
+			//statusQuote: false,
+			//statusInvoice: false,
+			//statusProcessing: false,
+			//statusCompleted: false,
 		},
 	}},
 	methods: {
@@ -19,34 +18,8 @@ module.exports = {
 		* Submit the search form
 		*/
 		submit() {
-			const search = { path: '/orders' };
-
-			if (this.searchQuery) {
-				search.query = {q: this.searchQuery};
-			}
-			this.$router.push(search).catch(_.noop);
-			this.setHelperVisibility(false)
+			this.$router.push({path: '/search', query: {q: this.searchQuery}}).catch(_.noop);
 		},
-
-
-		/**
-		* Set the visiblity of the helper
-		* @param {boolean|string} [state='toggle'] Either the visibility boolean or 'toggle' to switch
-		*/
-		setHelperVisibility(state = 'toggle') {
-			this.showHelper = state == 'toggle' ? !this.showHelper : !!state;
-
-			if (this.showHelper) {
-				// Hook into global body click handler
-				this.$timeout(()=> $('body').on('click', '*', this.handleBodyClick), 250); // Let DOM settle then bind to clicking outside the area to close
-				app.vue.$on('$beforeRoute', this.handleRoute);
-			} else {
-				// Destroy global body click handler
-				$('body').off('click', '*', this.handleBodyClick);
-				app.vue.$off('$beforeRoute', this.handleRoute);
-			}
-		},
-
 
 		/**
 		* Decode the active search into helper values
@@ -74,12 +47,13 @@ module.exports = {
 					} else if (i.startsWith('before:')) {
 						helper.before = moment(i.substring(7)).toDate();
 					} else if (i.startsWith('is:')) {
-						var statuses = i.substring(3).split(/\s*,\s*/);
-						helper.statusInvoice = statuses.includes('invoice');
-						helper.statusProcessing = statuses.includes('processing');
-						helper.statusCompleted = statuses.includes('completed');
-					} else if (i.startsWith('payment:')) {
-						helper.payment = i.substr(8);
+						console.warn('is: not implemented');
+						//var statuses = i.substring(3).split(/\s*,\s*/);
+						//helper.statusDraft = statuses.includes('draft');
+						//helper.statusQuote = statuses.includes('quote');
+						//helper.statusInvoice = statuses.includes('invoice');
+						//helper.statusProcessing = statuses.includes('processing');
+						//helper.statusCompleted = statuses.includes('completed');
 					} else { // Don't recognise as a token - throw onto fuzzy searching pile
 						helper.search.push(i);
 					}
@@ -101,36 +75,18 @@ module.exports = {
 				this.helper.search,
 				this.helper.after ? `after:${moment(this.helper.after).format('YYYY-MM-DD')}` : '',
 				this.helper.before ? `before:${moment(this.helper.before).format('YYYY-MM-DD')}` : '',
-				this.helper.statusInvoice || this.helper.statusProcessing || this.helper.statusCompleted
+				/*
+				this.helper.statusDraft || this.helper.statusQuote || this.helper.statusInvoice || this.helper.statusProcessing || this.helper.statusCompleted
 					? 'is:' + [
+						this.helper.statusDraft && 'draft',
+						this.helper.statusQuote && 'quote',
 						this.helper.statusInvoice && 'invoice',
 						this.helper.statusProcessing && 'processing',
 						this.helper.statusCompleted && 'completed',
 					].filter(s => s).join(',')
 					: '',
-				this.helper.payment && this.helper.payment != 'all' ? `payment:${this.helper.payment}` : '',
+				*/
 			].filter(i => i).join(' ')
-		},
-
-
-		/**
-		* Detect and handle top level body clicks
-		* Close the dialog if the click is detected anywhere outside the DOM element tree
-		*/
-		handleBodyClick(e) {
-			if (!this.showHelper) return; // Helper is invisible anyway - disguard
-			if (!$(e.target).parents('.app-search-helper').toArray().length) { // Helper is not in DOM tree upwards - user clicked outside open search helper area
-				e.stopPropagation();
-				this.setHelperVisibility(false);
-			}
-		},
-
-		/**
-		* Detect and handle routing while the search helper is open
-		*/
-		handleRoute(data) {
-			if (!this.showHelper) return; // Helper is invisible anyway - disguard
-			this.setHelperVisibility(false);
 		},
 	},
 	watch: {
@@ -148,177 +104,99 @@ module.exports = {
 			},
 		},
 	},
-	beforeDestroy() {
-		this.setHelperVisibility(false); // Clean up body click handlers
+	mounted() {
+		// Prevent input fields from closing dropdown.
+		$('.dropdown-menu').find('input').click(function (e) {
+			e.stopPropagation();
+		});
 	},
 };
 </component>
 
 <template>
-	<form @submit.prevent="submit" role="search" :class="searchHasFocus && 'app-search-focus'">
-		<input
-			v-model="searchQuery"
-			type="text"
-			placeholder="Search orders..."
-			class="form-control app-search-input"
-			@keydown.enter="submit"
-			@focus="searchHasFocus = true"
-			@blur="searchHasFocus = false"
-		/>
-		<a @click="submit" class="far fa-search"/>
-		<a @click="setHelperVisibility('toggle')" class="far fa-chevron-down"/>
-		<div class="app-search-helper form-horizontal container pt-1" :class="showHelper && 'open'">
-			<div class="form-group row">
-				<label class="col-sm-3 col-form-label">Search</label>
-				<div class="col-sm-9">
-					<input v-model="helper.search" type="text" class="form-control"/>
+	<form class="app-search" @submit.prevent="submit" role="search">
+		<div class="app-search-box dropdown">
+			<div class="input-group">
+				<input v-model="searchQuery" autocomplete="off" type="search" class="form-control" placeholder="Search..." id="top-search">
+				<div class="input-group-append">
+					<button class="btn" type="submit">
+						<i class="fe-search"></i>
+					</button>
 				</div>
 			</div>
-			<div class="form-group row">
-				<label class="col-sm-3 col-form-label">Date</label>
-				<div class="col-sm-4">
-					<v-date v-model="helper.after" @selected="helper.before = $event" :clear-button="true"/>
+			<div class="dropdown-menu dropdown-lg" id="search-dropdown">
+
+				<div class="dropdown-header noti-title">
+					<h5 class="text-overflow mb-2">Filters</h5>
 				</div>
-				<div class="col-sm-1">to</div>
-				<div class="col-sm-4">
-					<v-date v-model="helper.before" :clear-button="true"/>
+
+				<div class="form-group dropdown-item notify-item">
+					<label for="search-field-date-after">After</label>
+					<input v-model="helper.after" type="date" class="form-control" aria-describedby="search-field-date-after-help" id="search-field-date-after"/>
+					<small id="search-field-date-after-help" class="sr-only form-text text-muted">Show results created after this date.</small>
 				</div>
-			</div>
-			<div class="form-group row">
-				<label class="col-sm-3 col-form-label">Status</label>
-				<div class="col-sm-9 form-inline form-control-plaintext">
-					<div class="form-check mr-3">
-						<input v-model="helper.statusInvoice" class="form-check-input" type="checkbox" id="searchHelperStatusInvoice"/>
-						<label class="form-check-label" for="searchHelperStatusInvoice">Invoice</label>
-					</div>
-					<div class="form-check mr-3">
-						<input v-model="helper.statusProcessing" class="form-check-input" type="checkbox" id="searchHelperStatusProcessing"/>
-						<label class="form-check-label" for="searchHelperStatusProcessing">Processing</label>
-					</div>
-					<div class="form-check mr-3">
-						<input v-model="helper.statusCompleted" class="form-check-input" type="checkbox" id="searchHelperStatusCompleted"/>
-						<label class="form-check-label" for="searchHelperStatusCompleted">Completed</label>
-					</div>
+
+				<div class="form-group dropdown-item notify-item">
+					<label for="search-field-date-before">Before</label>
+					<input v-model="helper.before" type="date" class="form-control" aria-describedby="search-field-date-before-help" id="search-field-date-before"/>
+					<small id="search-field-date-before-help" class="sr-only form-text text-muted">Show results created before this date.</small>
 				</div>
-			</div>
-			<div class="form-group row">
-				<label class="col-sm-3 col-form-label">Payment</label>
-				<div class="col-sm-9 form-inline form-control-plaintext">
-					<div class="form-check mr-3">
-						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentAll" name="searchHelperPayment" value="all"/>
-						<label class="form-check-label" for="searchHelperPaymentAll">All</label>
-					</div>
-					<div class="form-check mr-3">
-						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentSettled" name="searchHelperPayment" value="settled"/>
-						<label class="form-check-label" for="searchHelperPaymentSettled">Settled</label>
-					</div>
-					<div class="form-check mr-3">
-						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentPartial" name="searchHelperPayment" value="partial"/>
-						<label class="form-check-label" for="searchHelperPaymentPartial">Partial</label>
-					</div>
-					<div class="form-check mr-3">
-						<input v-model="helper.payment" class="form-check-input" type="radio" id="searchHelperPaymentUnpaid" name="searchHelperPayment" value="unpaid"/>
-						<label class="form-check-label" for="searchHelperPaymentUnpaid">Unpaid</label>
-					</div>
+
+				<!--
+				<div class="dropdown-header noti-title">
+					<h5 class="text-overflow mb-2">Found <span class="text-danger">09</span> results</h5>
 				</div>
-			</div>
-			<div class="form-group row d-flex justify-content-end px-2">
-				<button @click="submit" type="button" class="btn btn-primary">Search</button>
+
+				<a href="javascript:void(0);" class="dropdown-item notify-item">
+					<i class="fe-home mr-1"></i>
+					<span>Analytics Report</span>
+				</a>
+
+				<a href="javascript:void(0);" class="dropdown-item notify-item">
+					<i class="fe-aperture mr-1"></i>
+					<span>How can I help you?</span>
+				</a>
+
+				<a href="javascript:void(0);" class="dropdown-item notify-item">
+					<i class="fe-settings mr-1"></i>
+					<span>User profile settings</span>
+				</a>
+
+				<div class="dropdown-header noti-title">
+					<h6 class="text-overflow mb-2 text-uppercase">Users</h6>
+				</div>
+
+				<div class="notification-list">
+					<a href="javascript:void(0);" class="dropdown-item notify-item">
+						<div class="media">
+							<img class="d-flex mr-2 rounded-circle" src="../assets/images/users/avatar-2.jpg" alt="Generic placeholder image" height="32">
+							<div class="media-body">
+								<h5 class="m-0 font-14">Erwin E. Brown</h5>
+								<span class="font-12 mb-0">UI Designer</span>
+							</div>
+						</div>
+					</a>
+
+					<a href="javascript:void(0);" class="dropdown-item notify-item">
+						<div class="media">
+							<img class="d-flex mr-2 rounded-circle" src="../assets/images/users/avatar-5.jpg" alt="Generic placeholder image" height="32">
+							<div class="media-body">
+								<h5 class="m-0 font-14">Jacob Deo</h5>
+								<span class="font-12 mb-0">Developer</span>
+							</div>
+						</div>
+					</a>
+				</div>
+				-->
+
 			</div>
 		</div>
 	</form>
 </template>
 
 <style>
-/* Search input area {{{ */
-.app-search .app-search-focus input.app-search-input {
-	background: var(--white);
-	color: var(--dark);
-}
-
-.app-search .app-search-focus > a.far {
-	color: var(--dark);
-}
-
-.app-search input.app-search-input::placeholder {
-	color: var(--muted) !important;
-}
-/* }}} */
-
-/* Search helper {{{ */
-.navbar-custom .menu-left {
-	overflow: visible;
-}
-
-.app-search .app-search-helper {
-	display: none;
-	width: 400px;
-	z-index: 1000;
-	background: #FFF;
-	position: absolute;
-	border: 1px solid var(--secondary);
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-}
-
-.app-search .app-search-helper .form-control,
-.app-search .app-search-helper .form-control:focus {
-	color: var(--gray-dark);
-	border-bottom: 1px solid var(--secondary);
-	border-radius: 0px;
-	width: 100%;
-	padding: 0;
-}
-
-.app-search .app-search-helper .vdp-datepicker {
-	border-bottom: 1px solid var(--secondary);
-}
-
-.app-search .app-search-helper .vdp-datepicker input {
-	border: none;
-	width: 100%;
-}
-
-.app-search .app-search-helper .vdp-datepicker .vdp-datepicker__clear-button {
-	position: absolute;
-	right: 0px;
-}
-
-.app-search .app-search-helper.open {
-	display: block;
-}
-/* }}} */
-
-/* Button placement {{{ */
-.app-search .form-control, .app-search .form-control:focus {
-	width: 400px;
-}
-
-.app-search a.fa-search {
-	left: auto;
-	right: 30px;
-}
-
-.app-search a.fa-chevron-down {
-	left: auto;
-	right: 5px;
-}
-/* }}} */
-
-/* Theme fixes {{{*/
-.app-search .digest-select a {
-	position: inherit;
-	top: initial;
-	left: initial;
-	height: auto;
-	line-height: 1;
-	width: auto;
-}
-.app-search .digest-select a.btn-hover-danger {
-	flex-grow: 0;
+.navbar-custom .app-search .dropdown-menu .form-control {
 	color: inherit;
-	border-radius: 0;
-	width: 31px;
+	background-color: inherit;
 }
-/* }}} */
 </style>

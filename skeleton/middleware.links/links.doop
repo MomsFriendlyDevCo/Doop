@@ -1,0 +1,24 @@
+<schema>
+app.middleware.db.schema('links', {
+	created: {type: 'date', default: Date.now},
+	col: {type: 'string'},
+	doc: {type: 'string', index: true},
+	links: [{
+		col: {type: 'string'},
+		doc: {type: 'string', index: true},
+	}],
+});
+</schema>
+
+<endpoint>
+app.use('/api/links/:id?', app.middleware.express.rest('history', {
+	get: app.middleware.express.isUser(),
+	query: app.middleware.express.isUser(),
+	count: app.middleware.express.isUser(),
+	create: app.middleware.express.isUser(),
+	save: app.middleware.express.isUser(),
+	meta: app.middleware.express.isUser(),
+	delete: false,
+	search: false, // When unspecified `search()` picks up before `query()`
+}));
+</endpoint>
