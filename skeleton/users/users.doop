@@ -143,11 +143,9 @@ Users.hook('save', function(next, q) {
 // }}}
 
 // Force username to ALWAYS be lower case {{{
-// FIXME: Mongoosy
-Users.pre('save', function(next) {
-	if (this.email) this.email = this.email.toLowerCase();
-	if (this.username) this.username = this.username.toLowerCase();
-	next();
+Users.plugin(app.middleware.db.replace, {
+	email: val => val.toLowerCase(),
+	username: val => val.toLowerCase(),
 });
 // }}}
 
@@ -160,15 +158,12 @@ Users.pre('save', function(next) {
 /**
 * Return if the user has the valid array of permissions
 * All permissions must be present to return true
-* @param {string|array<string>} permission... Permission(s) to check
+* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
 * @returns boolean True if the user has all permissions
 */
-/*
-Users.method('hasPermission', function(...permissions) {
-	var user = this;
-	return permissions.every(p => user.permissions[p]);
+Users.method('hasPermission', function(permission) {
+	return app.utils.permissions.has(permission);
 });
-*/
 // }}}
 </schema>
 
@@ -183,7 +178,7 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 		},
 		app.middleware.express.isUser(),
 	],
-	query: 'get',
+	query: app.middleware.express.isUser(),
 	count: app.middleware.express.isUser(),
 	create: false,
 	// FIXME: Does this allow user to hack their own permissions?

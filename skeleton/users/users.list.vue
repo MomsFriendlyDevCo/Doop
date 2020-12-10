@@ -17,7 +17,7 @@ module.exports = {
 <template>
 	<div>
 		<div class="btn-group-float">
-			<a v-href="'/users/invite'" class="btn btn-icon btn-circle btn-success far fa-paper-plane" v-tooltip="'Invite a new user'"></a>
+			<a v-href="'/invite'" class="btn btn-icon btn-circle btn-success far fa-paper-plane" v-tooltip="'Invite a new user'"></a>
 		</div>
 		<v-table
 			ref="users"
