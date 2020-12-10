@@ -9,10 +9,10 @@ app.get('/go/invite/:token', (req, res) => {
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
 		//$errNotFound: false,
 	})
-		// TODO: Disabled? Configurable.
 		.then(user => {
-			console.log('Would accept token for user', user);
-			throw new Error('NOPE!');
+			if (!app.config.session.invite.enabled) throw new Error('User invite is disabled');
+			// TODO: Validate any user conditions for invite
+			return user;
 		})
 		.then(user => user || Promise.reject('Password reset token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
@@ -22,7 +22,7 @@ app.get('/go/invite/:token', (req, res) => {
 			return user.save();
 		})
 		// Utilising forgot password functionality to prompt user.
-		.then(()=> res.redirect('/forgot'))
+		.then(()=> res.redirect('/recover'))
 		.catch(e => res.sendError(403, e.toString()))
 });
 </endpoint>
@@ -46,6 +46,7 @@ app.post([
 		.then(()=> {
 			if (!app.config.session.invite.enabled) throw new Error('403: User invite is disabled');
 			if (!req.body.email) throw new Error('An email must be provided to invite a new user');
+			req.body.email = req.body.email.toLowerCase();
 			// TODO: Check valid email
 		})
 		// }}}
@@ -68,8 +69,6 @@ app.post([
 				username: req.body.username
 			});
 		})
-		// TODO: async-chainable?
-		//.then(user => session.user = user)
 		// }}}
 		// Generate invite token {{{
 		.then(user => user.setToken('invite').then(token => [user, token]))
@@ -94,7 +93,11 @@ app.post([
 		})
 		// }}}
 		// End {{{
-		.then(user=> res.send({data: {_id: user._id}}))
+		.then(user => res.format({
+			html: ()=> res.redirect('/'),
+			json: ()=> res.status(200).send({_id: user._id}),
+			default: ()=> res.status(406).send('Not an acceptable login accept type'),
+		}))
 		.catch(res.sendError)
 		// }}}
 );

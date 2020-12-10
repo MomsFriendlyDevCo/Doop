@@ -82,14 +82,11 @@ app.post([
 		})
 		// }}}
 		// End {{{
-		.then(user => res.send({_id: user._id}))
-		/*
-		.then(output => res.format({
+		.then(user => res.format({
 			html: ()=> res.redirect('/'),
-			json: ()=> res.status(200).send(output),
+			json: ()=> res.status(200).send({_id: user._id}),
 			default: ()=> res.status(406).send('Not an acceptable login accept type'),
 		}))
-		*/
 		// FIXME: Hide nature of error.
 		.catch(res.sendError)
 		// }}}

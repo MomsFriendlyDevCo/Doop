@@ -6,7 +6,7 @@
 */
 module.exports = function() {
 	var $session = this;
-	$session.$debugging = true;
+	$session.$debugging = false;
 
 	$session.data = {permissions: {}}; // User session data
 	$session.isRefreshed = false; // Have we pinged the server yet
@@ -271,7 +271,7 @@ module.exports = function() {
 		.then(()=> window.location.reload())
 		.finally(()=> Vue.services().$loader.stop('$session.logout'))
 
-/**
+	/**
 	* Attempt to initiate password reset
 	* @param {Object} user The user object to login
 	* @param {string} user.email The username to login
@@ -306,7 +306,7 @@ module.exports = function() {
 		// Convert array to multiple clauses
 		if (_.isArray(expression)) expression = { $and: expression.map(value => ({[value]: true})) };
 
-		return (sift(expression, [$session.data.permissions]).length > 0);
+		return ([$session.data.permissions].filter(sift(expression)).length > 0);
 	};
 
 	/**
