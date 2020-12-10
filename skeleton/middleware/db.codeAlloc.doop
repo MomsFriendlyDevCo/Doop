@@ -8,7 +8,7 @@ var mongoosy = require('@momsfriendlydevco/mongoosy');
 * This function accepts a handlebars template and checks for collisions within an existing MongoDB collection
 * If a collision is found the '{{unique}}' part of the pattern is incremented until the output no longer collides
 *
-* @param {MonoxideModel} model The mongoosy model to attach to
+* @param {MongoosySchema} schema Attach to this schema
 * @param {Object} [options] Options structure to use
 * @param {string|function} [options.template="{{unique}}"] The handlebars template to use when generating the code, if this is a function it is executed as (doc) and may return a promise
 * @param {boolean} [options.allocateUndefined=true] Whether to process undefined values when creating a record
@@ -36,6 +36,8 @@ var mongoosy = require('@momsfriendlydevco/mongoosy');
 * }))
 */
 app.middleware.db.codeAlloc = (model, options) => {
+	app.log.warn('MONGOOSY: Untested app.middleware.db.codeAlloc on', app.log.colors.cyan(schema.id), '- verify functionality before moving this warning');
+
 	var settings = {
 		field: 'code',
 		template: '{{unique}}',
@@ -182,7 +184,7 @@ app.middleware.db.codeAlloc = (model, options) => {
 								// Compile candidateCode into a regExp and look for collisions
 								var codeRE = new RegExp('^' + handlebarsCandidate.replace(settings.uniqueToken, settings.uniqueRE) + '$');
 								var query = {
-									$errNotFound: false,
+									//$errNotFound: false,
 									[settings.field]: codeRE,
 								};
 
@@ -216,7 +218,7 @@ app.middleware.db.codeAlloc = (model, options) => {
 								code: tryCode,
 							}))
 							.then(lockAllocated => {
-								if (lockAllocated && operation == 'create') { // Record not created yet - just glue to document
+								if (lockAllocated && doc.isNew) { // Record not created yet - just glue to document
 									app.log(app.log.colors.green('Allocated'), 'Use code', app.log.colors.cyan(tryCode), 'for', app.log.colors.cyan(model.$collection), '#',  app.log.colors.cyan(doc._id));
 									doc[settings.field] = tryCode;
 									resolve();
@@ -252,6 +254,7 @@ app.middleware.db.codeAlloc = (model, options) => {
 			.catch(e => e === 'SKIP' ? done() : done(e))
 	};
 
+	// FIXME: Mongoose hooks...
 	if (settings.allocateCreate) model.hook('create', middlewareHook.bind({operation: 'create'}));
 	if (settings.allocateSave) model.hook('save', middlewareHook.bind({operation: 'save'}));
 	if (settings.allocateSave) model.hook('update', middlewareHook.bind({operation: 'update'}));

@@ -1,0 +1,39 @@
+<server on="middleware, dbMiddleware">
+var _ = require('lodash');
+
+/**
+* Simple database middleware to replace fields or rewrite documents on any write event
+*
+* @param {Mongoosyschema} schema The mongoosy schema to attach to
+* @param {Object|function} [options] Options structure to use or the intial value of `$doc` if a function is passed
+* @param {function} [$doc] Function called as `(doc)` to mutate the entire document prior to other replacement functions, if truthy is returned it is assumed to be the full document, if falsy the document is assumed to have been mutated inline
+* @param {function} [$postDoc] Function called as `(doc)` to mutate the entire document post all other replacement functions, if truthy is returned it is assumed to be the full document, if falsy the document is assumed to have been mutated inline
+* @param {function} [...] Per-field replacement async functions called as `(val, doc)` each is expected to return an alternate value to insert
+*/
+app.middleware.db.replace = (schema, options) => {
+	app.log.warn('MONGOOSY: Untested app.middleware.db.replace on', app.log.colors.cyan(schema.id), '- verify functionality before moving this warning');
+
+	var settings = {
+		$doc: _.isFunction(options) ? options : undefined,
+		$postDoc: undefined,
+		..._.isObject(options) ? options : {},
+	};
+
+	schema.pre('save', function() {
+		return Promise.resolve()
+			.then(()=> settings.$doc && Promise.resolve(settings.$doc.call(this, this)))
+			.then(res => { if (res) Object.assign(this, res) }) // Replace entire doc if truthy
+			.then(()=> Promise.allSeries(
+				Object.keys(settings)
+					.filter(k => !['$doc', '$postDoc'].includes(k))
+					.map(k => () =>
+						_.isFunction(settings[k]) && Promise.resolve(
+							settings[k].call(this, _.get(this, k))
+						).then(newVal => _.set(this, k, newVal))
+					)
+			))
+			.then(()=> settings.$postDoc && Promise.resolve(settings.$postDoc.call(this, this)))
+			.then(res => { if (res) Object.assign(this, res) }) // Replace entire doc if truthy
+	});
+};
+</server>

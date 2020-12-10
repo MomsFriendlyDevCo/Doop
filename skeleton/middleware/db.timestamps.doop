@@ -9,26 +9,24 @@ var _ = require('lodash');
 *
 * @example Attach to the widgets schema to add timestamps on change
 *   app.middleware.db.schema('widgets', { ... })
-*     .hook('save', app.middleware.db.timestamps())
+*     .pre('save', app.middleware.db.timestamps())
 */
 app.middleware.db.timestamps = options => {
 	// Settings {{{
 	var settings = {
 		key: 'status',
-		// FIXME: Doesn't use key for status...
-		path: doc => `timestamps.${doc.status}`, 
+		path: doc => `timestamps.${doc[settings.key]}`, 
 		...options,
 	};
 	// }}}
 
-	// FIXME: Update to pre style with `this` instead of `doc`
-	return function(done, doc) {
-		if (!doc[settings.key]) return done(); // Not changing status
+	return function(next) {
+		if (!this[settings.key]) return next(); // Not changing status
 
-		Promise.resolve(settings.path(doc, settings))
-			.then(path => _.set(doc, path, new Date()))
-			.then(()=> done())
-			.catch(done)
+		Promise.resolve(settings.path(this, settings))
+			.then(path => _.set(this, path, new Date()))
+			.then(()=> next())
+			.catch(next)
 	};
 };
 </server>
