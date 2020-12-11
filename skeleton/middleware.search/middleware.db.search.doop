@@ -83,14 +83,14 @@ app.middleware.db.search = (schema, options) => {
 			// Filter by status
 			// status: (query, val) => query.find({status: val}),
 		},
-		mutateTokens: (v, settings) => _.chain(v)
+		mutateTokens: v => _.chain(v)
 			.toString()
 			.thru(v => v.toUpperCase())
 			.deburr()
 			.replace(/[^A-Z0-9\-:]+/g, ' ')
 			.trim()
 			.value(),
-		searchTermsModify: (v, settings) => _.chain(v)
+		searchTermsModify: v => _.chain(v)
 			.toString()
 			.thru(v => v.toUpperCase())
 			.deburr()
@@ -145,11 +145,13 @@ app.middleware.db.search = (schema, options) => {
 	* @param {string} terms Search terms to filter
 	* @param {Object} [options] Additional options
 	* @param {Object} [options.filter] Additional Mongo compatible expression to filter on the database
+	* @param {function} [options.softFilter] Addtional "soft" filter to apply, added after the main settings.docFilter, called as `(next, doc)`
 	* @param {string} [options.sort="_score"] Sort results by this field (use the '-' prefix to reverse sort)
 	* @param {string} [options.softSort] Soft sort results by this field (slower as its sorted in memory, use the '-' prefix to reverse sort)
-	* @param {function} [options.softFilter] Addtional "soft" filter to apply, added after the main settings.docFilter, called as `(next, doc)`
-	* @param {function} [options.limit=100] How many records to "soft" limit by
-	* @param {function} [options.skip=0] How many records to "soft" skip by
+	* @param {number} [options.limit=100] How many records limit by
+	* @param {number} [options.softLimit=100] How many records to "soft" limit by
+	* @param {number} [options.skip=0] How many records to skip by
+	* @param {number} [options.softSkip=0] How many records to "soft" skip by
 	* @param {string} [options.select] Optional CSV of fields to limit by, overrides settings.select if present
 	* @param {boolean} [options.count=false] Return an object with the count of objects rather than those that match
 	* @param {boolean} [options.acceptTags=true] Whether to process specified tags. If falsy tag contents are ignored and removed from the term
@@ -160,6 +162,7 @@ app.middleware.db.search = (schema, options) => {
 	*/
 	schema.static('search', function(terms, options) {
 		console.log('search', terms, options);
+		var searchStart = Date.now();
 		var searchSettings = {
 			filter: undefined,
 			softFilter: (next, doc) => next(null, true),
@@ -202,7 +205,7 @@ app.middleware.db.search = (schema, options) => {
 				? [_.trim(terms.join(' '))]
 				: terms
 			)
-			.map(term => searchSettings.searchTermsModify(term, settings)) // Mangle terms to remove burring etc.
+			.map(term => searchSettings.searchTermsModify(term)) // Mangle terms to remove burring etc.
 			.map(term => new RegExp(RegExp.escape(term), 'i')) // Encode each term as a RegExp
 			.value();
 
@@ -287,48 +290,55 @@ app.middleware.db.search = (schema, options) => {
 								.value();
 							return (!filters.length || Promise.all(filters).then(f => f.every(r => r))); // No filters or all values are truthy
 						}).then(docs => {
+							app.log((searchSettings.count ? 'Search (count)' : 'Search') + ' complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
 							if (searchSettings.count) return resolve(docs.length); // We dont need to do any document mangling for count operations
 
 							Promise.all(docs.map(doc => // Remap each found doc...
 								Promise.all(settings.fields.map((field, fieldIndex) => Promise.resolve(
 										field.path ? _.get(doc, field.path)
 										: _.isFunction(field.handler) ? field.handler(doc) // FIXME: Use call with a context?
-										: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${model.$collection} - specify "path" or "handler" at least`)
+										: Promise.reject(`Unknown search handler on field #${field.name || fieldIndex} for model ${schema.id} - specify "path" or "handler" at least`)
 									)
 									.then(fieldVal => fieldVal && termsRE.some(re => re.test(fieldVal)) ? field.weight : 0)
 								))
 								.then(fieldScores => doc._score = fieldScores.reduce((t, v) => t + v, 0))
 								.then(()=> doc)
 							))
-							.then(docs => searchSettings.sort ? _.orderBy(docs, searchSettings.sort.replace(/^-/, ''), searchSettings.sort.indexOf('-') === 0 ? 'desc':'asc' ) : docs)
-							.then(docs => (searchSettings.skip || searchSettings.limit) ? docs.slice(searchSettings.skip, searchSettings.skip + searchSettings.limit) : docs)
-							.then(docs => resolve(docs))
+							.then(docs => searchSettings.softSort ? _.orderBy(docs, searchSettings.softSort.replace(/^-/, ''), searchSettings.softSort.indexOf('-') === 0 ? 'desc':'asc' ) : docs)
+							.then(docs => (searchSettings.softSkip || searchSettings.softLimit) ? docs.slice(searchSettings.softSkip, searchSettings.softSkip + searchSettings.softLimit) : docs)
+							.then(docs => {
+								app.log('Search including filtering complete in', app.log.colors.cyan(Date.now() - searchStart + 'ms'));
+								return resolve(docs);
+							})
 							.catch(e => reject(e));
 						});
 					}
-				})
-		})
+				});
+		});
 	};
 	// }}}
-};
 
-// Inject universal search engine expose if enabled
-if (app.config.search?.exposeEngine) {
-	app.log('Exposing search engine as', app.log.colors.cyan(app.config.publicUrl));
-	app.config.layout.headInject.push(
-		'<script type="application/ld+json">'
-		+ JSON.stringify({
-			'@context': 'https://schema.org',
-			'@type': 'WebSite',
-			url: app.config.publicUrl,
-			name: app.config.title,
-			potentialAction: [{
-				'@type': 'SearchAction',
-				target: app.config.search.exposeSearchUrl,
-				'query-input': 'required name=search_term_string'
-			}]
-		})
-		+ '</script>'
-	);
-}
+	// TODO: Inject universal search engine expose if enabled {{{
+	/*
+	if (app.config.search?.exposeEngine) {
+		app.log('Exposing search engine as', app.log.colors.cyan(app.config.publicUrl));
+		app.config.layout.headInject.push(
+			'<script type="application/ld+json">'
+			+ JSON.stringify({
+				'@context': 'https://schema.org',
+				'@type': 'WebSite',
+				url: app.config.publicUrl,
+				name: app.config.title,
+				potentialAction: [{
+					'@type': 'SearchAction',
+					target: app.config.search.exposeSearchUrl,
+					'query-input': 'required name=search_term_string'
+				}]
+			})
+			+ '</script>'
+		);
+	}
+	*/
+	// }}}
+};
 </server>
