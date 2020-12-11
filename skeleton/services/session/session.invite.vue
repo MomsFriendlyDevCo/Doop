@@ -53,10 +53,9 @@ module.exports = {
 </component>
 
 <template>
-	<form class="form-horizontal" @submit.prevent="submit(true, true)">
+	<form v-permissions="'usersInvite'" class="form-horizontal" @submit.prevent="submit(true, true)">
 		<div class="btn-group-float">
 			<button
-				v-if="$session.hasPermission('usersInvite')"
 				v-tooltip="'Send invite'"
 				type="submit"
 				class="btn btn-icon btn-lg btn-circle btn-success"

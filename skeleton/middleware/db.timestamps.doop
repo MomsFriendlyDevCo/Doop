@@ -9,7 +9,10 @@ var _ = require('lodash');
 *
 * @example Attach to the widgets schema to add timestamps on change
 *   app.middleware.db.schema('widgets', { ... })
-*     .plugin(app.middleware.db.timestamps)
+*     .plugin(app.middleware.db.timestamps, {
+*		key: 'foo',
+*		path: doc => `fooTimestamps.${doc.foo}`, 
+*	})
 */
 app.middleware.db.timestamps = (schema, options) => {
 	app.log.warn('MONGOOSY: Untested app.middleware.db.timestamps - verify functionality before moving this warning');
@@ -17,14 +20,15 @@ app.middleware.db.timestamps = (schema, options) => {
 	// Settings {{{
 	var settings = {
 		key: 'status',
-		// FIXME: What about `timestamps.status.active`? So that timestamps can be collected on multiple fields
 		path: doc => `timestamps.${doc[settings.key]}`, 
 		...options,
 	};
 	// }}}
 
 	// Inject index field into existing schema {{{
-	schema.add({ timestamps: {type: Object, default: {}, minimize: false} });
+	// TODO: Add sub-keys
+	var path = settings.path({[settings.key]: true}).split('.')[0];
+	schema.add({ [path]: {type: Object, default: {}, minimize: false} });
 	// }}}
 
 	// Attach hook {{{

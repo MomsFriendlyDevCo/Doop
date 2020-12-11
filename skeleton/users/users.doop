@@ -121,25 +121,13 @@ Users.method('releaseToken', function() {
 });
 // }}}
 
-// Whenever we are saving and we dont have a username use the email address {{{
-/*
-Users
-	.pre('save', function(next) {
-		if (!this.username && this.email) this.username = this.email; // Username should be the email address if we have email but not the username
-		next();
-	});
-*/
-// }}}
-
 // TODO: Ensure user is not adjusting their own permissions on "save"
 
-// Alias username/email when using email as username
-/*
-Users.hook('save', function(next, q) {
-	if (app.config.session.signup.emailAsUsername) q.username = q.email;
+// Alias username/email when using email as username {{{
+Users.pre('validate', function(next) {
+	if (app.config.session.signup.emailAsUsername) this.username = this.email;
 	next();
 });
-*/
 // }}}
 
 // Force username to ALWAYS be lower case {{{
@@ -151,7 +139,8 @@ Users.plugin(app.middleware.db.replace, {
 
 // Timestamp status tracking {{{
 Users.plugin(app.middleware.db.timestamps, {
-	key: 'status'
+	key: 'status',
+	//path: doc => `timestamps.${doc[settings.key]}`, 
 });
 // }}}
 

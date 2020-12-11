@@ -315,7 +315,7 @@ app.middleware.db.search = (schema, options) => {
 					}
 				});
 		});
-	};
+	});
 	// }}}
 
 	// TODO: Inject universal search engine expose if enabled {{{
