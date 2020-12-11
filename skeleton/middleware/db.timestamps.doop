@@ -26,8 +26,7 @@ app.middleware.db.timestamps = (schema, options) => {
 	// }}}
 
 	// Inject index field into existing schema {{{
-	// TODO: Add sub-keys
-	var path = settings.path({[settings.key]: true}).split('.')[0];
+	var path = settings.path({[settings.key]: ''}).slice(0, -1);
 	schema.add({ [path]: {type: Object, default: {}, minimize: false} });
 	// }}}
 
