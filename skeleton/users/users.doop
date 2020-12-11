@@ -150,8 +150,9 @@ Users.plugin(app.middleware.db.replace, {
 // }}}
 
 // Timestamp status tracking {{{
-// TODO: Re-implement for mongoosy
-//Users.pre('save', app.middleware.db.timestamps())
+Users.plugin(app.middleware.db.timestamps, {
+	key: 'status'
+});
 // }}}
 
 // Permission Utilities {{{ */
@@ -184,8 +185,11 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	// FIXME: Does this allow user to hack their own permissions?
 	save: (req, res, next) => {
 		// Allow user to save their own profile
-		if (req.user && req.params.id === req.user._id) return next();
-		return app.middleware.express.hasPermission('usersEdit');
+		if (app.middleware.express.hasPermission('usersEdit') || req.user && req.params.id === req.user._id) {
+			return next();
+		} else {
+			res.sendError('403: You are not an admin or editing your own profile');
+		}
 	},
 	meta: true,
 	delete: [
