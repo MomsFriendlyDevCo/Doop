@@ -74,7 +74,8 @@ module.exports = {
 				type: 'checkboxes',
 				tag: 'report',
 				options: [
-					'endOfDay',
+					'paymentMethods',
+					'paymentTotals',
 				],
 			},
 		],

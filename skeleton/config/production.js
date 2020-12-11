@@ -13,6 +13,9 @@ module.exports = {
 		debugCSS: false,
 		minifyCSS: false, // FIXME: Untested
 	},
+	mongo: {
+		migration: false,
+	},
 	papertrail: {
 		enabled: true,
 	},

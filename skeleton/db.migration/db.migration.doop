@@ -6,14 +6,13 @@
 * correctly bumps the version sequencially until it hits the highest stratergy version found
 *
 * @example Simple migration example
-* <script on="postSchemas">
+* <server on="migrations">
 * app.dbMigration(101, 'Fix widgets', ()=>                        // Declare we are upgrading to version 101
-*   db.widgets.find().eachAsync(widget => {                       // Iterate over each widget (3 at a time, see later)
+*   db.widgets.find().cursor.eachAsync(widget => {                // Iterate over each widget (3 at a time, see later)
 *     widget.status = 'newStatus';                                // Change doc in some way
 *     return widget.save();                                       // Save it back
-*   }, 3)                                                         // Process 3 documents at once
+*   }, {parallel: 3})                                             // Process 3 documents at once
 * )
-* </script>
 */
 
 var _ = require('lodash');
@@ -27,8 +26,10 @@ var fs = require('fs');
 app.dbMigration = function(version, title, handler) {
 	if (!_.isNumber(version) || !_.isString(title) || !_.isFunction(handler)) throw new Error('app.dbMigration expects (version<Number>, title<String>, handler<function>)');
 
-	if (version == app.config.thisVersion) return; // Database is already old enough, no need to migrate
-	if (version >= app.config.thisVersion) return; // Migration doesn't need to be applied
+	if (
+		!app.config.mongo.migration // Migration is disabled
+		|| app.config.mongo.version >= version  // Database is already old enough
+	) return; // Ignore this migration listing
 
 	app.dbMigration.migrations.push({version, title, handler});
 };
@@ -40,7 +41,6 @@ app.dbMigration = function(version, title, handler) {
 * @returns {Promise} A promise which will resolve when the version has been set
 */
 app.dbMigration.setVersion = function(version) {
-	console.log('DEBUG VERSION=', version);
 	return fs.promises.writeFile(`${app.config.paths.root}/.git/.doop-db-version`, version.toString())
 		.then(()=> app.config.mongo.version = version)
 };
@@ -66,24 +66,27 @@ return fs.promises.readFile(`${app.config.paths.root}/.git/.doop-db-version`, 'u
 */
 var _ = require('lodash');
 
-if (!app.dbMigration.migrations.length) return; // Nothing to do
+return Promise.resolve()
+	.then(()=> app.emit('migrations'))
+	.then(()=> {
+		if (!app.config.mongo.migration || !app.dbMigration.migrations.length) return; // Nothing to do
 
-var targetVersion = Math.max(...app.dbMigration.migrations.map(m => m.version));
-app.log('Applying database migration', app.log.colors.cyan(app.config.mongo.version), '->', app.log.colors.cyan(targetVersion));
+		var targetVersion = Math.max(...app.dbMigration.migrations.map(m => m.version));
+		app.log('Applying database migration', app.log.colors.cyan(app.config.mongo.version), '->', app.log.colors.cyan(targetVersion));
 
-return Promise.allSeries(
-	_.chain(app.dbMigration.migrations)
-		.sortBy('version')
-		.map(migration => ()=> {
-			app.log('Applying database migration', app.log.colors.cyan(app.config.mongo.version), '=>', app.log.colors.cyan(migration.version), '-', app.log.colors.gray(migration.title));
-			return Promise.resolve(migration.handler())
-				.then(()=> {
-					// Bump current version if everything at this level succeded
-					if (migration.version > app.config.mongo.version + 1) return app.dbMigration.setVersion(migration.version);
+		return Promise.allSeries(
+			_.chain(app.dbMigration.migrations)
+				.sortBy('version')
+				.map(migration => ()=> {
+					app.log('Applying database migration', app.log.colors.cyan(app.config.mongo.version), '=>', app.log.colors.cyan(migration.version), '-', app.log.colors.gray(migration.title));
+					return Promise.resolve(migration.handler())
+						.then(()=> {
+							// Bump current version if everything at this level succeded
+							if (migration.version > app.config.mongo.version + 1) return app.dbMigration.setVersion(migration.version);
+						})
 				})
-		})
-		.value()
-)
-	.then(()=> app.dbMigration.setVersion(targetVersion))
-	.then(()=> console.log('MIGRATION DONE'))
+				.value()
+		)
+		.then(()=> app.dbMigration.setVersion(targetVersion))
+	})
 </server>
