@@ -11,6 +11,7 @@ module.exports = function() {
 
 	$toast.primary = Snotify.simple.bind(Snotify);
 	$toast.info = Snotify.info.bind(Snotify);
+	$toast.simple = Snotify.simple.bind(Snotify);
 	$toast.success = Snotify.success.bind(Snotify);
 	$toast.warn = $toast.warning = Snotify.warning.bind(Snotify);
 	$toast.danger = Snotify.error.bind(Snotify);
@@ -32,6 +33,58 @@ module.exports = function() {
 
 	
 	$toast._progress = {}; // Storage of all progress toasts
+
+
+	/**
+	* Perform an async operation displaying text while its working and success text when done
+	* @param {string} text Text to show while working
+	* @param {Object|array} options Additional options
+	* @param {function} options.action Async worker, function which returns a promise
+	* @param {function} func Function which returns a promise
+	*/
+	$toast.async = (text, options) => {
+		var toast = Snotify.async(
+			text,
+			()=> Promise.resolve(options.action())
+				.finally(()=> setTimeout(()=> Snotify.remove(toast.id), 2000)),
+			options,
+		);
+	};
+
+
+	/**
+	* Display a toast with buttons and other decent defaults
+	* This is really just a wrapper for Snotify.confirm() with some additional wrapping functionality to auto-close on button presses
+	* @param {string} text Text prompt to show
+	* @param {Object|array} options Additional options, if this is an array it is assumed as options.buttons
+	* @param {boolean} [options.autoClose=true] Automatically close the toast when the button is pressed
+	* @param {array<Object>} [options.buttons] Buttons to display
+	* @param {string} options.buttons.text Text of the button
+	* @param {function} [options.buttons.action] Action to take when the button is clicked, default behaviour is to close the toast
+	*/
+	$toast.ask = (text, options) => {
+		// Argument mangling {{{
+		if (_.isArray(options)) {
+			[text, options] = [text, {buttons: options}];
+		} else if (!options) {
+			throw new Error('No options specified for $toast.ask()');
+		}
+		// }}}
+
+		Snotify.confirm(text, {
+			timeout: 5000,
+			showProgressBar: true,
+			...options,
+			buttons: options.buttons.map(button => ({
+				...button,
+				action: toast => {
+					if (options.autoClose ?? true) Snotify.remove(toast.id);
+					if (button.action) button.action(toast); // Revert to actual button action
+				},
+			})),
+		});
+	};
+
 
 	/**
 	* Display a toast with progress
@@ -145,14 +198,27 @@ module.exports = function() {
 }
 /* }}} */
 
+/* Async {{{ */
+.snotifyToast.snotify-async .snotify-icon--async {
+	right: 5px !important;
+	height: 30px;
+	width: 30px;
+}
+/* }}} */
 /* Progress {{{ */
 .snotifyToast.snotify-progress {
-	background-color: var(--secondary);
-	border: 1px solid var(--gray-dark);
+	background-color: #eee;
+}
+
+.snotifyToast.snotify-progress .progress-bar {
+	background-color: var(--main-darker);
+}
+
+.snotifyToast.snotify-progress .snotify-fa-icon {
+	background: #acacac;
 }
 
 .snotifyToast.snotify-progress .snotifyToast__inner {
-	color: var(--light);
 	padding: 5px;
 }
 /* }}} */
@@ -173,6 +239,9 @@ module.exports = function() {
 	margin: auto;
 	font-size: 1.5em;
 }
+.snotify {
+	z-index: 99999;
+}
 /* }}} */
 </style>
 
@@ -183,6 +252,38 @@ module.exports = {
 		testToast(method, ...args) {
 			this.$toast[method](...args);
 		},
+
+		testAsync(succeed) {
+			this.$toast.async('Thinking...', {
+				action: ()=> Promise.timeout(100000)
+					.then(()=> succeed ? 'All good' : Promise.reject('Failed'))
+			});
+		},
+
+		testConfirm() {
+			// Use Snotify.confirm (no auto closing of toasts)
+			this.$toast.confirm('This is a question', {
+				timeout: 5000,
+				showProgressBar: true,
+				buttons: [
+					{text: 'Yes', action: toast => console.log('Clicked Yes')},
+					{text: 'No', action: ()=> console.log('Clicked No')},
+				],
+			});
+		},
+
+
+		/**
+		* Use Doop wrapped version of Snotify.confirm with auto-closing
+		*/
+		testAsk() {
+			this.$toast.ask('This is a question', {
+				buttons: [
+					{text: 'Yes', action: toast => console.log('Clicked Yes')},
+					{text: 'No', action: ()=> console.log('Clicked No')},
+				],
+			});
+		},
 	},
 };
 </component>
@@ -192,9 +293,14 @@ module.exports = {
 		<div class="list-group">
 			<a class="list-group-item" @click="testToast('primary', 'Hello World')">vm.$toast.primary('Hello World')</a>
 			<a class="list-group-item" @click="testToast('info', 'Hello World')">vm.$toast.info('Hello World')</a>
+			<a class="list-group-item" @click="testToast('simple', 'Hello World')">vm.$toast.simple('Hello World')</a>
 			<a class="list-group-item" @click="testToast('success', 'Hello World')">vm.$toast.success('Hello World')</a>
 			<a class="list-group-item" @click="testToast('warning', 'Hello World')">vm.$toast.warning('Hello World')</a>
 			<a class="list-group-item" @click="testToast('error', 'Hello World')">vm.$toast.error('Hello World')</a>
+			<a class="list-group-item" @click="testAsync(true)">vm.$toast.async({action: PromiseThatSucceeds})</a>
+			<a class="list-group-item" @click="testAsync(false)">vm.$toast.async(Promise PromiseThatFails})</a>
+			<a class="list-group-item" @click="testConfirm">vm.$toast.confirm({buttons: ...})</a>
+			<a class="list-group-item" @click="testAsk">vm.$toast.ask([...]})</a>
 			<a class="list-group-item" @click="testToast('save')">vm.$toast.save()</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 'Thinking...', 25)">vm.$toast.progress('debug', 'Thinking...', 25)</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 50)">vm.$toast.progress('debug', 50)</a>
