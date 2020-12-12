@@ -88,5 +88,6 @@ return Promise.resolve()
 				.value()
 		)
 		.then(()=> app.dbMigration.setVersion(targetVersion))
+		.then(()=> app.log('Database migration complete to version', app.log.colors.cyan(targetVersion)))
 	})
 </server>
