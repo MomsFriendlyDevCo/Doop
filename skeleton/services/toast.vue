@@ -56,18 +56,29 @@ module.exports = function() {
 	* Display a toast with buttons and other decent defaults
 	* This is really just a wrapper for Snotify.confirm() with some additional wrapping functionality to auto-close on button presses
 	* @param {string} text Text prompt to show
-	* @param {Object|array} options Additional options, if this is an array it is assumed as options.buttons
+	* @param {Object|array} [options] Additional options, if this is an array it is assumed as options.buttons, if omitted asks "Yes" / "No" and returns a promise that succeeds on "Yes" and fails on "No"
 	* @param {boolean} [options.autoClose=true] Automatically close the toast when the button is pressed
 	* @param {array<Object>} [options.buttons] Buttons to display
 	* @param {string} options.buttons.text Text of the button
 	* @param {function} [options.buttons.action] Action to take when the button is clicked, default behaviour is to close the toast
+	* @returns {undefined|Promise} Either undefined if options / buttons is specified or a Promise if using "Yes" / "No" mode - i.e. no options or buttons specified
 	*/
 	$toast.ask = (text, options) => {
-		// Argument mangling {{{
+		var output;
+
+		// Argument mangling / Promise mode {{{
 		if (_.isArray(options)) {
 			[text, options] = [text, {buttons: options}];
-		} else if (!options) {
-			throw new Error('No options specified for $toast.ask()');
+		} else if (!options || !options.buttons) {
+			// Promise mode - if no options assume yes / no and return a promise
+			var deferred = Promise.defer();
+			output = deferred.promise;
+			options = {
+				buttons: [
+					{text: 'Yes', action: ()=> deferred.resolve()},
+					{text: 'No', action: ()=> deferred.reject('cancel')},
+				],
+			};
 		}
 		// }}}
 
@@ -83,6 +94,8 @@ module.exports = function() {
 				},
 			})),
 		});
+
+		return output;
 	};
 
 
@@ -284,6 +297,16 @@ module.exports = {
 				],
 			});
 		},
+
+
+		/**
+		* Same as testAsk but support promises
+		*/
+		testAskPromise() {
+			this.$toast.ask('This is a question')
+				.then(()=> console.log('vum.$toast.ask succeeded'))
+				.catch(()=> console.log('vum.$toast.ask failed'))
+		},
 	},
 };
 </component>
@@ -300,7 +323,8 @@ module.exports = {
 			<a class="list-group-item" @click="testAsync(true)">vm.$toast.async({action: PromiseThatSucceeds})</a>
 			<a class="list-group-item" @click="testAsync(false)">vm.$toast.async(Promise PromiseThatFails})</a>
 			<a class="list-group-item" @click="testConfirm">vm.$toast.confirm({buttons: ...})</a>
-			<a class="list-group-item" @click="testAsk">vm.$toast.ask([...]})</a>
+			<a class="list-group-item" @click="testAsk">vm.$toast.ask(String, [...]})</a>
+			<a class="list-group-item" @click="testAskPromise">vm.$toast.ask(String) - promise mode</a>
 			<a class="list-group-item" @click="testToast('save')">vm.$toast.save()</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 'Thinking...', 25)">vm.$toast.progress('debug', 'Thinking...', 25)</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 50)">vm.$toast.progress('debug', 50)</a>
