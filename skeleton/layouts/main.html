@@ -91,7 +91,7 @@
 			<div class="h-100" data-simplebar>
 
 				<!-- User box {{{ -->
-				<!-- TODO: ??? -->
+				<!-- TODO: ? -->>
 				<!-- }}} -->
 
 				<div id="sidebar-menu">
@@ -112,12 +112,14 @@
 						<ul class="list-unstyled topnav-menu float-right mb-0">
 							<!-- Search: Desktop {{{ -->
 							<li class="d-none d-lg-block">
-								<search-navbar></search-navbar>
+								<search-global></search-global>
 							</li>
 							<!-- }}} -->
 
 							<!-- Search: Mobile {{{ -->
 							<li class="dropdown d-inline-block d-lg-none">
+								<search-global></search-global>
+								<!--
 								<a class="nav-link dropdown-toggle arrow-none waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
 									<i class="fe-search noti-icon"></i>
 								</a>
@@ -126,6 +128,7 @@
 										<input name="q" type="text" class="form-control" placeholder="Search ..." aria-label="Search">
 									</form>
 								</div>
+								-->
 							</li>
 							<!-- }}} -->
 
@@ -152,6 +155,10 @@
 								</a>
 								<!-- End mobile menu toggle-->
 							</li>
+
+							<!--li class="hide-phone app-search float-left">
+								<search-global></search-global>
+							</li-->
 
 							<!--li class="hide-phone app-search float-left">
 								<form role="search" class="">

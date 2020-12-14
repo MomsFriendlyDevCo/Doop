@@ -212,6 +212,8 @@ module.exports = {
 		},
 	},
 	mongo: {
+		version: undefined, // Database version, stored locally in .git/.doop-db-version, if this mongo version is older than any migration steps it will be migrated
+		migration: true, // Whether migration is enabled for this thread, enabled for dev disabled for all but one production thread
 		hooks: false, // Overridden during Doop bootstrap (otherwise ignore all hook calls)
 		uri: 'mongodb://localhost/FIXME-name',
 		options: {
@@ -240,6 +242,10 @@ module.exports = {
 	sanity: {
 		user: 'sanity',
 		pass: '{{FIXME}}', // Used as as basic-auth on /sanity checks, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
+	},
+	search: {
+		exposeEngine: false, // Whether to expose the search engine in Searchbox compatible browsers like Chrome - https://developers.google.com/search/docs/data-types/sitelinks-searchbox
+		exposeSearchUrl: 'https://query.example.com/search?q={search_term_string}',
 	},
 	sentry: {
 		enabled: false,

@@ -15,7 +15,7 @@ var timestring = require('timestring');
 * @param {boolean} [options.fixDates=true] Whether to preparse the field into a valid Mongo date before iterating, this fixes string date storage
 * @param {function} [options.interval="1d"] Promisable function called as `(req, res, settings)` which should return the interval of the timeseries, defaults to parsing req.query.interval via timestring or '1d'
 * @param {function} [options.timeLabel] Function called as `(date)` to neaten the date display, defaults to using Moment to return a simple local date
-* @param {function} [options.start] Promisable function called as `(req, res, settings)` which shdould return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
+* @param {function} [options.start] Promisable function called as `(req, res, settings)` which should return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
 * @param {function} [options.end] Promisable function called as `(req, res, settings)` which should return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
 * @param {boolean} [options.passthru=false] If falsy req.send is called with the calculated timeseries, if falsy this function populates `req.timeSeries` and passes control to the next express middleware function
 */
@@ -105,12 +105,6 @@ app.middleware.express.timeSeries = options => {
 					label: settings.valueLabel(k, kOffset, dataSet, settings),
 					backgroundColor: settings.valueColor(k, kOffset, dataSet, settings),
 					data: boundaries.map(b => dataSetMap[b] || 0), // Fill in blanks for the sparce dataSet Mongo gives us back
-						/*
-						_(dataSet)
-							.filter(d => d._id != 'unparsable') // Remove unparsable entries
-							.map(d => d.count) // Return only the count field
-							.value(),
-						*/
 				};
 			}))
 			.then(datasets => ({

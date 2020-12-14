@@ -33,7 +33,7 @@ Promise.resolve()
 	.then(()=> app.emit('preAgents'))
 	.then(()=> app.emit('agents'))
 	.then(()=> app.emit('postAgents'))
-	.then(()=> app.emit('preEndpoints'))
+	.then(()=> app.emit('preEndpoints')) // Also emits migrations
 	.then(()=> app.emit('endpoints'))
 	.then(()=> app.emit('postEndpoints'))
 	.then(()=> app.emit('preServer'))
