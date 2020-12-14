@@ -1,0 +1,156 @@
+<schema>
+app.middleware.db.schema('doopMigrations', {
+	created: {type: Date, edfault: ()=> new Date()},
+	ref: {type: String, index: {unique: true}},
+});
+</schema>
+
+<server on="init, essencial">
+/**
+* Database script migration functionality
+*
+* The `app.migration(version, title, handler)` function specifies a migration stratergy for each database version and
+* correctly bumps the version sequencially until it hits the highest stratergy version found
+*
+* @example Simple migration example
+* <server on="migrations">
+* app.migration('widgetsFix', 'Fix widgets', ()=>               // Declare we are upgrading to version 101
+*   db.widgets.find().cursor.eachAsync(widget => {                // Iterate over each widget (3 at a time, see later)
+*     widget.status = 'newStatus';                                // Change doc in some way
+*     return widget.save();                                       // Save it back
+*   }, {parallel: 3})                                             // Process 3 documents at once
+* )
+*/
+
+var _ = require('lodash');
+var fs = require('fs');
+
+
+/**
+* Declare a database migration stratergy
+* @param {string} id ID of the migration to apply
+* @param {string} title Human readable title of the fix
+* @param {Object} [options] Additional options to add
+* @param {string|array<string>} [options.after] Array or single migration IDs this migration should wait for before applying
+* @param {boolean} [options.manual=false] Warn the user about the migration but do not apply it
+* @param {function} handler Handler function to call when a migration is needed
+*/
+app.migration = function(id, title, options, handler) {
+	// Argument mangling {{{
+	if (id && title && _.isFunction(options)) { // Called as id, title, handler
+		[id, title, options, handler] = [id, title, {}, options];
+	} else if (!id || !_.isString(title) || !_.isFunction(handler)) {
+		throw new Error('app.migration expects (id<String>, title<String>, options<Object>?, handler<function>)');
+	}
+	// }}}
+
+	var settings = {
+		after: [],
+		manual: false,
+		...options,
+	};
+
+	if (
+		!app.config.mongo.migration // Migration is disabled
+		|| app.migration.migrationsApplied.has(id) // Already applied
+	) return;  // Ignore this migration listing
+
+
+	if (!app.migration.applyManual && settings.manual) {
+		app.log.warn('Migration', app.log.colors.cyan(id), 'needs to be applied manually', 'Run:', app.log.colors.inverse(`MIGRATION=${id} gulp migrations.apply`));
+	} else {
+		// Add to list of migrations to apply
+		app.migration.migrations.push({id, title, options, handler});
+	}
+};
+
+
+/**
+* Set of known db migrations from the database collection `doopMigrations`
+* @type {Set}
+*/
+app.migration.migrationsApplied = new Set();
+
+
+/**
+* Apply manually marked migrations
+* This is used internally by Gulp to force the migration to apply
+* @type {boolean}
+*/
+app.migration.applyManual = false;
+
+
+/**
+* Read in all migration information into app.migration.migrationsApplied<Set>
+* @returns {Promise} A promise which will resolve when app.migration.migrationsApplied has been populated
+*/
+app.migration.init = ()=> Promise.resolve()
+	.then(()=> app.migration.migrationsApplied.clear())
+	.then(()=> app.db.doopMigrations.find())
+	.then(migrations => migrations.forEach(doc => app.migration.migrationsApplied.add(doc.ref)))
+
+
+/**
+* Update which migrations have run
+* This function also saves the state of the migration to the database so it is not repeated
+* @param {string} id The ID of the migration to mark as completed
+* @returns {Promise} A promise which will resolve when the migration has been marked as completed
+*/
+app.migration.markMigration = id => Promise.resolve()
+	.then(()=> app.db.doopMigrations.create({
+		ref: id,
+		created: new Date(),
+	}))
+	.then(()=> app.migration.migrationsApplied.add(id))
+	.catch(()=> null)
+
+
+/**
+* Collection of migrations to apply
+* @type {array<Object>}
+* @property {id} id The ID of the migration
+* @property {string} title The description of the migration
+* @property {Object} options The options of the migration
+* @property {function} handler The handler async function to call
+*/
+app.migration.migrations = [];
+</server>
+
+<server on="preEndpoints">
+/**
+* Apply all migrations (if any)
+*/
+var _ = require('lodash');
+var async = require('async-chainable');
+
+return Promise.resolve()
+	.then(()=> app.migration.init())
+	.then(()=> app.log(app.log.colors.cyan(app.migration.migrationsApplied.size), 'migrations present'))
+	.then(()=> app.emit('migrations'))
+	.then(()=> {
+		if (!app.config.mongo.migration || !app.migration.migrations.length) return; // Nothing to do
+
+		var scheduler = async()
+			.then(()=> app.log('Applying', app.log.colors.cyan(app.migration.migrations.length), 'migrations...'))
+			.limit(1);
+
+		// Add already-completed migrations as stubs so the resolver marks them as complete
+		Array.from(app.migration.migrationsApplied).forEach(id => scheduler.defer([], id, ()=> true));
+
+		// Queue up all migrations + their prequisites
+		app.migration.migrations.forEach(migration =>
+			scheduler.defer(migration.options.after ? _.castArray(migration.options.after) : [], migration.id, next => {
+				app.log('Applying', app.log.colors.cyan(migration.id), 'migration', app.log.colors.gray(`(${migration.title})`));
+				Promise.resolve(migration.handler())
+					.then(()=> app.migration.markMigration(migration.id))
+					.then(()=> next())
+			})
+		);
+
+		return scheduler
+			.await() // Run all defers
+			.then(()=> app.log('Applied', app.log.colors.cyan(app.migration.migrations.length), 'migrations successfully'))
+			.end()
+			.promise()
+	})
+</server>
