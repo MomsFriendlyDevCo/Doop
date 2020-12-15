@@ -6,15 +6,15 @@ module.exports = {
 		lockdown: false,
 	},
 	email: {
-		enabled: true,
+		enabled: false,
 		method: 'mailgun',
 		toAdmin: 'matt@mfdc.biz',
 	},
 	gulp: {
 		notifications: true,
 		npmUpdate: false,
+		watchVendors: true,
 		watchModules: true,
 		watchModulesInclude: [],
-		watchVendors: true,
 	},
 };

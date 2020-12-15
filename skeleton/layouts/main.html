@@ -111,25 +111,32 @@
 					<div class="container-fluid">
 						<ul class="list-unstyled topnav-menu float-right mb-0">
 							<!-- Search: Desktop {{{ -->
-							<li class="d-none d-lg-block">
+							<li class="d-block">
+								<!-- TODO: Currently only showing desktop version. {{{
+									<li class="d-none d-lg-block">
+								}}} -->
 								<search-global></search-global>
 							</li>
 							<!-- }}} -->
 
-							<!-- Search: Mobile {{{ -->
+							<!-- TODO: Implement proper mobile version {{{
 							<li class="dropdown d-inline-block d-lg-none">
-								<search-global></search-global>
-								<!--
+								<a class="nav-link dropdown-toggle arrow-none waves-effect waves-light" href="/search">
+									<i class="fe-search noti-icon"></i>
+								</a>
+							</li>
+							}}} -->
+
+							<!-- Search: Mobile {{{ -->
+							<!--li class="dropdown d-inline-block d-lg-none">
 								<a class="nav-link dropdown-toggle arrow-none waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
 									<i class="fe-search noti-icon"></i>
 								</a>
 								<div class="dropdown-menu dropdown-lg dropdown-menu-right p-0">
-									<form class="p-3" method="get" action="/search" role="search">
-										<input name="q" type="text" class="form-control" placeholder="Search ..." aria-label="Search">
-									</form>
+									// TODO: This should only show helper without the main navbar search input.
+									<search-global></search-global>
 								</div>
-								-->
-							</li>
+							</li-->
 							<!-- }}} -->
 
 							<user-dropdown></user-dropdown>
@@ -156,16 +163,11 @@
 								<!-- End mobile menu toggle-->
 							</li>
 
-							<!--li class="hide-phone app-search float-left">
+							<!-- Desktop only search {{{ 
+							<li class="hide-phone app-search float-left">
 								<search-global></search-global>
-							</li-->
-
-							<!--li class="hide-phone app-search float-left">
-								<form role="search" class="">
-									<input type="text" placeholder="Search..." class="form-control">
-									<a><i class="far fa-search"></i></a>
-								</form>
-							</li-->
+							</li>
+							}}} -->
 						</ul>
 						<div class="clearfix"></div>
 					</div>

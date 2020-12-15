@@ -170,12 +170,14 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	],
 	query: app.middleware.express.isUser(),
 	count: app.middleware.express.isUser(),
-	create: false,
-	// FIXME: Does this allow user to hack their own permissions?
+	create: app.middleware.express.hasPermission('usersEdit'),
 	save: (req, res, next) => {
-		// Allow user to save their own profile
-		if (app.middleware.express.hasPermission('usersEdit') || req.user && req.params.id === req.user._id) {
-			return next();
+		// FIXME: Does this allow user to hack their own permissions?
+		if (
+			req.user.hasPermission('usersEdit') // User is an admin and can edit anyone
+			|| req.params.id == req.user._id // Allow the current user to edit their own profile
+		) {
+			next();
 		} else {
 			res.sendError('403: You are not an admin or editing your own profile');
 		}

@@ -277,11 +277,14 @@ module.exports = {
 				// debug: true,
 			},
 		},
-		recover: {
+		login: {
 			enabled: true,
 		},
 		invite: {
-			enabled: false,
+			enabled: true,
+		},
+		recover: {
+			enabled: true,
 		},
 		signup: {
 			enabled: true,
@@ -297,4 +300,5 @@ module.exports = {
 		key: undefined, // Path to privkey.pem
 	},
 	theme: {},
+	throttle: {},
 };

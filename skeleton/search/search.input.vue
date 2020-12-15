@@ -307,6 +307,10 @@ module.exports = {
 		this.setHelperVisibility(false); // Clean up body click handlers
 	},
 
+	created() {
+		this.$debugging = false;
+	},
+
 	watch: {
 		tags: { // React to tag definition changes
 			immediate: true,
@@ -322,9 +326,11 @@ module.exports = {
 				if (!this.readQuery) return; // Route query monitoring behaviour disabled
 				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
 
-				this.decodeQuery(this.$route.query[this.readQuery]);
-				this.encodeQuery();
-				this.$emit('change', this.searchQuery);
+				this.searchQuery = this.$route.query[this.readQuery];
+				this.decodeQuery(this.searchQuery);
+				// FIXME: Why?
+				//this.encodeQuery();
+				//this.$emit('change', this.searchQuery);
 			},
 		},
 	},
@@ -337,119 +343,133 @@ module.exports = {
 		@keydown.tab="setHelperVisibility('toggle')"
 		@keydown.enter="submit"
 		role="search"
-		class="search-input"
-		:class="{'input-search-focused': searchHasFocus, 'open': showHelper, 'has-content': hasContent}"
+		class="app-search search-input"
+		:class="{
+			'input-search-focused': searchHasFocus,
+			'open': showHelper,
+			'has-content': hasContent,
+		}"
 	>
-		<div class="search-input-verbs">
-			<a @click="submit" class="far fa-search"/>
-			<a @click="setHelperVisibility('toggle')" class="far fa-chevron-down"/>
-		</div>
-		<input
-			v-model="searchQuery"
-			type="text"
-			:placeholder="placeholder"
-			class="form-control search-input-fuzzy"
-			@focus="searchHasFocus = true"
-			@blur="searchHasFocus = false"
-		/>
-		<div class="search-input-helper form-horizontal container pt-1">
-			<div class="form-group row">
-				<label class="col-sm-3 col-form-label">Search</label>
-				<div class="col-sm-9">
-					<input
-						v-model="fuzzyQuery"
-						type="text"
-						class="form-control"
-						@input="encodeQuery"
-					/>
+		<div class="app-search-box">
+			<div class="input-group">
+				<input
+					v-model="searchQuery"
+					type="search"
+					:placeholder="placeholder"
+					class="form-control search-input-fuzzy"
+					@focus="searchHasFocus = true"
+					@blur="searchHasFocus = false"
+					autocomplete="off"
+				/>
+				<div class="input-group-append search-input-verbs">
+					<button class="btn btn-outline-secondary" type="submit">
+						<i class="far fa-search"/>
+					</button>
+					<button class="btn btn-outline-secondary" @click.prevent="setHelperVisibility('toggle')">
+						<i class="far fa-chevron-down"/>
+					</button>
 				</div>
 			</div>
-			<div v-for="tag in computedTags" :key="tag.tag" class="form-group row">
-				<label class="col-sm-3 col-form-label">{{tag.title}}</label>
-				<div class="col-9 mt-2">
-					<!-- type='digest' {{{ -->
-					<dynamic-component
-						v-if="tag.type == 'digest'"
-						component="digestSelect"
-						:props="widgetDigestProps(tag)"
-						:events="{change: setTagValue.bind(null, tag.tag)}"
-					/>
-					<!-- }}} -->
-					<!-- type='date' {{{ -->
-					<v-date
-						v-else-if="tag.type == 'date'"
-						:value="tagValues[tag.tag]"
-						@selected="setTagValue(tag.tag, $event)"
-						:clear-button="true"
-					/>
-					<!-- }}} -->
-					<!-- type='dateRange' {{{ -->
-					<div v-else-if="tag.type == 'dateRange'" class="row">
-						<div class="col-5">
-							<v-date
-								:value="tagValues[tag.tag][0]"
-								@selected="setTagValue([tag.tag, 0], $event)"
-								:clear-button="true"
-							/>
-						</div>
-						<div class="col-2 text-center">to</div>
-						<div class="col-5">
-							<v-date
-								:value="tagValues[tag.tag][1]"
-								@selected="setTagValue([tag.tag, 1], $event)"
-								:clear-button="true"
-							/>
-						</div>
+			<div class="search-input-helper form-horizontal container pt-1">
+				<div class="form-group row">
+					<label class="col-sm-3 col-form-label">Search</label>
+					<div class="col-sm-9">
+						<input
+							v-model="fuzzyQuery"
+							type="search"
+							class="form-control"
+							@input="encodeQuery"
+							autocomplete="off" 
+						/>
 					</div>
-					<!-- }}} -->
-					<!-- type='checkboxes' {{{ -->
-					<div v-else-if="tag.type == 'checkboxes'">
-						<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
-							<input
-								class="form-check-input"
-								type="checkbox"
-								:id="`${tag.tag}-${option.id}`"
-								:checked="!!tagValues[tag.tag][option.id]"
-								@change="setTagValue([tag.tag, option.id], $event.target.checked)"
-							/>
-							<label
-								class="form-check-label"
-								:for="`${tag.tag}-${option.id}`"
-							>
-								{{option.title}}
-							</label>
-						</div>
-					</div>
-					<!-- }}} -->
-					<!-- type='radios' {{{ -->
-					<div v-else-if="tag.type == 'radios'">
-						<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
-							<input
-								class="form-check-input"
-								type="radio"
-								:id="`${tag.tag}-${option.id}`"
-								:name="tag.tag"
-								:checked="tagValues[tag.tag] == option.id"
-								@change="setTagValue(tag.tag, option.id)"
-							/>
-							<label
-								class="form-check-label"
-								:for="`${tag.tag}-${option.id}`"
-							>
-								{{option.title}}
-							</label>
-						</div>
-					</div>
-					<!-- }}} -->
-					<!-- type unknown {{{ -->
-					<div v-else class="alert alert-danger">
-						Unknown search tag type "{{tag.type}}"
-					</div>
-					<!-- }}} -->
 				</div>
-			</div>
-			<div class="form-group row d-flex justify-content-end px-2">
-				<button @click="submit" type="button" class="btn btn-primary">Search</button>
+				<div v-for="tag in computedTags" :key="tag.tag" class="form-group row">
+					<label class="col-sm-3 col-form-label">{{tag.title}}</label>
+					<div class="col-9 mt-2">
+						<!-- type='digest' {{{ -->
+						<dynamic-component
+							v-if="tag.type == 'digest'"
+							component="digestSelect"
+							:props="widgetDigestProps(tag)"
+							:events="{change: setTagValue.bind(null, tag.tag)}"
+						/>
+						<!-- }}} -->
+						<!-- type='date' {{{ -->
+						<v-date
+							v-else-if="tag.type == 'date'"
+							:value="tagValues[tag.tag]"
+							@selected="setTagValue(tag.tag, $event)"
+							:clear-button="true"
+						/>
+						<!-- }}} -->
+						<!-- type='dateRange' {{{ -->
+						<div v-else-if="tag.type == 'dateRange'" class="row">
+							<div class="col-5">
+								<v-date
+									:value="tagValues[tag.tag][0]"
+									@selected="setTagValue([tag.tag, 0], $event)"
+									:clear-button="true"
+								/>
+							</div>
+							<div class="col-2 text-center">to</div>
+							<div class="col-5">
+								<v-date
+									:value="tagValues[tag.tag][1]"
+									@selected="setTagValue([tag.tag, 1], $event)"
+									:clear-button="true"
+								/>
+							</div>
+						</div>
+						<!-- }}} -->
+						<!-- type='checkboxes' {{{ -->
+						<div v-else-if="tag.type == 'checkboxes'">
+							<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
+								<input
+									class="form-check-input"
+									type="checkbox"
+									:id="`${tag.tag}-${option.id}`"
+									:checked="!!tagValues[tag.tag][option.id]"
+									@change="setTagValue([tag.tag, option.id], $event.target.checked)"
+								/>
+								<label
+									class="form-check-label"
+									:for="`${tag.tag}-${option.id}`"
+								>
+									{{option.title}}
+								</label>
+							</div>
+						</div>
+						<!-- }}} -->
+						<!-- type='radios' {{{ -->
+						<div v-else-if="tag.type == 'radios'">
+							<div v-for="option in tag.options" :key="option.id" class="form-check mr-3">
+								<input
+									class="form-check-input"
+									type="radio"
+									:id="`${tag.tag}-${option.id}`"
+									:name="tag.tag"
+									:checked="tagValues[tag.tag] == option.id"
+									@change="setTagValue(tag.tag, option.id)"
+								/>
+								<label
+									class="form-check-label"
+									:for="`${tag.tag}-${option.id}`"
+								>
+									{{option.title}}
+								</label>
+							</div>
+						</div>
+						<!-- }}} -->
+						<!-- type unknown {{{ -->
+						<div v-else class="alert alert-danger">
+							Unknown search tag type "{{tag.type}}"
+						</div>
+						<!-- }}} -->
+					</div>
+				</div>
+				<div class="form-group row d-flex justify-content-end px-2">
+					<button type="submit" class="btn btn-primary">Search</button>
+				</div>
 			</div>
 		</div>
 	</form>
@@ -457,12 +477,15 @@ module.exports = {
 
 <style>
 /* Search input widget {{{ */
+/*
 .search-input .search-input-fuzzy {
 	width: 100% !important;
 }
+*/
 /* }}} */
 
 /* Search input verbs (right aligned buttons) {{{ */
+/*
 .search-input .search-input-verbs {
 	position: absolute;
 	right: 24px;
@@ -482,22 +505,24 @@ module.exports = {
 	border-radius: 50%;
 	color: var(--white);
 }
+*/
 /* }}} */
 
 /* Search helper {{{ */
+/*
 .navbar-custom .menu-left {
 	overflow: visible;
 }
-
+*/
 .search-input .search-input-helper {
 	display: none;
-	width: 400px;
 	z-index: 1000;
 	background: #FFF;
 	position: absolute;
 	border: 1px solid var(--secondary);
 	border-bottom-left-radius: 5px;
 	border-bottom-right-radius: 5px;
+	min-width: 400px;
 	max-height: calc(100vh - 100px);
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -518,9 +543,11 @@ module.exports = {
 	border-right: none;
 }
 
+/*
 .search-input .search-input-helper label {
 	user-select: none;
 }
+*/
 
 .search-input .search-input-helper .vdp-datepicker {
 	border-bottom: 1px solid var(--secondary);
@@ -542,6 +569,7 @@ module.exports = {
 /* }}} */
 
 /* Button placement {{{ */
+/*
 .search-input .form-control, .search-input .form-control:focus {
 	width: 400px;
 }
@@ -555,9 +583,11 @@ module.exports = {
 	left: auto;
 	right: 5px;
 }
+*/
 /* }}} */
 
 /* Theme fixes {{{ */
+/*
 .search-input .digest-select a {
 	position: inherit;
 	top: initial;
@@ -571,6 +601,17 @@ module.exports = {
 	color: inherit;
 	border-radius: 0;
 	width: 31px;
+}
+*/
+/* }}} */
+
+/* Expand search area when search has content or helper is expanded {{{ */
+.search-input.has-content .input-group {
+	width: calc(100vw - 500px);
+}
+
+.search-input.open .input-group {
+	width: calc(100vw - 500px);
 }
 /* }}} */
 </style>

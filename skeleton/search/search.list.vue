@@ -2,7 +2,7 @@
 module.exports = {
 	route: '/search',
 	created() {
-		this.$sitemap.setTitle(`Search: ${this.$route.query.q}`);
+		this.$sitemap.setTitle(`Search: ${this.$search.parseTags(this.$route.query.q).$fuzzy}`);
 	}
 };
 </component>
