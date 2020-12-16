@@ -85,6 +85,7 @@ module.exports = function() {
 		Snotify.confirm(text, {
 			timeout: 5000,
 			showProgressBar: true,
+			position: 'rightTop', // Force placement differently from regular toasts
 			...options,
 			buttons: options.buttons.map(button => ({
 				...button,
@@ -216,6 +217,26 @@ module.exports = function() {
 	right: 5px !important;
 	height: 30px;
 	width: 30px;
+}
+/* }}} */
+/* Ask / Confirm {{{ */
+.snotifyToast.snotify-confirm {
+	background-color: #eee;
+	color: #000;
+}
+
+.snotifyToast.snotify-confirm .snotifyToast__progressBar {
+	background-color: #c7c7c7;
+}
+
+.snotifyToast.snotify-confirm .snotifyToast__progressBar .snotifyToast__progressBar__percentage {
+	background-color: #4c4c4c;
+}
+
+.snotifyToast.snotify-confirm .snotifyToast__body,
+.snotifyToast.snotify-confirm .snotifyToast__buttons button,
+.snotifyToast.snotify-confirm {
+	color: #000;
 }
 /* }}} */
 /* Progress {{{ */
