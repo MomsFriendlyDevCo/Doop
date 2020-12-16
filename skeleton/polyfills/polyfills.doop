@@ -7,6 +7,7 @@ var polyfills = [
 	{id: 'array.flatMap', test: ()=> Array.prototype.flatMap === undefined},
 	{id: 'console.dump', test: ()=> true},
 	{id: 'fs.exists', test: ()=> require('fs').exists === undefined},
+	{id: 'fs.promises.move', test: ()=> require('fs').promises.move === undefined},
 	{id: 'promise.allLimit', test: ()=> true},
 	{id: 'promise.allSeries', test: ()=> true},
 	{id: 'promise.defer', test: ()=> true},

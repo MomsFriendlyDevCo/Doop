@@ -147,7 +147,7 @@ app.middleware.express.attachments = (path, options) => {
 
 								return Promise.all([
 									// Move buffered file to correct location
-									fs.promises.rename(file.path, dstFile),
+									fs.promises.move(file.path, dstFile),
 
 									// (if settings.metaData), create meta file
 									settings.metaData
