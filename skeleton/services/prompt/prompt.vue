@@ -150,6 +150,8 @@ module.exports = function() {
 	/**
 	* Display a dialog with various customisations
 	* This is the main $prompt worker - all the other $prompt.* functions are really just wrappers for this function
+	* NOTE: Use $prompt.dialog.method() to communicate with the nested component - e.g. via button click actions
+	*
 	* @param {Object} options Dialog options to use
 	* @param {string} [options.title='Dialog'] The dialog title, HTML is supported
 	* @param {string} [options.body=''] The dialog body (usually the message to display)
@@ -275,6 +277,15 @@ module.exports = function() {
 
 
 	/**
+	* Call a method on an open $prompt.dialog instance component
+	* @param {string} method The method name to call
+	* @param {*} [args...] Additional arguments to pass
+	* @returns {*} The return of the method
+	*/
+	$prompt.dialog.method = (method, ...args) => app.broadcast('$prompt.method', method, ...args);
+
+
+	/**
 	* Close the dialog if open
 	* This may trigger another dialog to open if one is queued
 	* NOTE: This does not resolve the dialog promise
@@ -381,6 +392,10 @@ module.exports = {
 		settings: undefined,
 	}),
 	created() {
+		this.$on('$prompt.method', (method, ...args) => {
+			console.debug('Relaying $prompt.dialog.method(', method, ...args, ')');
+			return this.$refs.injectedComponent.$refs.component[method](...args);
+		});
 		this.$on('$prompt.open', this.openModal);
 		this.$on('$prompt.close', this.closeModal);
 	},
@@ -418,6 +433,7 @@ module.exports = {
 						<div v-if="settings.isHtml" v-html="settings.body"/>
 						<dynamic-component
 							v-if="settings.component"
+							ref="injectedComponent"
 							:component="settings.component"
 							:props="settings.componentProps"
 							:events="settings.componentEvents"
