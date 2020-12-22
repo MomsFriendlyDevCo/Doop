@@ -33,6 +33,7 @@ module.exports = function() {
 
 	
 	$toast._progress = {}; // Storage of all progress toasts
+	$toast._spinners = {}; // Storage of all spinner toasts
 
 
 	/**
@@ -42,7 +43,7 @@ module.exports = function() {
 	* @param {function} options.action Async worker, function which returns a promise
 	* @param {function} func Function which returns a promise
 	*/
-	$toast.async = (text, options) => {
+	$toast.promise = (text, options) => {
 		var toast = Snotify.async(
 			text,
 			()=> Promise.resolve(options.action())
@@ -98,6 +99,50 @@ module.exports = function() {
 
 		return output;
 	};
+
+
+	/**
+	* Show a spinner which can be closed when completed
+	* This is a ligher version of $toast.progress()
+	* @param {string} id A unique ID to identify the toast so it can be changed later
+	* @param {string|boolean} text The text to display, if boolean `false` the spinner is removed
+	* @param {Object} [options] Additional options
+	* @param {number} [options.spinnerRemoveDelay=5000] How long to keep a closed spinner open for
+	*/
+	$toast.spinner = (id, text, options) => {
+		var settings = {
+			spinnerRemoveDelay: 2000,
+			...options,
+		};
+
+		if (text !== true && text !== false && !$toast._spinners[id]) { // Create new toast
+			var defer = Promise.defer();
+
+			$toast._spinners[id] = {
+				text,
+				defer,
+				settings,
+				snotify: Snotify.async(text, ()=> defer.promise, {
+					position: 'rightBottom',
+					closeOnClick: false,
+				}),
+			};
+		}
+
+		if (text === true || text === false) { // Resolve spinner promise
+			if (!$toast._spinners[id] || !$toast._spinners[id].snotify) return; // Toast doesn't exist anyway
+			if (text === true) {
+				$toast._spinners[id].defer.resolve(true);
+			} else if (text === false) {
+				$toast._spinners[id].defer.reject(false);
+			}
+			var sid = $toast._spinners[id].snotify.id;
+			setTimeout(()=> Snotify.remove(sid), $toast._spinners[id].settings.spinnerRemoveDelay);
+			delete $toast._spinners[id];
+		}
+	};
+
+
 
 
 	/**
@@ -287,7 +332,7 @@ module.exports = {
 			this.$toast[method](...args);
 		},
 
-		testAsync(succeed) {
+		testPromise(succeed) {
 			this.$toast.async('Thinking...', {
 				action: ()=> Promise.timeout(100000)
 					.then(()=> succeed ? 'All good' : Promise.reject('Failed'))
@@ -325,8 +370,8 @@ module.exports = {
 		*/
 		testAskPromise() {
 			this.$toast.ask('This is a question')
-				.then(()=> console.log('vum.$toast.ask succeeded'))
-				.catch(()=> console.log('vum.$toast.ask failed'))
+				.then(()=> console.log('vm.$toast.ask succeeded'))
+				.catch(()=> console.log('vm.$toast.ask failed'))
 		},
 	},
 };
@@ -341,8 +386,8 @@ module.exports = {
 			<a class="list-group-item" @click="testToast('success', 'Hello World')">vm.$toast.success('Hello World')</a>
 			<a class="list-group-item" @click="testToast('warning', 'Hello World')">vm.$toast.warning('Hello World')</a>
 			<a class="list-group-item" @click="testToast('error', 'Hello World')">vm.$toast.error('Hello World')</a>
-			<a class="list-group-item" @click="testAsync(true)">vm.$toast.async({action: PromiseThatSucceeds})</a>
-			<a class="list-group-item" @click="testAsync(false)">vm.$toast.async(Promise PromiseThatFails})</a>
+			<a class="list-group-item" @click="testPromise(true)">vm.$toast.promise({action: PromiseThatSucceeds})</a>
+			<a class="list-group-item" @click="testPromise(false)">vm.$toast.promise(Promise PromiseThatFails})</a>
 			<a class="list-group-item" @click="testConfirm">vm.$toast.confirm({buttons: ...})</a>
 			<a class="list-group-item" @click="testAsk">vm.$toast.ask(String, [...]})</a>
 			<a class="list-group-item" @click="testAskPromise">vm.$toast.ask(String) - promise mode</a>
@@ -350,6 +395,9 @@ module.exports = {
 			<a class="list-group-item" @click="testToast('progress', 'debug', 'Thinking...', 25)">vm.$toast.progress('debug', 'Thinking...', 25)</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 50)">vm.$toast.progress('debug', 50)</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 100)">vm.$toast.progress('debug', 100)</a>
+			<a class="list-group-item" @click="testToast('spinner', 'debug', 'Thinking...')">vm.$toast.spinner('debug', String)</a>
+			<a class="list-group-item" @click="testToast('spinner', 'debug', true)">vm.$toast.spinner('debug', true)</a>
+			<a class="list-group-item" @click="testToast('spinner', 'debug', false)">vm.$toast.spinner('debug', false)</a>
 			<a class="list-group-item" @click="testToast('catch')">vm.$toast.catch()</a>
 			<a class="list-group-item" @click="testToast('catch', {error: 'Hello World'})">vm.$toast.catch({error: 'Hello World'})</a>
 		</div>
