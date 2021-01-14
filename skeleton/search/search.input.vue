@@ -2,9 +2,9 @@
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
 *
-* @param {string|boolean} [readQuery='q'] If non-falsy, try to read the query from $router.query into the current state
-*
+* @param {string} [value] Initial value to decode and display, if omitted `readQuery` is used instead
 * @param {string} [placeholder="Search..."] Placeholder text to display
+* @param {string|boolean} [readQuery='q'] If non-falsy, try to read the query from $router.query into the current state
 *
 * @param {string} [redirect] Front end URL to redirect to on submission (rather than just emitting)
 * @param {string} [redirectQuery='q'] Query element to set to the new search parameter when redirecting
@@ -12,7 +12,7 @@
 * @param {Array<Object>} tags Collection of search tags to configure
 * @param {string} tag.title The human readable title of the tag
 * @param {string} tag.tag The name of the tag being defined
-* @param {string} tag.type Internal search tag type. ENUM: 'date', 'dateRange', 'digest', 'checkboxes', 'radios'
+* @param {string} tag.type Internal search tag type. ENUM: 'hidden', 'date', 'dateRange', 'digest', 'checkboxes', 'radios'
 * @param {Object} [tag.dateFormat='DD/MM/YYYY'] (type==date|dateRange) Moment compatible date format to input/output in tags
 * @param {Object} [tag.seperator='-'] (type==dateRange) Seperator string between start + end
 * @param {Object} [tag.startOnlyTag] (type==dateRange) Change tag to this value if only the start date is specified instead of using `${start}${seperator}${end}` format
@@ -40,8 +40,9 @@ module.exports = {
 		},
 	},
 	props: {
-		readQuery: {type: [String, Boolean], default: 'q'},
+		value: {type: String},
 		placeholder: {type: String, default: 'Search...'},
+		readQuery: {type: [String, Boolean], default: 'q'},
 		redirect: {type: String},
 		redirectQuery: {type: String, default: 'q'},
 		tags: {type: Array, required: true},
@@ -129,6 +130,9 @@ module.exports = {
 				if (!tag.type) throw new Error(`No type property specified for search tag "${tag.tag}"`);
 
 				switch (tag.type) {
+					case 'hidden':
+						tagValues[tag.tag] = tag.default;
+						break;
 					case 'date':
 						tagValues[tag.tag] = tag.default;
 						if (!tag.dateFormat) tag.dateFormat = 'DD/MM/YYYY';
@@ -215,6 +219,9 @@ module.exports = {
 							case 'digest': // Simple key=val setters
 								tag.value = this.tagValues[tag.tag];
 								break;
+							case 'hidden':
+								tag.value = undefined;
+								break;
 							case 'radios':
 								tag.value = this.tagValues[tag.tag] && this.tagValues[tag.tag] != tag.clearValue && this.tagValues[tag.tag];
 								break;
@@ -258,6 +265,10 @@ module.exports = {
 
 			this.computedTags.forEach(tag => {
 				switch (tag.type) {
+					case 'hidden': // Simple key / values
+					case 'digest':
+						this.tagValues[tag.tag] = queryHash[tag.tag];
+						break;
 					case 'date':
 						this.tagValues[tag.tag] = queryHash[tag.tag] ? moment(queryHash[tag.tag], tag.dateFormat).toDate() : undefined;
 						break;
@@ -271,9 +282,6 @@ module.exports = {
 								dateSplit[1] ? moment(dateSplit[1], tag.dateFormat).toDate() : undefined,
 							];
 						}
-						break;
-					case 'digest':
-						this.tagValues[tag.tag] = queryHash[tag.tag];
 						break;
 					case 'checkboxes':
 						var setValues = new Set((queryHash[tag.tag] || '').split(/\s*,\s*/).filter(Boolean));
@@ -303,6 +311,24 @@ module.exports = {
 		},
 	},
 
+	created() {
+		this.$watchAll(['$route.query', 'value'], ()=> { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
+			var inputQuery; // Query to process
+			if (this.value) { // Have an input value
+				inputQuery = this.value;
+			} else if (this.readQuery) {
+				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
+				inputQuery = this.$route.query[this.readQuery];
+			} else { // Take no input
+				return;
+			}
+
+			this.decodeQuery(inputQuery);
+			this.encodeQuery();
+
+		}, {deep: true, immediate: true});
+	},
+
 	beforeDestroy() {
 		this.setHelperVisibility(false); // Clean up body click handlers
 	},
@@ -313,18 +339,6 @@ module.exports = {
 			handler(newVal, oldVal) {
 				if (JSON.stringify(newVal) == JSON.stringify(oldVal)) return; // Horrible kludge to detect if tag composition is identical - if so skip rebuild
 				this.compileTags();
-			},
-		},
-		'$route.query': { // React to query changes (if $props.readQuery is enabled), NOTE: Must fire after tags
-			immediate: true,
-			deep: true,
-			handler() {
-				if (!this.readQuery) return; // Route query monitoring behaviour disabled
-				if (this.redirect && this.$route.path != this.redirect) return; // Path portion redirect does not match this page - ignore (allows `?q=search` to be reused on other pages other than global search redirect destination)
-
-				this.decodeQuery(this.$route.query[this.readQuery]);
-				this.encodeQuery();
-				this.$emit('change', this.searchQuery);
 			},
 		},
 	},
@@ -364,7 +378,7 @@ module.exports = {
 					/>
 				</div>
 			</div>
-			<div v-for="tag in computedTags" :key="tag.tag" class="form-group row">
+			<div v-for="tag in computedTags.filter(ct => ct.type != 'hidden')" :key="tag.tag" class="form-group row">
 				<label class="col-sm-3 col-form-label">{{tag.title}}</label>
 				<div class="col-9 mt-2">
 					<!-- type='digest' {{{ -->
@@ -408,13 +422,13 @@ module.exports = {
 							<input
 								class="form-check-input"
 								type="checkbox"
-								:id="`${tag.tag}-${option.id}`"
+								:id="`input-${_uid}-${tag.tag}-${option.id}`"
 								:checked="!!tagValues[tag.tag][option.id]"
 								@change="setTagValue([tag.tag, option.id], $event.target.checked)"
 							/>
 							<label
 								class="form-check-label"
-								:for="`${tag.tag}-${option.id}`"
+								:for="`input-${_uid}-${tag.tag}-${option.id}`"
 							>
 								{{option.title}}
 							</label>
@@ -427,14 +441,14 @@ module.exports = {
 							<input
 								class="form-check-input"
 								type="radio"
-								:id="`${tag.tag}-${option.id}`"
+								:id="`input-${_uid}-${tag.tag}-${option.id}`"
 								:name="tag.tag"
 								:checked="tagValues[tag.tag] == option.id"
 								@change="setTagValue(tag.tag, option.id)"
 							/>
 							<label
 								class="form-check-label"
-								:for="`${tag.tag}-${option.id}`"
+								:for="`input-${_uid}-${tag.tag}-${option.id}`"
 							>
 								{{option.title}}
 							</label>
