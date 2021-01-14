@@ -9,6 +9,13 @@ module.exports = function() {
 	var Snotify = Vue.prototype.$snotify;
 	Snotify.config.global.preventDuplicates = true;
 
+
+	/**
+	* Generic toast handling functions
+	* All these are really the same method which takes a simple string and additional options
+	* @param {string} text Text to display
+	* @param {Object} [options] Additional Snotify options
+	*/
 	$toast.primary = Snotify.simple.bind(Snotify);
 	$toast.info = Snotify.info.bind(Snotify);
 	$toast.simple = Snotify.simple.bind(Snotify);
@@ -20,6 +27,10 @@ module.exports = function() {
 	$toast.prompt = Snotify.prompt.bind(Snotify);
 	$toast.clear = Snotify.clear.bind(Snotify);
 
+
+	/**
+	* Display a brief generic "Saved" toast at the top of the screen
+	*/
 	$toast.save = ()=>
 		Snotify.create({
 			title: 'Saved',
@@ -32,16 +43,14 @@ module.exports = function() {
 		})
 
 	
-	$toast._progress = {}; // Storage of all progress toasts
-	$toast._spinners = {}; // Storage of all spinner toasts
-
-
 	/**
 	* Perform an async operation displaying text while its working and success text when done
 	* @param {string} text Text to show while working
 	* @param {Object|array} options Additional options
 	* @param {function} options.action Async worker, function which returns a promise
-	* @param {function} func Function which returns a promise
+	*
+	* @example Run a promise inside a $toast.progress wrapper
+	* this.$toast.promise('Working on something', {action: promiseFunction})
 	*/
 	$toast.promise = (text, options) => {
 		var toast = Snotify.async(
@@ -63,6 +72,14 @@ module.exports = function() {
 	* @param {string} options.buttons.text Text of the button
 	* @param {function} [options.buttons.action] Action to take when the button is clicked, default behaviour is to close the toast
 	* @returns {undefined|Promise} Either undefined if options / buttons is specified or a Promise if using "Yes" / "No" mode - i.e. no options or buttons specified
+	*
+	* @example Ask a yes/no question
+	* this.$toast.ask('This is a question', {
+	*   buttons: [
+	*     {text: 'Yes', action: toast => console.log('Clicked Yes')},
+	*     {text: 'No', action: toast => console.log('Clicked No')},
+	*   ],
+	* });
 	*/
 	$toast.ask = (text, options) => {
 		var output;
@@ -105,9 +122,17 @@ module.exports = function() {
 	* Show a spinner which can be closed when completed
 	* This is a ligher version of $toast.progress()
 	* @param {string} id A unique ID to identify the toast so it can be changed later
-	* @param {string|boolean} text The text to display, if boolean `false` the spinner is removed
+	* @param {string|boolean} text The text to display, if boolean `true` / `false` the spinner is removed and the action is considered to have succeded / failed respectively, only the first response is used so its safe to fail in a finally() block
 	* @param {Object} [options] Additional options
 	* @param {number} [options.spinnerRemoveDelay=5000] How long to keep a closed spinner open for
+	*
+	* @example Perform a server action and display whether it succeded
+	* Promise.resolve()                                                                     // Start promise chain
+	*   .then(()=> this.$prompt.spinner('someAction', 'Doing something complicated...'))    // Create spinner
+	*   .then(()=> this.$http.get('/api/something/complicated'))                            // Make web request
+	*   .then(()=> { ... })                                                                 // Do something with response from server
+	*   .then(()=> this.$prompt.spinner('someAction', true))                                // If we got here we can assume it succeded
+	*   .finally(()=> this.$prompt.spinner('someAction', false))                            // If we got here either its already succeded (above) or we can mark it as failed
 	*/
 	$toast.spinner = (id, text, options) => {
 		var settings = {
@@ -143,6 +168,11 @@ module.exports = function() {
 	};
 
 
+	/**
+	* Storage of all spinner toasts
+	* @type {Object}
+	*/
+	$toast._spinners = {};
 
 
 	/**
@@ -152,6 +182,15 @@ module.exports = function() {
 	* @param {number} progress Progress to show between 0 and 100 - at 100 the progress display is removed
 	* @param {object} [options] Additional options to pass
 	* @param {object} [options.icon="far fa-spinner fa-spin"] Font-Awesome comaptible icon class to use in the side of the toast
+	*
+	* @example Perform a multi-step action showing progress
+	* Promise.resolve()                                                                     // Start promise chain
+	*   .then(()=> this.$prompt.progress('someAction', 'Working on things'))                // Show initial toast with starting text
+	*   .then(()=> Promise.timeout(2000))                                                   // Wait 2s
+	*   .then(()=> this.$prompt.progress('someAction', 25))                                 // Set progress to 25%
+	*   .then(()=> this.$prompt.progress('someAction', 'Still working', 50))                // Update text and set progress to 50%
+	*   .then(()=> Promise.timeout(2000))                                                   // Wait 2s
+	*   .finally(()=> this.$prompt.progress('someAction', 100))                             // Show 100% completion - automatically removes the toast after an interval
 	*/
 	$toast.progress = (id, text, progress, options) => {
 		var settings = {
@@ -207,6 +246,23 @@ module.exports = function() {
 	};
 
 
+	/**
+	* Storage of all progress toasts
+	* @type {Object}
+	*/
+	$toast._progress = {};
+
+
+	/**
+	* Generic fault catching $toast display
+	* This function is intended to be within the `catch()` functionality of a promise
+	* It will attempt to decode the error to display based on internal tests ignoring the generic 'cancel' string message (used in $prompt dialogs)
+	*
+	* @example Perform a server action and show errors if any
+	* Promise.resolve()                                                                     // Start promise chain
+	*   .then(()=> this.$http.get('/api/something/complicated'))                            // Make web request
+	*   .catch(this.$toast.catch)                                                           // Handle all error output
+	*/
 	$toast.catch = (obj, options) => {
 		console.warn('Promise chain threw error:', obj);
 		if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
