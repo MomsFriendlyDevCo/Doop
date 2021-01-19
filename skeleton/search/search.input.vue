@@ -23,7 +23,8 @@
 * @param {*} [tag.default] Default value for the tag if any
 * @param {function} [tag.toQuery] Function called as `(tag)` to convert tag into a search string (a default is specified that approximates to `tag => ${tag.tag}:${tag.value}`)
 *
-* @emits change Emitted with any newly computed search query when a search has been submitted
+* @emits preRedirect Emitted as `(queryString)` before redirecting to new destination, if the result is `false` the redirect is aborted
+* @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
 */
 module.exports = {
 	data() { return {
@@ -54,6 +55,8 @@ module.exports = {
 		submit() {
 			if (this.redirect) { // Perform router redirect + we have a non-blank query
 				this.setHelperVisibility(false);
+
+				if (this.$emit('preRedirect', this.searchQuery) === false) return; // Abort redirect if preRedirect returns false
 
 				this.$router.push({
 					path: this.redirect,
