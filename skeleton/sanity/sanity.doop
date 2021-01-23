@@ -24,9 +24,11 @@ app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sa
 /**
 * Endpoint for basic server santity checks
 * This endpoint runs all /sanity/*.js scripts scripts (resolving promises) and only returns `"SANITY:OK"` if everything passes, otherwise errors are shown
+* Workers can throw - in which case sanity fails or return a string (shows as the passing text string)
+* @param {string} [req.params.test] Specific test to run, if omitted all are run
 */
 app.get(
-	'/api/sanity',
+	'/api/sanity/:test?',
 	basicAuth({
 		challenge: true,
 		realm: app.config.title,
@@ -35,11 +37,15 @@ app.get(
 	(req, res) => {
 		res.type('text');
 
-		Promise.all(sanityChecks.map(s =>
-			Promise.resolve(s.func())
-				.then(m => `PASS ${s.id} - ${m || 'OK'}`)
-				.catch(e => `FAIL ${s.id} - ${e.toString()}`)
-		))
+		Promise.all(
+			sanityChecks
+				.filter(s => !req.params.test || s.id == req.params.test)
+				.map(s =>
+					Promise.resolve(s.func())
+						.then(m => `PASS ${s.id} - ${m || 'OK'}`)
+						.catch(e => `FAIL ${s.id} - ${e.toString()}`)
+				)
+		)
 			.then(results => {
 				var fail = results.some(r => typeof r == 'string' && r.startsWith('FAIL '));
 
