@@ -80,15 +80,6 @@ app.middleware.express.timeSeries = options => {
 							default: 'unparsable',
 							boundaries,
 						}},
-						/*
-						{$group: { // BW's code, relies on date clashes ("2020-02-28" as a date) rather series splitters
-							_id: {
-								created: '$' + settings.field,
-								status: '$status',
-								count: {$sum: 1},
-							},
-						}},
-						*/
 					]))
 					.value()
 				},

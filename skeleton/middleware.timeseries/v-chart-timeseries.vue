@@ -22,6 +22,9 @@ Vue.component('v-chart-timeseries', {
 			this.renderChart(this.url ? this.chartData : this.data, {
 				responsive: true,
 				maintainAspectRatio: false,
+				scales: {
+					yAxes: [{stacked: true}],
+				},
 				...this.options,
 			});
 		}, {immediate: true, deep: true});
