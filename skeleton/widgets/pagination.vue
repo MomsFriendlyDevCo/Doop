@@ -39,8 +39,8 @@ module.exports = {
 	methods: {
 		set(v) {
 			if (v == 'first') return this.$emit('change', this.min);
-			if (v == 'previous' && this.value - 1 > this.min) return this.$emit('change', this.value - 1);
-			if (v == 'next' && this.value + 1 < this.max) return this.$emit('change', this.value + 1);
+			if (v == 'previous' && this.value - 1 >= this.min) return this.$emit('change', this.value - 1);
+			if (v == 'next' && this.value + 1 <= this.max) return this.$emit('change', this.value + 1);
 			if (v == 'last') return this.$emit('change', this.max);
 			if (typeof v == 'number') return this.$emit('change', v);
 		},

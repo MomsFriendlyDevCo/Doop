@@ -175,7 +175,7 @@ module.exports = {
 						})
 							.then(res => {
 								this.rowCount = res.data.count;
-								this.pages = Math.floor(this.rowCount / this.limit);
+								this.pages = Math.ceil(this.rowCount / this.limit);
 							}),
 					]);
 				})
