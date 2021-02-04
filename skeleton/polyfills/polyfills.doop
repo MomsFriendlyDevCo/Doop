@@ -9,6 +9,7 @@ var polyfills = [
 	{id: 'fs.exists', test: ()=> require('fs').exists === undefined},
 	{id: 'fs.promises.move', test: ()=> require('fs').promises.move === undefined},
 	{id: 'promise.allLimit', test: ()=> true},
+	{id: 'promise.allObject', test: ()=> true},
 	{id: 'promise.allSeries', test: ()=> true},
 	{id: 'promise.defer', test: ()=> true},
 	{id: 'promise.isPromiseLike', test: ()=> true},

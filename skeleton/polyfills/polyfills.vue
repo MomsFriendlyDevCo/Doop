@@ -5,6 +5,7 @@
 import './polyfills/array.flat';
 import './polyfills/array.flatMap';
 import './polyfills/promise.allLimit';
+import './polyfills/promise.allObject';
 import './polyfills/promise.allSeries';
 import './polyfills/promise.defer';
 import './polyfills/promise.isPromiseLike';
