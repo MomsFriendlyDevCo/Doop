@@ -6,6 +6,8 @@
 * @param {string} [component.component] The component name if passed a string, the component name is always camelCased
 * @param {Object} [component.events] Event bindings as an object lookup
 * @param {Object} [component.props] Prop bindings as an object lookup
+*
+* NOTE: This component exposes a single ref `component` which is the dynamically loaded component
 */
 module.exports = {
 	props: {
@@ -24,6 +26,7 @@ module.exports = {
 	render: function(h) {
 		// TODO: Could this use functional pattern with passing through context?
 		return h(this.$props.component, {
+			ref: 'component',
 			props: this.$props.props,
 			on: this.$props.events,
 		});

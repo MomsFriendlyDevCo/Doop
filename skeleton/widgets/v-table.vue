@@ -25,7 +25,7 @@
 *
 * @param {array<Object>} columns Column definition
 * @param {string} columns.id ID of a specific column, used as the field name in dotted notation, must be unique
-* @param {string} columns.slot The name of the Vue slot to map to the column (since Vue stuggles with dotted notation in names), defaults to camelCase
+* @param {string} [columns.slot] The name of the Vue slot to map to the column (since Vue stuggles with dotted notation in names), defaults to camelCase
 * @param {string} [column.cellClass] CSS classes to apply (overrides the column type if specified)
 * @param {string} [column.title] Title of the column, if omitted the ID via _.startCase is used
 * @param {string} [column.type] Optional columnType behaviour to inherit
@@ -182,7 +182,7 @@ module.exports = {
 						})
 							.then(res => {
 								this.rowCount = res.data.count;
-								this.pages = Math.floor(this.rowCount / this.limit);
+								this.pages = Math.ceil(this.rowCount / this.limit);
 							}),
 					]);
 				})
@@ -323,7 +323,7 @@ module.exports = {
 			<table v-if="state == 'ready' || (state == 'loading' && rows && rows.length > 0)" :class="tableClass">
 				<thead>
 					<tr>
-						<th v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type].cellClass">
+						<th v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type]?.cellClass">
 							<a @click="setSort(col.id, 'toggle')" :class="!col.sortable && 'no-click'">
 								{{col.title || _.startCase(col .id)}}
 								<i v-if="endpointSort == col.id" :class="endpointSortAsc ? 'far fa-sort-amount-down-alt text-primary' : 'far fa-sort-amount-up-alt text-primary'"/>
@@ -333,7 +333,7 @@ module.exports = {
 				</thead>
 				<tbody>
 					<tr v-for="row in rows" :key="row[rowKey]">
-						<td v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type].cellClass">
+						<td v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type]?.cellClass">
 							<a v-href="cellHref ? cellHref(row) : false" :class="!cellHref && 'no-click'">
 								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
 									{{format(_.get(row, col.id), col.format)}}

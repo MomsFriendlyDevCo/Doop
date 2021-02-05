@@ -9,6 +9,13 @@ module.exports = function() {
 	var Snotify = Vue.prototype.$snotify;
 	Snotify.config.global.preventDuplicates = true;
 
+
+	/**
+	* Generic toast handling functions
+	* All these are really the same method which takes a simple string and additional options
+	* @param {string} text Text to display
+	* @param {Object} [options] Additional Snotify options
+	*/
 	$toast.primary = Snotify.simple.bind(Snotify);
 	$toast.info = Snotify.info.bind(Snotify);
 	$toast.simple = Snotify.simple.bind(Snotify);
@@ -20,6 +27,10 @@ module.exports = function() {
 	$toast.prompt = Snotify.prompt.bind(Snotify);
 	$toast.clear = Snotify.clear.bind(Snotify);
 
+
+	/**
+	* Display a brief generic "Saved" toast at the top of the screen
+	*/
 	$toast.save = ()=>
 		Snotify.create({
 			title: 'Saved',
@@ -32,17 +43,16 @@ module.exports = function() {
 		})
 
 	
-	$toast._progress = {}; // Storage of all progress toasts
-
-
 	/**
 	* Perform an async operation displaying text while its working and success text when done
 	* @param {string} text Text to show while working
 	* @param {Object|array} options Additional options
 	* @param {function} options.action Async worker, function which returns a promise
-	* @param {function} func Function which returns a promise
+	*
+	* @example Run a promise inside a $toast.progress wrapper
+	* this.$toast.promise('Working on something', {action: promiseFunction})
 	*/
-	$toast.async = (text, options) => {
+	$toast.promise = (text, options) => {
 		var toast = Snotify.async(
 			text,
 			()=> Promise.resolve(options.action())
@@ -62,6 +72,14 @@ module.exports = function() {
 	* @param {string} options.buttons.text Text of the button
 	* @param {function} [options.buttons.action] Action to take when the button is clicked, default behaviour is to close the toast
 	* @returns {undefined|Promise} Either undefined if options / buttons is specified or a Promise if using "Yes" / "No" mode - i.e. no options or buttons specified
+	*
+	* @example Ask a yes/no question
+	* this.$toast.ask('This is a question', {
+	*   buttons: [
+	*     {text: 'Yes', action: toast => console.log('Clicked Yes')},
+	*     {text: 'No', action: toast => console.log('Clicked No')},
+	*   ],
+	* });
 	*/
 	$toast.ask = (text, options) => {
 		var output;
@@ -85,6 +103,7 @@ module.exports = function() {
 		Snotify.confirm(text, {
 			timeout: 5000,
 			showProgressBar: true,
+			position: 'rightTop', // Force placement differently from regular toasts
 			...options,
 			buttons: options.buttons.map(button => ({
 				...button,
@@ -100,12 +119,78 @@ module.exports = function() {
 
 
 	/**
+	* Show a spinner which can be closed when completed
+	* This is a ligher version of $toast.progress()
+	* @param {string} id A unique ID to identify the toast so it can be changed later
+	* @param {string|boolean} text The text to display, if boolean `true` / `false` the spinner is removed and the action is considered to have succeded / failed respectively, only the first response is used so its safe to fail in a finally() block
+	* @param {Object} [options] Additional options
+	* @param {number} [options.spinnerRemoveDelay=5000] How long to keep a closed spinner open for
+	*
+	* @example Perform a server action and display whether it succeded
+	* Promise.resolve()                                                                     // Start promise chain
+	*   .then(()=> this.$prompt.spinner('someAction', 'Doing something complicated...'))    // Create spinner
+	*   .then(()=> this.$http.get('/api/something/complicated'))                            // Make web request
+	*   .then(()=> { ... })                                                                 // Do something with response from server
+	*   .then(()=> this.$prompt.spinner('someAction', true))                                // If we got here we can assume it succeded
+	*   .finally(()=> this.$prompt.spinner('someAction', false))                            // If we got here either its already succeded (above) or we can mark it as failed
+	*/
+	$toast.spinner = (id, text, options) => {
+		var settings = {
+			spinnerRemoveDelay: 2000,
+			...options,
+		};
+
+		if (text !== true && text !== false && !$toast._spinners[id]) { // Create new toast
+			var defer = Promise.defer();
+
+			$toast._spinners[id] = {
+				text,
+				defer,
+				settings,
+				snotify: Snotify.async(text, ()=> defer.promise, {
+					position: 'rightBottom',
+					closeOnClick: false,
+				}),
+			};
+		}
+
+		if (text === true || text === false) { // Resolve spinner promise
+			if (!$toast._spinners[id] || !$toast._spinners[id].snotify) return; // Toast doesn't exist anyway
+			if (text === true) {
+				$toast._spinners[id].defer.resolve(true);
+			} else if (text === false) {
+				$toast._spinners[id].defer.reject(false);
+			}
+			var sid = $toast._spinners[id].snotify.id;
+			setTimeout(()=> Snotify.remove(sid), $toast._spinners[id].settings.spinnerRemoveDelay);
+			delete $toast._spinners[id];
+		}
+	};
+
+
+	/**
+	* Storage of all spinner toasts
+	* @type {Object}
+	*/
+	$toast._spinners = {};
+
+
+	/**
 	* Display a toast with progress
 	* @param {string} id A unique ID to identify the toast so it can be changed later
 	* @param {string} [text] The text of the progress area
 	* @param {number} progress Progress to show between 0 and 100 - at 100 the progress display is removed
 	* @param {object} [options] Additional options to pass
 	* @param {object} [options.icon="far fa-spinner fa-spin"] Font-Awesome comaptible icon class to use in the side of the toast
+	*
+	* @example Perform a multi-step action showing progress
+	* Promise.resolve()                                                                     // Start promise chain
+	*   .then(()=> this.$prompt.progress('someAction', 'Working on things'))                // Show initial toast with starting text
+	*   .then(()=> Promise.timeout(2000))                                                   // Wait 2s
+	*   .then(()=> this.$prompt.progress('someAction', 25))                                 // Set progress to 25%
+	*   .then(()=> this.$prompt.progress('someAction', 'Still working', 50))                // Update text and set progress to 50%
+	*   .then(()=> Promise.timeout(2000))                                                   // Wait 2s
+	*   .finally(()=> this.$prompt.progress('someAction', 100))                             // Show 100% completion - automatically removes the toast after an interval
 	*/
 	$toast.progress = (id, text, progress, options) => {
 		var settings = {
@@ -161,6 +246,23 @@ module.exports = function() {
 	};
 
 
+	/**
+	* Storage of all progress toasts
+	* @type {Object}
+	*/
+	$toast._progress = {};
+
+
+	/**
+	* Generic fault catching $toast display
+	* This function is intended to be within the `catch()` functionality of a promise
+	* It will attempt to decode the error to display based on internal tests ignoring the generic 'cancel' string message (used in $prompt dialogs)
+	*
+	* @example Perform a server action and show errors if any
+	* Promise.resolve()                                                                     // Start promise chain
+	*   .then(()=> this.$http.get('/api/something/complicated'))                            // Make web request
+	*   .catch(this.$toast.catch)                                                           // Handle all error output
+	*/
 	$toast.catch = (obj, options) => {
 		console.warn('Promise chain threw error:', obj);
 		if (_.isObject(obj) && obj.status && obj.status == -1 && obj.statusText && obj.statusText == '') return $toast.offline(true);
@@ -218,6 +320,26 @@ module.exports = function() {
 	width: 30px;
 }
 /* }}} */
+/* Ask / Confirm {{{ */
+.snotifyToast.snotify-confirm {
+	background-color: #eee;
+	color: #000;
+}
+
+.snotifyToast.snotify-confirm .snotifyToast__progressBar {
+	background-color: #c7c7c7;
+}
+
+.snotifyToast.snotify-confirm .snotifyToast__progressBar .snotifyToast__progressBar__percentage {
+	background-color: #4c4c4c;
+}
+
+.snotifyToast.snotify-confirm .snotifyToast__body,
+.snotifyToast.snotify-confirm .snotifyToast__buttons button,
+.snotifyToast.snotify-confirm {
+	color: #000;
+}
+/* }}} */
 /* Progress {{{ */
 .snotifyToast.snotify-progress {
 	background-color: #eee;
@@ -266,7 +388,7 @@ module.exports = {
 			this.$toast[method](...args);
 		},
 
-		testAsync(succeed) {
+		testPromise(succeed) {
 			this.$toast.async('Thinking...', {
 				action: ()=> Promise.timeout(100000)
 					.then(()=> succeed ? 'All good' : Promise.reject('Failed'))
@@ -304,8 +426,8 @@ module.exports = {
 		*/
 		testAskPromise() {
 			this.$toast.ask('This is a question')
-				.then(()=> console.log('vum.$toast.ask succeeded'))
-				.catch(()=> console.log('vum.$toast.ask failed'))
+				.then(()=> console.log('vm.$toast.ask succeeded'))
+				.catch(()=> console.log('vm.$toast.ask failed'))
 		},
 	},
 };
@@ -320,8 +442,8 @@ module.exports = {
 			<a class="list-group-item" @click="testToast('success', 'Hello World')">vm.$toast.success('Hello World')</a>
 			<a class="list-group-item" @click="testToast('warning', 'Hello World')">vm.$toast.warning('Hello World')</a>
 			<a class="list-group-item" @click="testToast('error', 'Hello World')">vm.$toast.error('Hello World')</a>
-			<a class="list-group-item" @click="testAsync(true)">vm.$toast.async({action: PromiseThatSucceeds})</a>
-			<a class="list-group-item" @click="testAsync(false)">vm.$toast.async(Promise PromiseThatFails})</a>
+			<a class="list-group-item" @click="testPromise(true)">vm.$toast.promise({action: PromiseThatSucceeds})</a>
+			<a class="list-group-item" @click="testPromise(false)">vm.$toast.promise(Promise PromiseThatFails})</a>
 			<a class="list-group-item" @click="testConfirm">vm.$toast.confirm({buttons: ...})</a>
 			<a class="list-group-item" @click="testAsk">vm.$toast.ask(String, [...]})</a>
 			<a class="list-group-item" @click="testAskPromise">vm.$toast.ask(String) - promise mode</a>
@@ -329,6 +451,9 @@ module.exports = {
 			<a class="list-group-item" @click="testToast('progress', 'debug', 'Thinking...', 25)">vm.$toast.progress('debug', 'Thinking...', 25)</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 50)">vm.$toast.progress('debug', 50)</a>
 			<a class="list-group-item" @click="testToast('progress', 'debug', 100)">vm.$toast.progress('debug', 100)</a>
+			<a class="list-group-item" @click="testToast('spinner', 'debug', 'Thinking...')">vm.$toast.spinner('debug', String)</a>
+			<a class="list-group-item" @click="testToast('spinner', 'debug', true)">vm.$toast.spinner('debug', true)</a>
+			<a class="list-group-item" @click="testToast('spinner', 'debug', false)">vm.$toast.spinner('debug', false)</a>
 			<a class="list-group-item" @click="testToast('catch')">vm.$toast.catch()</a>
 			<a class="list-group-item" @click="testToast('catch', {error: 'Hello World'})">vm.$toast.catch({error: 'Hello World'})</a>
 		</div>
