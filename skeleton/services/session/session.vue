@@ -342,7 +342,7 @@ module.exports = function() {
 
 	/**
 	* Set a user setting against an optional endpoint
-	* @param {string} key The key to set, can be in dotted notation
+	* @param {string|Object} key The key to set, can be in dotted notation. If this is an object the entire value is merged
 	* @param {*} value The value to store
 	* @param {string} [method='server'] Where to store the setting. ENUM: 'server' (store on the server against user document), 'local' (use localStorage), 'session', (use sessionStorage)
 	* @returns {Promise} A promise which will resolve when the setting has been saved
@@ -350,12 +350,28 @@ module.exports = function() {
 	$session.settings.set = (key, value, method = 'server') => {
 		switch (method) {
 			case 'server':
-				_.set($session.data.settings, key, value);
+				if (_.isPlainObject(key)) {
+					_.merge($session.data.settings, key);
+				} else {
+					_.set($session.data.settings, key, value);
+				}
 				return this.$http.post('/api/session/profile', {
 					settings: this.$session.data.settings,
 				});
-			case 'local': return Promise.resolve(localStorage.setItem(key, JSON.stringify(value)));
-			case 'session': return Promise.resolve(sessionStorage.setItem(key, JSON.stringify(value)));
+			case 'local':
+				if (_.isPlainObject(key)) {
+					_.forEach(key, (v, k) => localStorage.setItem(k, JSON.stringify(v)));
+				} else {
+					localStorage.setItem(key, JSON.stringify(value));
+				}
+				return Promise.resolve();
+			case 'session':
+				if (_.isPlainObject(key)) {
+					_.forEach(key, (v, k) => sessionStorage.setItem(k, JSON.stringify(v)));
+				} else {
+					sessionStorage.setItem(key, JSON.stringify(value));
+				}
+				return Promise.resolve();
 			default: throw new Error(`Unknown setting storage method "${method}"`);
 		}
 	};
