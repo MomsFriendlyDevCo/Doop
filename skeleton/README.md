@@ -8,9 +8,9 @@ HOW TO CLONE THIS REPO
 
 
 
-{{FIXME: Title}}
+{{FIXME:Title}}
 ================
-{{FIXME: Description}}
+{{FIXME:Description}}
 
 
 Installation

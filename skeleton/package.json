@@ -1,5 +1,5 @@
 {
-  "name": "FIXME_name",
+  "name": "{{FIXME_name}}",
   "version": "0.0.0",
   "description": "{{FIXME:title}}",
   "main": "server/index.js",
