@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Middleware to set the status of a document
 * This is useful as middleware for the app.delete() endpoint to set a status and NOT actually remove the document
@@ -36,4 +36,4 @@ app.middleware.express.setDocStatus = options => {
 		.catch(res.sendError)
 	};
 };
-</server>
+</script>

@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Check permissions on a session object
 * @param {String/Array/Object} allow String, Array or SIFT of required permissions
@@ -53,21 +53,23 @@
 * </permissions>
 
 */
-module.exports = {
+app.component('permissions', {
+	data() { return {
+		searchValue: '',
+		selectedGroups: {},
+	}},
 	props: {
-    allow: {type: [String,Array,Object], required: true},
-    any: {type:[String,Boolean], required: false},
+		allow: {type: [String,Array,Object], required: true},
+		any: {type:[String,Boolean], required: false},
 	},
 	functional: true,
 	render: function (createElement, context) {
-		
-		var $session = Vue.services().$session;
+		var $session = app.service.$session;
 		//$session.$debugging = true;
-		$session.$debug('permissions', context.props.allow, context.props.any, $session.hasPermission(context.props.allow));
-		if (context.props.allow.any && !$session.hasPermission.any(context.props.allow)) return;
+		if (context.props.any && !$session.hasPermission.any(context.props.allow)) return;
 		if (!$session.hasPermission(context.props.allow)) return;
 		// Transparently pass any attributes, event listeners, children, etc.
 		return createElement('div', context.data, context.children)
 	},
-};
-</component>
+});
+</script>

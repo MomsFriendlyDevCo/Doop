@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Component which manages user email addresses
 * This displays a simple table of email addresses with optional subscriptions next to each
@@ -6,13 +6,14 @@
 * @param {array<Object>} fields Checkbox fields to display, each entity should be of the form `[{id: String, title: String, default?: true[default]/false/'firstOnly'}]`
 * @emits change Emitted as `(emails)` when any of the contents changes
 */
-module.exports = {
+app.component('userEmails', {
 	data() { return {
 		emails: [],
 	}},
 	props: {
 		value: {type: Array, required: true},
 		fields: {type: Array, required: true},
+		user: {type: String},
 	},
 	methods: {
 		/**
@@ -45,6 +46,25 @@ module.exports = {
 			this.emails.splice(index, 1);
 			this.$emit('change', this.emails);
 		},
+
+
+		editEmailSignature(email) {
+			// Already has a valid pointer - redirect to edit it
+			if (email.signature) return this.$router.go(`/emailSignatures/${email.signature}`);
+
+			// No existing signature - create stub then throw to edit
+			return this.$http.post(`/api/emailSignatures`, {
+				user: this.user,
+				email: email.email,
+			})
+				.then(({data}) => email.signature = data._id)
+				.then(()=> {
+					this.$emit('change', this.emails)
+					this.$emit('saveUser', this.emails)
+				})
+				.then(()=> this.$router.go(`/emailSignatures/${email.signature}`))
+				.catch(this.$toast.catch)
+		},
 	},
 	watch: {
 		'$prop.value': { // Copy $props.value -> emails
@@ -55,14 +75,15 @@ module.exports = {
 			},
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<table class="table table-striped">
 		<thead>
 			<th class="pl-4">Email address</th>
 			<th v-for="field in fields" :key="field.id" class="text-center">{{field.title}}</th>
+			<th v-if="$props.user" class="col-verbs"/>
 			<th class="col-verbs"/>
 		</thead>
 		<tbody>
@@ -76,17 +97,20 @@ module.exports = {
 					/>
 				</td>
 				<td v-for="field in fields" :key="field.id" class="text-center">
-					<toggle-button
+					<v-toggle
 						:value="email[field.id]"
 						@change="email[field.id] = $event.value; $emit('change', emails)"
 					/>
+				</td>
+				<td v-if="$props.user">
+					<a @click="editEmailSignature(email)" class="btn btn-link far fa-file-signature" v-tooltip="'Edit email signature'"></a>
 				</td>
 				<td>
 					<a @click="removeEmail(emailIndex)" class="btn btn-link btn-link-danger far fa-times" v-tooltip="'Remove this email address'"/>
 				</td>
 			</tr>
 			<tr v-if="!emails.length">
-				<td :colspan="fields.length + 2" class="text-center text-muted p-3">
+				<td :colspan="fields.length + ($props.user ? 3: 2)" class="text-center text-muted p-3">
 					<i class="far fa-info-circle"/>
 					No email addresses specified
 				</td>
@@ -94,7 +118,7 @@ module.exports = {
 		</tbody>
 		<tfoot>
 			<tr>
-				<td :colspan="fields.length + 2" class="pl-4">
+				<td :colspan="fields.length + ($props.user ? 3 : 2)" class="pl-4">
 					<input
 						:value="''"
 						type="email"

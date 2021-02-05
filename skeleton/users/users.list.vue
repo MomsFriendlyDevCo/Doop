@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/users',
 	methods: {
 		setStatus(user, status) {
@@ -11,8 +11,8 @@ module.exports = {
 				.finally(()=> this.$loader.stop())
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

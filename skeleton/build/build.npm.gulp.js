@@ -7,6 +7,30 @@ var spawn = require('child_process').spawn;
 
 gulp.task('npm', ['npm.update', 'npm.engineCheck']);
 
+
+/**
+* Perform a `npm cleaninstall` (but only if the package-lock.json file has changed)
+*/
+gulp.task('npm.cleanInstall', ['load:app.git'], ()=> Promise.resolve()
+	.then(()=> app.git.pathChanged(`${app.config.paths.root}/package-lock.json`))
+	.then(hasChanged => {
+		if (hasChanged) {
+			gulp.log('Detected change to', gulp.colors.cyan('package-lock.json'), 'performing NPM clean-install...');
+			return;
+			return exec([
+				'npm',
+				'clean-install',
+			], {log: true});
+		} else {
+			gulp.log(gulp.colors.gray('Detected no changes to package-lock.json, skipping NPM clean-install'));
+		}
+	})
+);
+
+
+/**
+* Update the NPM environment if the package.json file has changed
+*/
 gulp.task('npm.update', ['load:app', 'load:app.git'], ()=> {
 	if (app.config.isProduction) return done(); // Skip if production
 	if (!_.get(app, 'config.gulp.npmUpdate')) {

@@ -1,10 +1,8 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/debug/session',
-	data() { return {
-	}},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="card">

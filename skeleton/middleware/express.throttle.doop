@@ -1,7 +1,8 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 var emt = require('@momsfriendlydevco/express-middleware-throttle');
 
 /*
+// New Lock instance with specific collection for middleware locks
 {
 	lock: {
 		...app.config.lock,
@@ -19,4 +20,4 @@ app.middleware.express.throttle = emt({
 	lock: app.lock,
 	...app.config.throttle,
 });
-</server>
+</script>

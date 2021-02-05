@@ -1,4 +1,4 @@
-<server on="init, dbInit">
+<script lang="js" backend on="init, dbInit">
 var _ = require('lodash');
 var natural = require('natural');
 
@@ -24,4 +24,4 @@ app.utils.inflect.singular = input => nounInflector.singularize(_.startCase(inpu
 * @returns {string} The plural version of input
 */
 app.utils.inflect.singular = input => nounInflector.singularize(_.startCase(input));
-</server>
+</script>

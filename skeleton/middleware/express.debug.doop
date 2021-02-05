@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 var _ = require('lodash');
 
 /**
@@ -16,4 +16,4 @@ app.middleware.express.debug = message => {
 		return next();
 	};
 };
-</server>
+</script>

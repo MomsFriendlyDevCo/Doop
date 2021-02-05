@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Wrapper around ReST interface on a named model with options
 *
@@ -17,4 +17,4 @@
 var mongoosy = require('@momsfriendlydevco/mongoosy');
 
 app.middleware.express.rest = mongoosy.serve.bind(mongoosy);
-</server>
+</script>

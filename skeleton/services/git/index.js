@@ -100,3 +100,30 @@ git.historySinceBookmark = bookmark =>
 				[bookmark]: history[0].shortHash,
 			}, null, '\t')).then(()=> historyFiltered);
 		});
+
+
+/**
+* Returns if a path has changed since the the last deploy marker
+* @param {string} path The path to check
+* @returns {boolean} Boolean true if the file has changed since the last deployment bookmark, returning true as a fallback if no history or bookmark is present
+*/
+git.pathChanged = path => Promise.resolve()
+	.then(()=> fs.promises.readFile(`${app.config.paths.root}/.git/doop-git-bookmarks.json`).catch(e => '{}') // Read bookmark file
+		.then(contents => JSON.parse(contents))
+		.then(bookmarks => bookmarks[app.config.deploy.historyBookmark] || 'NOMARK') // Find last deploy marker
+		.catch(()=> 'NOMARK') // Fallback to no history
+	)
+	.then(lastDeployHash => {
+		if (lastDeployHash == 'NOMARK') return true; // Default to assuming file has changed
+
+		return exec([
+			'git',
+			'diff',
+			'--exit-code', // Return 0 if no changes, 1 if so
+			lastDeployHash,
+			'--',
+			path,
+		])
+			.then(()=> false) // Returned 0 - there are no changes
+			.catch(()=> true) // Returned 1 - there are some changes
+	})

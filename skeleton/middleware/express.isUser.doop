@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Verifies if a user is valid and logged in
 * @returns {function} Express middleware function
@@ -51,4 +51,4 @@ app.middleware.express.isRoot = ()=> (req, res, next) => {
 		});
 	}
 };
-</server>
+</script>

@@ -1,7 +1,8 @@
-<script repack>
-import {VueSelect} from 'vue-select';
-import './node_modules/vue-select/dist/vue-select.css';
-Vue.component('v-select', VueSelect);
+<script lang="js" frontend>
+import vSelect from "vue-select";
+import '/node_modules/vue-select/dist/vue-select.css';
+
+app.component('v-select', vSelect);
 </script>
 
 <style>

@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Express middleware takes multiple other middleware entries and returns if ANY of them succeed
 * @param {Array <function>} middlewares Array of middleware items to run, each is expected to either call res.send(), res.sendError() or next([err])
@@ -55,4 +55,4 @@ app.middleware.express.or = (middlewares, failHandler) => (req, res, next) => {
 		},
 	}, e => middlewareOrHandler(mIndex, e)));
 };
-</server>
+</script>

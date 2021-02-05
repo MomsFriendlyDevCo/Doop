@@ -1,10 +1,10 @@
-<component>
+<script lang="js" frontend>
 /**
 * Substate style background image
 * Vue compatible, slightly altered version of the below CodePen
 * @url https://codepen.io/piksl/pen/EaxJxX
 */
-module.exports = {
+app.component('splashSubstrate', {
 	props: {
 		speed: {type: Number, default: 25},
 		strokeColor: {type: String, default: '#505050'},
@@ -91,8 +91,8 @@ module.exports = {
 	beforeDestroy() {
 		clearInterval(this.boidIntervalTimer);
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<canvas class="splash splash-substrate"/>

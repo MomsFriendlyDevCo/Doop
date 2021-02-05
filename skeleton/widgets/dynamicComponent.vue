@@ -1,6 +1,6 @@
-<component>
+<script lang="js" frontend>
 /**
-* Extended version of the built in `<component/>` dynamic component that supports events and props and sanity checks
+* Extended version of the built in `<script lang="js" frontend>` dynamic component that supports events and props and sanity checks
 *
 * @param {string} component The string name of a component
 * @param {string} [component.component] The component name if passed a string, the component name is always camelCased
@@ -9,14 +9,14 @@
 *
 * NOTE: This component exposes a single ref `component` which is the dynamically loaded component
 */
-module.exports = {
+app.component('dynamicComponent', {
 	props: {
 		component: {
 			type: String,
 			required: true,
 			validator: val => {
-				var isValid = Vue.component(val);
-				if (!isValid) console.error('Dynamic component', val, 'is not available via Vue.component()');
+				var isValid = app.component(val);
+				if (!isValid) console.error('Dynamic component', val, 'is not available via app.component()');
 				return isValid;
 			},
 		},
@@ -32,4 +32,4 @@ module.exports = {
 		});
 	},
 };
-</component>
+</script>

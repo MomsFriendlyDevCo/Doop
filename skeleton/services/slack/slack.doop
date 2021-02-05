@@ -1,4 +1,4 @@
-<server on="init, dbInit, load:slack">
+<script lang="js" backend on="init, dbInit, load:slack">
 var SlackClient = require('@slack/web-api').WebClient;
 
 app.slack = {};
@@ -24,4 +24,4 @@ app.slack.post = msg => {
 		as_user: true,
 	});
 };
-</server>
+</script>

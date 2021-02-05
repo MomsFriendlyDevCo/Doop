@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/signup',
 	data: ()=> ({
 		data: {
@@ -25,8 +25,8 @@ module.exports = {
 	// Bind special Login styles
 	beforeCreate: ()=> $('body').addClass('minimal').removeClass('bootstrapping'),
 	destroyed: ()=> $('body').removeClass('minimal'),
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

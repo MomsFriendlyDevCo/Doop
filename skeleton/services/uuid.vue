@@ -1,6 +1,7 @@
-<script repack>
+<script lang="js" frontend>
 import {v4} from 'uuid';
-Vue.prototype.$uuid = {
+
+app.service('$uuid', {
 	generate: v4,
-};
+});
 </script>

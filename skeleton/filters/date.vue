@@ -1,4 +1,6 @@
-<filter>
+<script lang="js" frontend>
+import moment from 'moment';
+
 /**
 * Display human-readable dates
 * This filter is similar to the <date/> component which adds the extra behaviour of having tooltip
@@ -13,7 +15,7 @@
 * @param {number} [options.diffLimit] Highest diff before switching back to formatMobile
 * @returns {string} A formatted date
 */
-module.exports = (value, options) => {
+app.filter('date', value => {
 	if (!value) return '';
 
 	var settings = {
@@ -45,10 +47,10 @@ module.exports = (value, options) => {
 	} else {
 		return dateMoment.format(
 			settings.format ? settings.format
-			: Vue.services().$screen.isMobile ? settings.formatMobile
+			: app.service.$screen.isMobile ? settings.formatMobile
 			: settings.formatDesktop
 		);
 	}
 	
-};
-</filter>
+});
+</script>

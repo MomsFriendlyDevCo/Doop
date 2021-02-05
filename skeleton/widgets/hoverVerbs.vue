@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Provide a set of hoverable buttons which copy everything under this DOM element
 *
@@ -16,7 +16,7 @@
 * @example Show a custom menu of verbs, overriding all in built styles + copy button
 * <hover-verbs :verbs="[{class: 'btn far fa-search', tooltip: 'Search'}, 'copy']">Hello World</hover-verbs>
 */
-module.exports = {
+app.component('hoverVerbs', {
 	data() { return {
 		content: undefined, // Calculated on hover (so Vue can change the binding in the slot if needed)
 		prototypes: { // Simple prototype mappings we support
@@ -57,8 +57,8 @@ module.exports = {
 				)
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div

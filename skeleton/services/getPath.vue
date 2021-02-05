@@ -1,4 +1,4 @@
-<script>
+<script lang="js" frontend>
 /**
 * Get a dotted notation or array path
 * This function acts very similar to the Lodash `_.get()` function
@@ -14,24 +14,28 @@
 * @example Get a deeply nested path, with arrays, assuming VM as the root node and a fallback
 * vm.$getPath('foo.1.bar', 123); // The value of vm.$data.foo OR 123 if it doesnt exist
 */
-Vue.prototype.$getPath = function(target, path, fallback) {
-	// Argument mangling {{{
-	if (_.isString(target) || _.isArray(target)) { // called as (path, fallback)
-		[target, path, fallback] = [this, target, path];
-	} else if (!_.isObject(target)) {
-		throw new Error('Cannot use $getPath on non-object target');
-	}
-	// }}}
+app.mixin({
+	methods: {
+		$getPath(target, path, fallback) {
+			// Argument mangling {{{
+			if (_.isString(target) || _.isArray(target)) { // called as (path, fallback)
+				[target, path, fallback] = [this, target, path];
+			} else if (!_.isObject(target)) {
+				throw new Error('Cannot use $getPath on non-object target');
+			}
+			// }}}
 
-	var node = target;
-	return (_.isString(path) ? path.split('.') : path).find((chunk, chunkIndex, chunks) => {
-		if (node[chunk] === undefined) { // Endpoint or path waypoint doesn't exist
-			return fallback;
-		} else if (chunkIndex == chunks.length - 1) { // At leaf node
-			return node[chunk];
-		} else { // Keep traversing down branch node
-			node = node[chunk];
-		}
-	});
-};
+			var node = target;
+			return (_.isString(path) ? path.split('.') : path).find((chunk, chunkIndex, chunks) => {
+				if (node[chunk] === undefined) { // Endpoint or path waypoint doesn't exist
+					return fallback;
+				} else if (chunkIndex == chunks.length - 1) { // At leaf node
+					return node[chunk];
+				} else { // Keep traversing down branch node
+					node = node[chunk];
+				}
+			});
+		},
+	},
+});
 </script>

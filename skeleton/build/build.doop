@@ -1,4 +1,4 @@
-<server on="postEndpoints">
+<script lang="js" backend on="postEndpoints">
 /**
 * Serve the /dist folder as a static resource
 */
@@ -6,4 +6,4 @@ app.use('/dist', app.middleware.express.static(`${app.config.paths.root}/dist`, 
 	fallthrough: true,
 	setHeaders: res => res.set('Cache-Control', 'no-cache, max-age=0'), // Force HEAD on each reload to check static resources haven't updated
 }));
-</server>
+</script>

@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 var async = require('async-chainable');
 var colors = require('chalk');
@@ -25,7 +25,7 @@ app.get('/api/session/avatar/:user', function(req, res) {
 	async()
 		// Fetch the basic user info {{{
 		.then('user', function(next) {
-			return app.db.users.findById(req.params.user)
+			return db.users.findOne({_id: req.params.user})
 				.select(['email', 'username'])
 				.promise();
 		})
@@ -78,4 +78,4 @@ app.get('/api/session/avatar/:user', function(req, res) {
 		})
 		// }}}
 });
-</endpoint>
+</script>

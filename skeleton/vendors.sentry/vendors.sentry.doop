@@ -1,4 +1,4 @@
-<server on="postExpress">
+<script lang="js" backend on="postExpress">
 var Sentry = require('@sentry/node');
 var SentryTracing = require('@sentry/tracing');
 var url = require('url');
@@ -28,9 +28,9 @@ var s = Sentry.init({
 app.express.use(Sentry.Handlers.requestHandler());
 
 app.express.use(Sentry.Handlers.tracingHandler());
-</server>
+</script>
 
-<server on="postServer">
+<script lang="js" backend on="postServer">
 // Capture all out-of-scope errors
 var _ = require('lodash');
 var crash = require('@momsfriendlydevco/crash');
@@ -54,4 +54,4 @@ app.express.use((err, req, res, next) => {
 		res.status(500).send(err.trace || err.toString());
 	}
 })
-</server>
+</script>

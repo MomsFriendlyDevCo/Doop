@@ -1,11 +1,12 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/recover',
 	data() { return {
 		data: {
 			password: undefined,
 			confirmation: undefined,
 		},
+		/* MG2 implementation {{{
 		spec: {
 			type: 'mgContainer',
 			layout: 'card',
@@ -26,6 +27,7 @@ module.exports = {
 				},
 			]
 		},
+		}}} */
 	}},
 	methods: {
 		submit(notification = false, redirect = false) {
@@ -51,8 +53,8 @@ module.exports = {
 	created() {
 		this.$debugging = true;
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form class="form-horizontal" @submit.prevent="submit(true, true)">
@@ -64,11 +66,46 @@ module.exports = {
 				><i class="fa fa-check" /></button>
 		</div>
 
-		<mg-form
+		<!--mg-form
 			:config="$data.spec"
 			:data="$data.data"
 			@changeItem="$setPath($data.data, $event.path, $event.value)"
-		/>
+		/-->
+
+		<!-- Card: User information {{{ -->
+		<div class="card">
+			<div class="card-header">Account Recovery</div>
+			<div class="card-body">
+				<div class="form-group row">
+					<label class="col-4 col-form-label">Password</label>
+					<div class="col-8 col-form-label">
+						<input
+							v-model="data.password"
+							type="password"
+							class="form-control"
+							data-lpignore="true"
+							autocomplete="off"
+							required
+							autofocus
+						/>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-4 col-form-label">Confirmation</label>
+					<div class="col-8 col-form-label">
+						<input
+							v-model="data.confirmation"
+							type="password"
+							class="form-control"
+							data-lpignore="true"
+							autocomplete="off"
+							required
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- }}} -->
 
 		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
 			<div class="card-header">

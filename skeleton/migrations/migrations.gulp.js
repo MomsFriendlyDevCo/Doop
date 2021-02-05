@@ -7,7 +7,7 @@ var gulp = require('gulp');
 * Clear all migrations from the database
 */
 gulp.task('migrations.clear', ['load:app.db'], ()=> Promise.resolve()
-	.then(()=> app.db.doopMigrations.$mongooseModel.deleteMany())
+	.then(()=> app.db.doopMigrations.deleteMany())
 	.then(()=> gulp.log('All migrations marked as unapplied'))
 );
 

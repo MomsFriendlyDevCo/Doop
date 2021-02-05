@@ -1,5 +1,4 @@
-<endpoint>
-var promisify = require('util').promisify;
+<script lang="js" backend endpoint>
 /**
 * Accept a user token to confirm email address
 * @param {string} req.params.token The token used to login the user
@@ -8,9 +7,9 @@ var promisify = require('util').promisify;
 // TODO: Could simply use the password confirmation endpoint
 app.get('/go/signup/:token', (req, res) => {
 	app.db.users.findOne({
+		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'signup',
-		//$errNotFound: false,
 	})
 		.then(user => user || Promise.reject('Signup token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
@@ -23,9 +22,9 @@ app.get('/go/signup/:token', (req, res) => {
 		.then(()=> res.redirect('/recover'))
 		.catch(e => res.sendError(403, e.toString()))
 });
-</endpoint>
+</script>
 
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 
 app.post([
@@ -48,7 +47,7 @@ app.post([
 		// TODO: When permitted email domain list is defined ensure users domain matches
 
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false,
+			//$errNotFound: false, // Monoxide
 			username: req.body.username,
 		}))
 		// FIXME: User enumeration
@@ -57,6 +56,16 @@ app.post([
 			email: req.body.email,
 			name: req.body.name || req.body.username || req.body.email,
 			username: req.body.username,
+			// ABI fields {{{
+			emails: [{
+				email: req.body.email,
+				quote: true,
+				invoice: true,
+				delivery: true,
+				newsletter: true,
+			}],
+			type: req.body.type,
+			// }}}
 		}))
 		// }}}
 		// Generate Token {{{
@@ -91,4 +100,4 @@ app.post([
 		.catch(res.sendError)
 		// }}}
 );
-</endpoint>
+</script>

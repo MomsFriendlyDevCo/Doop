@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Customizable table component with auto data retrieval, pagnination and searching
 *
@@ -50,8 +50,7 @@
 * @slot table-footer-right Slot to template as the footer area (far right) - wraps item counts
 * @slot COLUMN Per-column custom cell rendering, if specified each slot gets the "row" data binding
 */
-
-module.exports = {
+app.component('vTable', {
 	data() { return {
 		state: 'init', // ENUM: 'loading', 'ready', 'empty', 'error'
 		error: undefined, // Error from server, if any
@@ -89,7 +88,7 @@ module.exports = {
 			thumbnail: {cellClass: 'col-thumbnail text-center'},
 			verbs: {cellClass: 'col-verbs text-right'},
 			card: {cellClass: 'col-text text-left card'},
-		}}}, /* }}} */
+		}}, minimize: false}, /* }}} */
 
 		showSearch: {type: Boolean, default: true},
 		showSearchBefore: {type: Boolean, default: false},
@@ -278,7 +277,7 @@ module.exports = {
 		//this.searchDebounced = _.debounce(this.search, this.searchDebounce);
 	},
 };
-</component>
+</script>
 
 <template>
 	<div v-bind="$attrs" class="v-table" :class="layout">

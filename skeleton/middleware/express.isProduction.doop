@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Middleware layer to resolve a task only if we are operating in a production environment based on a query
 * @param {boolean} [isProduction=true] Whether this middleware should operate only in production, set to falsy to invert behaviour to only operate in dev environments
@@ -16,4 +16,4 @@ app.middleware.express.isProduction = (isProduction) =>
 			res.sendError(`403: Functionality only available in ${isProduction ? 'production' : 'non-production'} environments`);
 		}
 	}
-</server>
+</script>

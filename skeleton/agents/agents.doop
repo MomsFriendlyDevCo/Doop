@@ -1,4 +1,4 @@
-<server on="agents">
+<script lang="js" backend on="agents">
 var Agents = require('@momsfriendlydevco/agents');
 
 exports = ()=> new Promise(resolve => {
@@ -28,9 +28,9 @@ exports = ()=> new Promise(resolve => {
 
 	app.agents.init()
 });
-</server>
+</script>
 
-<endpoint>
+<script lang="js" backend on="endpoints">
 var _ = require('lodash');
 
 /**
@@ -43,10 +43,6 @@ app.get('/api/agents', app.middleware.express.isUser(), (req, res) => {
 		.then(data => res.send(data.map(i => _.omit(i, ['email', 'emailSubject', 'emailTemplate']))))
 		.catch(err => res.sendError(err))
 });
-</endpoint>
-
-<endpoint>
-var _ = require('lodash');
 
 /**
 * Get a list of agents
@@ -58,9 +54,7 @@ app.get('/api/agents/count', app.middleware.express.isUser(), (req, res) => {
 		.then(data => res.send({ count: data.length }))
 		.catch(err => res.sendError(err))
 });
-</endpoint>
 
-<endpoint>
 /**
 * Get the CACHED return value of a given agent
 * NOTE: This does not regenerate the answer - only pull the last calculated value. Add `/regenerate` as a suffix if you want the fresh value calculated
@@ -72,9 +66,7 @@ app.get('/api/agents/:id', app.middleware.express.isUser(), (req, res) => {
 		.then(contents => res.send(contents))
 		.catch(res.sendError)
 });
-</endpoint>
 
-<endpoint>
 /**
 * Force regenerate a given agent
 * @param {string} req.param.id The ID of the agent to regenerate
@@ -85,9 +77,7 @@ app.get('/api/agents/:id/regenerate', app.middleware.express.isUser(), (req, res
 		.then(contents => res.sendStatus(200))
 		.catch(res.sendError);
 });
-</endpoint>
 
-<endpoint>
 /**
 * Invalidate a cached agent response
 * @param {string} req.param.id The ID of the agent to invalidate
@@ -98,9 +88,7 @@ app.get('/api/agents/:id/invalidate', app.middleware.express.isUser(), (req, res
 		.then(()=> res.sendStatus(200))
 		.catch(res.sendError)
 });
-</endpoint>
 
-<endpoint>
 /**
 * Lazy fetcher to return the size of a agent
 * @param {string} req.param.id The ID of the agent to fetch the response size of
@@ -111,4 +99,4 @@ app.get('/api/agents/:id/size', app.middleware.express.isUser(), (req, res) => {
 		.then(size => res.send({size: size || false}))
 		.catch(res.sendError)
 });
-</endpoint>
+</script>

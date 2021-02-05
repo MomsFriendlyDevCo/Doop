@@ -1,4 +1,4 @@
-<server on="init, dbInit">
+<script lang="js" backend on="init, dbInit">
 /**
 * UUID generation tools
 */
@@ -77,4 +77,4 @@ app.utils.uuid.validate = (input, options) => {
 
 	return re.test(input);
 };
-</server>
+</script>

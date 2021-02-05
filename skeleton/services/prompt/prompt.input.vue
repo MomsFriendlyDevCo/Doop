@@ -1,4 +1,4 @@
-<script>
+<script lang="js" frontend>
 /**
 * Extension for $prompt that adds simple text input
 * @param {Object} [options] Options to use when displaying the prompt
@@ -12,11 +12,11 @@
 * vm.$prompt.input({title: 'What is your name'}).then(response => ...)
 */
 app.ready.then(()=> {
-	Vue.services().$prompt.input = options => Vue.services().$prompt.dialog({
+	app.service.$prompt.input = options => app.service.$prompt.dialog({
 		title: 'Input text',
 		body: '',
 		placeholder: '',
-		component: 'promptInput',
+		component: 'promptInputComponent',
 		value: options.default || '',
 		buttons: {
 			left: [{
@@ -24,14 +24,14 @@ app.ready.then(()=> {
 				title: 'Cancel',
 				method: 'reject',
 				class: 'btn btn-danger',
-				icon: 'far fa-times',
+				icon: 'fa fa-times',
 			}],
 			right: [{
 				id: 'confirm',
 				title: 'Confirm',
 				class: 'btn btn-success',
 				icon: 'fa fa-check',
-				click: ()=> Vue.services().$prompt.resolve(Vue.services().$prompt.settings.value),
+				click: ()=> app.service.$prompt.resolve(app.service.$prompt.settings.value),
 			}],
 		},
 		dialogClose: 'reject',
@@ -39,46 +39,3 @@ app.ready.then(()=> {
 	});
 })
 </script>
-
-<component>
-module.exports = {
-	methods: {
-		keydown(e) { // Reject when the user presses escape
-			if (e.which === 27) this.$prompt.reject();
-		},
-		submit() { // Accept the promise when the user submits the form (Enter or whatever)
-			return this.$prompt.resolve(this.$prompt.settings.value);
-		},
-	},
-};
-</component>
-
-<template>
-	<form class="form-horizontal" @submit.prevent="submit()">
-		<div class="form-group row">
-			<div class="col-12">
-				<div class="input-group">
-					<div v-if="$prompt.settings.prefix" class="input-group-prepend">
-						<span class="input-group-text">
-							{{$prompt.settings.prefix}}
-						</span>
-					</div>
-					<input
-						type="search"
-						v-model="$prompt.settings.value"
-						class="form-control"
-						:placeholder="$prompt.settings.placeholder"
-						@keydown="keydown"
-						autofocus
-						data-autofocus-method="select"
-					/>
-					<div v-if="$prompt.settings.suffix" class="input-group-append">
-						<span class="input-group-text">
-							{{$prompt.settings.suffix}}
-						</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</form>
-</template>

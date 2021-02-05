@@ -1,9 +1,9 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component('error', {
 	data: ()=> ({
 	}),
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="page-error">

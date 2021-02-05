@@ -1,4 +1,6 @@
-<component>
+<script lang="js" frontend>
+import moment from 'moment';
+
 /**
 * Component to display a shorthand date display with a tooltip on hover
 * @param {string|number|Date} [date] The date to display, can be any processable Moment expression or a Unix timestamp (number or string)
@@ -10,7 +12,7 @@
 * @example Display a date
 * <date :date="someDate"/>
 */
-module.exports = {
+app.component('date', {
 	props: {
 		date: {type: [Date, Number, String]}, // Date may be blank
 		format: {type: String},
@@ -48,8 +50,8 @@ module.exports = {
 	created() {
 		this.$on('$screen.resize', this.refresh); // React to screen size changes
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div v-tooltip="dateTooltip">

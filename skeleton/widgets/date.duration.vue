@@ -1,4 +1,6 @@
-<component>
+<script lang="js" frontend>
+import moment from 'moment';
+
 /**
 * Display an allowing the user to select a time duration with some suggested values
 * @param {number} [minutes] The current selection
@@ -9,7 +11,7 @@
 *
 * @emits change Emitted as (newVal) where the value is in the format dicated by `dateFormat`
 */
-module.exports = {
+app.component('dateDuration',  {
 	props: {
 		minutes: Number,
 		options: Array,
@@ -34,8 +36,8 @@ module.exports = {
 			);
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

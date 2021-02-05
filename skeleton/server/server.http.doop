@@ -1,4 +1,4 @@
-<server on="init">
+<script lang="js" backend on="init">
 /**
 * Create dummy Express(like) methods which queue up endpoints
 * These get processed in a later hook which turns them into real Express endpoints on `app`
@@ -22,9 +22,9 @@ app.endpoints = [];
 		app.endpoints.push({method, path, args})
 	}
 );
-</server>
+</script>
 
-<server on="server">
+<script lang="js" backend on="server">
 /**
 * Initalize core server
 */
@@ -95,9 +95,9 @@ app.express.use(function(req, res, next) {
 
 	next();
 });
-</server>
+</script>
 
-<server on="server">
+<script lang="js" backend on="server">
 /**
 * Explode all endpoints in app.endpoints into actual Express endpoints
 */
@@ -121,16 +121,16 @@ delete app.endpoints; // Prevent usage of endpoints now its been processed
 ['all', 'delete', 'get', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
 	app[method] = path => app.log.warn('Attemping to set up express path at', app.log.colors.cyan(path), 'after server hook has fired - request rejected')
 );
-</server>
+</script>
 
-<server on="server">
+<script lang="js" backend on="server">
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
 var express = require('express');
 var url = require('url');
 
-exports = ()=> new Promise(resolve => {
+return new Promise(resolve => {
 	if (app.config.ssl.enabled && !fs.existsSync(app.config.ssl.cert)) {
 		app.log.warn('SSL enabled but cert file is missing, assuming', app.log.colors.yellow('production simulation mode'), 'without SSL');
 		app.config.ssl.enabled = false;
@@ -162,8 +162,8 @@ exports = ()=> new Promise(resolve => {
 		app.server.timeout = app.config.timeout;
 	}
 });
-</server>
+</script>
 
-<server on="ready">
+<script lang="js" backend on="ready">
 app.log('Web interface listening at', app.log.colors.cyan(app.config.url));
-</server>
+</script>

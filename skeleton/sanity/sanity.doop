@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 var basicAuth = require('express-basic-auth');
 var fspath = require('path');
@@ -18,7 +18,7 @@ var sanityChecks = glob.sync(`${app.config.paths.root}/sanity/*.js`)
 	})
 	.sort((a, b) => a.id > b.id ? 1 : -1)
 
-app.log('Loaded', sanityChecks.length, 'sanity checks:', sanityChecks.map(s => s.id).map(i => app.log.colors.cyan(i)).join(', '));
+app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sanityChecks.map(s => s.id).map(i => app.log.colors.cyan(i)).join(', '));
 
 
 /**
@@ -73,4 +73,4 @@ app.get(
 			.catch(e => res.send(`SANITY:FAULT:${e.toString()}`)) // Generic fallback
 	}
 );
-</endpoint>
+</script>

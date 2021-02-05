@@ -1,8 +1,8 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/reports',
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

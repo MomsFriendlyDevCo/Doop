@@ -1,4 +1,4 @@
-<schema>
+<script lang="js" backend schema>
 app.middleware.db.schema('links', {
 	created: {type: 'date', default: Date.now},
 	col: {type: 'string'},
@@ -8,9 +8,9 @@ app.middleware.db.schema('links', {
 		doc: {type: 'string', index: true},
 	}],
 });
-</schema>
+</script>
 
-<endpoint>
+<script lang="js" backend on="endpoints">
 app.use('/api/links/:id?', app.middleware.express.rest('history', {
 	get: app.middleware.express.isUser(),
 	query: app.middleware.express.isUser(),
@@ -21,4 +21,4 @@ app.use('/api/links/:id?', app.middleware.express.rest('history', {
 	delete: false,
 	search: false, // When unspecified `search()` picks up before `query()`
 }));
-</endpoint>
+</script>

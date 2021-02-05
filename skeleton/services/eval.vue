@@ -1,7 +1,5 @@
-<service singleton>
-module.exports = function() {
-	var $eval = this;
-
+<script lang="js" frontend>
+app.service('$eval', {
 	/**
 	* Executes arbitrary code as a string, passing a custom context and exposed services
 	* This is an attempt to remap eval() to something less insane
@@ -10,10 +8,10 @@ module.exports = function() {
 	* @param {Object} [options] Additional options
 	* @param {string} [options.action] Optional additional way to pass the code for execution, use this if just passing a single object
 	* @param {array} [options.args] Arguments to pass the function
-	* @param {Object} [options.context=Vue.services] The context to run the code within, defaults to the exposed services of Vue.services
-	* @param {Object} [options.inject=Vue.services] Injectables (i.e. items to appear within the scope of the function
+	* @param {Object} [options.context=app.service] The context to run the code within, defaults to the exposed services of app.service
+	* @param {Object} [options.inject=app.service] Injectables (i.e. items to appear within the scope of the function
 	*/
-	$eval.run = function(subject, options) {
+	run(subject, options) {
 		// Argument mangling {{{
 		if (_.isPlainObject(subject)) { // Form: options
 			options = subject;
@@ -27,8 +25,8 @@ module.exports = function() {
 		var settings = {
 			action: '',
 			args: [],
-			context: Object.assign({}, Vue.services),
-			inject: Object.assign({}, Vue.services),
+			context: Object.assign({}, app.service),
+			inject: Object.assign({}, app.service),
 			...options,
 		};
 
@@ -42,11 +40,11 @@ module.exports = function() {
 		}
 
 		return func.call(settings.context, ...injectables.map(i => i[1]), ...settings.args);
-	};
+	},
 
 
 	/**
-	* Attempt to safely evaluate a subject as a JSON object
+	* Attempt to savely evaluate a subject as a JSON object
 	* @param {string} subject Subject expression to evaluate
 	* @param {boolean} [wantObject=true] Allow object returns
 	* @param {boolean} [wantArray=true] Allow array returns
@@ -57,7 +55,7 @@ module.exports = function() {
 	* @param {*} [fallback=null] Fallback value to use if nothing can be detected
 	* @returns {*} Either the parsed expression in the desired format(s) or the fallback
 	*/
-	$eval.asObject = function(subject, options) {
+	asObject(subject, options) {
 		var settings = {
 			wantObject: true,
 			wantArray: true,
@@ -84,7 +82,7 @@ module.exports = function() {
 		} else {
 			return settings.fallback;
 		}
-	}
+	},
 
 
 	/**
@@ -93,7 +91,7 @@ module.exports = function() {
 	* @param {string} input HanSON compatible string
 	* @returns {string} A JSON string
 	*/
-	$eval.hansonParse = input => {
+	hansonParse(input) {
 		var UNESCAPE_MAP = { '\\"': '"', "\\`": "`", "\\'": "'" };
 		var ML_ESCAPE_MAP = {'\n': '\\n', "\r": '\\r', "\t": '\\t', '"': '\\"'};
 		function unescapeQuotes(r) { return UNESCAPE_MAP[r] || r; }
@@ -118,8 +116,6 @@ module.exports = function() {
 		    else
 			return s;
 		});
-	};
-
-	return $eval;
-};
-</service>
+	},
+});
+</script>

@@ -1,3 +1,3 @@
-<endpoint>
+<script lang="js" backend on="endpoints">
 app.use('/assets', app.middleware.express.static(`${app.config.paths.root}/assets`, {fallback: true}));
-</endpoint>
+</script>

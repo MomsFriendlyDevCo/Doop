@@ -1,0 +1,153 @@
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+
+/**
+* Return a collection of available database collections
+* @returns {array<Object>} Available collections
+*/
+app.get('/api/db', app.middleware.express.hasPermission('debug'), (req, res) => {
+	res.send(_(db)
+		.pickBy((collection, name) => !name.startsWith('_') && _.isFunction(collection.findById)) // Filter out private collections
+		.map((v, k) => ({
+			_id: k,
+			title: _.camelCase(k),
+		}))
+		.sortBy('title')
+		.slice(req.query.skip || 0, req.query.limit || 0 + req.query.skip || 30)
+		.value()
+	)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+
+/**
+* Return a count of available database collections
+* @returns {Object<{count: Number}>} A single number return for the count of collections
+*/
+app.get('/api/db/count', app.middleware.express.hasPermission('debug'), (req, res) => {
+	res.send({
+		count: _(db)
+			.pickBy((collection, name) => !name.startsWith('_') && _.isFunction(collection.findById))
+			.keys()
+			.value()
+			.length,
+	});
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+
+/**
+* Return all matching documents from a collection (excluding private fields)
+* NOTE: By default this shows only the top level key=vals and ignores arrays and non-scalars
+* @param {string} req.params.collection The collection to query
+* @param {number} [req.query.limit=30] Documents to limit to, max of 100
+* @returns {array<Object>} Found documents
+*/
+app.get('/api/db/:collection', app.middleware.express.hasPermission('debug'), (req, res) => {
+	if (!db[req.params.collection]) return res.sendError('404: Collection not found');
+	if (req.query.limit > 100) return res.sendError('400: Maximum document limit is 100');
+
+	var includeTypes = ['string', 'number', 'date', 'boolean']; // Field types to return
+
+	db[req.params.collection].meta()
+		.then(meta => db[req.params.collection].find(_.omit(req.query, ['limit', 'sort', 'skip']))
+			.skip(Number(req.query.skip || 0))
+			.limit(Number(req.query.limit || 30))
+			.sort(req.query.sort)
+			.lean()
+			.then(docs => ({docs, meta}))
+		)
+		.then(({docs, meta}) => docs.map(doc =>
+			_.pickBy(doc, (v, k) =>
+				k == '_id' // Always include _id
+				|| (
+					!k.startsWith('_') // Exclude '_' prefixed fields
+					&& meta[k] // Exclude complex paths
+					&& includeTypes.includes(meta[k].type)
+				)
+			)
+		))
+		.then(docs => res.send(docs))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Return a total count for all documents within a given collection
+* @param {string} req.params.collection The collection to query
+* @returns {array<Object>} Available collections
+*/
+app.get('/api/db/:collection/count', app.middleware.express.hasPermission('debug'), (req, res) => {
+	if (!db[req.params.collection]) return res.sendError('404: Collection not found');
+
+	db[req.params.collection].count()
+		.then(count => res.send({count}))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Return meta data about a collection
+* @param {string} req.params.collection The collection to query
+* @returns {array<Object>} Available collections
+*/
+app.get('/api/db/:collection/meta', app.middleware.express.hasPermission('debug'), (req, res) => {
+	if (!db[req.params.collection]) return res.sendError('404: Collection not found');
+
+	db[req.params.collection].meta({$indexes: true})
+		.then(meta => res.send(meta))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+
+/**
+* Return a single document by its collection + id
+* @param {string} req.params.collection The collection to query
+* @returns {Object} The document to edit
+*/
+app.get('/api/db/:collection/:id', app.middleware.express.hasPermission('debug'), (req, res) => {
+	if (!db[req.params.collection]) return res.sendError('404: Collection not found');
+
+	db[req.params.collection].findOne({_id: req.params.id})
+		.lean()
+		.orFail()
+		.then(doc => _.omitBy(doc, (v, k) => k != '_id' && k.startsWith('_'))) // Omit private fields
+		.then(doc => res.send(doc))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Save a single document by its collection + id
+* @param {string} req.params.collection The collection to query
+* @param {string} req.params.id The document ID to save
+* @param {Object} req.body Body object to patch
+* @returns {Object} The new document state
+*/
+app.post('/api/db/:collection/:id', app.middleware.express.hasPermission('debug'), (req, res) => {
+	if (!db[req.params.collection]) return res.sendError('404: Collection not found');
+
+	db[req.params.collection].findOne({_id: req.params.id})
+		.orFail()
+		.then(doc => Object.assign(doc, doc.body))
+		.then(doc => doc.save())
+		.then(doc => res.send(doc))
+		.catch(res.sendError)
+});
+</script>

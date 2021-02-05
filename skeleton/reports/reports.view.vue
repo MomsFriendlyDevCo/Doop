@@ -1,10 +1,11 @@
-<component name="reportsView">
+<script lang="js" frontend>
+
 /**
 * Display report
 * @param {Object} foo ???
 *
 */
-module.exports = {
+app.component({
 	route: '/reports/:id',
 	data() { return {
 		data: undefined,
@@ -48,8 +49,8 @@ module.exports = {
 		this.$sitemap.setTitle(this.$route.params.id);
 		return this.refresh();
 	}
-};
-</component>
+});
+</script>
 
 <template name="reportsView">
 	<div class="reports-view">

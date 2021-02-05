@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 var promisify = require('util').promisify;
 /**
 * Accept a user token to perform an immediate login
@@ -7,9 +7,9 @@ var promisify = require('util').promisify;
 // TODO: Could be more universal if `/go/:type/:token` was able to lookup a redirect URL also.
 app.get('/go/login/:token', (req, res) => {
 	app.db.users.findOne({
+		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'login', // Restrict the token usage to users requesting logins only
-		//$errNotFound: false,
 	})
 		.then(user => user || Promise.reject('Login token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
@@ -17,9 +17,9 @@ app.get('/go/login/:token', (req, res) => {
 		.then(()=> res.redirect('/'))
 		.catch(e => res.sendError(403, e.toString()))
 });
-</endpoint>
+</script>
 
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 
 app.post([
@@ -38,13 +38,12 @@ app.post([
 		// Fetch user and verify password {{{
 		.then(()=> app.log('Check login for', req.body.username))
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false,
+			//$errNotFound: false, // Monoxide
 			$or: [
 				{email: req.body.username},
 				{username: req.body.username},
 			],
 		}))
-		// FIXME: User enumeration
 		.then(user => user || Promise.reject('403: Unknown user'))
 		.then(user => user.checkPassword(req.body.password)
 			.then(res => !res && Promise.reject('403: Invalid password'))
@@ -63,4 +62,4 @@ app.post([
 		.catch(res.sendError)
 		// }}}
 );
-</endpoint>
+</script>

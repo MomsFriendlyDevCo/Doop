@@ -1,8 +1,8 @@
-<script>
+<script lang="js" frontend>
 var methods = {}; // Method's to glue onto vm.$emit
 
 /**
-* Extend the base Vue.prototype.$emit with Vue.prototype.$emit.broadcast()
+* Extend the base app.vue.prototye.$emit with app.vue.prototye.$emit.broadcast()
 * This is effectively the same as an $emit.down from the root node
 * NOTE: This also broadcasts to app.vue
 * @param {string} msg The name of the event to emit
@@ -15,7 +15,7 @@ app.broadcast = methods.broadcast = (msg, ...payload) => {
 
 
 /**
-* Extend the base Vue.prototype.$emit with Vue.prototype.$emit.down() which recurses though all children emitting a message
+* Extend the base app.vue.prototye.$emit with app.vue.prototye.$emit.down() which recurses though all children emitting a message
 * NOTE: This does not include the current component level, only the children
 * @param {string} msg The name of the event to emit
 * @param {*} [payload...] The payload of the event
@@ -32,7 +32,7 @@ methods.down = function(msg, ...payload) {
 
 
 /**
-* Extend the base methods.$emit with Vue.prototype.$emit.up() which recurses though all parents emitting a message
+* Extend the base methods.$emit with app.vue.prototye.$emit.up() which recurses though all parents emitting a message
 * NOTE: This does not include the current component level, only the parents
 * @param {string} msg The name of the event to emit
 * @param {*} [payload...] The payload of the event
@@ -51,7 +51,7 @@ methods.up = function(msg, ...payload) {
 
 
 /**
-* Extend the base Vue.prototype.$emit with promise support
+* Extend the base app.vue.prototye.$emit with promise support
 * Any function returning a promise will be waited on
 * NOTE: As of 2019-07-10 (Vue 2.6.10) it is not possible to glue this as vm.$emit.promise for some reason, maybe one day this will change
 * @param {string} msg The name of the event to emit
@@ -139,7 +139,7 @@ methods.unschedule = function(msgs) {
 };
 
 
-Vue.mixin({
+app.mixin({
 	beforeCreate() {
 		this.$emit = this.$emit.bind(this); // Rebind $emit to this vm so we get the right context
 

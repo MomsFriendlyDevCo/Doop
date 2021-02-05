@@ -6,8 +6,13 @@
 var _ = require('lodash');
 var domain = require('domain');
 var gulp = require('@momsfriendlydevco/gulpy'); // Force gulpy as regular gulp is weird when forced to run tasks out-of-sequence
+var nodemon = require('nodemon');
 var spawn = require('child_process').spawn;
 var watch = require('chokidar').watch;
+var throttleTimeout = 1000; // How long to wait before firing a rebuild again - prevents multiple file updates launching multiple rebuilds simultaneously
+var throttleOptions = {leading: true, trailing: false};
+
+var procRunningCount = 0;
 
 /**
 * Launch a server and watch the local file system for changes (restarting the server if any are detected)
@@ -25,74 +30,45 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 	});
 
 	watchDomain.run(()=> {
-		var runCount = 0;
+		// Server process (Nodemon instance) {{{
+		var isQuitting = false;
 
-		// Server process {{{
-		var lastBoot;
-		var isRunning = false;
-		var isRestarting = false;
-		var serverProcess;
+		// Gulp manages file changes so specify an invalid extension so nodemon doesn't actually watch anything valid
+		var serverProcess = nodemon(`--ext FAKEFILE '${app.config.paths.root}/server/index.js'`)
+			.once('start', ()=> finish())
+			.on('start', ()=> app.log(app.log.colors.bgGreen('FIXME:NODEMON'), 'start'))
+			.on('crash', ()=> !isQuitting && app.log.warn(app.log.colors.bgGreen('FIXME:NODEMON'), 'Server has crashed'))
+			.on('restart', files => app.log(app.log.colors.bgGreen('FIXME:NODEMON'), 'Server restarting', {files}))
+			.on('exit', ()=> {
+				if (!isQuitting && app.config.isProduction) {
+					app.log.warn('Server exited cleanly - but its not supposed to ever exit, forcing restart');
+					serverProcess.emit('restart');
+				}
+			})
 
-		/**
-		* Boot the server process in a seperate thread
-		* @param {boolean} [forceRestart=false] If false the server is started if its not already, true force restarts
-		* @returns {Promise} A promise representing the restart / server check status
-		*/
-		var bootServerProcess = (forceRestart = false) =>
-			!forceRestart && isRunning // Only check and server is already running
-				? Promise.resolve
-				: Promise.resolve()
-					.then(()=> new Promise((resolve, reject) => {
-						if (!serverProcess) return resolve();
 
-						isRestarting = true;
-						gulp.log('Restarting server process', runCount++ > 0 ? `Restart #${runCount}` : '');
-						serverProcess.kill()
-						serverProcess.on('close', ()=> {
-							resolve();
-							isRestarting = false;
-						});
-					}))
-					.then(()=> {
-						gulp.log('Booting server process');
-						lastBoot = Date.now();
-						isRunning = true;
-						serverProcess = spawn('node', [`${app.config.paths.root}/server/index.js`], {stdio: 'inherit'});
-						serverProcess.on('close', code => {
-							isRunning = false;
-							if (isRestarting) {
-								gulp.log('Server closed but is restarting', code);
-								return;
-							}
-							gulp.log('Server process exited with error code', code);
-							serverProcess = null;
-
-							if (code != 0 && Date.now() - lastBoot < 3000) {
-								gulp.log('Last reboot was only', gulp.colors.cyan(_.round((Date.now() - lastBoot) / 1000, 1) + 's'), 'ago. Waiting until a file changes...');
-							} else {
-								setTimeout(bootServerProcess, 1000);
-							}
-						});
-					});
+		process.on('SIGINT', ()=> {
+			gulp.log('Closing server process due to SIGTERM');
+			process.exit(1);
+		});
 
 		process.on('beforeExit', ()=> {
 			gulp.log('Closing server process');
-			serverProcess.kill()
+			isQuitting = true;
+			serverProcess.emit('quit');
 		});
 		// }}}
 
 		// Frontend rebuild {{{
-		watch([
-			'**/*.css',
-			'**/*.vue',
-			'vendors/vue.*.js',
-		], {
+		var throttledRebuild =
+		watch('**/*.vue', {
 			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
-		}).on('all', file => {
+			awaitWriteFinish: true,
+		}).on('all', _.throttle(file => {
 			gulp.log('Rebuild Vue + Parcel files...');
-			gulp.run('build.css', ['build.vue', 'build.repack'], ()=> bootServerProcess(false));
-		});
+			gulp.run('build.vue', ()=> serverProcess.emit('restart'));
+		}, throttleTimeout, throttleOptions));
 		// }}}
 
 		// Backend rebuild (server process restart) {{{
@@ -105,10 +81,10 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		], {
 			ignored: ['build/**/*', 'data/**/*', 'dist/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
-		}).on('all', (e, path) => {
+		}).on('all', _.throttle((e, path) => {
 			gulp.log('Rebuild backend hook / layout / path files...');
-			bootServerProcess(true);
-		});
+			serverProcess.emit('restart');
+		}, throttleTimeout, throttleOptions));
 
 		watch('package.json').on('change', ()=> {
 			gulp.log('Check NPM installs...');
@@ -118,10 +94,10 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		watch([
 			'config/*.conf.js',
 			'services/config.vue',
-		], {ignoreInitial: true}).on('all', (e, path) => {
+		], {ignoreInitial: true}).on('all', _.throttle((e, path) => {
 			gulp.log('Rebuild config service...');
-			gulp.run('build.vue', ()=> bootServerProcess(false));
-		});
+			gulp.run('build.vue', ()=> serverProcess.emit('restart'));
+		}, throttleTimeout, throttleOptions));
 
 		if (app.config.gulp.watchModules) {
 			gulp.log('Watching node_modules...');
@@ -130,23 +106,21 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 				...app.config.gulp.watchModulesInclude,
 			], {
 				ignoreInitial: true,
-			}).on('all', ()=> {
+			}).on('all', _.throttle(()=> {
 				gulp.log('Node_modules has changed, Rebuild Vendors...');
-				gulp.run('build.vendors.main', ()=> bootServerProcess(true));
-			});
+				gulp.run('build.vendors.main', ()=> serverProcess.emit('restart'));
+			}, throttleTimeout, throttleOptions));
 		}
 
 		if (app.config.gulp.watchVendors) {
 			gulp.log('Watching vendors...');
 			watch(require(`${app.config.paths.root}/vendors/vendors.js`).main, {
 				ignoreInitial: true,
-			}).on('all', ()=> {
+			}).on('all', _.throttle(()=> {
 				gulp.log('Vendors file has changed, Rebuild Vendors...');
-				gulp.run('build.vendors.main', ()=> bootServerProcess(false));
-			});
+				gulp.run('build.vendors.main', ()=> serverProcess.emit('restart'));
+			}, throttleTimeout, throttleOptions));
 		}
 		// }}}
-
-		bootServerProcess(true);
 	});
 });

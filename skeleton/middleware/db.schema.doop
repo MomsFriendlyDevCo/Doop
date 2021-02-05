@@ -1,4 +1,4 @@
-<server on="middleware, dbMiddleware">
+<script lang="js" backend on="middleware, dbMiddleware">
 /**
 * Wrapper for the schema function
 */
@@ -6,4 +6,4 @@
 var mongoosy = require('@momsfriendlydevco/mongoosy');
 
 app.middleware.db.schema = mongoosy.schema.bind(mongoosy);
-</server>
+</script>

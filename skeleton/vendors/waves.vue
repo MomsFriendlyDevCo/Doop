@@ -1,16 +1,13 @@
-<script repack>
+<script lang="js" frontend>
 import Waves from 'node-waves';
-global.Waves = Waves;
-</script>
 
-<script>
 /**
 * Inject the material design waves effect to all things that look like buttons
 * Requires 'node-waves' NPM
 */
 app.ready.then(()=>
 	app.router.afterEach((to, from) =>
-		Vue.nextTick(()=> {
+		app.nextTick(()=> {
 			// NOTE: All the below attachment rules assumes `waves-effect` is applied anyway
 			$('.btn').addClass('waves-effect');
 			$('.btn-circle, .btn-ellipsis').addClass('waves-circle');

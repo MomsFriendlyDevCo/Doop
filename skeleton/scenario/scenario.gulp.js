@@ -28,13 +28,6 @@ gulp.task('scenario', 'db:nuke', 'load:app.db', ()=> {
 			connection: mongoosy.connection,
 			getModels: ()=> Object.keys(app.db),
 			getCollection: collection => app.db[collection],
-			/*
-			// FIXME: Not needed with mongoosy?
-			getCollectionSchema: collection => {
-				if (!app.db[collection]) throw new Error('Scenario failed attempting to populate unknown database collection: ' + collection);
-				return app.db[collection].$mongooseModel.schema;
-			},
-			*/
 		}))
 		.on('error', err => finish('Error loading scenario:' + err.toString()));
 });

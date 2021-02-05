@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/invite',
 	data() { return {
 		data: {
@@ -7,7 +7,10 @@ module.exports = {
 			email: undefined,
 			name: undefined,
 			username: undefined,
+			type: undefined,
 		},
+		userTypes: [],
+		/* MG2 implementation {{{
 		spec: {
 			type: 'mgContainer',
 			layout: 'card',
@@ -33,8 +36,17 @@ module.exports = {
 				},
 			]
 		},
+		}}} */
 	}},
 	methods: {
+		refresh() {
+			return Promise.resolve()
+				.then(()=> this.$loader.start())
+				.then(()=> this.$http.get('/api/users/types'))
+				.then(res => this.userTypes = res.data)
+				.catch(this.$toast.catch)
+				.finally(()=> this.$loader.stop());
+		},
 		submit(notification = false, redirect = false) {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
@@ -48,27 +60,77 @@ module.exports = {
 	},
 	created() {
 		this.$debugging = true;
+		// TODO: Throw a 404 when user does not have permission
+		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
-	<form v-permissions="'usersInvite'" class="form-horizontal" @submit.prevent="submit(true, true)">
+	<form class="form-horizontal" @submit.prevent="submit(true, true)">
 		<div class="btn-group-float">
 			<button
+				v-if="$session.hasPermission('usersInvite')"
 				v-tooltip="'Send invite'"
 				type="submit"
 				class="btn btn-icon btn-lg btn-circle btn-success"
 				><i class="fa fa-check" /></button>
 		</div>
 
-		<mg-form
+		<!--mg-form
 			:config="$data.spec"
 			:data="$data.data"
 			@changeItem="$setPath($data.data, $event.path, $event.value)"
-		/>
+		/-->
 
-		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
+		<!-- Card: User information {{{ -->
+		<div class="card">
+			<div class="card-header">User information</div>
+			<div class="card-body">
+				<div class="form-group row">
+					<label class="col-4 col-form-label">Email</label>
+					<div class="col-8 col-form-label">
+						<input
+							v-model="data.email"
+							type="email"
+							class="form-control"
+							data-lpignore="true"
+							autocomplete="off"
+							required
+							autofocus
+						/>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-4 col-form-label">Name (optional)</label>
+					<div class="col-8 col-form-label">
+						<input
+							v-model="data.name"
+							type="text"
+							class="form-control"
+							data-lpignore="true"
+							autocomplete="off"
+							@keyup.enter="submit(true, false)"
+						/>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-4 col-form-label">Type</label>
+					<div class="col-8 col-form-label">
+						<select
+							v-model="data.type"
+							class="form-control"
+							required
+							>
+							<option v-for="(type, idx) in userTypes" :value="type" :key="idx">{{ type }}</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- }}} -->
+
+		<div v-if="this.$debugging && $session.hasPermission('debug')" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

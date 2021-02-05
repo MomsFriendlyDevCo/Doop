@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 var async = require('async-chainable');
 var colors = require('chalk');
@@ -103,4 +103,4 @@ app.get('/api/users/:user/avatar', function(req, res) {
 		})
 		// }}}
 });
-</endpoint>
+</script>

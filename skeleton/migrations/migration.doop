@@ -1,11 +1,12 @@
-<schema>
+<script lang="js" backend schema>
 app.middleware.db.schema('doopMigrations', {
-	created: {type: Date, edfault: ()=> new Date()},
+	created: {type: Date, default: ()=> new Date()},
 	ref: {type: String, index: {unique: true}},
 });
-</schema>
+</script>
 
-<server on="init, essencial">
+
+<script lang="js" backend on="init, essencial">
 /**
 * Database script migration functionality
 *
@@ -53,7 +54,7 @@ app.migration = function(id, title, options, handler) {
 	if (
 		!app.config.mongo.migration // Migration is disabled
 		|| app.migration.migrationsApplied.has(id) // Already applied
-	) return;  // Ignore this migration listing
+	) return app.log.debug('Skip migration', id);  // Ignore this migration listing
 
 
 	if (!app.migration.applyManual && settings.manual) {
@@ -114,9 +115,10 @@ app.migration.markMigration = id => Promise.resolve()
 * @property {function} handler The handler async function to call
 */
 app.migration.migrations = [];
-</server>
+</script>
 
-<server on="preEndpoints">
+
+<script lang="js" backend on="preEndpoints">
 /**
 * Apply all migrations (if any)
 */
@@ -125,7 +127,8 @@ var async = require('async-chainable');
 
 return Promise.resolve()
 	.then(()=> app.migration.init())
-	.then(()=> app.log(app.migration.migrationsApplied.size, 'migrations already applied'))
+	.then(()=> app.log.debug('Migrations applied:', Array.from(app.migration.migrationsApplied).join(', ')))
+	.then(()=> app.log(app.log.colors.cyan(app.migration.migrationsApplied.size), 'migrations present'))
 	.then(()=> app.emit('migrations'))
 	.then(()=> {
 		if (!app.config.mongo.migration || !app.migration.migrations.length) return; // Nothing to do
@@ -153,4 +156,4 @@ return Promise.resolve()
 			.end()
 			.promise()
 	})
-</server>
+</script>

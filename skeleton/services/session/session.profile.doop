@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 var crypto = require('crypto');
 
@@ -37,4 +37,4 @@ app.post('/api/session', (req, res) => {
 	req.user.save()
 		.then(()=> res.sendStatus(200));
 });
-</endpoint>
+</script>

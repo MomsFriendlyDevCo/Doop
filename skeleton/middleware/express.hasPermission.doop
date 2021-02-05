@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Middleware layer to resolve a task only if a given set of permissions resolve
 * @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
@@ -29,4 +29,4 @@ app.middleware.express.hasPermission = (permission, handler = app.utils.permissi
 app.middleware.express.hasPermission.any = permission => {
 	return app.middleware.express.hasPermission(permission, app.utils.permissions.has.any);
 };
-</server>
+</script>

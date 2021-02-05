@@ -14,7 +14,7 @@ Promise.resolve()
 	// Load app core {{{
 	.then(()=> {
 		debug('load app core')
-		require('../app');
+		require('../app/app.backend');
 	})
 	// }}}
 	// Initialize all .doop files {{{

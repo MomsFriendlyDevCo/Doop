@@ -1,4 +1,4 @@
-<script repack>
+<script lang="js" frontend>
 // FIXME: This means we're loading jQuery twice, and potentially others.
 // jQuery 3.5.1
 // Bootstrap v4.5.2

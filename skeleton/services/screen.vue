@@ -1,4 +1,4 @@
-<service singleton>
+<script lang="js" frontend>
 /**
 * Service which guesses the screen display area based on window.resize events
 * This service returns a number of simple variables such as:
@@ -11,8 +11,8 @@
 *
 * In addition the body class `screen-{xs,sm,mg,lg}` is also added
 */
-module.exports = function() {
-	var $screen = this;
+app.service('$screen', function() {
+	var $screen = {};
 
 	$screen.isXS;
 	$screen.isSM;
@@ -22,13 +22,13 @@ module.exports = function() {
 
 	$screen.recalculate = ()=> {
 		var width = $(document).width();
-		Vue.set($screen, 'isXS', width <= 576);
-		Vue.set($screen, 'isSM', width > 576 && width < 768);
-		Vue.set($screen, 'isMD', width > 768 && width < 1200);
-		Vue.set($screen, 'isLG', width >= 1200);
-		Vue.set($screen, 'isMobile', $screen.isXS);
-		Vue.set($screen, 'isTablet', $screen.isSM || $screen.isMD || $screen.isLG);
-		Vue.set($screen, 'isDesktop', $screen.isLG);
+		app.set($screen, 'isXS', width <= 576);
+		app.set($screen, 'isSM', width > 576 && width < 768);
+		app.set($screen, 'isMD', width > 768 && width < 1200);
+		app.set($screen, 'isLG', width >= 1200);
+		app.set($screen, 'isMobile', $screen.isXS);
+		app.set($screen, 'isTablet', $screen.isSM || $screen.isMD || $screen.isLG);
+		app.set($screen, 'isDesktop', $screen.isLG);
 
 		var newSize =
 			$screen.isXS ? 'xs'
@@ -37,7 +37,7 @@ module.exports = function() {
 			: 'lg';
 
 		if (newSize != $screen.size) {
-			Vue.set($screen, 'size', newSize);
+			app.set($screen, 'size', newSize);
 			app.ready.then(()=> app.broadcast('$screen.resize', $screen.size));
 		}
 
@@ -52,5 +52,5 @@ module.exports = function() {
 	app.ready.then(()=> $screen.recalculate()); // Trigger initial calculation
 
 	return $screen;
-};
-</service>
+});
+</script>

@@ -9,7 +9,7 @@ gulp.task.once('load:app.git', 'load:app', ()=>
 	git.current()
 		.then(res => {
 			app.git = git;
-			app.git.current = res;
+			app.git.current = res; // Work out current hash for ease of reference and glue it into app.git.current
 		})
 );
 

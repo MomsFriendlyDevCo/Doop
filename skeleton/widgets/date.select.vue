@@ -1,10 +1,8 @@
-<script repack>
-import 'luxon';
+<script lang="js" frontend>
 import {Datetime} from 'vue-datetime';
-import './node_modules/vue-datetime/dist/vue-datetime.css';
-</script>
+import '/node_modules/vue-datetime/dist/vue-datetime.css';
+import moment from 'moment';
 
-<component>
 /**
 * Show a user editable data/time selectable widget
 * @param {Date|number|string} [date] The intial date value, can be any processable Moment expression or a Unix timestamp (number or string)
@@ -16,7 +14,7 @@ import './node_modules/vue-datetime/dist/vue-datetime.css';
 *
 * @emits change Emitted as (output) where the output format is determined by `outputFormat`
 */
-module.exports = {
+app.component('dateSelect', {
 	props: {
 		date: [Date, Number, String], // Date may be also be blank
 		outputFormat: {type: String, default: 'date'},
@@ -28,6 +26,9 @@ module.exports = {
 	data() { return {
 		value: '',
 	}},
+	components: {
+		datetime: Datetime,
+	},
 	methods: {
 		changeHandler(newVal) {
 			var outMoment = moment(newVal);
@@ -67,8 +68,8 @@ module.exports = {
 			},
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="date-select btn btn-light">

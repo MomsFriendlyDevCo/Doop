@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/users/:id',
 	data() { return {
 		data: undefined,
@@ -71,8 +71,8 @@ module.exports = {
 		this.$sitemap.setTitle('');
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form class="form-horizontal" @submit.prevent="save(true, true)">

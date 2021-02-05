@@ -1,4 +1,4 @@
-<server on="init, dbInit">
+<script lang="js" backend on="init, dbInit">
 var os = require('os');
 var exec = require('@momsfriendlydevco/exec');
 var readable = require('@momsfriendlydevco/readable');
@@ -52,4 +52,4 @@ app.utils.sanity.diskSpace = (path, minPercent = 10) => {
 			}
 		});
 };
-</server>
+</script>

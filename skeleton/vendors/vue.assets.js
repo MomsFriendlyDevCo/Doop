@@ -37,14 +37,6 @@ Vue.assets = {
 
 
 	/**
-	* Init a MacGyver component
-	* @alias Vue.mgComponent
-	* @returns {VueComponent}
-	*/
-	macgyver: (id, config) => Vue.mgComponent(id, config),
-
-
-	/**
 	* Thin wrapper around Vue.directive() that may add some extra magic in the future
 	* @alias Vue.directive
 	* @returns {VueDirective}
@@ -117,6 +109,14 @@ Vue.assets = {
 
 		Vue.assets.$assets.templates[id] = template;
 	},
+
+
+	/**
+	* Register a MacGyver widget
+	* @param {string} id The name of the MacGyver widget to register
+	* @param {string} config The MacGyver widget to register
+	*/
+	macgyver: (id, config) => Vue.assets.$assets.macgyver[id] = config,
 };
 
 /**

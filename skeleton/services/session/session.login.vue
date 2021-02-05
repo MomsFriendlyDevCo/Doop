@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/login',
 	data: ()=> ({
 		data: {
@@ -36,14 +36,15 @@ module.exports = {
 	// Bind special Login styles
 	beforeCreate: ()=> $('body').addClass('minimal').removeClass('bootstrapping'),
 	destroyed: ()=> $('body').removeClass('minimal'),
-};
-</component>
+});
+</script>
 
 <template>
 	<div>
-		<splash-solid background="white"/>
-		<splash-substrate
-			stroke-color="#83d3f5"
+		<splash-popsquares
+			:colors="['#e5d5ca', '#eadacf', '#f5e5da']"
+			duration="5s"
+			background="#faeadf"
 		/>
 		<div class="container-fluid session-float">
 			<div class="row d-flex justify-content-center">
@@ -84,3 +85,33 @@ module.exports = {
 		</div>
 	</div>
 </template>
+
+<style>
+.session-float {
+	z-index: 150; /* Appear on top of particles splash screen */
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	overflow: auto;
+}
+
+.session-float .card {
+	box-shadow: 0 1px 20px 0 rgba(69,90,100,.8);
+}
+
+.session-float .card {
+	border-radius: 5px;
+}
+
+.session-float .logo {
+	width: 50vh;
+	margin-top: 5vh;
+	margin-bottom: 5vh;
+}
+
+.session-float .footer {
+	z-index: 1000;
+}
+</style>

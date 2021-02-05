@@ -1,3 +1,3 @@
-<filter>
-module.exports = value => _.startCase(value);
-</filter>
+<script lang="js" frontend>
+app.filter('startCase', value => _.startCase(value))
+</script>

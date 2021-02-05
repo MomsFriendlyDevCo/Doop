@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/debug/agents',
 	methods: {
 		action(id, type) {
@@ -20,8 +20,8 @@ module.exports = {
 				.finally(()=> this.$loader.stop());
 		},
 	}
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

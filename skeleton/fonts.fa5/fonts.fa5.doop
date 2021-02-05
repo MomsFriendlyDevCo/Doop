@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 
 /**
@@ -28,4 +28,4 @@ _.chain(require(`${app.config.paths.root}/fonts.fa5/fa-pro/metadata/icons.json`)
 	}))
 	.tap(v => app.get('/api/webfonts/fa.json', (req, res) => res.send(v)))
 	.value();
-</endpoint>
+</script>

@@ -1,4 +1,4 @@
-<server on="preInit">
+<script lang="js" backend on="preInit">
 /**
 * Loader for Winston + Papertrail logging
 */
@@ -35,63 +35,36 @@ var doopLogFormat = winston.format(info => {
 	return info;
 });
 
-var initWinston = ()=> {
-	var ptTransport = app.config.papertrail.enabled ? new PapertrailTransport({
-		format: doopLogFormat(),
-		maximumAttempts: 1,
-		attemptsBeforeDecay: 1,
-		...app.config.papertrail,
-	}) : null;
 
-	var logger = winston.createLogger({
-		level: 'info',
-		transports: [
-			new winston.transports.Console({ // Add default console logger
-				level: 'info',
+var logger = winston.createLogger({
+	level: 'info',
+	transports: [
+		new winston.transports.Console({ // Add default console logger
+			level: 'info',
+			format: doopLogFormat(),
+		}),
+
+		app.config.papertrail.enabled
+			? new PapertrailTransport({
 				format: doopLogFormat(),
-			}),
+				...app.config.papertrail,
+			})
+			: null,
+	].filter(i => i), // Remove defunct loggers
+});
 
-			ptTransport,
-		].filter(i => i), // Remove defunct loggers
-	});
+// Remap console.* -> logger.*
+Object.assign(console, {
+	isWinston: true,
+	logRaw: console.log,
+	log: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	info: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	warn: (...msg) => logger.log('warn', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	error: (...msg) => logger.log('error', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+});
 
-	// Remap console.* -> logger.*
-	Object.assign(console, {
-		isWinston: true,
-		logRaw: console.log,
-		log: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-		info: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-		warn: (...msg) => logger.log('warn', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-		error: (...msg) => logger.log('error', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-	});
-
-	app.refresh.log(); // Reload main loggers
-
-	if (ptTransport) {
-		// Monkey-punch in a replacement error handler as the built-in doesn't ever seem to stop trying to connect
-		var tryCount = 0;
-		var maxTries = 3;
-		ptTransport.connection.onErroredOriginal = ptTransport.connection.onErrored; // Backup old error handler
-		ptTransport.connection.onErrored = function(err) {
-			app.log.warn.as('Papertrail', 'Connection error:', err.toString(), 'on attempt', ++tryCount, '/', maxTries);
-			if (tryCount < maxTries) {
-				return ptTransport.connection.onErroredOriginal(err);
-			} else { // Exhausted retries
-				app.log.warn.as('Papertrail', app.log.colors.bold.red('Papertrail faulted - disabling!'));
-				ptTransport.connection.close();
-				app.config.papertrail.enabled = false;
-				initWinston();
-			}
-		};
-
-		// Disable stupid error handler which does nothing anyway
-		ptTransport.connection.emitSilentError = ()=> {};
-	}
-};
-
-initWinston();
-
+app.refresh.log(); // Reload main loggers
 
 // Add Papertrail if its enabled
 if (app.config.papertrail.enabled) app.log('Registered with Papertail as', app.log.colors.cyan(app.config.papertrail.hostname), '/', app.log.colors.cyan(app.config.papertrail.program || 'no program'));
-</server>
+</script>

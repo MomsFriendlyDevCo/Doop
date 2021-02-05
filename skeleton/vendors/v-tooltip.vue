@@ -1,6 +1,8 @@
-<script repack>
-import {VTooltip} from 'v-tooltip';
-Vue.component('v-tooltip', VTooltip);
+<script lang="js" frontend>
+import {VTooltip, VPopover} from 'v-tooltip';
+
+app.directive('v-tooltip', VTooltip);
+app.component('v-popover', VPopover);
 </script>
 
 <style>

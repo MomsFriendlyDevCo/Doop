@@ -1,4 +1,4 @@
-<server on="middleware, dbMiddleware">
+<script lang="js" backend on="middleware, dbMiddleware">
 var _ = require('lodash');
 
 /**
@@ -36,4 +36,4 @@ app.middleware.db.replace = (schema, options) => {
 			.then(res => { if (res) Object.assign(this, res) }) // Replace entire doc if truthy
 	});
 };
-</server>
+</script>

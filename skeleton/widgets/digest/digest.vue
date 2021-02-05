@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Extremely simple component which fetches a single point of data from the server and displays it
 * EITHER the collection + ID OR the url must be specified
@@ -46,7 +46,7 @@
 *   </template>
 * </digest>
 */
-module.exports = {
+app.component('digest', {
 	data: ()=> ({
 		data: undefined,
 		displayContent: '',
@@ -87,7 +87,7 @@ module.exports = {
 							: typeof this.$props.textValid == 'function' ? this.$props.textValid(value)
 							: value;
 
-						if (this.$props.filter) this.displayContent = Vue.filter(this.$props.filter)(this.displayContent);
+						if (this.$props.filter) this.displayContent = app.filter(this.$props.filter)(this.displayContent);
 
 						this.displayIcon = this.$props.iconValid;
 						if (this.$props.classValid) this.displayClass = this.$props.classValid;
@@ -150,8 +150,8 @@ module.exports = {
 			this.refresh();
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="digest">
@@ -173,8 +173,8 @@ module.exports = {
 }
 </style>
 
-<service singleton>
-module.exports = function() {
+<script lang="js" frontend>
+app.service('$digest', function() {
 	var $digest = this;
 
 	$digest.settings = {
@@ -335,5 +335,5 @@ module.exports = function() {
 
 
 	return $digest;
-};
-</service>
+});
+</script>

@@ -1,4 +1,4 @@
-<server on="middleware, dbMiddleware">
+<script lang="js" backend on="middleware, dbMiddleware">
 var _ = require('lodash');
 var handlebars = require('handlebars');
 var mongoosy = require('@momsfriendlydevco/mongoosy');
@@ -259,4 +259,4 @@ app.middleware.db.codeAlloc = (model, options) => {
 	if (settings.allocateSave) model.hook('save', middlewareHook.bind({operation: 'save'}));
 	if (settings.allocateSave) model.hook('update', middlewareHook.bind({operation: 'update'}));
 };
-</server>
+</script>

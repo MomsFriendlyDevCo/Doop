@@ -1,3 +1,3 @@
-<filter>
-module.exports = value => Number(value || 0).toLocaleString();
-</filter>
+<script lang="js" frontend>
+app.filter('number', value => Number(value || 0).toLocaleString());
+</script>

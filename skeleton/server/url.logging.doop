@@ -1,7 +1,7 @@
-<server on="init">
+<script lang="js" backend on="init">
 var expressLogger = require('express-log-url');
 expressLogger.logger = app.logger.log;
 
 app.set('log.username', req => req.user && req.user.username ? `(@${req.user.username})` : undefined);
 app.use(expressLogger);
-</server>
+</script>

@@ -1,4 +1,4 @@
-<server on="init, dbInit, essencial">
+<script lang="js" backend on="init, dbInit, essencial">
 var colors = require('chalk');
 
 var polyfills = [
@@ -28,4 +28,4 @@ console.log('Injected:',
 		.map(p => colors.cyan(p.id))
 		.join(', ')
 );
-</server>
+</script>

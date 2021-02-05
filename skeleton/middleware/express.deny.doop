@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Express middleware which will always deny any incomming request
 * This is mainly used for debugging
@@ -19,4 +19,4 @@ app.middleware.express.deny = (options) => {
 		return res.sendError(settings.code, settings.text);
 	};
 };
-</server>
+</script>

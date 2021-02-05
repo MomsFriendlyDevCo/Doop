@@ -1,20 +1,18 @@
-<component>
+<script lang="js" frontend>
 /**
 * Draw a simple covering image splash
 * @param {string} url URL image to display
 * @param {string|Object} [imageStyle] Additional CSS styles to apply to the image such as `{filter: 'contrast(0.5)'}`
 */
-module.exports = {
-	data: ()=> ({
-	}),
+app.component('splashImage', {
 	methods: {
 	},
 	props: {
 		url: {type: String, required: true},
 		imageStyle: {type: [String, Object]},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div 

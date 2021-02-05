@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Display a directory layout
 * This can also optionally take a path within the sitemap to auto-populate children
@@ -16,21 +16,21 @@
 * @param {string} [node.icon="fas fa-folder"] The icon to display
 *
 * @example Display a simple directory view based on the sitemap (component only)
-* module.exports = {
+* app.component({
 *   route: '/debug',
 *   template: '<directory :sitemap="true"/>',
-* };
+* });
 
 * @example Display a simple directory view based on the sitemap (template only)
 * <directory :root="{children: widgets}"/>
 */
-module.exports = {
+app.component('directory', {
 	data() { return {
 		node: undefined,
 	}},
 	props: {
 		sitemap: {type: Boolean, default: false},
-		root: {type: Object, default() { return {} }},
+		root: {type: Object, default() { return {} }, minimize: false},
 	},
 	created() {
 		Promise.resolve()
@@ -52,8 +52,8 @@ module.exports = {
 			.finally(()=> this.$loader.stop())
 			.catch(this.$toast.catch)
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div v-if="node" class="directory row">

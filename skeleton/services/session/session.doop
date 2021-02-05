@@ -1,4 +1,4 @@
-<server on="preEndpoints">
+<script lang="js" backend on="preEndpoints">
 // Inject cookie handling middleware
 var cookieParser = require('cookie-parser');
 app.use(cookieParser({
@@ -43,4 +43,4 @@ app.use((req, res, next) => {
 	}
 
 });
-</server>
+</script>

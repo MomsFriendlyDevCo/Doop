@@ -1,34 +1,34 @@
-<endpoint>
+<script lang="js" backend endpoint>
 /**
 * Test response with a 200 response code
 */
 app.all('/api/debug/http/200', function(req, res) {
 	res.send('Everything is ok, relax');
 });
-</endpoint>
+</script>
 
 
-<endpoint>
+<script lang="js" backend endpoint>
 /**
 * Test response with a 403 response code
 */
 app.all('/api/debug/http/403', function(req, res) {
 	res.status(403).send('You are forbidden from doing that. Forbidden I say!');
 });
-</endpoint>
+</script>
 
 
-<endpoint>
+<script lang="js" backend endpoint>
 /**
 * Test response with a 500 response code throwing an intentional error
 */
 app.all('/api/debug/http/500', app.middleware.express.isProduction(false), function(req, res) {
 	throw new Error('Intentional test error');
 });
-</endpoint>
+</script>
 
 
-<endpoint>
+<script lang="js" backend endpoint>
 /**
 * Crash the Node instance
 */
@@ -37,10 +37,10 @@ app.all('/api/debug/crash', app.middleware.express.isProduction(false), function
 		throw new Error('Intentional server crash via /api/debug/crash');
 	}, 10);
 });
-</endpoint>
+</script>
 
 
-<endpoint>
+<script lang="js" backend endpoint>
 /**
 * Dummy file area
 */
@@ -52,10 +52,10 @@ app.all('/api/debug/files/:file?', app.middleware.express.isProduction(false), a
 	query: true,
 	delete: true,
 }));
-</endpoint>
+</script>
 
 
-<endpoint>
+<script lang="js" backend endpoint>
 var crypto = require('crypto');
 
 /**
@@ -69,4 +69,4 @@ app.get('/api/debug/pass', app.middleware.express.isProduction(false), (req, res
 	var hash = crypto.pbkdf2Sync(req.query.pass, saltBuffer, 10000, 64, 'sha512').toString('base64');
 	res.send({salt, hash});
 });
-</endpoint>
+</script>

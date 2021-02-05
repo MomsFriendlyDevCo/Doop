@@ -1,13 +1,15 @@
-<service singleton>
+<script lang="js" frontend>
+import sift from 'sift';
+
 /**
 * Session management service
 *
 * @emits $session.request Called as `(axiosRequest)` when about to submit a HTTP request to /api/session, can be mutated by downstream promise subscribers
 */
-module.exports = function() {
-	var $session = this;
-	$session.$debugging = false;
+app.service('$session', function() {
+	var $session = {};
 
+	this.$debug = this.$debug.new('$session').enable(false);
 	$session.data = {permissions: {}}; // User session data
 	$session.isRefreshed = false; // Have we pinged the server yet
 	$session.isLoggedIn = false; // Whether the user is logged in according to the server
@@ -40,6 +42,7 @@ module.exports = function() {
 
 	/**
 	* Object lookup of stages to perform while bootstrapping
+	* NOTE: Because of weird context reasons all functions need to be arrow-functions so we have access to `this` scoping to `vm`
 	* Rules:
 	* 	- Each stage should call app.vue.$emit.promise('$session.<STAGEID>') during its process
 	* 	- Each stage should call $session.stages.next() on completion to advance
@@ -50,17 +53,17 @@ module.exports = function() {
 		* @param {number} stage The stage to operate from
 		* @returns {Promise} A promise representing the stage load chain
 		*/
-		run(stage) {
+		run: stage => {
 			if ($session.stage >= 3) {
-				$session.$debug('run() REPLACE', $session.stage, 'with', stage, '($session has already settled)');
+				this.$debug('run() REPLACE', $session.stage, 'with', stage, '($session has already settled)');
 				$session.stagePromise = Promise.defer();
 			} else {
-				$session.$debug('run() REVERT', $session.stage, 'to', stage);
+				this.$debug('run() REVERT', $session.stage, 'to', stage);
 			}
 
 			$session.stage = stage - 1;
 			$session.stages.next();
-			$session.stagePromise.promise.finally(()=> $session.$debug('FINALLY!', $session.data));
+			$session.stagePromise.promise.finally(()=> this.$debug('FINALLY!', $session.data));
 			return $session.stagePromise.promise;
 		},
 
@@ -70,8 +73,8 @@ module.exports = function() {
 		* @emits $session.stageChange Emitted as a promise event as `(stageNumber)`
 		* @returns {Promise} A promise representing the stage load chain
 		*/
-		next() {
-			$session.$debug('At stage', $session.stage + 1);
+		next: ()=> {
+			this.$debug('At stage', $session.stage + 1);
 			return app.vue.$emit.promise('$session.stageChange', ++$session.stage)
 				.then(()=> {
 					switch ($session.stage) {
@@ -93,11 +96,11 @@ module.exports = function() {
 		* @emits $session.bootstrap Emitted as a promise event after bootstrap setup
 		* @returns {Promise} A promise which resolves when the stage completes
 		*/
-		bootstrap() {
+		bootstrap: ()=> {
 			return Promise.resolve()
-				.then(()=> $session.$debug('stage', 'bootstrap'))
+				.then(()=> this.$debug('stage', 'bootstrap'))
 				.then(()=> { // Load auth header token if we're in authHeader session preference mode
-					if (!$session.isRefreshed && Vue.services().$config.session.preference == 'authHeader') { // Pull header from localStorage as we're not using cookies
+					if (!$session.isRefreshed && this.$config.session.preference == 'authHeader') { // Pull header from localStorage as we're not using cookies
 						return $session.settings.get('authToken').then(token => {
 							if (token) axios.defaults.headers.Auth = token;
 						});
@@ -114,7 +117,7 @@ module.exports = function() {
 		* @emits $session.request Emitted as a promise event as (axiosRequestObject) before making the Axios request to the server
 		* @returns {Promise} A promise which resolves when the stage completes
 		*/
-		preBootData() {
+		preBootData: ()=> {
 			var requestPrototype = {
 				url: '/api/session',
 				headers: {
@@ -123,15 +126,15 @@ module.exports = function() {
 			};
 
 			return Promise.resolve()
-				.then(()=> $session.$debug('stage', 'preBootData'))
+				.then(()=> this.$debug('stage', 'preBootData'))
 				.then(()=> app.vue.$emit.promise('$session.preBootData'))
 				.then(()=> app.vue.$emit.promise('$session.request', requestPrototype))
 				.then(req => req || requestPrototype) // Did the promise do a complete rewrite or should we use the original?
-				.then(req => Vue.services().$http(req))
+				.then(req => this.$http(req))
 				.then(res => {
-					$session.$debug('$session.data now', JSON.parse(JSON.stringify(res.data)));
+					this.$debug('$session.data now', res.data);
 					if (res.data._id) {
-						$session.data = Vue.prototype.$assign($session.data, {permissions: {}}, res.data)
+						$session.data = this.$assign($session.data, {permissions: {}}, res.data)
 						$session.isLoggedIn = true;
 					} else {
 						$session.isLoggedIn = false;
@@ -144,10 +147,10 @@ module.exports = function() {
 						&& err == 'Network error'
 						&& !$session.isRefreshed
 					) {
-						$session.$debug('Network error during preBootData on first fetch');
+						this.$debug('Network error during preBootData on first fetch');
 						app.crash('Can not connect to the server', showReload=true);
 					} else {
-						$session.$debug('Caught error during preBootData', err);
+						this.$debug('Caught error during preBootData', err);
 						throw err;
 					}
 				})
@@ -159,9 +162,9 @@ module.exports = function() {
 		* @emits $session.postBootData Emitted as a promise event as `($session.data)` after user data has been loaded
 		* @returns {Promise} A promise which resolves when the stage completes
 		*/
-		postBootData() {
+		postBootData: ()=> {
 			return Promise.resolve()
-				.then(()=> $session.$debug('stage', 'postBootData'))
+				.then(()=> this.$debug('stage', 'postBootData'))
 				.then(()=> app.vue.$emit.promise('$session.postBootData', $session.data))
 				.then(()=> $session.stages.next())
 		},
@@ -172,9 +175,9 @@ module.exports = function() {
 		* @emits $session.settled Emitted as a promise event as `($session.data)` after user data has been finalized
 		* @returns {Promise} A promise which resolves when the stage completes
 		*/
-		settled() {
+		settled: ()=> {
 			return Promise.resolve()
-				.then(()=> $session.$debug('stage', 'settled'))
+				.then(()=> this.$debug('stage', 'settled'))
 				.then(()=> app.vue.$emit.promise('$session.settled', $session.data))
 				.then(()=> $session.isSettled = true)
 				.then(()=> {
@@ -198,7 +201,7 @@ module.exports = function() {
 	*
 	* @example Use as a Vue middleware hook
 	* beforeRouteEnter(to, from, next) {
-	*  Vue.services().$session.promise(next);
+	*  this.$session.promise(next);
 	* },
 	*/
 	$session.promise = cb => new Promise((resolve, reject) => {
@@ -208,7 +211,7 @@ module.exports = function() {
 					if (cb) cb();
 				}));
 			} else {
-				$session.$debug('$session.promise not ready yet');
+				this.$debug('$session.promise not ready yet');
 				setTimeout(checkPromise, 10);
 			}
 		};
@@ -231,10 +234,10 @@ module.exports = function() {
 	* @return {Promise} The promise object for the server request
 	*/
 	$session.signup = user => Promise.resolve()
-		.then(()=> Vue.services().$loader.start('$session.signup'))
-		.then(()=> Vue.services().$http.post('/api/session/signup', user))
+		.then(()=> this.$loader.start('$session.signup'))
+		.then(()=> this.$http.post('/api/session/signup', user))
 		.then(()=> $session.$debug('signup done'))
-		.finally(()=> Vue.services().$loader.stop('$session.signup'))
+		.finally(()=> this.$loader.stop('$session.signup'))
 
 
 	/**
@@ -245,17 +248,17 @@ module.exports = function() {
 	* @return {Promise} The promise object for the server request
 	*/
 	$session.login = user => Promise.resolve()
-		.then(()=> Vue.services().$loader.start('$session.login'))
-		.then(()=> Vue.services().$http.post('/api/session/login', user))
+		.then(()=> this.$loader.start('$session.login'))
+		.then(()=> this.$http.post('/api/session/login', user))
 		.then(res => { // Use authHeader method?
-			if (Vue.services().$config.session.preference == 'authHeader' && res.data && res.data.auth) {
+			if (this.$config.session.preference == 'authHeader' && res.data && res.data.auth) {
 				axios.defaults.headers.Auth = res.data.auth;
 				return $session.settings.set('authToken', res.data.auth, 'local');
 			}
 		})
 		.then(()=> $session.stages.run(1)) // Reperform the session fetcher
-		.then(()=> $session.$debug('login done'))
-		.finally(()=> Vue.services().$loader.stop('$session.login'))
+		.then(()=> this.$debug('login done'))
+		.finally(()=> this.$loader.stop('$session.login'))
 
 
 	/**
@@ -264,12 +267,12 @@ module.exports = function() {
 	* @emits $session.reset Emitted when the session is nullified
 	*/
 	$session.logout = ()=> Promise.resolve()
-		.then(()=> Vue.services().$loader.start('$session.logout'))
+		.then(()=> this.$loader.start('$session.logout'))
 		.then(()=> app.vue.$emit.promise('$session.reset'))
 		.then(()=> this.$config.session.preference == 'authHeader' && $session.settings.unset('authToken'))
 		.then(()=> this.$http.post('/api/session/logout'))
-		.then(()=> window.location.reload())
-		.finally(()=> Vue.services().$loader.stop('$session.logout'))
+		.then(()=> window.location = '/')
+		.finally(()=> this.$loader.stop('$session.logout'))
 
 	/**
 	* Attempt to initiate password reset
@@ -278,10 +281,10 @@ module.exports = function() {
 	* @return {Promise} The promise object for the server request
 	*/
 	$session.recover = user => Promise.resolve()
-		.then(()=> Vue.services().$loader.start('$session.recover'))
-		.then(()=> Vue.services().$http.post('/api/session/recover', user))
-		.then(()=> $session.$debug('recover done'))
-		.finally(()=> Vue.services().$loader.stop('$session.recover'))
+		.then(()=> this.$loader.start('$session.recover'))
+		.then(()=> this.$http.post('/api/session/recover', user))
+		.then(()=> this.$debug('recover done'))
+		.finally(()=> this.$loader.stop('$session.recover'))
 
 	// $session.permissions - mirror or app.utils.permissions {{{
 	/**
@@ -355,7 +358,7 @@ module.exports = function() {
 
 	/**
 	* Set a user setting against an optional endpoint
-	* @param {string|Object} key The key to set, can be in dotted notation. If this is an object the entire value is merged
+	* @param {string} key The key to set, can be in dotted notation
 	* @param {*} value The value to store
 	* @param {string} [method='server'] Where to store the setting. ENUM: 'server' (store on the server against user document), 'local' (use localStorage), 'session', (use sessionStorage)
 	* @returns {Promise} A promise which will resolve when the setting has been saved
@@ -363,28 +366,12 @@ module.exports = function() {
 	$session.settings.set = (key, value, method = 'server') => {
 		switch (method) {
 			case 'server':
-				if (_.isPlainObject(key)) {
-					_.merge($session.data.settings, key);
-				} else {
-					_.set($session.data.settings, key, value);
-				}
+				_.set($session.data.settings, key, value);
 				return this.$http.post('/api/session', {
 					settings: this.$session.data.settings,
 				});
-			case 'local':
-				if (_.isPlainObject(key)) {
-					_.forEach(key, (v, k) => localStorage.setItem(k, JSON.stringify(v)));
-				} else {
-					localStorage.setItem(key, JSON.stringify(value));
-				}
-				return Promise.resolve();
-			case 'session':
-				if (_.isPlainObject(key)) {
-					_.forEach(key, (v, k) => sessionStorage.setItem(k, JSON.stringify(v)));
-				} else {
-					sessionStorage.setItem(key, JSON.stringify(value));
-				}
-				return Promise.resolve();
+			case 'local': return Promise.resolve(localStorage.setItem(key, JSON.stringify(value)));
+			case 'session': return Promise.resolve(sessionStorage.setItem(key, JSON.stringify(value)));
 			default: throw new Error(`Unknown setting storage method "${method}"`);
 		}
 	};
@@ -417,59 +404,5 @@ module.exports = function() {
 	});
 
 	return $session;
-};
-</service>
-
-<component>
-module.exports = {
-	route: '/debug/session',
-	data() { return {
-	}},
-};
-</component>
-
-<template>
-	<div class="card">
-		<div class="card-body">
-			<pre>{{$session.data}}</pre>
-		</div>
-	</div>
-</template>
-
-<!-- TODO: user.dropdown used instead? {{{
-<component name="session-menu">
-module.exports = {
-	mounted() {
-		this.$on('$session.update', ()=> this.$forceUpdate());
-	},
-};
-</component>
-
-<template name="session-menu">
-	<li v-if="$session.isLoggedIn" class="pull-right dropdown session-menu">
-		<a data-toggle="dropdown">
-			<div class="username">{{$session.data.name}}</div>
-			<img :src="`/api/session/avatar/${$session.data._id}`" class="img-circle img-user">
-		</a>
-		<ul class="dropdown-menu pull-right">
-			<li><a v-href="{href: '/profile', transition: 'cover-up'}"><i class="far fa-user"></i> Your Profile</a></li>
-			<li class="dropdown-divider"></li>
-			<li class="dropdown-item-danger"><a @click="$session.logout()"><i class="far fa-sign-out-alt"></i> Logout</a></li>
-		</ul>
-	</li>
-</template>
-}}} -->
-
-<style>
-.session-menu .username {
-	float: left;
-	color: #FFF;
-	margin: 15px 5px;
-}
-
-.session-menu .img-user {
-	width: 50px;
-	height: 50px;
-	border: 1px solid #1e3a56;
-}
-</style>
+});
+</script>

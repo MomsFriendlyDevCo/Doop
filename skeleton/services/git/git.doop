@@ -1,4 +1,4 @@
-<server on="init">
+<script lang="js" backend on="init">
 /**
 * Loads the Git information service and populates `app.git.current`
 *
@@ -8,11 +8,11 @@
 
 app.git = require('.');
 
-exports = ()=> app.git.current()
+return app.git.current()
 	.then(res => app.git.current = res)
-</server>
+</script>
 
-<endpoint>
+<script lang="js" backend endpoint>
 var git = require('.');
 
 app.get('/api/git/history', (req, res) => {
@@ -20,4 +20,4 @@ app.get('/api/git/history', (req, res) => {
 		.then(data => res.send(data))
 		.catch(res.sendError)
 });
-</endpoint>
+</script>

@@ -1,4 +1,4 @@
-<script>
+<script lang="js" frontend>
 /**
 * Return whether a dotted notation or array path exists within the target
 * This function acts very similar to the Lodash `_.has()` function
@@ -14,15 +14,19 @@
 * @example Check a deeply nested path, with arrays, assuming VM as the root node
 * vm.$hasPath('foo.1.bar'); // True if vm.$data.foo exists
 */
-Vue.prototype.$hasPath = function(target, path) {
-	// Argument mangling {{{
-	if (_.isString(target) || _.isArray(target)) { // called as (path)
-		[target, path] = [this, target];
-	} else if (!_.isObject(target)) {
-		throw new Error('Cannot use $hasPath on non-object target');
-	}
-	// }}}
+app.mixin({
+	methods: {
+		$hasPath(target, path) {
+			// Argument mangling {{{
+			if (_.isString(target) || _.isArray(target)) { // called as (path)
+				[target, path] = [this, target];
+			} else if (!_.isObject(target)) {
+				throw new Error('Cannot use $hasPath on non-object target');
+			}
+			// }}}
 
-	return this.$getPath(target, path, undefined) !== undefined;
-};
+			return this.$getPath(target, path, undefined) !== undefined;
+		},
+	},
+});
 </script>

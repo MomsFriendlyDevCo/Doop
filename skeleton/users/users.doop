@@ -1,4 +1,4 @@
-<schema>
+<script lang="js" backend schema>
 var Users = app.middleware.db.schema('users', {
 	created: {type: Date, default: ()=> new Date()},
 	lastLogin: {type: Date, default: ()=> new Date()},
@@ -8,7 +8,8 @@ var Users = app.middleware.db.schema('users', {
 	_passhash2: {type: String},
 	_passsalt: {type: String},
 	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
-	_tokenPurpose: {type: String, enum: ['invite', 'login', 'recover', 'signup']},
+	// FIXME: null allowed as tokenPurpose for legacy records
+	_tokenPurpose: {type: String, enum: [null, 'invite', 'login', 'recover', 'signup']},
 	name: {type: String},
 	status: {type: String, enum: ['inactive', 'active', 'deleted'], default: 'inactive', index: true},
 	role: {type: String, enum: ['user', 'admin', 'root'], default: 'user', index: true},
@@ -73,7 +74,7 @@ Users.method('logIn', function(res) {
 			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
 			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
 
-			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}).then(()=> output);
+			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}, app.config.session.auth.expiry).then(()=> output);
 		})
 		// }}}
 });
@@ -132,15 +133,14 @@ Users.pre('validate', function(next) {
 
 // Force username to ALWAYS be lower case {{{
 Users.plugin(app.middleware.db.replace, {
-	email: val => val.toLowerCase(),
-	username: val => val.toLowerCase(),
+	email: val => val && val.toLowerCase(),
+	username: val => val && val.toLowerCase(),
 });
 // }}}
 
 // Timestamp status tracking {{{
 Users.plugin(app.middleware.db.timestamps, {
-	key: 'status',
-	//path: doc => `timestamps.${doc[settings.key]}`, 
+	key: 'status'
 });
 // }}}
 
@@ -152,12 +152,44 @@ Users.plugin(app.middleware.db.timestamps, {
 * @returns boolean True if the user has all permissions
 */
 Users.method('hasPermission', function(permission) {
-	return app.utils.permissions.has(permission);
+	return app.utils.permissions.has(permission, this.permissions);
 });
 // }}}
-</schema>
+</script>
 
-<endpoint>
+
+<script lang="js" backend endpoint>
+const _ = require('lodash');
+const profileCountries = ['AU', 'GB', 'NZ'];
+const countries = _.pick(require('../widgets/address/country/countries.js'), profileCountries);
+
+app.get('/api/users/countries', (req, res) => Promise.resolve()
+	.then(() => res.send(_.values(countries))))
+</script>
+
+
+<script lang="js" backend endpoint>
+app.get('/api/users/types', (req, res) => {
+	res.send([
+		'Managers',
+		'Showroom Sales',
+		'International Sales',
+		'Trade Sales',
+		'Reseller Accounts',
+		'Reseller Sales',
+		'Sales',
+		'Aftersales',
+		'Accounts',
+		'Purchasing',
+		'Admin (Absolutle Full Permissions)',
+		'Creative Team',
+		'Warehouse',
+	]);
+})
+</script>
+
+
+<script lang="js" backend endpoint>
 app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
 	get: [
@@ -171,13 +203,10 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	query: app.middleware.express.isUser(),
 	count: app.middleware.express.isUser(),
 	create: app.middleware.express.hasPermission('usersEdit'),
-	save: (req, res, next) => {
-		// FIXME: Does this allow user to hack their own permissions?
-		if (
-			req.user.hasPermission('usersEdit') // User is an admin and can edit anyone
-			|| req.params.id == req.user._id // Allow the current user to edit their own profile
-		) {
-			next();
+	save: (req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
+		// Allow user to save their own profile
+		if (app.middleware.express.hasPermission('usersEdit') || req.user && req.params.id === req.user._id) {
+			return next();
 		} else {
 			res.sendError('403: You are not an admin or editing your own profile');
 		}
@@ -188,4 +217,4 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 		app.middleware.express.setDocStatus({collection: 'users', status: 'deleted'}),
 	],
 }));
-</endpoint>
+</script>

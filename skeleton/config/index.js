@@ -169,9 +169,7 @@ module.exports = {
 		fontGlob: '*.{css,eot,svg,ttf,woff,woff2}', // Fonts to cache internally, can be tweaked by Cordova or other build process
 	},
 	layout: {
-		headInject: [ // Aditional HTML compliant content to inject into the page header (line feeds added automatically)
-			// '<meta name="description" content="FIXME: SEO description"/>',
-		],
+		headInject: [], // Aditional HTML compliant content to inject into the page header
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
 			'/dist/app.css',
 			'/dist/app.js',
@@ -229,7 +227,7 @@ module.exports = {
 		program: '',
 	},
 	paths: {
-		ignore: [`!data`, `!dist`, `!node_modules`], // NOTE: Because the gulpfile.js loads early in the boot order it must be updated when this list changes also
+		ignore: config => [`!data`, `!dist`, `!node_modules`], // NOTE: Because the gulpfile.js loads early in the boot order it must be updated when this list changes also
 		data: path.normalize(`${__dirname}/../data`),
 		dist: path.normalize(`${__dirname}/../dist`),
 		root: path.normalize(`${__dirname}/..`),

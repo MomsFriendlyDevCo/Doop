@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Component which displays a multi-select control that allows user selection and optionally also raw email addresses
 * This component exports a collection which resembles `{user: user._id, email: rawString}`
@@ -15,7 +15,7 @@
 * @example
 * <emails :selected="emails" @change="emails = $event"/>
 */
-module.exports = {
+app.component('emails', {
 	data() { return {
 		options: undefined,
 		userCache: {},
@@ -26,7 +26,7 @@ module.exports = {
 		labelField: {type: String, default: 'name'},
 		emailField: {type: String, default: 'email'},
 		placeholder: {type: String, default: 'Enter email addresses or pick a user...'},
-		userUrl: {type: String, default() { return `/api/users?select=${this.$props.idField},${this.$props.labelField},${this.$props.emailField}` }},
+		userUrl: {type: String, default() { return '/api/users' }},
 	},
 	computed: {
 		selectedItems() {
@@ -94,9 +94,17 @@ module.exports = {
 		search: _.debounce(function(...args){
 			return this.refresh(...args);
 		}, 350),
+
+		blur() {
+			var select = this.$refs.select;
+			if (!select.search) return false; // Nothing selected, do nothing
+
+			select.select({label: select.search});
+			return false;
+		},
 	},
 };
-</component>
+</script>
 
 <template>
 	<div class="emails">
@@ -107,8 +115,10 @@ module.exports = {
 			multiple
 			taggable
 			select-on-tab
+			:clear-search-on-blur="blur"
 			@input="changeHandler"
 			@search="search"
+			ref="select"
 		>
 			<template slot="option" slot-scope="option">
 				<i class="fas fa-user"/>
@@ -117,6 +127,9 @@ module.exports = {
 			<template slot="selected-option" slot-scope="option">
 				<i :class="option.loading ? 'fa fa-spinner fa-spin' : 'fas fa-user m-r-5'"/>
 				<span v-if="!option.loading">{{option.label}}</span>
+			</template>
+			<template slot="no-options">
+				Start typing to search for people or enter an email...
 			</template>
 		</v-select>
 	</div>

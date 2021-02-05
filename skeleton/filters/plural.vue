@@ -1,4 +1,4 @@
-<filter>
+<script lang="js" frontend>
 /**
 * Pluralise various words based on the numeric prefix
 * This function is a fancy find/replace system which examines numbers before words and tries to pluralise them
@@ -14,7 +14,7 @@
 * @example Pluralise with definitions
 * {{'1 person' | plural('person/people')}} //= '1 person' / '1 people'
 */
-module.exports = (value, plurals) => {
+app.filter('plural', (value, plurals) => {
 	var singularToPlural = {};
 	var pluralToSingular = {};
 
@@ -48,5 +48,5 @@ module.exports = (value, plurals) => {
 			return numberRaw + ' ' + wordPlural;
 		}
 	});
-};
-</filter>
+});
+</script>

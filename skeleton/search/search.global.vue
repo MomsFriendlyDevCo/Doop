@@ -1,8 +1,10 @@
-<component>
+<script lang="js" frontend>
+import orderUtils from '/orders/orderUtils';
+
 /**
 * Wrapped version of the searchInput VueComponent instance that works specifically for global searches
 */
-module.exports = {
+app.component('searchGlobal', {
 	data() { return {
 		tags: [
 			{
@@ -64,8 +66,8 @@ module.exports = {
 			},
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="search-global">

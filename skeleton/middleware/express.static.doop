@@ -1,8 +1,8 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Simple wrapper around the default Express static function without needing it in the require header each time
 */
 var express = require('express');
 
 app.middleware.express.static = express.static;
-</server>
+</script>

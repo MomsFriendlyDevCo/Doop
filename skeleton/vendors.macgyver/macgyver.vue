@@ -1,21 +1,20 @@
-<script repack>
-import sift from 'sift';
-global.sift = sift;
+<script lang="js" frontend>
+//import sift from 'sift';
+//global.sift = sift;
 
-import 'ace-builds';
+//import 'ace-builds';
 
 // TODO: Load in any needed modes/themes
 //ace.require("ace/mode/javascript").Mode;
 //ace.require("ace/mode/json").Mode;
 
 // "main": "dist/macgyver-node.js"
-import './node_modules/@momsfriendlydevco/macgyver/dist/macgyver.js';
-</script>
+//import './node_modules/@momsfriendlydevco/macgyver/dist/macgyver.js';
+import 'macgyver';
 
-<script>
 app.ready.then(()=> {
-	macgyver.$http = Vue.services().$http;
-	macgyver.$prompt = Vue.services().$prompt;
+	macgyver.$http = app.$http;
+	macgyver.$prompt = app.$prompt;
 });
 </script>
 

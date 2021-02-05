@@ -1,4 +1,4 @@
-<server on="middleware, dbMiddleware">
+<script lang="js" backend on="middleware">
 var _ = require('lodash');
 
 /**
@@ -104,4 +104,4 @@ app.middleware.db.links = function(schema, options) {
 	});
 	*/
 };
-</server>
+</script>

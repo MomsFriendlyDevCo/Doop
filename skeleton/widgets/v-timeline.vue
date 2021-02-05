@@ -1,11 +1,11 @@
-<component>
+<script lang="js" frontend>
 /**
 * Customizable timeline component with auto data retrieval and searching
 *
 * TODO: JSDocs. Pagination.
 */
 
-module.exports = {
+app.component('vTimeline', {
 	data() { return {
 		//state: 'init', // ENUM: 'loading', 'ready', 'empty', 'error'
 		//error: undefined, // Error from server, if any
@@ -76,8 +76,8 @@ module.exports = {
 
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="v-timeline">

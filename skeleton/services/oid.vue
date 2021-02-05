@@ -1,4 +1,4 @@
-<service singleton>
+<script lang="js" frontend>
 /**
 * Utility functions to attach, detach and generally manage meta Object IDs
 * This service exists because sometimes it may be necessary to attach tracking information into a Vue object which needs to be removed before it gets thrown at the server
@@ -10,8 +10,8 @@
 * this.$http.post('/api/widgets', {widgets: this.$oid.deoid(this.widgets)})
 */
 
-module.exports = function() {
-	var $oid = this;
+app.service('$oid', function() {
+	var $oid = {};
 
 	$oid.settings = {
 		key: '$id', // What key to use when attaching to objects
@@ -36,7 +36,7 @@ module.exports = function() {
 	* @param {Object} obj The object to allocate the OID to
 	* @returns {string} The allocated OID
 	*/
-	$oid.attach = obj => Vue.set(obj, $oid.settings.key, $oid.next());
+	$oid.attach = obj => app.set(obj, $oid.settings.key, $oid.next());
 
 
 	/**
@@ -70,5 +70,5 @@ module.exports = function() {
 	};
 
 	return $oid;
-};
-</service>
+});
+</script>

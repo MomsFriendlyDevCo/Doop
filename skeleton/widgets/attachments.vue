@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Component which displays a simple attachment list linked against an API endpoint
 * NOTE: Url is expected to return [{url, deleteUrl?, name, icon?, created? (parseable date string), size (bytes)}]
@@ -27,7 +27,7 @@
 * </div>
 * <attachments ref="attachments" url="/api/uploads"/>
 */
-module.exports = {
+app.component('attachments', {
 	props: {
 		url: {type: String, required: true},
 		view: {type: String, default: 'table'},
@@ -55,7 +55,7 @@ module.exports = {
 					href: {url: file.url, target: '_blank'},
 					icon: file.icon,
 					title: file.name,
-					subTitle: Vue.filter('fileSize')(file.size),
+					subTitle: app.filter('fileSize')(file.size),
 				}))
 		},
 	},
@@ -102,20 +102,20 @@ module.exports = {
 		},
 		getAttachmentTooltip(attachment) {
 			return attachment.name + '<br/>'
-				+ (this.hasStats.size ? `<strong>Size:</strong> ${Vue.filter('fileSize')(attachment.size)}<br/>` : '')
-				+ (this.hasStats.created ? `<strong>Created:</strong> ${Vue.filter('date')(attachment.created)}<br/>` : '')
+				+ (this.hasStats.size ? `<strong>Size:</strong> ${app.filter('fileSize')(attachment.size)}<br/>` : '')
+				+ (this.hasStats.created ? `<strong>Created:</strong> ${app.filter('date')(attachment.created)}<br/>` : '')
 		},
 	},
 	created() {
 		return this.refresh();
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="attachments" :class="!attachments || !attachments.length ? 'empty' : ''">
 		<div v-if="loading">
-			<i class="far fa-spinner fa-spin"/>
+			<i class="fa fa-spinner fa-spin"/>
 			Loading attachments...
 		</div>
 		<div v-else>

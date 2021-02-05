@@ -1,10 +1,8 @@
-<service singleton>
+<script lang="js" frontend>
 /**
 * Various clipboard access functions
 */
-module.exports = function() {
-	var $clipboard = this;
-
+app.service('$clipboard', {
 	/**
 	* Copy text to the clipboard in the supidest yet consistant way imagineable
 	* NOTE: I can't believe hacks like these are still needed - MC 2020-09-02
@@ -12,7 +10,7 @@ module.exports = function() {
 	* @param {string} text Text to copy
 	* @returns {Promise} A promise that the text has copied, rejects with whatever the DOM had objections to
 	*/
-	$clipboard.copy = text => new Promise((resolve, reject) => {
+	copy: text => new Promise((resolve, reject) => {
 		try { // Wrap the whole bloody thing in try/catch why not, what are we Java?!, only way to catch stupid DOM errors though
 			var copyDiv = document.createElement('div');
 			copyDiv.setAttribute('style', 'position: fixed; left: 50%; top: 50%'); // Kludge to not force the screen to scoll since we're appending to the end of the DOM
@@ -39,8 +37,6 @@ module.exports = function() {
 		} catch (e) {
 			reject(e);
 		}
-	});
-
-	return $clipboard;
-};
-</service>
+	}),
+});
+</script>

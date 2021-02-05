@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Provides a middleware cache for routes
 * @param {string} [time] @momsfriendlydevco/express-middleware-cache compatible time string
@@ -22,26 +22,24 @@ var logger = require('express-log-url');
 var middlewareCache = require('@momsfriendlydevco/express-middleware-cache');
 var promisify = require('util').promisify;
 
-exports = ()=>
-	Promise.resolve()
-		.then(()=> require('.')())
-		.then(()=> { // Register against event hooks
-			app.cache
-				.on('routeCacheHashError', (err, req) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache Error + ${err.toString()}`}))
-				.on('routeCacheEtag', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Validated against existing etag hash ${info.hash}`}))
-				.on('routeCacheExisting', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cached using existing hash ${info.hash}`}))
-				.on('routeCacheFresh', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache generate new hash ${info.hash}`}))
-				.on('routeCacheInvalidate', (tag, hash) => console.log(colors.grey(`Invalidate cache tag '${tag}' (hash ${hash})`)));
-		})
-		.then(()=> { // Load app.middleware.express.cache
-			app.middleware.express.cache = middlewareCache;
-			return promisify(app.middleware.express.cache.setup)(app.config.cache);
-		})
-		.then(()=> app.on('exit', ()=> app.cache.destroy()))
+return Promise.resolve()
+	.then(()=> require('.')())
+	.then(()=> { // Register against event hooks
+		app.cache
+			.on('routeCacheHashError', (err, req) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache Error + ${err.toString()}`}))
+			.on('routeCacheEtag', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Validated against existing etag hash ${info.hash}`}))
+			.on('routeCacheExisting', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cached using existing hash ${info.hash}`}))
+			.on('routeCacheFresh', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache generate new hash ${info.hash}`}))
+			.on('routeCacheInvalidate', (tag, hash) => console.log(colors.grey(`Invalidate cache tag '${tag}' (hash ${hash})`)));
+	})
+	.then(()=> { // Load app.middleware.express.cache
+		app.middleware.express.cache = middlewareCache;
+		return promisify(app.middleware.express.cache.setup)(app.config.cache);
+	})
+	.then(()=> app.on('exit', ()=> app.cache.destroy()))
+</script>
 
-</server>
-
-<server on="middleware">
+<script lang="js" backend on="middleware">
 var _ = require('lodash');
 
 /**
@@ -121,4 +119,4 @@ app.cache.function = (options, worker) => {
 			tryResolve();
 		}))
 };
-</server>
+</script>

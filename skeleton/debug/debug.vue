@@ -1,6 +1,9 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/debug',
-	template: '<directory :sitemap="true"/>',
-};
-</component>
+});
+</script>
+
+<template>
+	<directory :sitemap="true"/>
+</template>

@@ -1,9 +1,11 @@
-<service singleton>
+<script lang="js" frontend>
+import stringSplitBy from 'string-split-by';
+
 /**
 * Various utility functions for handling string queries
 */
-module.exports = function() {
-	var $search = this;
+app.service('$search', function() {
+	var $search = {};
 
 	/**
 	* Attempt to loosely parse search tags from an input string
@@ -17,21 +19,20 @@ module.exports = function() {
 	$search.parseTags = function(query = '') {
 		var fuzzyQuery = []; // Extracted fuzzy query parts, extracted from all queryHash parts that don't look like tags
 
-		var tags = _.chain(query) // Break query into a lookup hash of tag:values
+		return _.chain(query) // Break query into a lookup hash of tag:values
 			.thru(terms => stringSplitBy(terms, /\s+/, {
 				ignore: ['"', "'", '()'], // Preserve compound terms with speachmarks + brackets
 				escape: true, // Allow escaping of terms
 			}))
+			.filter(v => {
+				if (/:/.test(v)) return true;
+				fuzzyQuery.push(v); // Not a tag - add to fuzzy query part
+				return false;
+			})
+			.map(v => v.split(/:/, 2))
+			.fromPairs()
+			.set('$fuzzy', fuzzyQuery.join(' '))
 			.value();
-
-		return {
-			$fuzzy: tags.filter(v => (!/:/.test(v))).join(' '),
-
-			..._.chain(tags).filter(v => (/:/.test(v)))
-				.map(v => v.split(/:/, 2))
-				.fromPairs()
-				.value(),
-		};
 	};
 
 
@@ -67,11 +68,5 @@ module.exports = function() {
 
 
 	return $search;
-};
-</service>
-
-<script repack>
-// Expose string-split-by globally
-import stringSplitBy from 'string-split-by';
-window.stringSplitBy = stringSplitBy;
+});
 </script>

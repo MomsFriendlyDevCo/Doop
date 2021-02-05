@@ -1,11 +1,11 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	route: '/search',
 	created() {
 		this.$sitemap.setTitle(`Search: ${this.$search.parseTags(this.$route.query.q).$fuzzy}`);
 	}
-};
-</component>
+});
+</script>
 
 <template>
 	<div>

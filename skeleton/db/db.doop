@@ -1,8 +1,8 @@
-<server on="init, dbInit">
+<script lang="js" backend on="init, dbInit">
 var mongoosy = require('@momsfriendlydevco/mongoosy');
 
-exports = ()=> Promise.resolve()
-	//.then(()=> app.config.mongo.hooks = true) // Enabled specificaly to queue DB middleware calls
+return Promise.resolve()
+	.then(()=> app.config.mongo.hooks = true) // Enabled specificaly to queue DB middleware calls
 	.then(()=> app.log('Connecting to', app.log.colors.cyan(app.config.mongo.uri)))
 	.then(()=> mongoosy.connect(app.config.mongo.uri, app.config.mongo.options))
 	.then(()=> {
@@ -21,4 +21,4 @@ exports = ()=> Promise.resolve()
 				.then(()=> app.log('DB Disconnected'))
 		);
 	});
-</server>
+</script>

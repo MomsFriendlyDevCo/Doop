@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 var _ = require('lodash');
 
 app.middleware.express.isNewer = options => {
@@ -15,7 +15,7 @@ app.middleware.express.isNewer = options => {
 	if (!settings.collection) throw new Error('Collection required for app.middleware.express.isNewer()');
 
 	return (req, res, next) => {
-		db[settings.collection].findOneById(req.params[settings.param]).select(settings.docField)
+		db[settings.collection].findById(req.params[settings.param]).select(settings.docField)
 			.then(doc => {
 				var docField =
 					settings.asType == 'date' && _.isString(doc[settings.docField]) ? new Date(doc[settings.docField])
@@ -30,4 +30,4 @@ app.middleware.express.isNewer = options => {
 			.then(()=> next())
 	};
 };
-</server>
+</script>

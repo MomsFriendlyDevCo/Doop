@@ -1,4 +1,4 @@
-<component>
+<script lang="js" frontend>
 /**
 * Search widget that supports custom definable widgets that compose into a complex, tagged, search query compatible with the Doop search backend
 *
@@ -26,7 +26,7 @@
 * @emits preRedirect Emitted as `(queryString)` before redirecting to new destination, if the result is `false` the redirect is aborted
 * @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
 */
-module.exports = {
+app.component('searchInput', {
 	data() { return {
 		searchQuery: '',
 		fuzzyQuery: '',
@@ -363,8 +363,8 @@ module.exports = {
 			},
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<form

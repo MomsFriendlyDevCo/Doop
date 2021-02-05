@@ -1,11 +1,11 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component({
 	data() { return {
 		selected: undefined,
 	}},
 	route: '/debug/users',
-};
-</component>
+});
+</script>
 
 <template>
 	<div class="card">

@@ -1,4 +1,4 @@
-<server on="middleware, dbMiddleware">
+<script lang="js" backend on="middleware, dbMiddleware">
 var _ = require('lodash');
 var stringSplit = require('string-split-by');
 
@@ -341,4 +341,4 @@ app.middleware.db.search = (schema, options) => {
 	*/
 	// }}}
 };
-</server>
+</script>

@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Returns a middleware layer which will list, accept uploads at a specified path and optionally delete
 * This middleware is effectively a full ReST server which acts on a base path
@@ -163,4 +163,4 @@ app.middleware.express.attachments = (path, options) => {
 				}
 			})
 };
-</server>
+</script>

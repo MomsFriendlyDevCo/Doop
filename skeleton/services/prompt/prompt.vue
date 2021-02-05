@@ -1,7 +1,8 @@
-<service singleton>
-module.exports = function() {
-	var $prompt = this;
-	$prompt.$debugging = true;
+<script lang="js" frontend>
+app.service('$prompt', function() {
+	var $prompt = {};
+
+	this.$debug = this.$debug.new('$prompt').enable(false);
 	$prompt.dialogQueue = [];
 
 
@@ -57,7 +58,7 @@ module.exports = function() {
 		};
 
 		this.$debug('$prompt.modal', settings);
-		Vue.set($prompt, 'settings', settings);
+		app.set($prompt, 'settings', settings);
 
 		// Expand expression into object if passed a string
 		if (_.isString(settings.element)) settings.element = $(settings.element);
@@ -114,7 +115,7 @@ module.exports = function() {
 					keyboard: settings.keyboard,
 					show: true,
 					backdrop: settings.backdrop,
-				});
+				})
 		});
 
 		return settings.defer.promise;
@@ -158,7 +159,7 @@ module.exports = function() {
 	* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
 	* @param {string} [options.bodyHeader] Additional HTML to render above the main body area (this is always HTML rendered)
 	* @param {string} [options.bodyFooter] Additional HTML to render under the main body area (this is always HTML rendered)
-	* @param {string} [options.component] Vue component object to render as the modal body (under options.body if present), either as a string or wrapped with `Vue.component('fooComponent')`. Uses the `<dynamic-component/>` service to render so can also accept props, events etc.
+	* @param {string} [options.component] Vue component object to render as the modal body (under options.body if present), either as a string or wrapped with `app.component('fooComponent')`. Uses the `<dynamic-component/>` service to render so can also accept props, events etc.
 	* @param {Object} [options.componentProps] Property values to pass when initializing the component
 	* @param {Object} [options.componentEvents] Event mappings to pass when initializing the component
 	* @param {string|array} [options.modalClass] Optional modal class items to add (e.g. 'modal-lg')
@@ -185,13 +186,13 @@ module.exports = function() {
 	$prompt.dialog = options => {
 		// If we're already showing a dialog - defer showing the next dialog until this one has finished {{{
 		if ($prompt.settings) {
-			$prompt.$debug('Dialog already present, stashing previous settings', {current: $prompt.settings, new: options});
+			this.$debug('Dialog already present, stashing previous settings', {current: $prompt.settings, new: options});
 			$prompt.settingsNested.push($prompt.settings);
 		}
 		// }}}
 
 		// Setup defaults {{{
-		var settings = Vue.set($prompt, 'settings', {
+		var settings = app.set($prompt, 'settings', {
 			title: 'Dialog',
 			body: '',
 			isHtml: false,
@@ -216,7 +217,7 @@ module.exports = function() {
 		});
 		this.$debug('$prompt.dialog', settings);
 
-		if (settings.component && !_.isString(settings.component)) throw new Error('$prompt.dialog({component}) must be a string or object - use the raw component name or the wrapped Vue.component(name) value');
+		if (settings.component && !_.isString(settings.component)) throw new Error('$prompt.dialog({component}) must be a string or object - use the raw component name or the wrapped app.component(name) value');
 		// }}}
 
 		// Attach to promise to add a status property {{{
@@ -296,18 +297,18 @@ module.exports = function() {
 	*/
 	$prompt.close = (ok = false, payload) => {
 		if (!$prompt.settings) {
-			$prompt.$debug('Closing already closed modal - assuming internal recursion and ignoring');
+			this.$debug('Closing already closed modal - assuming internal recursion and ignoring');
 			return;
 		}
 
-		$prompt.$debug('Close modal', {status: ok ? 'resolve' : 'reject', payload});
+		this.$debug('Close modal', {status: ok ? 'resolve' : 'reject', payload});
 
 		$prompt.settings.defer[ok ? 'resolve' : 'reject'](payload);
 
 		// Force a specific modal handle to close
 		if ($prompt.settings.element) {
 			$prompt.settings.element.modal('hide');
-			Vue.set($prompt, 'settings', undefined);
+			app.set($prompt, 'settings', undefined);
 		}
 
 		// Close standard (handled) modals
@@ -340,150 +341,5 @@ module.exports = function() {
 	// All other $prompt.* functions are in seperate files within `services/prompt/prompt.*.vue`
 
 	return $prompt;
-};
-</service>
-
-<component>
-module.exports = {
-	route: '/debug/prompt',
-	methods: {
-		testPrompt(method, ...args) {
-			this.$prompt[method](...args)
-				.then(res => console.log(`$prompt.${method}`, {status: 'resolve', payload: res}))
-				.catch(res => console.log(`$prompt.${method}`, {status: 'reject', payload: res}))
-		},
-	},
-};
-</component>
-
-<template>
-	<div>
-		<div id="modal-test" class="modal">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h4 class="modal-title">Modal header</h4>
-						<a class="close" data-dismiss="modal"><i class="far fa-times"></i></a>
-					</div>
-					<div class="modal-body">
-						<p>Modal Body</p>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="card">
-			<div class="list-group">
-				<a class="list-group-item" @click="testPrompt('modal', '#modal-test')">vm.$prompt.modal("#modal-test")</a>
-				<a class="list-group-item" @click="testPrompt('alert', 'Hello World')">vm.$prompt.alert("Hello World")</a>
-				<a class="list-group-item" @click="testPrompt('confirm', {content: 'This is a question'})">vm.$prompt.confirm({content: "This is a question"})</a>
-				<a class="list-group-item" @click="testPrompt('input', {title: 'What is your name?'})">vm.$prompt.input({title: 'What is your name?'})</a>
-				<a class="list-group-item" @click="testPrompt('list', {list: [{_id: 1, title: 'Foo'}, {_id: 2, title: 'Bar'}, {_id: 3, title: 'Baz'}]})">vm.$prompt.list({list: [...]})</a>
-				<a class="list-group-item" @click="testPrompt('list', {url: '/api/users', field: 'name'})">vm.$prompt.list({url: '/api/users'})</a>
-				<a class="list-group-item" @click="testPrompt('macgyver', {macgyver: [{type: 'mgText', id: 'testText'}]})">vm.$prompt.macgyver({macgyver: [{type: 'mgText', id: 'testText'}]})</a>
-			</div>
-		</div>
-	</div>
-</template>
-
-<component name="promptInjector">
-module.exports = {
-	data: ()=> ({
-		isShowing: false,
-		settings: undefined,
-	}),
-	created() {
-		this.$on('$prompt.method', (method, ...args) => {
-			console.debug('Relaying $prompt.dialog.method(', method, ...args, ')');
-			return this.$refs.injectedComponent.$refs.component[method](...args);
-		});
-		this.$on('$prompt.open', this.openModal);
-		this.$on('$prompt.close', this.closeModal);
-	},
-	methods: {
-		openModal(settings) {
-			this.settings = settings;
-			this.isShowing = true;
-			this.$prompt.modal({
-				element: '#modal-_prompt',
-				...this.$prompt.settings,
-			});
-		},
-		closeModal() {
-			this.isShowing = false;
-			$('#modal-_prompt').modal('hide');
-		},
-	},
-};
-</component>
-
-<template name="promptInjector">
-	<div id="modal-_prompt" class="modal" tabindex="-1" role="dialog">
-		<div v-if="isShowing" class="modal-dialog" :class="settings.modalClass" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h4 class="modal-title">{{settings.title}}</h4>
-					<a class="close" @click="$prompt.close(false, 'cancel')"><i class="far fa-times fa-lg"/></a>
-				</div>
-				<div class="modal-body">
-					<div v-if="settings.bodyHeader" v-html="settings.$bodyHeader"/>
-					<div v-if="!settings.isHtml" class="text-center">
-						<h4>{{settings.body}}</h4>
-					</div>
-					<div v-if="settings.isHtml" v-html="settings.body"/>
-					<dynamic-component
-						v-if="settings.component"
-						ref="injectedComponent"
-						:component="settings.component"
-						:props="settings.componentProps"
-						:events="settings.componentEvents"
-					/>
-					<div v-if="settings.bodyFooter" v-html="settings.$bodyFooter"/>
-				</div>
-				<div v-if="settings.buttons && (settings.buttons.left.length || settings.buttons.right.length || settings.buttons.center.length)" class="modal-footer">
-					<div class="align-left">
-						<a v-for="button in settings.buttons.left" :key="button.id" @click="button.click()" :class="button.class">
-							<i v-if="button.icon" :class="button.icon"/>
-							{{button.title}}
-						</a>
-					</div>
-					<div class="align-center">
-						<a v-for="button in settings.buttons.center" :key="button.id" @click="button.click()" :class="button.class">
-							<i v-if="button.icon" :class="button.icon"/>
-							{{button.title}}
-						</a>
-					</div>
-					<div class="align-right">
-						<a v-for="button in settings.buttons.right" :key="button.id" @click="button.click()" :class="button.class">
-							<i v-if="button.icon" :class="button.icon"/>
-							{{button.title}}
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</template>
-
-<style>
-/* Adds a scale effect to modals */
-.modal > .modal-dialog {
-	transform: scale(0.7);
-	opacity: 0;
-	transition: all .3s;
-}
-
-.modal.show > .modal-dialog {
-	opacity: 1;
-	transform: scale(1);
-}
-
-/* Add a fade out effect when the backdrop appears */
-.modal-backdrop {
-	opacity: 0 !important;
-	transition: all 5s;
-}
-
-.modal-backdrop.show {
-	opacity: 0.333 !important;
-}
-</style>
+});
+</script>

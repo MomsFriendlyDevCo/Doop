@@ -1,4 +1,4 @@
-<server on="init, dbInit">
+<script lang="js" backend on="init, dbInit">
 var _ = require('lodash');
 var sift = require('sift');
 
@@ -42,4 +42,4 @@ app.utils.permissions.has.any = (permission, from = app.utils.permissions) => {
 
 	return app.utils.permissions.has(expression, from);
 };
-</server>
+</script>

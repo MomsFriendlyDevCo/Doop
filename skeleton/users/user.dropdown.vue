@@ -1,5 +1,5 @@
-<component>
-module.exports = {
+<script lang="js" frontend>
+app.component('userDropdown', {
 	data() { return {
 		$session: this.$session,
 	}},
@@ -8,8 +8,8 @@ module.exports = {
 			window.location.refresh();
 		},
 	},
-};
-</component>
+});
+</script>
 
 <template>
 	<li v-if="$session.isLoggedIn" class="dropdown notification-list topbar-dropdown">

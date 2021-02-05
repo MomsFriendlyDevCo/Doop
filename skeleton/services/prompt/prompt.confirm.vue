@@ -1,4 +1,4 @@
-<script>
+<script lang="js" frontend>
 app.ready.then(()=> {
 	/**
 	* Prompt with confirm / cancel buttons
@@ -10,9 +10,9 @@ app.ready.then(()=> {
 	* @param {array} [options.buttons=Confirm + Cancel]
 	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
 	*/
-	Vue.services().$prompt.confirm = options => {
+	app.service.$prompt.confirm = options => {
 		if (_.isString(options)) options = {body: options};
-		return Vue.services().$prompt.dialog({
+		return app.service.$prompt.dialog({
 			title: 'Confirm action',
 			body: 'Are you sure you want to do this?',
 			dialogClose: 'reject', // Reject if the user had second thoughts
@@ -22,7 +22,7 @@ app.ready.then(()=> {
 					title: 'Cancel',
 					method: 'reject',
 					class: 'btn btn-danger',
-					icon: 'far fa-times',
+					icon: 'fa fa-times',
 				}],
 				right: [{
 					id: 'confirm',

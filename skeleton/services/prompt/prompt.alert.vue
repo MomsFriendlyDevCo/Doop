@@ -1,4 +1,4 @@
-<script>
+<script lang="js" frontend>
 app.ready.then(()=> {
 	/**
 	* Display a general alert dialog
@@ -9,9 +9,9 @@ app.ready.then(()=> {
 	* @param {string} [options.body='Be alerted'] The body of the alert message
 	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
 	*/
-	Vue.services().$prompt.alert = options => {
+	app.service.$prompt.alert = options => {
 		if (_.isString(options)) options = {title: options};
-		return Vue.services().$prompt.dialog({
+		return app.service.$prompt.dialog({
 			title: 'Alert',
 			body: 'Be alerted',
 			dialogClose: 'resolve', // Alerts dont ever reject

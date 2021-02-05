@@ -1,18 +1,14 @@
-<script repack>
+<script lang="js" frontend>
 /**
 * Front-end polyfills to apply
 */
-import './polyfills/array.flat';
-import './polyfills/array.flatMap';
-import './polyfills/promise.allLimit';
-import './polyfills/promise.allObject';
-import './polyfills/promise.allSeries';
-import './polyfills/promise.defer';
-import './polyfills/promise.isPromiseLike';
-import './polyfills/promise.tap';
-import './polyfills/promise.timeout';
-import './polyfills/regexp.escape';
-
-// Misc polyfills needed by MS Edge >=41
-import 'core-js/features/object/from-entries';
+import './array.flat';
+import './array.flatMap';
+import './promise.allLimit';
+import './promise.allSeries';
+import './promise.defer';
+import './promise.isPromiseLike';
+import './promise.tap';
+import './promise.timeout';
+import './regexp.escape';
 </script>

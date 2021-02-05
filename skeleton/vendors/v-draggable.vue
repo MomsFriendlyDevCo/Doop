@@ -1,12 +1,8 @@
-<script repack>
+<script lang="js" frontend>
 /**
-* Importer for the v-draggable directive
+* Importer for the draggable component
 * @url https://github.com/SortableJS/Vue.Draggable
-*
-* @example
-*
-
 */
 import draggable from 'vuedraggable'
-Vue.use(draggable);
+app.component('draggable', draggable);
 </script>

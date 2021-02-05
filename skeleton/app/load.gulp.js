@@ -6,7 +6,7 @@ var gulp = require('gulp');
 * If you want `app.db` you must also call `load:app.db`
 */
 gulp.task.once('load:app', ()=> {
-	require('../app');
+	require('./app.backend');
 	return app.setup()
 		.then(()=> app.emit('essencial'))
 });

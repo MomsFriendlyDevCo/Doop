@@ -1,4 +1,4 @@
-<server on="middleware">
+<script lang="js" backend on="middleware">
 /**
 * Returns a wrapped version of multer with suitable defaults
 *
@@ -24,4 +24,4 @@ app.middleware.express.uploads = multer({
 		},
 	}),
 });
-</server>
+</script>

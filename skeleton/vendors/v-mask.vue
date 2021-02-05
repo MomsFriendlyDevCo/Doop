@@ -1,4 +1,4 @@
-<script repack>
+<script lang="js" frontend>
 /**
 * Importer for the v-mask directive
 * @url https://github.com/probil/v-mask
@@ -12,6 +12,6 @@
 * @example Mask a number with a thousands seperator
 * <div v-mask="'#,###'"/>
 */
-import VueMask from 'v-mask'
-Vue.use(VueMask);
+import {VueMaskDirective} from 'v-mask';
+app.directive('v-mask', VueMaskDirective);
 </script>

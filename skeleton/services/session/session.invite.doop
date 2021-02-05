@@ -1,13 +1,13 @@
-<endpoint>
+<script lang="js" backend endpoint>
 /**
 * Accept an email invite via token
 * @param {string} req.params.token The token used to login the user
 */
 app.get('/go/invite/:token', (req, res) => {
 	app.db.users.findOne({
+		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
-		//$errNotFound: false,
 	})
 		.then(user => {
 			if (!app.config.session.invite.enabled) throw new Error('User invite is disabled');
@@ -25,9 +25,9 @@ app.get('/go/invite/:token', (req, res) => {
 		.then(()=> res.redirect('/recover'))
 		.catch(e => res.sendError(403, e.toString()))
 });
-</endpoint>
+</script>
 
-<endpoint>
+<script lang="js" backend endpoint>
 var _ = require('lodash');
 var email = require('@momsfriendlydevco/email');
 
@@ -58,6 +58,7 @@ app.post([
 		// }}}
 		// Either find existing user or create stub account {{{
 		.then(()=> app.db.users.findOne({
+			//$errNotFound: false, // Monoxide
 			email: req.body.email,
 		}))
 		.then(user => {
@@ -66,7 +67,17 @@ app.post([
 			return app.db.users.create({ // User not found - create a new user with provided details
 				email: req.body.email,
 				name: req.body.name || req.body.username || req.body.email,
-				username: req.body.username
+				username: req.body.username,
+				// ABI fields {{{
+				emails: [{
+					email: req.body.email,
+					quote: true,
+					invoice: true,
+					delivery: true,
+					newsletter: true,
+				}],
+				type: req.body.type,
+				// }}}
 			});
 		})
 		// }}}
@@ -101,5 +112,5 @@ app.post([
 		.catch(res.sendError)
 		// }}}
 );
-</endpoint>
+</script>
 
