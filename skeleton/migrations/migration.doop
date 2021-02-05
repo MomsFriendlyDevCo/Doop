@@ -125,7 +125,7 @@ var async = require('async-chainable');
 
 return Promise.resolve()
 	.then(()=> app.migration.init())
-	.then(()=> app.log(app.log.colors.cyan(app.migration.migrationsApplied.size), 'migrations present'))
+	.then(()=> app.log(app.migration.migrationsApplied.size, 'migrations already applied'))
 	.then(()=> app.emit('migrations'))
 	.then(()=> {
 		if (!app.config.mongo.migration || !app.migration.migrations.length) return; // Nothing to do
