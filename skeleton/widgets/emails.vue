@@ -103,7 +103,7 @@ app.component('emails', {
 			return false;
 		},
 	},
-};
+});
 </script>
 
 <template>

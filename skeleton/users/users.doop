@@ -50,36 +50,6 @@ Users
 		this._passhash = this.encryptPass(this._passsalt, password);
 	});
 
-/**
-* Login a user and mutate the req object with cookie / header with session information
-* @param {Object} user The user object to login for this session
-* @param {Object} res The express response object which will be mutated
-* @returns {Promise<Object>} A promise which will return when the login sequence completes, the return value is an object which should be passed to res.send() when completing the transaction
-*/
-Users.method('logIn', function(res) {
-	this.lastLogin = new Date();
-
-	return Promise.resolve()
-		// Update last login details {{{
-		.then(()=> this.save())
-		// }}}
-		// Generate UUID {{{
-		.then(()=> app.utils.uuid.generate())
-		// }}}
-		// Create cookie against user login {{{
-		.then(token => {
-			var output;
-			app.log('Successful login for', this.username || this.email);
-
-			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
-			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
-
-			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}, app.config.session.auth.expiry).then(()=> output);
-		})
-		// }}}
-});
-// }}}
-
 // User tokens {{{
 var _ = require('lodash');
 /**
@@ -156,38 +126,6 @@ Users.method('hasPermission', function(permission) {
 });
 // }}}
 </script>
-
-
-<script lang="js" backend endpoint>
-const _ = require('lodash');
-const profileCountries = ['AU', 'GB', 'NZ'];
-const countries = _.pick(require('../widgets/address/country/countries.js'), profileCountries);
-
-app.get('/api/users/countries', (req, res) => Promise.resolve()
-	.then(() => res.send(_.values(countries))))
-</script>
-
-
-<script lang="js" backend endpoint>
-app.get('/api/users/types', (req, res) => {
-	res.send([
-		'Managers',
-		'Showroom Sales',
-		'International Sales',
-		'Trade Sales',
-		'Reseller Accounts',
-		'Reseller Sales',
-		'Sales',
-		'Aftersales',
-		'Accounts',
-		'Purchasing',
-		'Admin (Absolutle Full Permissions)',
-		'Creative Team',
-		'Warehouse',
-	]);
-})
-</script>
-
 
 <script lang="js" backend endpoint>
 app.use('/api/users/:id?', app.middleware.express.rest('users', {

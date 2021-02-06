@@ -10,7 +10,7 @@
 
 // "main": "dist/macgyver-node.js"
 //import './node_modules/@momsfriendlydevco/macgyver/dist/macgyver.js';
-import 'macgyver';
+import '@momsfriendlydevco/macgyver';
 
 app.ready.then(()=> {
 	macgyver.$http = app.$http;

@@ -31,5 +31,5 @@ app.component('dynamicComponent', {
 			on: this.$props.events,
 		});
 	},
-};
+});
 </script>

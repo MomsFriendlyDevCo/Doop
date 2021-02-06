@@ -276,7 +276,7 @@ app.component('vTable', {
 		// Add searchDebounced() methods which is the same as search but... well... debounced
 		//this.searchDebounced = _.debounce(this.search, this.searchDebounce);
 	},
-};
+});
 </script>
 
 <template>
@@ -322,7 +322,7 @@ app.component('vTable', {
 			<table v-if="state == 'ready' || (state == 'loading' && rows && rows.length > 0)" :class="tableClass">
 				<thead>
 					<tr>
-						<th v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type]?.cellClass">
+						<th v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type] && columnTypes[col.type].cellClass">
 							<a @click="setSort(col.id, 'toggle')" :class="!col.sortable && 'no-click'">
 								{{col.title || _.startCase(col .id)}}
 								<i v-if="endpointSort == col.id" :class="endpointSortAsc ? 'far fa-sort-amount-down-alt text-primary' : 'far fa-sort-amount-up-alt text-primary'"/>
@@ -332,7 +332,7 @@ app.component('vTable', {
 				</thead>
 				<tbody>
 					<tr v-for="row in rows" :key="row[rowKey]">
-						<td v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type]?.cellClass">
+						<td v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type] && columnTypes[col.type].cellClass">
 							<a v-href="cellHref ? cellHref(row) : false" :class="!cellHref && 'no-click'">
 								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
 									{{format(_.get(row, col.id), col.format)}}
