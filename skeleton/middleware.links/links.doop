@@ -11,7 +11,7 @@ app.middleware.db.schema('links', {
 </script>
 
 <script lang="js" backend on="endpoints">
-app.use('/api/links/:id?', app.middleware.express.rest('history', {
+app.use('/api/links/:id?', app.middleware.express.rest('links', {
 	get: app.middleware.express.isUser(),
 	query: app.middleware.express.isUser(),
 	count: app.middleware.express.isUser(),
