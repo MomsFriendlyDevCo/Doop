@@ -50,6 +50,36 @@ Users
 		this._passhash = this.encryptPass(this._passsalt, password);
 	});
 
+/**
+* Login a user and mutate the req object with cookie / header with session information
+* @param {Object} user The user object to login for this session
+* @param {Object} res The express response object which will be mutated
+* @returns {Promise<Object>} A promise which will return when the login sequence completes, the return value is an object which should be passed to res.send() when completing the transaction
+*/
+Users.method('logIn', function(res) {
+	this.lastLogin = new Date();
+
+	return Promise.resolve()
+		// Update last login details {{{
+		.then(()=> this.save())
+		// }}}
+		// Generate UUID {{{
+		.then(()=> app.utils.uuid.generate())
+		// }}}
+		// Create cookie against user login {{{
+		.then(token => {
+			var output;
+			app.log('Successful login for', this.username || this.email);
+
+			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
+			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
+
+			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}, app.config.session.auth.expiry).then(()=> output);
+		})
+		// }}}
+});
+// }}}
+
 // User tokens {{{
 var _ = require('lodash');
 /**
@@ -150,6 +180,7 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 		}
 	},
 	meta: true,
+	metaCustomFields: ['permissionGroups'], // Expose additional fields in meta
 	delete: [
 		app.middleware.express.hasPermission('usersDelete'),
 		app.middleware.express.setDocStatus({collection: 'users', status: 'deleted'}),

@@ -3,6 +3,7 @@ import {Datetime} from 'vue-datetime';
 import '/node_modules/vue-datetime/dist/vue-datetime.css';
 import moment from 'moment';
 
+
 /**
 * Show a user editable data/time selectable widget
 * @param {Date|number|string} [date] The intial date value, can be any processable Moment expression or a Unix timestamp (number or string)
@@ -84,7 +85,6 @@ app.component('dateSelect', {
 		/>
 	</div>
 </template>
-
 
 <style>
 .date-select input.vdatetime-input {

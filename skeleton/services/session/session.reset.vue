@@ -1,6 +1,6 @@
 <script lang="js" frontend>
 app.component({
-	route: '/recover',
+	route: '/reset',
 	data() { return {
 		data: {
 			password: undefined,
@@ -74,7 +74,7 @@ app.component({
 
 		<!-- Card: User information {{{ -->
 		<div class="card">
-			<div class="card-header">Account Recovery</div>
+			<div class="card-header">Password Reset</div>
 			<div class="card-body">
 				<div class="form-group row">
 					<label class="col-4 col-form-label">Password</label>

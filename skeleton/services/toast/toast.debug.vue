@@ -7,8 +7,8 @@ app.component('debugToast', {
 		},
 
 		testPromise(succeed) {
-			this.$toast.promise('Thinking...', {
-				action: ()=> Promise.timeout(5000)
+			this.$toast.async('Thinking...', {
+				action: ()=> Promise.timeout(100000)
 					.then(()=> succeed ? 'All good' : Promise.reject('Failed'))
 			});
 		},

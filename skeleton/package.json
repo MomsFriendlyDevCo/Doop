@@ -20,7 +20,7 @@
   "homepage": "https://github.com/MomsFriendlyDevCo/{{FIXME:repoBasename}}#readme",
   "engineStrict": true,
   "engines": {
-    "node": ">=14.8.0"
+    "node": ">=14.15.0"
   },
   "dependencies": {
     "@babel/core": "^7.12.3",
@@ -30,7 +30,7 @@
     "@momsfriendlydevco/agents": "^0.0.50",
     "@momsfriendlydevco/cache": "^2.1.3",
     "@momsfriendlydevco/crash": "^0.0.10",
-    "@momsfriendlydevco/email": "^2.3.2",
+    "@momsfriendlydevco/email": "^2.3.4",
     "@momsfriendlydevco/eventer": "^1.5.1",
     "@momsfriendlydevco/exec": "^1.5.2",
     "@momsfriendlydevco/express-middleware-cache": "^1.1.13",

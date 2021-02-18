@@ -5,6 +5,7 @@ config/private.conf.js
 .o
 
 # Dynamic data
+frontend.doop.vue.js
 data/
 dist/
 node_modules/

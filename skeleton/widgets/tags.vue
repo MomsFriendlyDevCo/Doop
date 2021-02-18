@@ -47,7 +47,6 @@ app.component('tags', {
 					if (!tagMeta) throw new Error(`Tag "${v.tag}" is a member of no item in spec!`);
 					return tagMeta.group;
 				})
-				.tap(v => console.log('Computed groups', v))
 				.mapValues((members, group) => {
 					if (!group) return members; // Ignore non-grouped items
 					if (members.length == 1) return members; // Ignore single item groups

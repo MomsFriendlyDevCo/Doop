@@ -27,6 +27,7 @@ app.get('/go/invite/:token', (req, res) => {
 });
 </script>
 
+
 <script lang="js" backend endpoint>
 var _ = require('lodash');
 var email = require('@momsfriendlydevco/email');

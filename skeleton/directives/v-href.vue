@@ -45,7 +45,7 @@ app.directive('v-href', {
 			case 'A':
 				if (!$el.hasClass('v-href')) {
 					$el.addClass('v-href');
-					$el[0].addEventListener('click', e => {
+					$el.first().off('click').on('click', e => {
 						if (settings.prevent) e.preventDefault();
 						if (settings.stop) e.stopPropagation();
 						app.router.go(settings);
@@ -63,6 +63,7 @@ app.directive('v-href', {
 
 					$td
 						.addClass('clickable')
+						.off('click')
 						.on('click', 'a', e => {
 							if (settings.prevent) e.preventDefault();
 							app.router.go(settings);

@@ -12,7 +12,7 @@ app.get('/go/recover/:token', (req, res) => {
 		.then(user => user || Promise.reject('403: Password reset token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken())
-		.then(()=> res.redirect('/recover'))
+		.then(()=> res.redirect('/reset'))
 		// TODO: Wrap error in a page.
 		.catch(res.sendError);
 });

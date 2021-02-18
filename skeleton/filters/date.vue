@@ -30,6 +30,7 @@ app.filter('date', value => {
 		...options // Ability to pass in options as second parameter `string | date({format: 'YYYY'})`
 	};
 
+
 	var dateMoment =
 		isFinite(settings.date) && settings.date > 1000000000 && settings.date < 2000000000 ? moment.unix(settings.date)
 		: moment(settings.date);

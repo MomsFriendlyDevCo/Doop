@@ -102,6 +102,17 @@ app.component({
 		</div>
 		<!-- end row-->
 
+		<div class="row">
+			<div class="col-lg-4 col-xl-4">
+				<div class="card text-center">
+					<div class="card-body">
+						<a href="/reset" class="btn btn-primary btn-lg btn-block">Reset Password</a>
+					</div>
+				</div> <!-- end card-box -->
+			</div> <!-- end col-->
+		</div>
+		<!-- end row-->
+
 		<div v-if="this.$debugging && $session.hasPermission('debug')" class="card">
 			<div class="card-header">
 				Raw data

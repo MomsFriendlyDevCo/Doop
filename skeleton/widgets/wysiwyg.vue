@@ -1,4 +1,4 @@
-<script repack>
+<script lang="js" frontend>
 /**
 * Wrapper for the Quill vue2-editor WYSIWYG wrapper as <wysiwyg/>
 *
@@ -13,7 +13,7 @@
 * />
 */
 import {VueEditor} from 'vue2-editor';
-Vue.component('wysiwyg', {
+app.component('wysiwyg', {
 	components: {VueEditor},
 	props: {
 		value: {type: String},

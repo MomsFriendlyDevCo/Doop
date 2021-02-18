@@ -110,7 +110,7 @@ methods.schedule = function(msg, ...payload) {
 		timer: undefined,
 		reschedule: ()=> {
 			this.$emit.scheduleHandles[msg].timer = setTimeout(()=> {
-				if (!this || !this.$emit.scheduleHandles[msg]) return console.log('Timer event for destroyed VueComponent');
+				if (!this || !this.$emit.scheduleHandles[msg]) return;
 				this.$emit.promise(this.$emit.scheduleHandles[msg].message, ...this.$emit.scheduleHandles[msg].payload)
 					.then(()=> this.$emit.scheduleHandles[msg].reschedule)
 			}, this.$emit.scheduleHandles[msg].interval);

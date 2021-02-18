@@ -1,7 +1,5 @@
 <script lang="js" frontend>
 app.component('error', {
-	data: ()=> ({
-	}),
 });
 </script>
 
