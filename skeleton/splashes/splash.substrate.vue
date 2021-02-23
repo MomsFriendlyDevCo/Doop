@@ -81,10 +81,7 @@ app.component('splashSubstrate', {
 				}
 			}
 
-			if (allDead) {
-				clearInterval(this.boidIntervalTimer);
-				console.log('DONE TIMER');
-			}
+			if (allDead) clearInterval(this.boidIntervalTimer);
 		}, vm.$props.speed);
 	},
 

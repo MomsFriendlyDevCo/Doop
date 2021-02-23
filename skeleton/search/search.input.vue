@@ -372,14 +372,14 @@ app.component('searchInput', {
 		@keydown.tab="setHelperVisibility('toggle')"
 		@keydown.enter="submit"
 		role="search"
-		class="app-search search-input"
+		class="search-input"
 		:class="{
 			'input-search-focused': searchHasFocus,
 			'open': showHelper,
 			'has-content': hasContent,
 		}"
 	>
-		<div class="app-search-box">
+		<div class="search-input-container">
 			<div class="input-group">
 				<input
 					v-model="searchQuery"
@@ -412,7 +412,7 @@ app.component('searchInput', {
 						/>
 					</div>
 				</div>
-				<div v-for="tag in computedTags" :key="tag.tag" class="form-group row">
+				<div v-for="tag in computedTags.filter(ct => ct.type != 'hidden')" :key="tag.tag" class="form-group row">
 					<label class="col-sm-3 col-form-label">{{tag.title}}</label>
 					<div class="col-9 mt-2">
 						<!-- type='digest' {{{ -->
@@ -538,11 +538,10 @@ app.component('searchInput', {
 /* }}} */
 
 /* Search helper {{{ */
-/*
-.navbar-custom .menu-left {
+.topbar .navbar-custom .menu-left {
 	overflow: visible;
 }
-*/
+
 .search-input .search-input-helper {
 	display: none;
 	z-index: 1000;
@@ -557,6 +556,7 @@ app.component('searchInput', {
 	overflow-x: hidden;
 }
 
+/*
 .search-input .search-input-helper .form-control,
 .search-input .search-input-helper .form-control:focus {
 	color: var(--gray-dark);
@@ -571,6 +571,7 @@ app.component('searchInput', {
 	border-left: none;
 	border-right: none;
 }
+*/
 
 /*
 .search-input .search-input-helper label {

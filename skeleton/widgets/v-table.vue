@@ -1,15 +1,18 @@
 <script lang="js" frontend>
 /**
-* Customizable table component with auto data retrieval, pagnination and searching
+* Customizable table component with auto data retrieval, sorting and pagnination.
 *
 * @param {string|Object} url Doop / Monoxide ReST endpoint to connect to, if this is a plain object its assumed to be an Axios compatible request (including a 'url' key) to merge with computed properties such as filters, sorting, pagination
 * @param {string} [sort] Field to sort by, if omitted the rowKey is used instead
 * @param {boolean} [sortAsc=true] When sorting, sort ascending (A-Z)
 * @param {number} [limit=30] How many records to show per page
+* @param {array} [limit_enum=[15, 30, 45, 60, 100]] Options for number of records per page
+* @param {string} [limit_desc="Page"] Placeholder for goto page input
 *
-* @param {boolean|function} [showSearch=true] Show the search interface
-* @param {boolean|function} [showSearchBefore=false] Show the search before date
-* @param {boolean|function} [showSearchAfter=false] Show the search after date
+* @param {boolean|function} [showPagination=true] Show the pagination buttons in footer
+* @param {boolean|function} [showPaginationDropdown=false] Show the limit options dropdown
+* @param {boolean|function} [showPaginationGoto=false] Show number input for going directly to a page
+*
 * @param {boolean} [autoScroll=true] Scroll to the top of the table on refresh
 * @param {string|number} [autoScrollOffset=0] Autoscroll Y offset if it needs manually tweaking, strings are automaticaly converted to numbers
 * @param {boolean} [autoResetPagination=true] Detect URL changes and reset pagination when it occurs (usually the upstream component clobbering the `url` property during a search)
@@ -18,7 +21,7 @@
 * @param {string} [rowKey="_id"] Key to use when looping over data to ensure minimal DOM re-rendering
 * @param {boolean} [loadForeground=false] Use the foreground loader rather than the background one
 *
-* @param {string} [layout="card"] How to layout the element, ENUM: 'card' (use BS4 cards), 'cards' (Convert table to flex boxes), 'none' (use no styling)
+* @param {string} [layout="card"] How to layout the element, ENUM: 'card' (use BS4 cards), 'none' (use no styling)
 * @param {string} [entity="items"] Shorthand to quickly set various text messages (used to compose the textEmpty etc.)
 * @param {string} [textEmpty="No ${entity} found"] Text to display when the table data is empty, use the slot 'state-empty' for more advanced content
 * @param {string} [textLoading="Loading ${entity}..."] Text to display when the table data is loading, use the slot 'state-loading' for more advanced content
@@ -41,7 +44,7 @@
 * @slot state-loading Slot template to display if table data is being loaded
 * @slot state-empty Slot template to display if no data is found to display in the table
 * @slot table-header Slot to template as the header area - wraps pagination and item counts
-* @slot table-header-left Slot to template as the header area (far left) - wraps search controls
+* @slot table-header-left Slot to template as the header area (far left) - displays nothing by default
 * @slot table-header-center Slot to template as the header area (center) - displays nothing by default
 * @slot table-header-right Slot to template as the header area (far right) - displays nothing by default
 * @slot table-footer Slot to template as the footer area - wraps pagination and item counts
@@ -60,23 +63,18 @@ app.component('vTable', {
 		reloadCount: 0, // Number of times we've reloaded, really just used to figure out if this is the first hit
 
 		endpointFilters: {},
-		endpointSearch: '',
 		endpointSort: undefined, // Inherits from $props.sort on initial refresh, changed by user after that
 		endpointSortAsc: undefined, // ^^^
 		endpointPage: 1,
-
-		// Unsubmitted query
-		searchInputs: {
-			text: '',
-			before: null,
-			after: null,
-		}
+		endpointLimit: 30,
 	}},
 	props: {
 		url: {type: [String, Object], required: true},
 		sort: {type: String},
 		sortAsc: {type: Boolean, default: true},
 		limit: {type: Number, default: 30},
+		limit_enum: {type: Array, default: () => [15, 30, 45, 60, 100]},
+		limit_desc: {type: String, default: 'Page'},
 
 		columns: {type: Array, validator: v => v.every(i => i.id)},
 		columnTypes: {type: Object, default() { /* Column types {{{ */ return {
@@ -87,12 +85,11 @@ app.component('vTable', {
 			number: {cellClass: 'col-number text-right'},
 			thumbnail: {cellClass: 'col-thumbnail text-center'},
 			verbs: {cellClass: 'col-verbs text-right'},
-			card: {cellClass: 'col-text text-left card'},
 		}}, minimize: false}, /* }}} */
 
-		showSearch: {type: Boolean, default: true},
-		showSearchBefore: {type: Boolean, default: false},
-		showSearchAfter: {type: Boolean, default: false},
+		showPagination: {type: Boolean, default: true},
+		showPaginationDropdown: {type: Boolean, default: false},
+		showPaginationGoto: {type: Boolean, default: false},
 
 		autoScroll: {type: Boolean, default: true},
 		autoScrollOffset: {type: [Number, String], default: 0},
@@ -109,14 +106,6 @@ app.component('vTable', {
 
 		tableClass: {type: String, default: 'table'},
 	},
-	watch: {
-		url() {
-			if (this.autoResetPagination) {
-				this.$debug('autoResetPagination');
-				this.endpointPage = 1;
-			}
-		},
-	},
 	methods: {
 		/**
 		* Refresh the contents of the table
@@ -127,9 +116,6 @@ app.component('vTable', {
 			if (this.state == 'loading') return; // Already refreshing
 			if (!this.url) return this.$debug('Skipping refresh due to falsy URL'); // No URL available yet, URL is probably dynamic - do nothing
 			if (_.isPlainObject(this.url) && !this.url.url) throw new Error('No "url" key provided in v-table object');
-
-			this.endpointSort = this.sort || this.rowKey; // Set intial sort state
-			this.endpointSortAsc = this.sortAsc;
 
 			// Omit empty keys from url object
 			if (_.isObject(this.url))
@@ -148,14 +134,13 @@ app.component('vTable', {
 				.then(()=> _.merge( // Calculate Axios request object
 					{}, // Empty object so we don't stomp on anything
 					_.isString(this.url) ? {url: this.url} : this.url, // Merge either single URL string OR entire url object
-					{ // Calculate fields from v-table session - filters, search, sorting, pagination
+					{ // Calculate fields from v-table session - filters, sorting, pagination
 						method: 'GET',
 						params: { // Compute AxiosRequest
 							...(this.endpointFilters),
-							...(this.endpointSearch ? {q: this.endpointSearch} : {}), // Add search functionality
 							sort: (this.endpointSortAsc ? '' : '-') + this.endpointSort,
-							limit: this.limit,
-							skip: this.limit * (this.endpointPage - 1), // Since page numbers start at 1 we have to decrement to get the skip value
+							limit: this.endpointLimit,
+							skip: this.endpointLimit * (this.endpointPage - 1), // Since page numbers start at 1 we have to decrement to get the skip value
 						},
 					},
 				))
@@ -215,6 +200,7 @@ app.component('vTable', {
 				this.endpointSort = columnId;
 				this.endpointSortAsc = true;
 			}
+			this.$debug('setSort', columnId, behaviour, this.endpointSort, this.endpointSortAsc);
 
 			return this.refresh();
 		},
@@ -230,19 +216,14 @@ app.component('vTable', {
 			return this.refresh();
 		},
 
-
 		/**
-		* Search by a given fuzzy query
+		* Adjust the number of items per page
+		* @param {number} limit The number of items per page
 		* @returns {Promise} A promise when the data has finished refreshing
 		*/
-		search() {
-			this.$debug('search', this.searchInputs);
-			this.endpointSearch = [
-				this.searchInputs.text,
-				this.$props.showSearchAfter && this.searchInputs.after ? `after:${moment(this.searchInputs.after).format('YYYY-MM-DD')}` : '',
-				this.$props.showSearchBefore && this.searchInputs.before ? `before:${moment(this.searchInputs.before).format('YYYY-MM-DD')}` : '',
-			].filter(i => i).join(' ');
-			return this.refresh();
+		setLimit(limit) {
+			this.endpointLimit = limit;
+			return this.setPage(1);
 		},
 
 		/**
@@ -268,41 +249,44 @@ app.component('vTable', {
 			});
 		},
 	},
+	watch: {
+		url() {
+			if (this.autoResetPagination) {
+				this.$debug('autoResetPagination');
+				this.endpointPage = 1;
+			}
+			this.refresh();
+		},
+		limit: {
+			immediate: true,
+			handler() {
+				this.endpointPage = 1;
+				this.endpointLimit = this.limit;
+				this.refresh();
+			},
+		},
+	},
 	created() {
 		this.$debugging = true;
-		this.$watchAll(['url', 'limit', 'columns'], this.refresh, {immediate: true, deep: true});
 
-		// TODO: Debounce
-		// Add searchDebounced() methods which is the same as search but... well... debounced
-		//this.searchDebounced = _.debounce(this.search, this.searchDebounce);
+		// FIXME: If passed a `url` with `sort` defined this may result in 2 sort params being added.
+		this.endpointSort = this.sort || this.rowKey; // Set intial sort state
+		this.endpointSortAsc = this.sortAsc;
 	},
 });
 </script>
 
 <template>
-	<div v-bind="$attrs" class="v-table" :class="layout">
+	<div v-bind="$attrs" class="v-table" :class="layout == 'card' && 'card'">
 		<!-- Header {{{ -->
-		<div :class="layout != 'card' && 'card'">
-			<div class="card-header">
-				<slot name="table-header">
-					<div class="v-table-header">
-						<slot name="table-header-left">
-							<form v-if="showSearch" @submit.prevent="search()" class="form-inline">
-								<div class="input-group">
-									<input v-model.trim="searchInputs.text" type="search" class="form-control" :placeholder="`Search ${entity}...`"/>
-									<input v-if="showSearchAfter" v-model="searchInputs.after" @change="search()" type="date" class="form-control" v-tooltip="'After'"/>
-									<input v-if="showSearchBefore" v-model="searchInputs.before" @change="search()" type="date" class="form-control" v-tooltip="'Before'"/>
-									<div class="input-group-append">
-										<a @click="search()" class="btn btn-light far fa-search"/>
-									</div>
-								</div>
-							</form>
-						</slot>
-						<slot name="table-header-center"/>
-						<slot name="table-header-right"/>
-					</div>
-				</slot>
-			</div>
+		<div :class="layout == 'card' && 'card-header'">
+			<slot name="table-header">
+				<div class="v-table-header">
+					<slot name="table-header-left"/>
+					<slot name="table-header-center"/>
+					<slot name="table-header-right"/>
+				</div>
+			</slot>
 		</div>
 		<!-- }}} -->
 		<!-- Body loading overlay {{{ -->
@@ -322,7 +306,7 @@ app.component('vTable', {
 			<table v-if="state == 'ready' || (state == 'loading' && rows && rows.length > 0)" :class="tableClass">
 				<thead>
 					<tr>
-						<th v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type] && columnTypes[col.type].cellClass">
+						<th v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && _.get(columnTypes, [col.type, 'cellClass'])">
 							<a @click="setSort(col.id, 'toggle')" :class="!col.sortable && 'no-click'">
 								{{col.title || _.startCase(col .id)}}
 								<i v-if="endpointSort == col.id" :class="endpointSortAsc ? 'far fa-sort-amount-down-alt text-primary' : 'far fa-sort-amount-up-alt text-primary'"/>
@@ -332,7 +316,7 @@ app.component('vTable', {
 				</thead>
 				<tbody>
 					<tr v-for="row in rows" :key="row[rowKey]">
-						<td v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && columnTypes[col.type] && columnTypes[col.type].cellClass">
+						<td v-for="col in columns" :key="col.id" :class="col.cellClass || col.type && _.get(columnTypes, [col.type, 'cellClass'])">
 							<a v-href="cellHref ? cellHref(row) : false" :class="!cellHref && 'no-click'">
 								<slot :name="col.slot || _.camelCase(col.id)" :row="row">
 									{{format(_.get(row, col.id), col.format)}}
@@ -365,20 +349,48 @@ app.component('vTable', {
 			<slot name="table-footer">
 				<div class="v-table-footer">
 					<slot name="table-footer-left">
-						<pagination
-							:value="endpointPage"
-							:max="pages"
-							@change="setPage($event).then(scrollIntoView)"
-						/>
+						<div class="v-table-pagination" v-if="showPagination">
+							<pagination
+								:value="endpointPage"
+								:max="pages"
+								@change="setPage($event).then(scrollIntoView)"
+							/>
+
+							<!-- Goto page {{{ -->
+							<div v-if="showPaginationGoto" class="input-group ml-2" v-tooltip="'Go to page'">
+								<input type="number" class="form-control" min="1" step="1"
+									:max="pages"
+									:placeholder="limit_desc"
+									@keyup.enter="setPage(parseInt($event.target.value)).then(scrollIntoView)"
+								/>
+							</div>
+							<!-- }}} -->
+
+							<!-- Per page {{{ -->
+							<div v-if="showPaginationDropdown" class="dropdown ml-2" v-tooltip="'Items per page'">
+								<a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									{{endpointLimit}}
+								</a>
+
+								<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+									<a v-for="(option, index) in limit_enum" :key="index" class="dropdown-item"
+										href="" @click.prevent="setLimit(option).then(scrollIntoView)"
+										:class="{ active:  (option == endpointLimit)}">
+										{{option}}
+									</a>
+								</div>
+							</div>
+							<!-- }}} -->
+						</div>
 					</slot>
 					<slot name="table-footer-center"/>
 					<slot name="table-footer-right">
 						<div class="text-muted">
 							Displaying
 							{{entity}}
-							{{limit * (endpointPage-1) + 1 | number}}
+							{{endpointLimit * (endpointPage-1) + 1 | number}}
 							-
-							{{Math.min(rowCount, limit * (endpointPage -1) + 1) | number}}
+							{{Math.min(rowCount, endpointLimit * (endpointPage -1) + 1) | number}}
 							of
 							{{rowCount | number}}
 						</div>
@@ -423,30 +435,5 @@ app.component('vTable', {
 .v-table .v-table-overlay-loading-spinner {
 	margin-bottom: 25px;
 	font-size: 120px;
-}
-
-.v-table-header {
-	display: flex;
-	justify-content: space-between;
-}
-
-.v-table.cards table {
-	display: block;
-}
-
-.v-table.cards thead {
-	display: none;
-}
-
-.v-table.cards tbody {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-.v-table.cards tr {
-	flex: 1;
-	min-width: 50%;
-	min-height: 320px;
-	overflow: hidden;
 }
 </style>

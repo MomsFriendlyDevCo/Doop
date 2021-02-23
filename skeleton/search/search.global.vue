@@ -1,6 +1,4 @@
 <script lang="js" frontend>
-import orderUtils from '/orders/orderUtils';
-
 /**
 * Wrapped version of the searchInput VueComponent instance that works specifically for global searches
 */
@@ -19,40 +17,6 @@ app.component('searchGlobal', {
 					selectText: 'Search users...',
 					title: 'Select user...',
 				},
-			},
-			{
-				title: 'Customer',
-				tag: 'customer',
-				type: 'digest',
-				digest: {
-					field: 'name',
-					url: '/api/customers',
-					iconValid: 'far fa-user',
-					textInvalid: 'Invalid customer',
-					selectText: 'Search customers...',
-					title: 'Search customers',
-					searchMethod: 'q',
-				},
-			},
-			{
-				title: 'Order date',
-				type: 'dateRange',
-				tag: 'date',
-				startOnlyTag: 'after',
-				endOnlyTag: 'before',
-			},
-			{
-				title: 'Status',
-				type: 'checkboxes',
-				tag: 'is',
-				options: [
-					'invoice',
-					'processing',
-					'completed',
-					'returnProcessing',
-					'returnCompleted',
-					'deleted',
-				],
 			},
 		],
 	}},

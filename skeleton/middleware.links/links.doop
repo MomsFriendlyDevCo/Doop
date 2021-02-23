@@ -10,7 +10,7 @@ app.middleware.db.schema('links', {
 });
 </script>
 
-<script lang="js" backend on="endpoints">
+<script lang="js" backend endpoint>
 app.use('/api/links/:id?', app.middleware.express.rest('links', {
 	get: app.middleware.express.isUser(),
 	query: app.middleware.express.isUser(),

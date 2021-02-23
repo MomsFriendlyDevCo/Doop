@@ -10,9 +10,14 @@ gulp.task.once('load:app.db', 'load:app', ()=>
 		})
 		.then(()=> hasLoaded = true)
 		.then(()=> {
-			gulp.on('finish', ()=> // Clean up the database connection when we finish
-				mongoosy.disconnect()
-					.then(()=> gulp.log('DB Disconnected'))
+			gulp.on('finish', ()=> Promise.all([// Clean up the database connection when we finish
+					mongoosy.disconnect()
+						.then(()=> gulp.log('DB Disconnected')),
+
+					app.dbwp && app.dbwp.destroy
+						? app.dbwp.destroy().then(()=> gulp.log('DBWP Disconnected'))
+						: null,
+				])
 			);
 		})
 		.then(()=> app.emit('dbInit'))

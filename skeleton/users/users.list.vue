@@ -55,7 +55,6 @@ app.component({
 			</template>
 			<template #verbs="{row}">
 				<div class="btn-group">
-					<i @click.prevent.stop="userOrders(row)" class="btn btn-light btn-hover-primary far fa-clipboard-list" v-tooltip="'Show user orders'"/>
 					<i v-if="row.status == 'active'" @click.prevent.stop="setStatus(row, 'deleted')" class="btn btn-light btn-hover-danger far fa-trash" v-tooltip="'Disable this user account'"/>
 					<i v-else-if="row.status == 'deleted'" @click.prevent.stop="setStatus(row, 'active')" class="btn btn-light far fa-undo" v-tooltip="'Re-enable this user account'"/>
 				</div>

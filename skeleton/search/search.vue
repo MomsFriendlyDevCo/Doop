@@ -19,16 +19,16 @@ app.service('$search', function() {
 	$search.parseTags = function(query = '') {
 		var fuzzyQuery = []; // Extracted fuzzy query parts, extracted from all queryHash parts that don't look like tags
 
-		return _.chain(query) // Break query into a lookup hash of tag:values
-			.thru(terms => stringSplitBy(terms, /\s+/, {
-				ignore: ['"', "'", '()'], // Preserve compound terms with speachmarks + brackets
-				escape: true, // Allow escaping of terms
-			}))
-			.filter(v => {
-				if (/:/.test(v)) return true;
-				fuzzyQuery.push(v); // Not a tag - add to fuzzy query part
-				return false;
-			})
+		var terms = stringSplitBy(query, /\s+/, {
+			ignore: ['"', "'", '()'], // Preserve compound terms with speachmarks + brackets
+			escape: true, // Allow escaping of terms
+		});
+
+		terms.forEach(v => {
+			if (!/:/.test(v)) fuzzyQuery.push(v); // Not a tag - add to fuzzy query part
+		});
+
+		return _.chain(terms).filter(v => (/:/.test(v)))
 			.map(v => v.split(/:/, 2))
 			.fromPairs()
 			.set('$fuzzy', fuzzyQuery.join(' '))

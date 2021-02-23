@@ -3,22 +3,47 @@ app.component({
 	route: '/users/:id',
 	data() { return {
 		data: undefined,
+		meta: undefined,
 		spec: {
 			type: 'mgContainer',
 			layout: 'card',
 			items: [
 				{
+					type: 'mgChoiceDropdown',
+					id: 'status',
+					title: 'Status',
+					required: true,
+					enum: ['Inactive', 'Active', 'Deleted'],
+				},
+				{
+					type: 'mgChoiceDropdown',
+					id: 'role',
+					title: 'Role',
+					required: true,
+					enum: ['User', 'Admin', 'Root'],
+				},
+				{
+					type: 'mgEmail',
+					id: 'email',
+					title: 'Email',
+					readonly: true,
+					// TODO: Support functions?
+					//readonly: () => this.$config.session.signup.emailAsUsername,
+				},
+				/*
+				{
+					type: 'mgText',
+					id: 'username',
+					title: 'Username',
+					showIf: () => !this.$config.session.signup.emailAsUsername,
+					readonly: true,
+				},
+				*/
+				{
 					type: 'mgText',
 					id: 'name',
 					title: 'Name',
 					required: true,
-				},
-				{
-					type: 'mgPermissionsList',
-					id: 'permissions',
-					title: 'Permissions',
-					enum: [],
-					showIf: () => this.$session.hasPermission('usersPromote')
 				},
 			]
 		},
@@ -33,22 +58,7 @@ app.component({
 				.then(res => this.data = res.data)
 				// Loading full schema for permissions regardless of what keys user has.
 				.then(()=> this.$http.get('/api/users/meta'))
-				.then(res => {
-					var prefix = 'permissions.';
-					for (var k in res.data) {
-						if (k.indexOf(prefix) !== 0) continue;
-
-						var key = k.substr(prefix.length);
-						this.spec.items[1].enum.push({
-							id: key,
-							title: _.startCase(key)
-								.split(' ')
-								.map(word => `${word} >`)
-								.join(' ')
-								.replace(/ >$/, ''),
-						});
-					}
-				})
+				.then(res => this.meta = res.data})
 				.then(()=> this.$sitemap.setTitle(this.data.name))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop())
@@ -90,6 +100,25 @@ app.component({
 			@changeItem="$setPath($data.data, $event.path, $event.value)"
 		/>
 
+		<div v-if="$session.hasPermission('usersPromote')">
+			<div class="col-12">
+				<!-- Card: Permissions {{{ -->
+				<div class="card">
+					<div class="card-header">Permissions</div>
+					<div class="card-body">
+						<permissions-list
+							v-if="$data.meta"
+							:selected="$data.data.permissions"
+							:spec="$data.meta"
+							spec-prefix="permissions."
+							@change="data.permissions = $event"
+						/>
+					</div>
+				</div>
+				<!-- }}} -->
+			</div>
+		</div>
+
 		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
@@ -99,6 +128,5 @@ app.component({
 				<pre>{{$data}}</pre>
 			</div>
 		</div>
-
 	</form>
 </template>

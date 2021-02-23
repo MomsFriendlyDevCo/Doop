@@ -30,6 +30,41 @@ app.all('/api/debug/http/500', app.middleware.express.isProduction(false), funct
 
 <script lang="js" backend endpoint>
 /**
+* Throws various 4* errors followed by 200 (one process state only)
+*/
+var codeOffset = 0;
+var codes = [400, 401, 402, 405, 406, 409, 412, 200]; // Omit 403, 404 as they tend to be fatal
+app.all('/api/debug/http/random', function(req, res) {
+	var code = codes[codeOffset++];
+	if (codeOffset > codes.length) [code, codeOffset] = [codes[0], 0];
+
+	if (code == 200) {
+		res.send('OK');
+	} else {
+		res.sendError(`${code}: Randomized error code ${code}`);
+	}
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+
+/**
+* Throws various 400 90% of the time with 200 10% of the time
+*/
+app.all('/api/debug/http/faulty', function(req, res) {
+	if (_.random(0, 10) == 10) {
+		res.send('OK');
+	} else {
+		res.sendError('400: Faulty endpoint test');
+	}
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
 * Crash the Node instance
 */
 app.all('/api/debug/crash', app.middleware.express.isProduction(false), function(req, res) {
@@ -61,12 +96,14 @@ var crypto = require('crypto');
 /**
 * Generate a Bcyrpt compatible password from a string
 * @param {string} req.query.pass Password string to encrypt
+* @param {string} [req.query.name] Name to generate a profile for
+* @param {string} [req.query.email] Email to generate a profile for
 */
 app.get('/api/debug/pass', app.middleware.express.isProduction(false), (req, res) => {
 	if (!req.query.pass) return res.sendError('400: No pass specified');
 	var salt = crypto.randomBytes(16).toString('base64');
 	var saltBuffer = Buffer.from(salt, 'base64');
 	var hash = crypto.pbkdf2Sync(req.query.pass, saltBuffer, 10000, 64, 'sha512').toString('base64');
-	res.send({salt, hash});
+	res.send({_passsalt: salt, _passhash: hash});
 });
 </script>

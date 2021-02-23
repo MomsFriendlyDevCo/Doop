@@ -52,7 +52,6 @@ app.directive('v-dropGroup', {
 						})
 				})
 				.on('dragleave', e => {
-					console.log('release closest');
 					childTargets.forEach(child => child.$child.removeClass('drop-closest'));
 				})
 				.on('dragover', e => {

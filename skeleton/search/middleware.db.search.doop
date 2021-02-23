@@ -125,10 +125,7 @@ app.middleware.db.search = (schema, options) => {
 			))
 				.then(tokens => tokens.map(token => ({...token, value: settings.mutateTokens(token.value)}))) // Mutate tokens
 				.then(tokens => tokens.filter(token => token.value)) // Remove falsy tokens
-				.then(tokens => {
-					console.log('set', settings.path, tokens);
-					_.set(doc, settings.path, tokens);
-				})
+				.then(tokens => _.set(doc, settings.path, tokens))
 				.then(()=> next())
 				.catch(next);
 		};
@@ -161,7 +158,6 @@ app.middleware.db.search = (schema, options) => {
 	* @returns {array<Object>} An array of matching documents with the meta `_score` field
 	*/
 	schema.static('search', function(terms, options) {
-		console.log('search', terms, options);
 		var searchStart = Date.now();
 		var searchSettings = {
 			filter: undefined,
@@ -319,7 +315,6 @@ app.middleware.db.search = (schema, options) => {
 	// }}}
 
 	// TODO: Inject universal search engine expose if enabled {{{
-	/*
 	if (app.config.search?.exposeEngine) {
 		app.log('Exposing search engine as', app.log.colors.cyan(app.config.publicUrl));
 		app.config.layout.headInject.push(
@@ -338,7 +333,6 @@ app.middleware.db.search = (schema, options) => {
 			+ '</script>'
 		);
 	}
-	*/
 	// }}}
 };
 </script>
