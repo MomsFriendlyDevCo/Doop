@@ -3,8 +3,8 @@
 </p>
 <br><br>
 
-Doop!
-=====
+Doop@3!
+=======
 The MEVN micro-framework used by [MomsFriendlyDevCo](http://mfdc.biz).
 
 **If we hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate - Zapp Brannigan**
@@ -86,7 +86,7 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/tests/`                      | Optional testing files
 | `/theme/bootstrap-extensions/` | Various CSS files which extend Bootstrap@4
 | `/theme/`                      | Site theme
-| `/theme/theme-fixes/`          | Various CSS files which fix issues with the main theme
+| `/theme/theme-overrides/`      | Various CSS files which fix issues with the main theme
 | `/users`                       | User schemas and management
 | `/vendors`                     | Externally supported vendor scripts
 | `/widgets`                     | Shared front-end Vue services
