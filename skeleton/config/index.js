@@ -163,6 +163,12 @@ module.exports = {
 			'users',
 		],
 	},
+	logRocket: {
+		enabled: false,
+		global: false, // Set to true to always enable, if false the permission below is used
+		permission: 'trackingLogrocket', // If {global:false} check this user permission before enabling
+		profile: '{{FIXME:logRocketProfile}}',
+	},
 	mailgun: {
 		apiKey: '{{FIXME:mailgunApiKey}}',
 		domain: 'mfdc.dev'

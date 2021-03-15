@@ -1,0 +1,21 @@
+<script lang="js" backend on="middleware">
+if (!app.config.logRocket.enabled) return;
+
+var logRocketHeaders = [
+	'<script src="https://cdn.lr-ingest.io/LogRocket.min.js" crossorigin="anonymous"></script>',
+	`<script>window.LogRocket && window.LogRocket.init('${app.config.logRocket.profile}');</script>`,
+];
+
+if (app.config.logRocket.global) {
+	app.log('Enabling LogRocket globally as', app.log.colors.cyan(app.config.logRocket.profile));
+	app.config.layout.headInject.push(...logRocketHeaders);
+} else {
+	app.log('Enabling LogRocket per-user as', app.log.colors.cyan(app.config.logRocket.profile));
+	app.use((req, res, next) => {
+		if (req.user && req.user.hasPermission(app.config.logRocket.permission)) {
+			req.layoutHeaders = (app.layoutHeaders ?? []).concat(logRocketHeaders);
+		}
+		next();
+	});
+}
+</script>
