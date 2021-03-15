@@ -51,13 +51,13 @@ app.component('pagination', {
 <template>
 	<nav>
 		<ul class="pagination">
-			<li v-if="viewFirst" class="page-item" :class="value <= min && 'disabled'"><a class="page-link" @click="set('first')"><i class="far fa-arrow-alt-to-left"/></a></li>
-			<li v-if="viewPrevious" class="page-item" :class="value <= min && 'disabled'"><a class="page-link" @click="set('previous')"><i class="far fa-arrow-alt-left"/></a></li>
+			<li v-if="viewFirst" class="page-item" :class="value <= min && 'disabled'"><a class="page-link" @click="set('first')"><i class="fa fa-angle-double-left"/></a></li>
+			<li v-if="viewPrevious" class="page-item" :class="value <= min && 'disabled'"><a class="page-link" @click="set('previous')"><i class="fa fa-angle-left"/></a></li>
 			<li v-for="page in pagesBefore" :key="page" class="page-item"><a class="page-link" @click="set(page)" v-text="page"/></li>
 			<li class="page-item active"><a class="page-link" @click="set(value)" v-text="value"/></li>
 			<li v-for="page in pagesAfter" :key="page" class="page-item"><a class="page-link" @click="set(page)" v-text="page"/></li>
-			<li v-if="viewNext" class="page-item" :class="value >= max && 'disabled'"><a class="page-link" @click="set('next')"><i class="far fa-arrow-alt-right"/></a></li>
-			<li v-if="viewLast" class="page-item" :class="value >= max && 'disabled'"><a class="page-link" @click="set('last')"><i class="far fa-arrow-alt-to-right"/></a></li>
+			<li v-if="viewNext" class="page-item" :class="value >= max && 'disabled'"><a class="page-link" @click="set('next')"><i class="fa fa-angle-right"/></a></li>
+			<li v-if="viewLast" class="page-item" :class="value >= max && 'disabled'"><a class="page-link" @click="set('last')"><i class="fa fa-angle-double-right"/></a></li>
 		</ul>
 	</nav>
 </template>

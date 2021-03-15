@@ -1,5 +1,8 @@
 <script lang="js" backend schema>
-var Users = app.middleware.db.schema('users', {
+var crypto = require('crypto');
+var _ = require('lodash');
+
+app.middleware.db.schema('users', {
 	created: {type: Date, default: ()=> new Date()},
 	lastLogin: {type: Date, default: ()=> new Date()},
 	username: {type: String, required: true, index: {unique: true}},
@@ -8,10 +11,13 @@ var Users = app.middleware.db.schema('users', {
 	_passhash2: {type: String},
 	_passsalt: {type: String},
 	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
-	_tokenPurpose: {type: String, enum: [null, 'invite', 'login', 'recover', 'signup']},
+	_tokenPurpose: {type: String, enum: ['invite', 'login', 'recover', 'signup']},
 	name: {type: String},
 	status: {type: String, enum: ['inactive', 'active', 'deleted'], default: 'inactive', index: true},
 	settings: {},
+	apiKeys: [{
+		key: {type: 'string', index: {unqiue: true}},
+	}],
 	permissions: {
 		debug: {type: Boolean, default: false, permissionGroups: ['Debug Testers']},
 	},
@@ -19,27 +25,24 @@ var Users = app.middleware.db.schema('users', {
 		account: {type: 'pointer', ref: 'accounts'},
 		status: {type: 'string', enum: ['active', 'pending'], default: 'active'},
 	}],
-});
+})
+
 
 // Logins + user passwords {{{
-var crypto = require('crypto');
-
 // FIXME: Method works still? Not 'static()'? Why 'static()' in "search"?
-Users
-	.method('encryptPass', function(salt, password) {
-		var saltBuffer = Buffer.from(salt, 'base64');
-		return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64, 'sha512').toString('base64');
-	})
-	.method('checkPassword', function(candidate) {
-		return Promise.resolve(this.encryptPass(this._passsalt || '', candidate) == this._passhash);
-	});
+.method('encryptPass', function(salt, password) {
+	var saltBuffer = Buffer.from(salt, 'base64');
+	return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64, 'sha512').toString('base64');
+})
+.method('checkPassword', function(candidate) {
+	return Promise.resolve(this.encryptPass(this._passsalt || '', candidate) == this._passhash);
+})
 
 // Allow write but not read
-Users
-	.virtual('password', null, function(password) {
-		this._passsalt = crypto.randomBytes(16).toString('base64');
-		this._passhash = this.encryptPass(this._passsalt, password);
-	});
+.virtual('password', null, function(password) {
+	this._passsalt = crypto.randomBytes(16).toString('base64');
+	this._passhash = this.encryptPass(this._passsalt, password);
+})
 
 /**
 * Login a user and mutate the req object with cookie / header with session information
@@ -47,7 +50,7 @@ Users
 * @param {Object} res The express response object which will be mutated
 * @returns {Promise<Object>} A promise which will return when the login sequence completes, the return value is an object which should be passed to res.send() when completing the transaction
 */
-Users.method('logIn', function(res) {
+.method('logIn', function(res) {
 	this.lastLogin = new Date();
 
 	return Promise.resolve()
@@ -68,18 +71,18 @@ Users.method('logIn', function(res) {
 			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}, app.config.session.auth.expiry).then(()=> output);
 		})
 		// }}}
-});
+})
 // }}}
 
 // User tokens {{{
-var _ = require('lodash');
+
 /**
 * Set the token method on a user
 * NOTE: Also saves the user {_token, _tokenPurpose} fields
 * @param {string} purpose The purpose of the token, stops tokens being used for cross purposes. Must conform to a valid enum in the _tokenPurpose field
 * @returns {Promise} A promise which will resolve with the allocated user token
 */
-Users.method('setToken', function(purpose) {
+.method('setToken', function(purpose) {
 	var tries = 0;
 	var maxTries = 20;
 	return new Promise((resolve, reject) => {
@@ -105,34 +108,34 @@ Users.method('setToken', function(purpose) {
 	});
 })
 
-Users.method('releaseToken', function() {
+.method('releaseToken', function() {
 	//app.log('releaseToken');
 	this._token = undefined;
 	this._tokenPurpose = undefined;
 	return this.save();
-});
+})
 // }}}
 
 // TODO: Ensure user is not adjusting their own permissions on "save"
 
 // Alias username/email when using email as username {{{
-Users.pre('validate', function(next) {
+.pre('validate', function(next) {
 	if (app.config.session.signup.emailAsUsername) this.username = this.email;
 	next();
-});
+})
 // }}}
 
 // Force username to ALWAYS be lower case {{{
-Users.plugin(app.middleware.db.replace, {
+.plugin(app.middleware.db.replace, {
 	email: val => val && val.toLowerCase(),
 	username: val => val && val.toLowerCase(),
-});
+})
 // }}}
 
 // Timestamp status tracking {{{
-Users.plugin(app.middleware.db.timestamps, {
+.plugin(app.middleware.db.timestamps, {
 	key: 'status'
-});
+})
 // }}}
 
 // Permission Utilities {{{ */
@@ -142,7 +145,7 @@ Users.plugin(app.middleware.db.timestamps, {
 * @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
 * @returns boolean True if the user has all permissions
 */
-Users.method('hasPermission', function(permission) {
+.method('hasPermission', function(permission) {
 	return app.utils.permissions.has(permission, this.permissions);
 });
 // }}}
@@ -154,7 +157,7 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
 	get: [
 		(req, res, next) => {
-			req.query.select = '_id,username,name,email,emails,company,abn,billing,shipping,totalDiscount,minPayment,settings,type'; // Force safe selection for Users
+			req.query.select = '_id,username,name,email'; // Force safe selection for Users
 			if (req.user.permissions.usersEdit) req.query.select += ',permissions'; // Can also edit other users permissions
 			next();
 		},

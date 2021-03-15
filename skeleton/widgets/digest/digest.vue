@@ -26,7 +26,7 @@
 * @slot [display] What to display when data is loaded. Bindings are `{config, data, displayContent}`
 *
 * @example Fetch a specific URL and extract a key
-* <digest url="/api/some/url" key="widgets"/>
+* <digest url="/api/some/url"/>
 *
 * @example Force all child digests to be invalid
 * this.$emit.down('digest.force.valid', false)

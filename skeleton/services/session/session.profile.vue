@@ -44,7 +44,7 @@ app.component({
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
 				.then(()=> this.$http.get(`/api/session`))
-				.then(res => this.data = res.data)
+				.then(({data}) => this.data = data)
 				.then(()=> this.$sitemap.setTitle(this.data.name || this.data.username || this.data.email))
 				.catch(this.$toast.catch)
 				.finally(()=> this.$loader.stop());

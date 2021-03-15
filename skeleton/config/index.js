@@ -209,7 +209,8 @@ module.exports = {
 		auth: {
 			preference: 'cookie', // Which method should the front end prefer when logging in, ENUM: 'cookie', 'authHeader'
 			bypassEmptyPassword: true, // Allow login the user has a blank password in the DB (disabled in prod obviously)
-			allowPost: false, // Allow POST login credentials to /login
+			allowPost: true, // Allow POST login credentials to /login
+			expiry: '6w', // Timestring compatible value to retain user login (cache)
 		},
 		authHeader: {
 			enabled: true, // Support 'auth' header token method in backend
@@ -234,11 +235,20 @@ module.exports = {
 				// debug: true,
 			},
 		},
+		login: {
+			enabled: true,
+		},
+		invite: {
+			enabled: true,
+		},
 		recover: {
 			enabled: true,
 		},
 		signup: {
-			enabled: true,
+			enabled: false,
+			// FIXME: Does this belong under "signup"? Considering it may be enabled when signup is disabled.
+			emailAsUsername: true,
+			// TODO: allowedDomains
 		},
 	},
 	ssl: {

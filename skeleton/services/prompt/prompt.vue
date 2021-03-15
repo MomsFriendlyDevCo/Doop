@@ -303,6 +303,7 @@ app.service('$prompt', function() {
 
 		this.$debug('Close modal', {status: ok ? 'resolve' : 'reject', payload});
 
+		// FIXME: Single field responses are being returned as Object.
 		$prompt.settings.defer[ok ? 'resolve' : 'reject'](payload);
 
 		// Force a specific modal handle to close

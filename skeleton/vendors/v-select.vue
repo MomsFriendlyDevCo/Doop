@@ -27,6 +27,6 @@ app.component('v-select', vSelect);
 
 /* Copy background color from theme */
 .vs__dropdown-option--highlight {
-	background: var(--main);
+	background: var(--primary);
 }
 </style>
