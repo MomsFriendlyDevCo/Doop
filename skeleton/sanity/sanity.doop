@@ -1,0 +1,76 @@
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+var basicAuth = require('express-basic-auth');
+var fspath = require('path');
+var glob = require('globby');
+
+/**
+* Compute an array of sanity checks to run from all fiels in /sanity/*.js
+* @type {array}
+*/
+var sanityChecks = glob.sync(`${app.config.paths.root}/sanity/*.js`)
+	.map(path => {
+		var id = fspath.basename(path, '.js');
+		var func = require(path);
+		if (typeof func != 'function') throw new Error(`Recieved non-function return in "${path}" - expected a function or promise factory`);
+
+		return {id, func};
+	})
+	.sort((a, b) => a.id > b.id ? 1 : -1)
+
+app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sanityChecks.map(s => s.id).map(i => app.log.colors.cyan(i)).join(', '));
+
+
+/**
+* Endpoint for basic server santity checks
+* This endpoint runs all /sanity/*.js scripts scripts (resolving promises) and only returns `"SANITY:OK"` if everything passes, otherwise errors are shown
+*
+* Workers can:
+*   - Throw - in which case the test is marked as failed with an optional string payload
+*   - Resolve - in which case they are marked as passed sanity tests with an optional string payload
+*   - Resolve as an object - The object keys are used as the test names with the values being optional string payloads
+*
+* @param {string} [req.params.test] Specific test to run, if omitted all are run
+*/
+app.get(
+	'/api/sanity/:test?',
+	basicAuth({
+		challenge: true,
+		realm: app.config.title,
+		users: {[app.config.sanity.user]: app.config.sanity.pass},
+	}),
+	(req, res) => {
+		res.type('text');
+
+		Promise.all(
+			sanityChecks
+				.filter(s => !req.params.test || s.id == req.params.test)
+				.map(s => Promise.resolve(s.func()) // Exec sanity check
+					.then(result => {
+						if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
+							return _.map(result, (v, k) => `PASS ${k} - ${v || 'OK'}`);
+						} else {
+							return `PASS ${s.id} - ${m || 'OK'}`;
+						}
+					})
+					.catch(e => {
+						app.log.warn.as(`sanity/${s.id}`, e);
+						return `FAIL ${s.id} - ${e.toString()}`;
+					})
+				)
+		)
+			.then(results => _.flatten(results))
+			.then(results => {
+				var fail = results.some(r => typeof r == 'string' && r.startsWith('FAIL '));
+
+				if (fail) res.status(500);
+
+				res.send(
+					(fail ? 'SANITY:FAIL\n' : 'SANITY:OK\n')
+					+ results.join('\n')
+				);
+			})
+			.catch(e => res.send(`SANITY:FAULT:${e.toString()}`)) // Generic fallback
+	}
+);
+</script>

@@ -1,0 +1,33 @@
+<script lang="js" backend on="middleware">
+var _ = require('lodash');
+
+app.middleware.express.isNewer = options => {
+	var settings = {
+		collection: undefined,
+		docField: 'created',
+		bodyField: 'created',
+		param: 'id',
+		asType: 'date',
+		error: '409: Document too old',
+		onError: (docField, reqField, doc) => app.log('Rejected older document update on', app.log.colors.cyan(doc._id), 'due to age', `mongoDoc.${settings.docField}=`, docField, `req.body.${settings.bodyField}=`, reqField),
+		...options,
+	};
+	if (!settings.collection) throw new Error('Collection required for app.middleware.express.isNewer()');
+
+	return (req, res, next) => {
+		db[settings.collection].findById(req.params[settings.param]).select(settings.docField)
+			.then(doc => {
+				var docField =
+					settings.asType == 'date' && _.isString(doc[settings.docField]) ? new Date(doc[settings.docField])
+					: doc[settings.docField];
+
+				var reqField =
+					settings.asType == 'date' && _.isString(req.body[settings.bodyField]) ? new Date(req.body[settings.bodyField])
+					: req.body[settings.bodyField];
+
+				if (reqField < docField) res.sendError(settings.error);
+			})
+			.then(()=> next())
+	};
+};
+</script>

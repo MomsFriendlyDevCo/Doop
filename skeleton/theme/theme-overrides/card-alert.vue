@@ -1,0 +1,6 @@
+<style>
+/* Cards with immediate alert children look weird */
+.card > .alert {
+	margin: 20px;
+}
+</style>

@@ -1,0 +1,51 @@
+<script lang="js" backend on="middleware">
+/**
+* Express middleware takes multiple other middleware entries and returns if ANY of them succeed
+* @param {Array <function>} middlewares Array of middleware items to run, each is expected to either call res.send(), res.sendError() or next([err])
+* @param {function|string|number} [failHandler] Either a function to call or string (which is wrapped in res.sendError()) if all the middlewares fail, if omitted the FIRST error is used (even if the middleware items are fired out of sequence)
+* @returns {ExpressMiddleware} An express middleware layer
+*
+* @example Allow access only if a project is active or the user is root
+* app.get('/api/projects/:id', app.middleware.express.or([
+* 	app.middleware.express.isRoot(),
+* 	app.middleware.express.isProjectActive(),
+* ], '403: The project is not active and you are not root'), (req, res) => ...);
+*/
+
+app.middleware.express.or = (middlewares, failHandler) => (req, res, next) => {
+	var waitingCount = middlewares.length;
+	var calledNext = false; // Whether we have already called next() due to one middleware layer succeeding
+	var errors = Array.from(new Array(waitingCount), ()=> null); // Populate the error array (so we can direct sett error messages later)
+
+	var middlewareOrHandler = (offset, err) => {
+		waitingCount--;
+		if (err) errors[offset] = err;
+
+		if (!err) { // This middleware item succeeded
+			calledNext = true;
+			next();
+		} else if (waitingCount <= 0 && !calledNext) { // Nothing else to wait for and none of the middlewares succeded
+			if (!failHandler) { // No handler, use first truthy
+				res.sendError(errors.find(e => e) || '403: Permission denied');
+			} else if (typeof failHandler == 'number' || typeof failHandler == 'string') {
+				res.sendError(failHandler);
+			} else if (typeof failHandler == 'function') {
+				failHandler(req, res);
+			} else {
+				throw new Error('Unknown failHandler for app.middleware.express.or()');
+			}
+		}
+	};
+
+	middlewares.forEach((m, mIndex) => m(req, {
+		...res,
+		send: (payload) => {
+			middlewareOrHandler(mIndex, );
+		},
+		sendError: (code, msg) => {
+			if (code && msg) return middlewareOrHandler(mIndex, `${code}: ${msg}`);
+			middlewareOrHandler(mIndex, msg || code);
+		},
+	}, e => middlewareOrHandler(mIndex, e)));
+};
+</script>

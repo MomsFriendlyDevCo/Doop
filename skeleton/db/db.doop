@@ -1,0 +1,24 @@
+<script lang="js" backend on="init, dbInit">
+var mongoosy = require('@momsfriendlydevco/mongoosy');
+
+return Promise.resolve()
+	.then(()=> app.config.mongo.hooks = true) // Enabled specificaly to queue DB middleware calls
+	.then(()=> app.log('Connecting to', app.log.colors.cyan(app.config.mongo.uri)))
+	.then(()=> mongoosy.connect(app.config.mongo.uri, app.config.mongo.options))
+	.then(()=> {
+		app.on('postSchemas', ()=>
+			mongoosy.compileModels()
+				.then(models => {
+					Object.assign(app.db, models); // Note that we have to extend the existing global, we can't clobber it or we loose the reference
+					global.db = app.db;
+				})
+				.then(()=> app.log('Loaded', app.log.colors.cyan(Object.keys(app.db).length), 'DB schemas:', Object.keys(app.db).map(m => app.log.colors.cyan(m)).join(', ')))
+				.then(()=> app.emit('postDb'))
+		);
+
+		app.on('exit', ()=>
+			mongoosy.disconnect()
+				.then(()=> app.log('DB Disconnected'))
+		);
+	});
+</script>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title><%= app.config.title %></title>
+	<meta http-equiv="Content-Language" content="en"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="google" value="notranslate"/>
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="yes"/>
+	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui"/>
+
+	<!-- Core vendors -->
+	<link rel='stylesheet' href="/dist/vendors.core.css"/>
+	<script src="/dist/vendors.core.js"></script>
+
+	<!-- Favicon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="<%- app.config.theme.faviconRoot %>/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="<%- app.config.theme.faviconRoot %>/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="<%- app.config.theme.faviconRoot %>/favicon-16x16.png">
+	<link rel="manifest" href="<%- app.config.theme.faviconRoot %>/site.webmanifest">
+	<link rel="mask-icon" href="<%- app.config.theme.faviconRoot %>/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="shortcut icon" href="<%- app.config.theme.faviconRoot %>/favicon.ico">
+	<meta name="msapplication-TileColor" content="#2b5797">
+	<meta name="msapplication-config" content="<%- app.config.theme.faviconRoot %>/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+
+	<!-- App (see end of file for main script loader) -->
+	<link href="/dist/vendors.main.css" rel="stylesheet" type="text/css"/>
+	<link href="/dist/vendors.fonts.css" rel="stylesheet" type="text/css"/>
+	<link href="/dist/app.css" rel="stylesheet" type="text/css"/>
+
+	<!-- 3rd party injections -->
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfj-JxoQDdnRf-a1gBBPlwg0CBm2UHoWg&libraries=places"></script>
+
+	<!-- Injection scripts -->
+	<%= layoutHeaders.join('\n') %>
+</head>
+
+<body class="bootstrapping widescreen fixed-left">
+	<!-- Splashes {{{ -->
+	<div class="splash splash-init">
+		<img src="/assets/logo/logo.svg"/>
+	</div>
+
+	<div class="splash splash-crash">
+		<img src="/assets/logo/logo.svg"/>
+		<div class="splash-crash-text">
+			<h3>Can't connect to server</h3>
+		</div>
+		<div class="splash-crash-reload mt-3">
+			<a class="btn btn-light btn-lg" onclick="location.reload()">
+				<i class="far fa-sync"></i>
+				Reload
+			</a>
+		</div>
+	</div>
+
+	<div class="splash splash-loading-foreground">
+		<img src="/assets/logo/logo.svg"/>
+		<div class="splah-loading-foreground-spinner"></div>
+	</div>
+	<!-- }}} -->
+
+	<div id="wrapper" class="forced">
+		<div id="app"></div>
+	</div>
+
+	<script src="/dist/vendors.main.js"></script>
+	<script src="/dist/app.js"></script>
+</body>
+</html>

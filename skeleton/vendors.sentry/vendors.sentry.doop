@@ -1,0 +1,57 @@
+<script lang="js" backend on="postExpress">
+var Sentry = require('@sentry/node');
+var SentryTracing = require('@sentry/tracing');
+var url = require('url');
+
+if (!app.config.sentry) return Promise.reject('Sentry config structure omitted - if you dont want to use sentry the `units/core.sentry` unit can probably be removed');
+if (!app.config.sentry.enabled) return Promise.resolve();
+if (!app.config.sentry.dsn) return Promise.reject('Sentry enabled but no DSN specified in app.config.sentry.dsn');
+
+var hostname = url.parse(app.config.url).hostname;
+
+app.log('Sentry enabled as', app.log.colors.cyan(hostname));
+var s = Sentry.init({
+	dsn: app.config.sentry.dsn,
+	integrations: [
+		// Enable HTTP calls tracing
+		new Sentry.Integrations.Http({tracing: true}),
+
+		// Enable Express.js middleware tracing
+		new SentryTracing.Integrations.Express({app: app.express}),
+	],
+	attachStacktrace: true,
+	tracesSampleRate: 1.0,
+	environment: app.config.env,
+	name: hostname,
+});
+
+app.express.use(Sentry.Handlers.requestHandler());
+
+app.express.use(Sentry.Handlers.tracingHandler());
+</script>
+
+<script lang="js" backend on="postServer">
+// Capture all out-of-scope errors
+var _ = require('lodash');
+var crash = require('@momsfriendlydevco/crash');
+var Sentry = require('@sentry/node');
+
+if (app.config.sentry) {
+	app.express.use(Sentry.Handlers.errorHandler({
+		shouldHandleError(err) {
+			var res = _.isError(err) || !err.status || err.status >= 500; // Capture only pure errors, undefined statuses or >=500 errors
+			if (res) app.log(app.log.colors.bold.blue('--- Dispatch error to sentry ---'));
+			return res;
+		},
+	}));
+}
+
+app.express.use((err, req, res, next) => {
+	crash.trace(err, {prefix: 'Server error'});
+	if (app.config.isProduction) {
+		return res.sendStatus(500);
+	} else {
+		res.status(500).send(err.trace || err.toString());
+	}
+})
+</script>

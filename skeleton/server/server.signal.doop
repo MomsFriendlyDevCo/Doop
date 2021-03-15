@@ -1,0 +1,11 @@
+<script lang="js" backend on="ready">
+var _ = require('lodash');
+
+/**
+* Middleware to transmit the 'ready' signal upstream to either PM2 or Nodemon to signal that the server is now listening
+*/
+if (_.isObject(global.process) && _.isFunction(global.process.send)) {
+	app.log.debug('Sending "ready" IPC message upstream to PM2 / Nodemon');
+	global.process.send('ready');
+}
+</script>

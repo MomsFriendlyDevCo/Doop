@@ -1,0 +1,23 @@
+<script lang="js" backend on="init">
+/**
+* Loads the Git information service and populates `app.git.current`
+*
+* @example Access the current git shortHash
+* var hash = app.git.current.shortHash
+*/
+
+app.git = require('.');
+
+return app.git.current()
+	.then(res => app.git.current = res)
+</script>
+
+<script lang="js" backend endpoint>
+var git = require('.');
+
+app.get('/api/git/history', (req, res) => {
+	git.history({limit: 30})
+		.then(data => res.send(data))
+		.catch(res.sendError)
+});
+</script>

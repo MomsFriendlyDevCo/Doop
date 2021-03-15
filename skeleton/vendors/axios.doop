@@ -1,0 +1,80 @@
+<script lang="js" backend on="init">
+var _ = require('lodash');
+var axios = require('axios');
+var axiosRetry = require('axios-retry');
+
+/**
+* Make axios.retry() globally available
+* This is a mutated version of Axios wrapping a generic Axios instance
+* @param {Object} settings Regular Axios settings object with additional `retry` key
+* @param {Object|number|string} [settings.retry] Retry options for this request OR the number of retries to use
+* @param {number|string} [settings.retry.retries=3] Number of retries to
+* @param {*} [settings.retry.*] Additional axios-retry options
+* @returns {Axios} Executing Axios instance
+*
+* @example Make an Axios request with up the default 3 retries
+* var axios = require('axios');
+* axios.retry({url: '/api/widgets'}).then(res => ...)
+*
+* @example Make an Axios request with a specified number of retries
+* var axios = require('axios');
+* axios.retry({url: '/api/widgets', retry: 3}).then(res => ...)
+*
+* @example Make an Axios request with a complex option set
+* var axios = require('axios');
+* axios.retry({url: '/api/widgets', retry: {retries: 3, ...}}).then(res => ...)
+*/
+axios.retry = settings => {
+	var settingsRetry = _.pickBy(settings, 'retry') || {};
+	if (isFinite(settings.retry)) settings.retry = {retries: +settings.retry}; // Assume entire object is the retry count
+
+	var retryCount = 0;
+	var maxRetries = _.isObject(settings.retry) ? settings.retry.retries : settings.retry || 3;
+	_.defaults(settingsRetry, {
+		retries: maxRetries,
+		retryDelay: retryCount => retryCount * 500, // Add 0.5s per between retries
+		retryCondition: err => {
+			app.log.warn.as('Axios', 'FAILED', app.log.colors.cyan(`#${retryCount}/${maxRetries}`), app.log.colors.blue(err.config.method.toUpperCase() || 'GET'), app.log.colors.cyan(err.config.url), '-', err.toString());
+			app.log.warn.as('Axios', 'Retry', app.log.colors.cyan(`#${++retryCount}/${maxRetries}`), app.log.colors.blue(err.config.method.toUpperCase() || 'GET'), app.log.colors.cyan(err.config.url));
+			return true;
+		},
+		shouldResetTimeout: true,
+	});
+
+	var client = axios.create();
+	axiosRetry(client, settingsRetry);
+
+	var requestSettings = _.omitBy(settings, 'retry');
+	if (!requestSettings.timeout) requestSettings.timeout = 3000;
+
+	return client(requestSettings);
+};
+
+
+/**
+* Inject various common behaviours to Axios such as handling errors, logging, timeouts and retry support
+*/
+
+axios.interceptors.request.use(config => {
+	app.log.as('Axios', 'Request', app.log.colors.blue(config.method), app.log.colors.cyan(config.url));
+	return config;
+});
+
+
+// Monkey patch Axios so that any error response also gets thrown to the console
+axios.interceptors.response.use(response => response, err => {
+	if (err.response && err.response.status == 408) { // Request timeout
+		app.log.warn.as('Axios', 'threw', app.log.colors.bold('TIMEOUT / 408'), 'error on', app.log.colors.blue(err.request.method), app.log.colors.cyan(err.request.url), '-', err.toString());
+		throw err;
+	} else if (err.response) { // client received an error response (5xx, 4xx)
+		app.log.warn.as('Axios', 'threw response error on', app.log.colors.blue(err.request.method), app.log.colors.cyan(err.request.url), '-', err.toString());
+		throw err;
+	} else if (err.request) { // client never received a response, or request never left
+		app.log.warn.as('Axios', 'threw', app.log.colors.bold('REQUEST'), 'error on', app.log.colors.blue(err.config.method), app.log.colors.cyan(err.config.url), '-', err.toString());
+		throw err;
+	} else { // anything else
+		app.log.warn.as('Axios', 'threw', app.log.colors.bold('GENERIC'), 'error', err.toString());
+		throw err;
+	}
+});
+</script>

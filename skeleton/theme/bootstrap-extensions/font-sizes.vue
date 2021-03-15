@@ -1,0 +1,6 @@
+<style>
+.font-sm {font-size: 10px}
+.font-md {font-size: 13px}
+.font-lg {font-size: 16px}
+.font-xl {font-size: 18px}
+</style>

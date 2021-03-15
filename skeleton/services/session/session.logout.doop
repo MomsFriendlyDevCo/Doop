@@ -1,0 +1,16 @@
+<script lang="js" backend endpoint>
+/**
+* Destroy cookie / auth linkage and return 200
+*/
+app.post('/api/session/logout', (req, res) => {
+	if (app.config.session.cookie.enabled && req.cookies && req.cookies[app.config.session.cookie.name]) { // Reset cookie method
+		app.cache.unset(app.config.session.cache.prefix + req.cookies[app.config.session.cookie.name])
+			.then(()=> res.sendStatus(200))
+	} else if (app.config.session.authHeader.enabled && req.headers.auth) { // Reset auth method
+		app.cache.unset(app.config.session.cache.prefix + req.headers.auth)
+			.then(()=> res.sendStatus(200))
+	} else {
+		res.sendError(400, 'No valid auth token found');
+	}
+});
+</script>

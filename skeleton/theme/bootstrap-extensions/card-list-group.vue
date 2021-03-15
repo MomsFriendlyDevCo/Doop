@@ -1,0 +1,7 @@
+<style>
+/* Add a small break between .card-body and .list-groups {{{ */
+.card .card-body + .list-group {
+	border-top: 1px solid #d8d8d8;
+}
+/* }}} */
+</style>

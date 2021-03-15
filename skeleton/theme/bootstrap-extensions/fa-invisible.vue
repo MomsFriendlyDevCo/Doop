@@ -1,0 +1,7 @@
+<style>
+/* Style which forces an icon to display as a block but doesn't render anything */
+.fa-invisible {
+	width: 37px;
+	height: 30px;
+}
+</style>

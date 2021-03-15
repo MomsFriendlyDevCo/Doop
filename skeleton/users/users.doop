@@ -1,0 +1,181 @@
+<script lang="js" backend schema>
+var Users = app.middleware.db.schema('users', {
+	created: {type: Date, default: ()=> new Date()},
+	lastLogin: {type: Date, default: ()=> new Date()},
+	username: {type: String, required: true, index: {unique: true}},
+	email: {type: String, required: true, index: {unique: true}},
+	_passhash: {type: String},
+	_passhash2: {type: String},
+	_passsalt: {type: String},
+	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
+	_tokenPurpose: {type: String, enum: [null, 'invite', 'login', 'recover', 'signup']},
+	name: {type: String},
+	status: {type: String, enum: ['inactive', 'active', 'deleted'], default: 'inactive', index: true},
+	settings: {},
+	permissions: {
+		debug: {type: Boolean, default: false, permissionGroups: ['Debug Testers']},
+	},
+	accounts: [{
+		account: {type: 'pointer', ref: 'accounts'},
+		status: {type: 'string', enum: ['active', 'pending'], default: 'active'},
+	}],
+});
+
+// Logins + user passwords {{{
+var crypto = require('crypto');
+
+// FIXME: Method works still? Not 'static()'? Why 'static()' in "search"?
+Users
+	.method('encryptPass', function(salt, password) {
+		var saltBuffer = Buffer.from(salt, 'base64');
+		return crypto.pbkdf2Sync(password, saltBuffer, 10000, 64, 'sha512').toString('base64');
+	})
+	.method('checkPassword', function(candidate) {
+		return Promise.resolve(this.encryptPass(this._passsalt || '', candidate) == this._passhash);
+	});
+
+// Allow write but not read
+Users
+	.virtual('password', null, function(password) {
+		this._passsalt = crypto.randomBytes(16).toString('base64');
+		this._passhash = this.encryptPass(this._passsalt, password);
+	});
+
+/**
+* Login a user and mutate the req object with cookie / header with session information
+* @param {Object} user The user object to login for this session
+* @param {Object} res The express response object which will be mutated
+* @returns {Promise<Object>} A promise which will return when the login sequence completes, the return value is an object which should be passed to res.send() when completing the transaction
+*/
+Users.method('logIn', function(res) {
+	this.lastLogin = new Date();
+
+	return Promise.resolve()
+		// Update last login details {{{
+		.then(()=> this.save())
+		// }}}
+		// Generate UUID {{{
+		.then(()=> app.utils.uuid.generate())
+		// }}}
+		// Create cookie against user login {{{
+		.then(token => {
+			var output;
+			app.log('Successful login for', this.username || this.email);
+
+			if (app.config.session.cookie.enabled) res.cookie(app.config.session.cookie.name, token, app.config.session.cookie);
+			if (app.config.session.authHeader.enabled) output = {auth: token}; // Send cookie as JSON return rather than though the traditional method (used to provide cross-domain access when testing a Cordova sandbox)
+
+			return app.cache.set(app.config.session.cache.prefix + token, {_id: this._id}, app.config.session.auth.expiry).then(()=> output);
+		})
+		// }}}
+});
+// }}}
+
+// User tokens {{{
+var _ = require('lodash');
+/**
+* Set the token method on a user
+* NOTE: Also saves the user {_token, _tokenPurpose} fields
+* @param {string} purpose The purpose of the token, stops tokens being used for cross purposes. Must conform to a valid enum in the _tokenPurpose field
+* @returns {Promise} A promise which will resolve with the allocated user token
+*/
+Users.method('setToken', function(purpose) {
+	var tries = 0;
+	var maxTries = 20;
+	return new Promise((resolve, reject) => {
+		var trySet = ()=> {
+			if (tries++ > maxTries) return reject(`Unable to set user token after ${maxTries} tries`);
+			var tryToken = crypto.createHmac('sha256', app.config.secret).update(this._id + Date.now() + _.random(10000, 99999))
+				.digest('base64')
+				.replace(/[^a-z0-9]+/ig, '');
+
+			this._token = tryToken;
+			this._tokenPurpose = purpose;
+			this.save()
+				.then(()=> {
+					//app.log('Token saved', purpose, tryToken);
+					return resolve(tryToken);
+				})
+				.catch(e => { // Possible unique collisision, wait a random amount of time and retry
+					app.log('Failed to allocate user token -', e.toString());
+					setTimeout(trySet, _.random(100, 500));
+				})
+		};
+		trySet();
+	});
+})
+
+Users.method('releaseToken', function() {
+	//app.log('releaseToken');
+	this._token = undefined;
+	this._tokenPurpose = undefined;
+	return this.save();
+});
+// }}}
+
+// TODO: Ensure user is not adjusting their own permissions on "save"
+
+// Alias username/email when using email as username {{{
+Users.pre('validate', function(next) {
+	if (app.config.session.signup.emailAsUsername) this.username = this.email;
+	next();
+});
+// }}}
+
+// Force username to ALWAYS be lower case {{{
+Users.plugin(app.middleware.db.replace, {
+	email: val => val && val.toLowerCase(),
+	username: val => val && val.toLowerCase(),
+});
+// }}}
+
+// Timestamp status tracking {{{
+Users.plugin(app.middleware.db.timestamps, {
+	key: 'status'
+});
+// }}}
+
+// Permission Utilities {{{ */
+/**
+* Return if the user has the valid array of permissions
+* All permissions must be present to return true
+* @param {string|array<string>|object} permission Single or multiple permissions to check, if an array all must be present
+* @returns boolean True if the user has all permissions
+*/
+Users.method('hasPermission', function(permission) {
+	return app.utils.permissions.has(permission, this.permissions);
+});
+// }}}
+</script>
+
+
+<script lang="js" backend endpoint>
+app.use('/api/users/:id?', app.middleware.express.rest('users', {
+	data: req => req.user ? {user: req.user._id} : undefined,
+	get: [
+		(req, res, next) => {
+			req.query.select = '_id,username,name,email,emails,company,abn,billing,shipping,totalDiscount,minPayment,settings,type'; // Force safe selection for Users
+			if (req.user.permissions.usersEdit) req.query.select += ',permissions'; // Can also edit other users permissions
+			next();
+		},
+		app.middleware.express.isUser(),
+	],
+	query: app.middleware.express.isUser(),
+	count: app.middleware.express.isUser(),
+	create: app.middleware.express.hasPermission('usersEdit'),
+	save: (req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
+		// Allow user to save their own profile
+		if (app.middleware.express.hasPermission('usersEdit') || req.user && req.params.id === req.user._id) {
+			return next();
+		} else {
+			res.sendError('403: You are not an admin or editing your own profile');
+		}
+	},
+	meta: true,
+	metaCustomFields: ['permissionGroups'], // Expose additional fields in meta
+	delete: [
+		app.middleware.express.hasPermission('usersDelete'),
+		app.middleware.express.setDocStatus({collection: 'users', status: 'deleted'}),
+	],
+}));
+</script>

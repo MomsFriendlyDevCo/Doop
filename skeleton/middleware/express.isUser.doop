@@ -1,0 +1,54 @@
+<script lang="js" backend on="middleware">
+/**
+* Verifies if a user is valid and logged in
+* @returns {function} Express middleware function
+* @example
+* app.get('/api/widgets', app.middleware.express.isUser(), (req, res) => { ... })
+*/
+app.middleware.express.isUser = ()=> (req, res, next) => {
+	if (req.user && req.user._id) {
+		next();
+	} else {
+		res.format({
+			'application/json': () => res.sendError(403, 'Unauthorized'),
+			'default': ()=> res.redirect('/'),
+		});
+	}
+};
+
+
+/**
+* Verifies if a user is logged in as admin (or root)
+* @returns {function} Express middleware function
+* @example
+* app.get('/api/widgets', app.middleware.express.isAdmin(), (req, res) => { ... })
+*/
+app.middleware.express.isAdmin = ()=> (req, res, next) => {
+	if (req.user && req.user._id && (req.user.role == 'admin' || req.user.role == 'root')) {
+		next();
+	} else {
+		res.format({
+			'application/json': () => res.sendError(403, 'Unauthorized - only admins can do that'),
+			'default': ()=> res.redirect('/'),
+		});
+	}
+};
+
+
+/**
+* Verifies if a user is logged in as root
+* @returns {function} Express middleware function
+* @example
+* app.get('/api/widgets', app.middleware.express.isRoot(), (req, res) => { ... })
+*/
+app.middleware.express.isRoot = ()=> (req, res, next) => {
+	if (req.user && req.user._id && req.user.role == 'root') {
+		next();
+	} else {
+		res.format({
+			'application/json': () => res.sendError(403, 'Unauthorized - only root can do that'),
+			'default': ()=> res.redirect('/'),
+		});
+	}
+};
+</script>

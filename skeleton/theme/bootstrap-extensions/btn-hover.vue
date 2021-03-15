@@ -1,0 +1,7 @@
+<style>
+.btn-hover-danger:hover {
+	background: var(--danger);
+	border: 1px solid var(--danger);
+	color: var(--light) !important;
+}
+</style>

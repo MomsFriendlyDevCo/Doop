@@ -1,0 +1,166 @@
+<script lang="js" backend on="middleware">
+/**
+* Returns a middleware layer which will list, accept uploads at a specified path and optionally delete
+* This middleware is effectively a full ReST server which acts on a base path
+* This middleware differs from app.middleware.express.upload in that it handles the entire upload + copy cycle as a server
+*
+* @param {string|function <Promise>} [path] Path to save to, can be absolute, relative (in which case it is assumed to be relative to app.config.paths.data) or a promise which resolves to absolute / relative
+* @param {Object} [options] Options to pass to the middleware
+* @param {string|function} [options.path] Alternative way to pass the path
+* @param {string} [options.urlRoot="/attachments"] Prefixing URL to prepend to each files URL
+* @param {string} [options.glob="*"] Glob within the directory to limit files to
+* @param {Object} [options.multer] Options to limit the multer instance to when accepting uploads
+* @param {function} [options.filename] How to name a file which has no 'originalname' property, defaults to Date.now() + some entropy
+* @param {Object} [options.stats] Object listing which stats to provide when querying files, all stats {icon, size, created} are true by default
+* @param {boolean} [options.sift=true] Run all results via @momsfriendlydevco/sift-sieve before returning (allows filtering by field, limits, sorts etc.) NOTE: You can only sort via meta data fields if options.metaDataOnQuery is also true
+* @param {boolean} [options.upload=false] Whether to allow file uploads
+* @param {boolean} [options.download=true] Whether to allow file downloads
+* @param {boolean} [options.delete=false] Whether to allow file deletion
+* @param {boolean} [options.query=true] Whether to allow file querying, listing files along with their stats
+* @param {boolean} [options.count=true] Whether to allow file counting
+* @param {boolean} [options.metaData=false] Also store meta data about each file in `.basename.meta.json`
+* @param {boolean} [options.metaDataOnQuery=true] Return all meta data within each query, if this is disabled options.sift will not work on meta data
+* @param {function} [options.metaFields] Function, called as `(req, file)` which returns the meta object to store
+* @param {function} [options.metaPath] Function which returns the full path of the meta file
+* @returns {ExpressMiddleware} An express middleware layer
+*
+* @example Set up file ReST server with full upload, download, query, delete support
+* app.all('/api/widgets/:id/files/:file?', app.middleware.express.attachments({
+*   path: req => `widgets/${req.params.id}`, // Store in data/widgets/123/
+*   urlRoot: req => `/api/widgets/${req.params.id}`, // How the URL should be computed per-file
+*   upload: true,
+*   download: true,
+*   query: true,
+*   delete: true,
+* }));
+*/
+var _ = require('lodash');
+var faIcons = require('@momsfriendlydevco/fa-icons');
+var glob = require('globby');
+var multer = require('multer');
+var fs = require('fs');
+var fspath = require('path');
+var os = require('os');
+var siftSieve = require('@momsfriendlydevco/sift-sieve');
+
+app.middleware.express.attachments = (path, options) => {
+	// Argument mangling {{{
+	if (_.isPlainObject(path)) {
+		[path, options] = [path.path, path];
+	}
+	// }}}
+
+	// Settings {{{
+	var settings = _.defaultsDeep(options, {
+		path,
+		glob: '*', // Glob to append to end of base to get files
+		param: 'file',
+		multer: {
+			storage: multer.diskStorage({
+				destination: _.get(app, 'config.middleware.uploads.path', os.tmpdir()),
+				filename: function (req, file, cb) {
+					cb(null, `upload-${file.fieldname}-${Date.now()}`);
+				},
+			}),
+		},
+		stats: {
+			icon: true,
+			size: true,
+			created: true,
+		},
+		sift: true,
+		filename: multerFile => Date.now() + '-' + _.random(100000, 999999),
+		upload: false,
+		download: true,
+		delete: false,
+		query: true,
+		count: true,
+		urlRoot: '/attachments',
+
+		metaData: false,
+		metaDataOnQuery: true,
+		metaFields: (req, files) => { throw new Error('metaData enabled but no metaFields function specified') },
+		metaPath: path => fspath.join(fspath.dirname(path), '.' + fspath.basename(path) + '.meta.json'),
+	});
+	// }}}
+
+	var multerInstance = settings.upload && multer(settings.multer).any();
+
+	return (req, res) =>
+		Promise.resolve()
+			.then(()=> { // If path is a function - resolve it
+				if (_.isString(settings.path)) return settings.path;
+				return Promise.resolve(settings.path(req, res));
+			})
+			.then(path => fspath.isAbsolute(path) ? path : fspath.join(app.config.paths.data, path)) // Make relative paths absolute
+			.then(path => { // Handle middleware
+				var doCount = false; // Used by the query system to only return a count of matching objects
+
+				if (settings.count && req.method == 'GET' && req.params[settings.param] && req.params[settings.param] == 'count') { // Count files
+					doCount = true;
+					delete req.params[settings.param]; // Delete param, causing this hit to be counted as a query method
+				}
+					
+				if (settings.download && req.method == 'GET' && req.params[settings.param]) { // Serve file
+					res.sendFile(fspath.join(path, req.params[settings.param]));
+				} else if (settings.delete && req.method == 'DELETE' && req.params[settings.param]) { // Delete file
+					var path = fspath.join(path, req.params[settings.param]);
+					return Promise.all([
+						fs.promises.unlink(path).catch(()=> {}),
+						fs.promises.unlink(settings.metaPath(path)).catch(()=> {}),
+					])
+						.then(()=> res.sendStatus(200))
+						.catch(e => res.sendError(e))
+				} else if (settings.query && req.method == 'GET') { // List files
+					glob(fspath.join(path, settings.glob), {stats: true})
+						.then(files => Promise.all(files.map(file =>
+							Promise.all([
+								// Compute "boring" stats file data
+								Promise.resolve({
+									name: fspath.basename(file.path),
+									url: _.isString(options.urlRoot)
+										? `${options.urlRoot}/${fspath.basename(file.path)}`
+										: `${options.urlRoot(req)}/${fspath.basename(file.path)}`,
+									size: settings.stats.size ? file.stats.size : undefined,
+									icon: settings.stats.icon ? faIcons(file.path, {class: 'far'}) : undefined,
+									created: settings.stats.created ? file.stats.ctime : undefined,
+								}),
+
+								// Read meta data file if functionality is enabled
+								settings.metaData && settings.metaDataOnQuery
+									? fs.promises.readFile(settings.metaPath(file.path))
+										.then(contents => JSON.parse(contents))
+										.catch(()=> {})
+									: Promise.resolve({}),
+							])
+								.then(data => data.reduce((t, v) => ({...t, ...v}), {})) // Combine all data objects
+						)))
+						.then(files => settings.sift ? siftSieve(files, req.query) : files)
+						.then(files => res.send(doCount ? {count: files.length} : files))
+						.catch(e => res.sendError(e))
+				} else if (settings.upload && req.method == 'POST') { // Upload a new file
+					return multerInstance(req, res, ()=> {
+						if (!req.files || !req.files.length) return res.sendError(400, 'No files provided during upload');
+						fs.promises.mkdir(path, {recursive: true})
+							.then(()=> Promise.all(req.files.map(file => {
+								var dstFile = fspath.join(path, '/', file.originalname ? fspath.basename(file.originalname) : settings.filename(file));
+
+								return Promise.all([
+									// Move buffered file to correct location
+									fs.promises.move(file.path, dstFile),
+
+									// (if settings.metaData), create meta file
+									settings.metaData
+										? fs.promises.writeFile(settings.metaPath(dstFile), JSON.stringify(settings.metaFields(req, file), null, '\t'))
+										: undefined,
+								]);
+							})))
+							.then(()=> res.sendStatus(200))
+							.catch(e => res.sendError(e))
+					});
+				} else {
+					res.sendError(404);
+				}
+			})
+};
+</script>

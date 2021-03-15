@@ -1,0 +1,115 @@
+<script lang="js" backend on="middleware">
+var _ = require('lodash');
+var moment = require('moment');
+var timestring = require('timestring');
+
+/**
+* Middleware to return a v-chart-timeseries compatible timeseries dataset
+* @param {object} options Options to use to generate the middleware
+* @param {string} options.collection Collection to return the timeseries of
+* @param {string} [options.field='created'] Collection field to iterate the time series by, must be a date. All non-dates are removed
+* @param {string} [options.field2='status'] Secondary field to iterate through
+* @param {array} [options.values] Values to return as sets from the secondary field, defaults to using the enum set of the field
+* @param {function} [options.valueLabel] Function called as `(value, offset, dataSet, settings)` to rewrite a value, default is to use _.startCase()
+* @param {function} [options.valueClor] Function called as `(value, offset, dataSet, settings)` to return a valid CSS color
+* @param {boolean} [options.fixDates=true] Whether to preparse the field into a valid Mongo date before iterating, this fixes string date storage
+* @param {function} [options.interval="1d"] Promisable function called as `(req, res, settings)` which should return the interval of the timeseries, defaults to parsing req.query.interval via timestring or '1d'
+* @param {function} [options.timeLabel] Function called as `(date)` to neaten the date display, defaults to using Moment to return a simple local date
+* @param {function} [options.start] Promisable function called as `(req, res, settings)` which should return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
+* @param {function} [options.end] Promisable function called as `(req, res, settings)` which should return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
+* @param {boolean} [options.passthru=false] If falsy req.send is called with the calculated timeseries, if falsy this function populates `req.timeSeries` and passes control to the next express middleware function
+*/
+app.middleware.express.timeSeries = options => {
+	var settings = {
+		collection: undefined,
+		field: 'created',
+		field2: 'status',
+		values: (req, res, settings) => _.get(app.db, [settings.collection, 'schema', 'paths', settings.field2, 'options', 'enum']),
+		valueLabel: (key, offset, dataSet, settings) => _.startCase(key),
+		valueColor: (key, offset, dataSet, settings) => {
+			var r = ["rgb(54, 162, 235)", "rgb(75, 192, 192)", "rgb(201, 203, 207)", "rgb(255, 159, 64)", "rgb(153, 102, 255)", "rgb(255, 99, 132)", "rgb(255, 205, 86)"][offset % 7];
+			return r;
+		},
+		fixDates: true,
+		interval: '1d',
+		start: (req, res) => (req.query.start ? moment(req.query.start) : moment().subtract(1, 'week')).set('hour', 0).set('minute', 0).set('second', 0).set('millisecond', 0),
+		end: (req, res) => (req.query.end ? moment(req.query.end) : moment()).set('hour', 23).set('minute', 59).set('second', 59),
+		interval: (req, res) => timestring(req.query.interval || '1d', 'ms'),
+		timeLabel: date => moment(date).format('ddd Do MMM'),
+		passthru: false,
+		...options,
+	};
+	if (!settings.collection) throw new Error('Collection must be specified for app.middleware.express.timeseries()');
+
+	return (req, res, next) => {
+		var boundaries = [];
+
+		return Promise.resolve()
+			.then(()=> Promise.all([
+				Promise.resolve(settings.start(req, res, settings)),
+				Promise.resolve(settings.end(req, res, settings)),
+				Promise.resolve(settings.interval(req, res, settings)),
+				Promise.resolve(settings.values(req, res, settings)),
+			]))
+			.then(([start, end, interval, values]) => {
+				var iter = start;
+
+				while (iter.isBefore(end)) {
+					boundaries.push(iter.toDate());
+					iter.add(interval, 'ms');
+				}
+
+				return values;
+			})
+			.then(values => app.db.orders.aggregate([{$facet: _(values)
+					.mapKeys()
+					.mapValues(val => ([
+						{$match: {
+							[settings.field2]: val,
+						}},
+						...(settings.fixDates // Optionally fix date conversion
+							? [{$project: {
+								[settings.field]: {$toDate: '$' + settings.field},
+								status: 1,
+							}}]
+							: []
+						),
+						{$bucket: {
+							groupBy: '$' + settings.field,
+							default: 'unparsable',
+							boundaries,
+						}},
+					]))
+					.value()
+				},
+			]))
+			.then(dataSets => dataSets[0])
+			.then(dataSets => Object.keys(dataSets).map((k, kOffset) => {
+				var dataSet = dataSets[k];
+				var dataSetMap = _(dataSet)
+					.mapKeys('_id')
+					.mapValues('count')
+					.value();
+
+				return {
+					label: settings.valueLabel(k, kOffset, dataSet, settings),
+					backgroundColor: settings.valueColor(k, kOffset, dataSet, settings),
+					data: boundaries.map(b => dataSetMap[b] || 0), // Fill in blanks for the sparce dataSet Mongo gives us back
+				};
+			}))
+			.then(datasets => ({
+				labels: boundaries.map(l => settings.timeLabel(l)),
+				datasets,
+			}))
+			.then(data => {
+				if (settings.passthru) {
+					req.timeSeries = data;
+					next();
+				} else {
+					res.send(data);
+				}
+			})
+			.catch(res.sendError)
+	};
+};
+</script>

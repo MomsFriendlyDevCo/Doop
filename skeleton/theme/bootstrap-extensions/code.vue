@@ -1,0 +1,7 @@
+<style>
+code {
+	border: 1px solid #e1e1e8;
+	padding: 3px;
+	word-break: keep-all;
+}
+</style>

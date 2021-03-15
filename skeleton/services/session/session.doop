@@ -1,0 +1,46 @@
+<script lang="js" backend on="preEndpoints">
+// Inject cookie handling middleware
+var cookieParser = require('cookie-parser');
+app.use(cookieParser({
+	secret: app.config.secret,
+}));
+
+
+/**
+* Inject MemcacheD + Dynamo session storage
+*
+* Process:
+*          1. Check if the input has a cookie header - if not, pass to next()
+*          2. Use cookie to lookup user._id from cache
+*          3. Lookup full user object from Dynamo via user._id
+*/
+app.use((req, res, next) => {
+	if (app.config.session.cookie.enabled && req.cookies && req.cookies[app.config.session.cookie.name]) { // Cookie mode
+		app.cache.get(app.config.session.cache.prefix + req.cookies[app.config.session.cookie.name]) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
+			.then(session => session._id ? session : Promise.reject('Invalid session state'))
+			.then(session => app.db.users.findByID(session._id))
+			.then(user => user || Promise.reject('Invalid user ID'))
+			.then(user => req.user = user)
+			.then(()=> next())
+			.catch(()=> next()) // Ignore cache faults - probably expired user session or other cache fault
+	} else if (app.config.session.authHeader.enabled && req.headers.auth) { // 'Auth' header token method
+		app.cache.get(app.config.session.cache.prefix + req.headers.auth) // Fetch cache entry for this (auth header | cookie) -> user._id lookup
+			.then(session => session._id ? session : Promise.reject('Invalid session state'))
+			.then(session => app.db.users.findByID(session._id))
+			.then(user => user || Promise.reject('Invalid user ID'))
+			.then(user => req.user = user)
+			.then(()=> next())
+			.catch(()=> next())
+	} else if (app.config.session.apiKey.enabled && req.headers.apikey) { // 'apikey' header token method
+		Promise.resolve()
+			.then(()=> app.db.users.findOne({'apiKeys.key': req.headers.apikey}))
+			.then(user => user || Promise.reject('Invalid API-Key'))
+			.then(user => req.user = user)
+			.then(()=> next())
+			.catch(()=> next())
+	} else { // Either no method is enabled or no token / cookie has been provided - req.user remains unpopulated
+		return next();
+	}
+
+});
+</script>

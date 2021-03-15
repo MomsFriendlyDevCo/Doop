@@ -1,0 +1,53 @@
+<style>
+/* .btn-context - display a dropdown context menu */
+/**
+* @example
+* <table>
+*   <thead>
+*     <tr>
+*       <th class="btn-context"></th>
+*     </tr>
+*   </thead>
+*   <tbody>
+*     <tr>
+*       <td class="btn-context">
+*         <div class="btn-group">
+*           <a class="btn dropdown-toggle" data-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></a>
+*           <ul class="dropdown-menu pull-right">
+*             ...
+*           </ul>
+*         </div>
+*       </td>
+*     </tr>
+*   </tbody>
+* </table>
+*/
+table.table th.btn-context {
+	width: 32px;
+}
+
+table.table td.btn-context {
+	padding: 10px 0 !important;
+	text-align: center;
+}
+
+table.table tr td.btn-context .btn-group {
+	box-shadow: none;
+}
+
+table.table tr td.btn-context .btn {
+	visibility: hidden;
+}
+
+table.table tr:hover td.btn-context .btn {
+	visibility: visible;
+}
+
+.btn.btn-context {
+	width: 30px;
+	color: #333;
+	padding: 0;
+	font-size: 20px;
+	border: none;
+}
+</style>

@@ -1,0 +1,31 @@
+<script lang="js" backend on="middleware">
+var joi = require('joi');
+
+/**
+* Accepts a Joi template and will error out if the request key does not match
+* @param {string} key The key to investigate, typically 'body', 'query' or 'params'
+* @param {Object|JoiSchema} validator The validator to use - plain objects are automatically wrapped
+* @returns {function} Express middleware function
+*
+* @example Validate a required 'name' paramter in the body
+* app.get('/api/doSomething',
+*   app.middleware.express.validate('body', {
+*     id: joi.string().required(),
+*     ...
+*   }),
+*   (req, res) => { ... },
+* )
+*/
+app.middleware.express.validate = (key, validator) => {
+	var schema = joi.isSchema(validator) ? validator : joi.object(validator); // Wrap plain objects if not already a schema
+
+	return (req, res, next) => {
+		var result = schema.validate(req[key]);
+		if (result.error) {
+			return res.sendError(400, result.error);
+		} else {
+			next();
+		}
+	};
+};
+</script>

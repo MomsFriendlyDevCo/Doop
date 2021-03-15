@@ -1,0 +1,134 @@
+<script lang="js" backend endpoint>
+/**
+* Test response with a 200 response code
+* @param {number} [req.query.delay=0] Optional delay before responding
+*/
+app.all('/api/debug/http/200', function(req, res) {
+	Promise.timeout(req.query.delay ?? 0)
+		.then(()=> res.send('Everything is ok, relax'));
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Test response with a 403 response code
+* @param {number} [req.query.delay=0] Optional delay before responding
+*/
+app.all('/api/debug/http/403', function(req, res) {
+	Promise.timeout(req.query.delay ?? 0)
+		.then(()=> res.status(403).send('You are forbidden from doing that. Forbidden I say!'))
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Test response with a 500 response code throwing an intentional error
+*/
+app.all('/api/debug/http/500', app.middleware.express.isProduction(false), function(req, res) {
+	throw new Error('Intentional test error');
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Throws various 4* errors followed by 200 (one process state only)
+* @param {number} [req.query.delay=0] Optional delay before responding
+*/
+var codeOffset = 0;
+var codes = [400, 401, 402, 405, 406, 409, 412, 200]; // Omit 403, 404 as they tend to be fatal
+app.all('/api/debug/http/random', function(req, res) {
+	var code = codes[codeOffset++];
+	if (codeOffset > codes.length) [code, codeOffset] = [codes[0], 0];
+
+	Promise.timeout(req.query.delay ?? 0)
+		.then(()=> {
+			if (code == 200) {
+				res.send('OK');
+			} else {
+				res.sendError(`${code}: Randomized error code ${code}`);
+			}
+		})
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+
+/**
+* Throws various 400 90% of the time with 200 10% of the time
+* @param {number} [req.query.delay=0] Optional delay before responding
+*/
+app.all('/api/debug/http/faulty', function(req, res) {
+	Promise.timeout(req.query.delay ?? 0)
+		.then(()=> {
+			if (_.random(0, 10) == 10) {
+				res.send('OK');
+			} else {
+				res.sendError('400: Faulty endpoint test');
+			}
+		})
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Crash the Node instance
+*/
+app.all('/api/debug/crash', app.middleware.express.isProduction(false), function(req, res) {
+	setTimeout(function() {
+		throw new Error('Intentional server crash via /api/debug/crash');
+	}, 10);
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Dummy file upload
+*/
+app.all('/api/debug/files/:file?', app.middleware.express.isProduction(false), app.middleware.express.attachments({
+	path: `${app.config.paths.data}/debug`,
+	urlRoot: '/api/debug/files',
+	upload: true,
+	download: true,
+	query: true,
+	delete: true,
+}));
+</script>
+
+
+<script lang="js" backend endpoint>
+var crypto = require('crypto');
+
+/**
+* Generate a Bcyrpt compatible password from a string
+* @param {string} req.query.pass Password string to encrypt
+* @param {string} [req.query.name] Name to generate a profile for
+* @param {string} [req.query.email] Email to generate a profile for
+*/
+app.get('/api/debug/pass', app.middleware.express.isProduction(false), (req, res) => {
+	if (!req.query.pass) return res.sendError('400: No pass specified');
+	var salt = crypto.randomBytes(16).toString('base64');
+	var saltBuffer = Buffer.from(salt, 'base64');
+	var hash = crypto.pbkdf2Sync(req.query.pass, saltBuffer, 10000, 64, 'sha512').toString('base64');
+
+	res.send({
+		_passsalt: salt,
+		_passhash: hash,
+		...(req.query.name || req.query.email ? {
+			username: req.query.email ?? 'FIXME:EMAIL',
+			email: req.query.email ?? 'FIXME:EMAIL',
+			status: 'active',
+			name: req.query.name ?? 'FIXME:NAME',
+			permissions: {
+				debug: false,
+			},
+		} : {}),
+	});
+});
+</script>

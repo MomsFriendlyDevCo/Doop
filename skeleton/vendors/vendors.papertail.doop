@@ -1,0 +1,97 @@
+<script lang="js" backend on="preInit">
+/**
+* Loader for Winston + Papertrail logging
+*/
+
+var _ = require('lodash');
+var util = require('util');
+var {PapertrailTransport} = require('winston-papertrail-transport');
+var winston = require('winston');
+
+if (app.config.papertrail.enabled && (!app.config.papertrail.host || !app.config.papertrail.port)) return Promise.reject('Papertrail enabled but no host or port specified in app.config.papertrail');
+
+
+/**
+* Custom formatter which accepts non-string elements in logger.log() and pretty prints them
+*
+* NOTE: All the Symbol.for() nonsense is because Winston encodes its keys in a truly ridiculous manner
+*/
+var doopLogFormat = winston.format(info => {
+	var content = info[Symbol.for('splat')]; // Extract extra content for this output
+
+	if (_.isEmpty(content)) { // No extra content to add - plain output
+		info[Symbol.for('message')] = info.message;
+	} else { // Extra content - pretty print + glue onto end of output
+		var stringifiedContent = content.map(item =>
+			util.inspect(item, {
+				depth: 5,
+				colors: true,
+			})
+		).join(' ');
+
+		info[Symbol.for('message')] = info.message + ' ' + stringifiedContent;
+	}
+
+	return info;
+});
+
+var initWinston = ()=> {
+	var ptTransport = app.config.papertrail.enabled ? new PapertrailTransport({
+		format: doopLogFormat(),
+		maximumAttempts: 1,
+		attemptsBeforeDecay: 1,
+		...app.config.papertrail,
+	}) : null;
+
+	var logger = winston.createLogger({
+		level: 'info',
+		transports: [
+			new winston.transports.Console({ // Add default console logger
+				level: 'info',
+				format: doopLogFormat(),
+			}),
+
+			ptTransport,
+		].filter(i => i), // Remove defunct loggers
+	});
+
+	// Remap console.* -> logger.*
+	Object.assign(console, {
+		isWinston: true,
+		logRaw: console.log,
+		log: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+		info: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+		warn: (...msg) => logger.log('warn', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+		error: (...msg) => logger.log('error', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+	});
+
+	app.refresh.log(); // Reload main loggers
+
+	if (ptTransport) {
+		// Monkey-punch in a replacement error handler as the built-in doesn't ever seem to stop trying to connect
+		var tryCount = 0;
+		var maxTries = 3;
+		ptTransport.connection.onErroredOriginal = ptTransport.connection.onErrored; // Backup old error handler
+		ptTransport.connection.onErrored = function(err) {
+			app.log.warn.as('Papertrail', 'Connection error:', err.toString(), 'on attempt', ++tryCount, '/', maxTries);
+			if (tryCount < maxTries) {
+				return ptTransport.connection.onErroredOriginal(err);
+			} else { // Exhausted retries
+				app.log.warn.as('Papertrail', app.log.colors.bold.red('Papertrail faulted - disabling!'));
+				ptTransport.connection.close();
+				app.config.papertrail.enabled = false;
+				initWinston();
+			}
+		};
+
+		// Disable stupid error handler which does nothing anyway
+		ptTransport.connection.emitSilentError = ()=> {};
+	}
+};
+
+initWinston();
+
+
+// Add Papertrail if its enabled
+if (app.config.papertrail.enabled) app.log('Registered with Papertail as', app.log.colors.cyan(app.config.papertrail.hostname), '/', app.log.colors.cyan(app.config.papertrail.program || 'no program'));
+</script>

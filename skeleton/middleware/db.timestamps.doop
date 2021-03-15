@@ -1,0 +1,44 @@
+<script lang="js" backend on="middleware, dbMiddleware">
+var _ = require('lodash');
+
+/**
+* Simple Database middleware to store the date that a field changed in the object
+* @param {string} [key='status'] The key to monitor for changes
+* @param {string|function} [path] The path to save the timestamp as or a promise factory which returns the path. Called as `(doc, settings)`
+* @returns {function} Database middleware
+*
+* @example Attach to the widgets schema to add timestamps on change
+*   app.middleware.db.schema('widgets', { ... })
+*     .plugin(app.middleware.db.timestamps, {
+*		key: 'foo',
+*		path: doc => `fooTimestamps.${doc.foo}`, 
+*	})
+*/
+app.middleware.db.timestamps = (schema, options) => {
+	app.log.warn('MONGOOSY: Untested app.middleware.db.timestamps - verify functionality before moving this warning');
+
+	// Settings {{{
+	var settings = {
+		key: 'status',
+		path: doc => `timestamps.${doc[settings.key]}`, 
+		...options,
+	};
+	// }}}
+
+	// Inject index field into existing schema {{{
+	var path = settings.path({[settings.key]: ''}).slice(0, -1);
+	schema.add({ [path]: {type: Object, default: {}, minimize: false} });
+	// }}}
+
+	// Attach hook {{{
+	schema.pre('save', function(next) {
+		if (!this[settings.key]) return next(); // Not changing status
+
+		Promise.resolve(settings.path(this, settings))
+			.then(path => _.set(this, path, new Date()))
+			.then(()=> next())
+			.catch(next)
+	});
+	// }}}
+};
+</script>
