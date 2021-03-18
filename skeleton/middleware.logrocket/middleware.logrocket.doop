@@ -6,6 +6,13 @@ var logRocketHeaders = [
 	`<script>window.LogRocket && window.LogRocket.init('${app.config.logRocket.profile}');</script>`,
 ];
 
+
+// Append all CSP permissions
+app.config.layout.csp['connect-src'].push('https://r.lr-ingest.io');
+app.config.layout.csp['script-src'].push('https://cdn.lr-ingest.io');
+app.config.layout.csp['worker-src'].push('blob:');
+
+// Selectively inject LogRocket
 if (app.config.logRocket.global) {
 	app.log('Enabling LogRocket globally as', app.log.colors.cyan(app.config.logRocket.profile));
 	app.config.layout.headInject.push(...logRocketHeaders);

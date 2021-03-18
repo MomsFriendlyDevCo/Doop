@@ -133,6 +133,37 @@ module.exports = {
 		headInject: [ // Aditional HTML compliant content to inject into the page header (line feeds added automatically)
 			// '<meta name="description" content="FIXME: SEO description"/>',
 		],
+		csp: { // Content security policy spec
+			// NOTE: 1. Do not remove empty arrays, they are here for reference and may get mutated by other middleware
+			//       2. All sources are automatically Uniq'd
+			'default-src': [
+				`'self'`,
+				`http://www.gravatar.com`,
+			],
+			'connect-src': [
+				`'self'`,
+			],
+			'frame-src': [
+				`'self'`,
+				`data:`
+			],
+			'font-src': [],
+			'frame-src': [],
+			'img-src': [
+				`'self'`,
+				`data:`,
+				`blob:`,
+				`http://www.gravatar.com`,
+			],
+			'media-src': [],
+			'object-src': [],
+			'prefetch-src': [],
+			'script-src': [
+				`'self'`,
+			],
+			'style-src': [],
+			'worker-src': [],
+		},
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
 			'/dist/app.css',
 			'/dist/app.js',
