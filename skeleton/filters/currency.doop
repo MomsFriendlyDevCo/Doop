@@ -1,4 +1,5 @@
 <script lang="js" backend on="middleware, dbMiddleware">
 var _ = require('lodash');
+// TODO: Options
 _.set(app, 'filters.currency', value => Number(value || 0).toLocaleString('en-AU', {style: 'currency', currency: 'AUD'}));
 </script>

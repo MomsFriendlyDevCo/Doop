@@ -1,0 +1,24 @@
+<script lang="js" backend on="middleware">
+var Throttle = require('@momsfriendlydevco/throttle');
+
+/*
+// New Lock instance with specific collection for method locks
+lock: {
+		...app.config.lock,
+		mongodb: {
+			...app.config.lock.mongodb,
+			collection: 'order_locks',
+		}
+	},
+*/
+
+app.throttler = new Throttle({
+	// FIXME: Apart from alphabetical order how else do we ensure app.throttler loads after app.lock?
+	lock: app.lock,
+	...app.config.throttle,
+});
+
+app.on('exit', () => app.throttler.destroy());
+
+return app.throttler.init();
+</script>

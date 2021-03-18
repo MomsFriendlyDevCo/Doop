@@ -86,6 +86,25 @@ global.app = {
 		}
 	},
 
+	mgComponent(id, spec) {
+		// Argument mangling {{{
+		if (_.isObject(id)) { // Passed only spec
+			[id, spec] = [_.camelCase(id.route), id];
+			if (!id) throw new Error(`Register anonymous mgComponent with app.mgComponent(SPEC) but spec has no route specified, specify a mgComponent name or {route: String}`);
+		}
+		// }}}
+
+		if (spec && app.isReady) { // Already live
+			console.warn(`Registered mgComponent "${id}" after app.init() was called`);
+			if (!isProduction && spec.template) console.warn('Component', id, 'has a template property - use <template/> tags or a raw renderer!');
+			return Vue.mgComponent(id, spec);
+		} else if (spec) { // Temporarily hold a mgComponent in memory while we slurp all mgComponent registrations
+			if (!app.mgComponent.register) app.mgComponent.register = {}; // Create the register if it doesn't already exist
+			return app.mgComponent.register[id] = spec;
+		} else { // Fetch an existing mgComponent
+			return Vue.mgComponent(id);
+		}
+	},
 
 	/**
 	* Register an object as a global Vue service
@@ -244,6 +263,15 @@ global.app = {
 			$debug(`app.component('${id}')`);
 			Vue.component(id, spec)
 		});
+		// FIXME: delete app.component.register?
+		// }}}
+
+		// INIT: mgComponents (loaded late so we have MacGyver in the Vue prototype) {{{
+		_.forEach(app.mgComponent.register, (spec, id) => {
+			$debug(`app.mgComponent('${id}')`);
+			Vue.mgComponent(id, spec)
+		});
+		// FIXME: delete app.mgComponent.register?
 		// }}}
 
 		// INIT: Various Vue mixins (set, nextTick etc.) {{{

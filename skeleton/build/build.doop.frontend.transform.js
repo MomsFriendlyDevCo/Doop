@@ -24,6 +24,8 @@ class DoopFrontendAsset extends VueAsset {
 			if (!/export default/.test(this.ast.script.content)) {
 				this.ast.script.content = this.ast.script.content
 					.replace(/^(\s*)(app\.component\()/m, '$1export default $2');
+					// TODO: Would seem MG components are not being passed in here.
+					//.replace(/^(\s*)(app\.(mgC|c){1}omponent\()/m, '$1export default $2');
 			}
 
 			// Apply inline `@IMPORT` replacements for only /services/config/config.vue

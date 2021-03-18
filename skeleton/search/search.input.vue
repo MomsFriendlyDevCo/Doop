@@ -24,6 +24,7 @@
 * @param {*} [tag.default] Default value for the tag if any
 * @param {function} [tag.toQuery] Function called as `(tag)` to convert tag into a search string (a default is specified that approximates to `tag => ${tag.tag}:${tag.value}`)
 *
+* @emits preRedirect Emitted as `(queryString)` before redirecting to new destination, if the result is `false` the redirect is aborted
 * @emits change Emitted as `(queryString)` with any newly computed search query when a search has been submitted
 */
 app.component('searchInput', {

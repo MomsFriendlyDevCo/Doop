@@ -1,6 +1,4 @@
 <script lang="js" frontend>
-import orderUtils from '/orders/orderUtils';
-
 /**
 * Wrapped version of the searchInput VueComponent instance that works specifically for global searches
 */
@@ -33,10 +31,6 @@ app.component('searchGlobal', {
 		],
 	}},
 
-	beforeCreate() {
-		this.$instance('orderUtils'); // Load this.orderUtils isomorphic functions
-	},
-
 	watch: {
 		'$route.query.q': { // React to router changes by populating the search query
 			immediate: true,
@@ -50,49 +44,57 @@ app.component('searchGlobal', {
 </script>
 
 <template>
-	<search-input
-		ref="searchInput"
-		redirect="/orders"
-		:tags="tags"
-	/>
+	<div class="search-global">
+		<search-input
+			ref="searchInput"
+			redirect="/search"
+			:tags="tags"
+		/>
+	</div>
 </template>
 
 <style>
 /* Search search area when search has content {{{ */
-.app-search .search-input.has-content .search-input-fuzzy {
+/*
+.search-global .search-input.has-content .input-group {
 	width: calc(100vw - 500px) !important;
 	background: var(--white);
 	color: var(--dark);
 }
 
-.app-search .search-input .search-input-fuzzy::placeholder {
+.search-global .search-input .search-input-fuzzy::placeholder {
 	color: var(--white) !important;
 }
 
-.app-search .search-input.has-content .search-input-verbs > a {
+.search-global .search-input.has-content .search-input-verbs > a {
 	color: var(--dark);
 }
 
-.app-search .search-input:not(.has-content) .search-input-fuzzy {
+.search-global .search-input:not(.has-content) .search-input-fuzzy {
 	color: var(--muted) !important;
 }
+*/
 /* }}} */
 
 /* Global theme overrides {{{ */
-.app-search {
+/*
+.search-global {
 	min-width: 400px;
 }
 
-.app-search .search-input .search-input-verbs a {
+.search-global .search-input .search-input-verbs a {
 	position: initial;
 	color: var(--white);
 }
+*/
 /* }}} */
 
 /* <search-input/> overrides {{{ */
-.app-search .search-input .search-input-verbs {
+/*
+.search-global .search-input .search-input-verbs {
 	right: 4px;
 	top: 20px;
 }
+*/
 /* }}} */
 </style>

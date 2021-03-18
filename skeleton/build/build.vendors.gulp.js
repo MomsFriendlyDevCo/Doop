@@ -10,6 +10,9 @@ var gulpIf = require('gulp-if');
 var replace = require('gulp-replace');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
+var sass = require('gulp-sass');
+
+sass.compiler = require('sass');
 
 gulp.task('build.vendors', ['build.vendors.core', 'build.vendors.main']);
 gulp.task('build.vendors.core', 'load:app', ()=> vendorBuilder(section = 'core'));
@@ -52,7 +55,10 @@ var vendorBuilder = (section = 'main') => {
 		.then(paths => Promise.all([
 			// JS files
 			new Promise((resolve, reject) => {
-				gulp.src(paths.filter(path => /\.js$/.test(path)))
+				var glob = paths.filter(path => /\.js$/.test(path));
+				if (!glob || !glob.length) return resolve();
+
+				gulp.src(glob)
 					.pipe(gulpIf(app.config.gulp.debugJS, sourcemaps.init()))
 					.pipe(concat(`vendors.${section}.js`))
 					.pipe(gulpIf(app.config.gulp.minifyJS, uglify({mangle: false, compress: {collapse_vars: false}}))) // FIXME: compress options are not normally needed. Remove this when https://github.com/mishoo/UglifyJS2/issues/3274 is resolved
@@ -64,12 +70,34 @@ var vendorBuilder = (section = 'main') => {
 
 			// CSS files
 			new Promise((resolve, reject) => {
-				gulp.src(paths.filter(path => /\.css$/.test(path)))
+				var glob = paths.filter(path => /\.css$/.test(path));
+				if (!glob || !glob.length) return resolve();
+
+				gulp.src(glob)
 					.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.init()))
 					.pipe(concat(`vendors.${section}.css`))
 					.pipe(gulpIf(app.config.gulp.minifyCSS, cleanCSS({
 						processImport: false, // Prevents 'Broken @import declaration' error during build task
 					})))
+					.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.write('.')))
+					.pipe(gulp.dest(`${app.config.paths.root}/dist`))
+					.on('end', ()=> resolve())
+					.on('error', reject)
+			}),
+
+			// SCSS files
+			new Promise((resolve, reject) => {
+				var glob = paths.filter(path => /\.scss$/.test(path));
+				if (!glob || !glob.length) return resolve();
+
+				gulp.src(glob)
+					.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.init()))
+					// TODO: Overwriting or appending?
+					.pipe(concat(`vendors.${section}.css`))
+					.pipe(sass().on('error', sass.logError))
+					//.pipe(gulpIf(app.config.gulp.minifyCSS, cleanCSS({
+					//	processImport: false, // Prevents 'Broken @import declaration' error during build task
+					//})))
 					.pipe(gulpIf(app.config.gulp.debugCSS, sourcemaps.write('.')))
 					.pipe(gulp.dest(`${app.config.paths.root}/dist`))
 					.on('end', ()=> resolve())
