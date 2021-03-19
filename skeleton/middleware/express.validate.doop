@@ -22,7 +22,7 @@ app.middleware.express.validate = (key, validator) => {
 	return (req, res, next) => {
 		var result = schema.validate(req[key]);
 		if (result.error) {
-			return res.sendError(400, result.error);
+			return res.sendError(400, result.error.details.map(d => d.message).join(', '));
 		} else {
 			next();
 		}
