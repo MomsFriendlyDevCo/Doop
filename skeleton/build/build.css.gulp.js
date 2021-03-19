@@ -94,10 +94,10 @@ gulp.task('build.scss', ['load:app'], ()=>
 		}))
 		.pipe(sass({
 			includePaths: [
-				'./node_modules/jquery-ui',
-				'./node_modules/modularscale-sass/stylesheets',
-				'./node_modules/@fortawesome',
-				'./node_modules/bourbon-neat/core'
+				//'./node_modules/jquery-ui',
+				//'./node_modules/modularscale-sass/stylesheets',
+				//'./node_modules/@fortawesome',
+				//'./node_modules/bourbon-neat/core'
 			]
 		}).on('error', sass.logError))
 		.pipe(concat('app.sass.css'))
