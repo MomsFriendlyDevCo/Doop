@@ -103,11 +103,20 @@ app.express.use(function(req, res, next) {
 */
 var _ = require('lodash');
 _(app.endpoints)
-	.sortBy(endpoint => _.isString(endpoint.path) && endpoint.path // Translate "/" + ":" into low ranking sort characters
-		.replace(/\//g, String.fromCharCode(824))
-		.replace(/:/g, String.fromCharCode(818))
-		.replace(/\?/g, String.fromCharCode(825))
-	)
+	.sortBy(endpoint => {
+		var sortPath = // Decide primary path element to sort by
+			_.isString(endpoint.path) ? endpoint.path // Strings: Use simple string if there is only one route
+			: _.isArray(endpoint.path) ? _.first(endpoint.path) // Arrays: Use first element if its an array
+			: _.isRegExp(endpoint.path) ? endpoint.path.toString().replace(/\/\//g, '/') // RegExp: try to tidy up path components at least
+			: null; // Use null - should sort to high priority
+
+		return _.isString(sortPath) // Translate "/" + ":" into low ranking sort characters
+			? sortPath
+				.replace(/\//g, String.fromCharCode(824))
+				.replace(/:/g, String.fromCharCode(818))
+				.replace(/\?/g, String.fromCharCode(825))
+			: '';
+	})
 	.forEach(endpoint => {
 		app.express[endpoint.method](...[
 			endpoint.path,
