@@ -47,6 +47,34 @@ module.exports = {
 			{user: 'user',pass: 'password'},
 		],
 	},
+	agents: {
+		autoInstall: false, // Need to enable in each profile separately
+		allowImmediate: true,
+		keyRewrite: config => key => `agent-${config.env}-${key}`, // Configure cache to use the site name prefix (prevents cache collosions if multiple instances are running on the same box)
+		cache: {
+			modules: ['filesystem'], // Disabled ['memcached', 'mongodb', 'memory'] until we can find a way around the size limits (memcached = 1mb, mongodb = 16mb)
+			calculate: config => ()=> 'filesystem',
+		},
+		runner: {
+			modules: ['pm2', 'inline'],
+			calculate: config => ()=> 'pm2',
+			pm2: {
+				cwd: config => config.paths.root,
+				env: config => session => ({
+					NODE_ENV: config.env,
+					AGENT: session.agent,
+					AGENT_SETTINGS: JSON.stringify(session.agentSettings),
+					AGENT_CACHE: session.cache,
+					AGENT_LAMBDA: 1,
+					AGENT_PRELOAD: `${config.paths.root}/agents/agentLoader.js`,
+				}),
+			},
+		},
+		paths: [
+			config => `${config.paths.root}/**/*.agent.js`,
+			//config => `${config.paths.root}/node_modules/@momsfriendlydevco/agents/examples/*.agent.js`,
+		],
+	},
 	cache: {
 		enabled: true,
 		keyMangle: config => key => `${config.name}-${config.env}-${key}`, // Configure cache to use the site name prefix (prevents cache collosions if multiple instances are running on the same box)
@@ -254,9 +282,6 @@ module.exports = {
 		},
 		authApiKey: {
 			enabled: true, // Support 'apikey' header token method in backend (case insensitive)
-		},
-		apiKey: {
-			enabled: false, // Support 'apikey' header token method in backend (case insensitive)
 		},
 		cache: {
 			prefix: 'session-',

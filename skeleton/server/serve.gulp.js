@@ -60,14 +60,29 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		// }}}
 
 		// Frontend rebuild {{{
-		var throttledRebuild =
-		watch('**/*.vue', {
+		watch([
+			'**/*.vue'
+		], {
 			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
 			awaitWriteFinish: true,
 		}).on('all', _.throttle(file => {
 			gulp.log('Rebuild Vue + Parcel files...');
 			gulp.run('build.vue', ()=> serverProcess.emit('restart'));
+		}, throttleTimeout, throttleOptions));
+		// }}}
+
+		// Theme rebuild {{{
+		watch([
+			'**/*.css',
+			'**/*.scss'
+		], {
+			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
+			ignoreInitial: true,
+			awaitWriteFinish: true,
+		}).on('all', _.throttle(file => {
+			gulp.log('Rebuild CSS files...');
+			gulp.run('build.css', ()=> serverProcess.emit('restart'));
 		}, throttleTimeout, throttleOptions));
 		// }}}
 

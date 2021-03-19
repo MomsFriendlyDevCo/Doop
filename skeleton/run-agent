@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Provide this root path to the upstream as a root
+export AGENT_PATH="$PWD/**/*.agent.js,$PWD/node_modules/@momsfriendlydevco/agents/examples/*.agent.js"
+export AGENT_PRELOAD="$PWD/agents/agentLoader.js"
+
+# Set max memory to 2gb
+export AGENT_MAXMEM=$((1024 * 1024 * 1024 * 2))
+
+exec ./node_modules/@momsfriendlydevco/agents/run-agent "--max-ram=$AGENT_MAXMEM" "$@"

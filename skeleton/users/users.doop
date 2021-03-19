@@ -153,6 +153,18 @@ app.middleware.db.schema('users', {
 
 
 <script lang="js" backend endpoint>
+app.get('/api/users/types', (req, res) => {
+	res.send([
+		'Debug Testers',
+		'Data Management',
+		'User Management',
+		'Admin',
+	]);
+})
+</script>
+
+
+<script lang="js" backend endpoint>
 app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
 	get: [
