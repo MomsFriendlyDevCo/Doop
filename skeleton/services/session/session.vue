@@ -181,6 +181,7 @@ app.service('$session', function() {
 				.then(()=> app.vue.$emit.promise('$session.settled', $session.data))
 				.then(()=> $session.isSettled = true)
 				.then(()=> {
+					this.$debug('$session', $session)
 					if ($session.isLoggedIn) {
 						$session.stagePromise.resolve($session.data);
 					} else {

@@ -11,7 +11,6 @@ var glob = require('globby');
 var gplumber = require('gulp-plumber');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
-var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var sass = require('gulp-sass');
 
@@ -31,7 +30,7 @@ gulp.task('build.css', ['load:app', 'build.scss', 'build.fonts'], ()=>
 	]))
 		.pipe(gplumber({
 			errorHandler: function(err) {
-				gutil.log(colors.red('ERROR DURING CSS BUILD'));
+				gulp.log(colors.red('ERROR DURING CSS BUILD'));
 
 				process.stdout.write(err.stack);
 				hasErr = err;
@@ -73,7 +72,7 @@ gulp.task('build.scss', ['load:app'], ()=>
 	]))
 		.pipe(gplumber({
 			errorHandler: function(err) {
-				gutil.log(colors.red('ERROR DURING SCSS BUILD'));
+				gulp.log(colors.red('ERROR DURING SCSS BUILD'));
 
 				process.stdout.write(err.stack);
 				hasErr = err;
@@ -95,10 +94,10 @@ gulp.task('build.scss', ['load:app'], ()=>
 		}))
 		.pipe(sass({
 			includePaths: [
-				'./node_modules/jquery-ui',
-				'./node_modules/modularscale-sass/stylesheets',
-				'./node_modules/@fortawesome',
-				'./node_modules/bourbon-neat/core'
+				//'./node_modules/jquery-ui',
+				//'./node_modules/modularscale-sass/stylesheets',
+				//'./node_modules/@fortawesome',
+				//'./node_modules/bourbon-neat/core'
 			]
 		}).on('error', sass.logError))
 		.pipe(concat('app.sass.css'))

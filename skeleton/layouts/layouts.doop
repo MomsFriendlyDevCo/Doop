@@ -12,13 +12,23 @@ exports = Promise.resolve()
 	.then(()=> fs.promises.readFile(`${app.config.paths.root}/layouts/main.html`, 'utf-8'))
 	.then(contents => _.template(contents))
 	.then(template => app.get('/', (req, res) =>
-		res.send(template({
-			app,
-			layoutHeaders: [].concat(
-				app.config.layout.headInject,
-				req.layoutHeaders ?? [],
-			),
-		}))
+		res
+			.type('html')
+			.set('Content-Security-Policy', Object.entries(app.config.layout.csp) // FIXME: Custom checkboxes base64 embedded SVG icons - https://github.com/twbs/bootstrap/issues/25394
+				.filter(([type, allowed]) => allowed.length > 0) // Remove empty
+				.map(([type, allowed]) => type
+					+ ' '
+					+ Array.from(new Set(allowed)).join(' ')
+				)
+				.join('; ')
+			)
+			.send(template({
+				app,
+				layoutHeaders: [].concat(
+					app.config.layout.headInject,
+					req.layoutHeaders ?? [],
+				),
+			}))
 	))
 </script>
 
