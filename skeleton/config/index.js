@@ -165,31 +165,31 @@ module.exports = {
 			// NOTE: 1. Do not remove empty arrays, they are here for reference and may get mutated by other middleware
 			//       2. All sources are automatically Uniq'd
 			'default-src': [
-				`'self'`,
-				`http://www.gravatar.com`,
+				`'self'`, // Allow access to this server
 			],
 			'connect-src': [
-				`'self'`,
+				`'self'`, // Allow access to this server
 			],
 			'frame-src': [
-				`'self'`,
-				`data:`
+				`'self'`, // Allow access to this server
 			],
 			'font-src': [],
 			'frame-src': [],
 			'img-src': [
-				`'self'`,
-				`data:`,
-				`blob:`,
-				`http://www.gravatar.com`,
+				`'self'`, // Allow access to this server
+				`data:`, // Allow inline image data
+				`blob:`, // Allow JS dynamic image data like webcams
 			],
 			'media-src': [],
 			'object-src': [],
 			'prefetch-src': [],
 			'script-src': [
-				`'self'`,
+				`'self'`, // Allow access to this server
 			],
-			'style-src': [],
+			'style-src': [
+				`'self'`, // Allow access to this server
+				`'unsafe-inline'`, // Used by Vue components
+			],
 			'worker-src': [],
 		},
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
