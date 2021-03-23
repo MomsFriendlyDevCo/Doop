@@ -25,7 +25,7 @@ app.directive('v-permissions', {
 		};
 
 		var $el = $(el);
-		var $debug = app.service.$debug.new('v-permissions').enable(true);;
+		var $debug = app.service.$debug.new('v-permissions').enable(false);
 		var $session = app.service.$session;
 		$debug(permission, binding.arg, $session.hasPermission(permission));
 		if (binding.arg === 'any' && !$session.hasPermission.any(permission)) return removeEl();
