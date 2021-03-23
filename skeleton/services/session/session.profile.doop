@@ -15,7 +15,6 @@ app.get('/api/session', (req, res) => {
 		name: req.user.name,
 		username: req.user.username,
 		settings: req.user.settings || {},
-		avatarUrl: 'https://www.gravatar.com/avatar/' + crypto.createHash('md5').update(req.user.email).digest('hex'),
 		permissions: {
 			...req.user.permissions,
 			...(app.config.isProduction ? undefined : app.config.session.profile.forcePermissions),
