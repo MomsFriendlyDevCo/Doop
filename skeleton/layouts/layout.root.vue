@@ -83,7 +83,6 @@ app.component('layoutRoot', {
 							<router-view></router-view>
 						</div>
 					</transition>
-					<user-location v-if="$session.data._id"/>
 				</div>
 			</div>
 		</div>
