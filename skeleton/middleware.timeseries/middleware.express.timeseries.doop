@@ -61,7 +61,7 @@ app.middleware.express.timeSeries = options => {
 
 				return values;
 			})
-			.then(values => app.db.orders.aggregate([{$facet: _(values)
+			.then(values => app.db[settings.collection].aggregate([{$facet: _(values)
 					.mapKeys()
 					.mapValues(val => ([
 						{$match: {
