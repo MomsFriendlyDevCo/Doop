@@ -75,7 +75,7 @@ app.express.use(function(req, res, next) {
 	* res.sendError('512: This is a custom error')
 	*/
 	res.sendError = function(code, err) {
-		if (!isFinite(code)) [code, err] = [400, code.toString()];
+		if (!isFinite(code)) [code, err] = [400, code];
 
 		// Process optional string prefix (if we're using the default error fallback)
 		if (code == 400) {
