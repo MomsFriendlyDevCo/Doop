@@ -99,7 +99,10 @@ app.utils.uuid.apiKey = options => {
 	};
 
 	return Promise.resolve()
-		.then(()=> crypto.randomBytes(settings.byteSize))
+		.then(()=> new Promise((resolve, reject) => crypto.randomBytes( // Stupid wrapper for Crypto randomBytes
+			settings.byteSize,
+			(err, payload) => err ? reject(err) : resolve(payload)
+		)))
 		.then(bytes =>
 			settings.prefix
 			+ bytes.toString('base64')
@@ -107,5 +110,34 @@ app.utils.uuid.apiKey = options => {
 				.substr(0, settings.stringSize)
 			+ settings.suffix
 		)
+};
+
+
+/**
+* Generate a random string suitable for use as an ApiKey
+* @param {Object|number} [options] Options to use when generating the string, if a number is passed the initial value of `stringSize` is populated
+* @param {number} [options.byteSize=255] How many bytes to initially generate entropy from
+* @param {number} [options.stringSize=64] Maximum size of the key, byteSize may also need increasing if larger than the default
+* @param {string} [options.prefix] Prefix for the key
+* @param {string} [options.suffix] Suffix for the key
+* @returns {Promise<string>} A promise which will resolve into an ApiKey
+*/
+app.utils.uuid.apiKeySync = options => {
+	var settings = {
+		byteSize: 255,
+		stringSize: _.isNumber(options) ? options : 32,
+		prefix: '',
+		suffix: '',
+		...(_.isNumber(options) ? {} : options),
+	};
+
+	var bytes = crypto.randomBytes(settings.byteSize);
+	return (
+		settings.prefix
+		+ bytes.toString('base64')
+			.replace(/[^a-z0-9]+/gi, '')
+			.substr(0, settings.stringSize)
+		+ settings.suffix
+	);
 };
 </script>
