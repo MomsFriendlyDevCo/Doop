@@ -284,12 +284,15 @@ global.app = {
 				.then(()=> app.vue.$emit('$beforeRoute', {to, from}))
 				.then(() => next())
 				.catch(()=> { // Forbid nav if not logged in an the path is in a whitelist
-					//app.router.$debug('path', from.path, to.path);
-					// TODO: Instead of whitelisting paths a requiresAuth property could be added
-					if (['/login','/signup'].includes(to.path)) return next(); // Let whitelisted paths continue
-					if (to.path !== '/logout') app.service.$session.settings.set('redirect', to.path, 'local');
-					app.router.$debug('No profile present, redirect to /login', app.service.$session.data);
-					next({path: '/login'}); // Redirect everything else
+					app.router.$debug('Route', from.path, to.path);
+
+					if (app.router.options.routeRequiresAuth.has(to.path)) { // Target component requires auth
+						app.router.$debug('No session auth present and', {routeRequiresAuth: true}, 'on routes', {to, from}, '- redirect to /login');
+						if (to.path !== '/logout') app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
+						next({path: '/login'}); // Redirect everything else
+					} else { // Controller endpoint does not require auth - serve page normally
+						next();
+					}
 				})
 				.finally(()=> {
 					if (to.path != '/login' && to.path != '/signup')
@@ -314,6 +317,12 @@ global.app = {
 				)
 				.value(),
 		);
+		app.router.options.routeRequiresAuth = new Set( // Create lookup set for all components that need auth
+			Object.values(app.component.register)
+				.filter(component => component.route && (component.routeRequiresAuth ?? true))
+				.map(component => component.route)
+		)
+
 		delete app.component.register; // Free up memory of loaded components
 		// }}}
 

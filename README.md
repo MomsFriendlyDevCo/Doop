@@ -161,7 +161,7 @@ Vue files follow the regular Vue [Single-Page-Component](https://vue-loader.vuej
 
 For example the following file registers a Vue component with the name `widget`:
 
-```
+```vue
 <script lang="js" frontend>
 app.component('widget', {
 	// Vue component definition
@@ -170,18 +170,27 @@ app.component('widget', {
 ```
 
 
-`.vue` files can also contain an optional `route` property which gets added to the router:
+`.vue` files can also contain an optional properties which gets specical treatment during the component load phase:
 
-```
+```vue
 <script lang="js" frontend>
 app.component('ordersEdit', {
-	route: '/orders/:id',
-	// Vue component definition
+	route: '/orders/:id',                 // Set up a route for this component automatically
+	routeRequiresAuth: true,              // Require a session to access this component (the default), otherwise let guest users view
+	// ... Vue component definition ... //
 })
 </script>
-```
 
-Standard registration types are:
+
+Special component properties supported by Doop:
+
+| Property            | Type    | Default | Description                                                                  |
+|---------------------|---------|---------|------------------------------------------------------------------------------|
+| `route`             | String  |         | Auto-installed route to access the component                                 |
+| `routeRequiresAuth` | Boolean | `true`  | Whether the route should redirect to the login page if no session is present |
+
+
+Standard frontend component registration types are:
 
 | Type               | Syntax example                                                | Description                                              |
 |--------------------|---------------------------------------------------------------|----------------------------------------------------------|

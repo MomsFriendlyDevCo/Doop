@@ -1,6 +1,7 @@
 <script lang="js" frontend>
 app.component({
 	route: '/signup',
+	routeRequiresAuth: false,
 	data: ()=> ({
 		data: {
 			email: '',
