@@ -180,6 +180,7 @@ app.component('ordersEdit', {
 	// ... Vue component definition ... //
 })
 </script>
+```
 
 
 Special component properties supported by Doop:
