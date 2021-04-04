@@ -51,6 +51,8 @@ global.app = {
 			app.dump = app.log.dump = (...args) => args.forEach(a => dumper.dump(a));
 			app.log.log = app.log;
 			app.log.log.as = (as, ...msg) => console.log.apply(app, [app.log.colors.blue(`[${as}]`)].concat(msg));
+			app.log.trace = (...msg) => console.trace.apply(app, [app.log.colors.blue(`[${this.id || app.log.forceId}]`)].concat(msg));
+			app.log.trace.as = (as, ...msg) => console.trace.apply(app, [app.log.colors.blue(`[${as}]`)].concat(msg));
 			app.log.warn = (...msg) => console.log.apply(app, [app.log.colors.blue(`[${this.id || app.log.forceId}]`), colors.yellow('[WARNING]')].concat(msg));
 			app.log.warn.as = (as, ...msg) => console.log.apply(app, [app.log.colors.blue(`[${as}]`), colors.yellow('[WARNING]')].concat(msg));
 			app.log.error = e => crash.trace(e);
