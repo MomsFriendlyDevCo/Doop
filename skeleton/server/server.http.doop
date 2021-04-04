@@ -28,6 +28,7 @@ app.endpoints = [];
 /**
 * Initalize core server
 */
+var _ = require('lodash');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var compression = require('compression');
@@ -85,7 +86,10 @@ app.express.use(function(req, res, next) {
 
 		res.errorBody = err;
 		if (!res.headersSent) {
-			res.status(code).send(res.errorBody);
+			res.format({
+				json: ()=> res.status(code).send(_.isPlainObject(res.errorBody) ? res.errorBody : {err: res.errorBody.toString()}),
+				default: ()=> res.status(code).send(res.errorBody),
+			})
 		} else {
 			app.log.warn('Cannot send error when headers have already been sent');
 		}
