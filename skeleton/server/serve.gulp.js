@@ -67,8 +67,8 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 			ignoreInitial: true,
 			awaitWriteFinish: true,
 		}).on('all', _.throttle(file => {
-			gulp.log('Rebuild Vue + Parcel files...');
-			gulp.run('build.vue', ()=> serverProcess.emit('restart'));
+			gulp.log('Rebuild Vue files...');
+			gulp.run('build.vue');
 		}, throttleTimeout, throttleOptions));
 		// }}}
 
