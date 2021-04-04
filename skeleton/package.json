@@ -140,8 +140,7 @@
     "vuedraggable": "^2.24.3",
     "vuejs-datepicker": "^1.6.2",
     "winston": "^3.3.3",
-    "winston-papertrail-transport": "^1.0.6",
-    "wordpress-hash-node": "^1.0.0"
+    "winston-papertrail-transport": "^1.0.6"
   },
   "babel": {
     "presets": [
