@@ -281,6 +281,7 @@ global.app = {
 		// INIT: Route guards must be attached before routes or first hit will not trigger middleware {{{
 		app.router.beforeEach((to, from, next) => {
 			app.service.$session.promise()
+				.then(()=> $('body').toggleClass('has-session', app.service.$session.isLoggedIn))
 				.then(()=> app.vue.$emit('$beforeRoute', {to, from}))
 				.then(() => next())
 				.catch(()=> { // Forbid nav if not logged in an the path is in a whitelist
