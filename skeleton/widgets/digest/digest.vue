@@ -8,7 +8,7 @@
 *
 * @param {string|Object} [url] The URL or AxiosRequest to fetch data (instead of specifying `collection` + `id`)
 * @param {string} [field="title"] Field to display the title of, if using slots specify "*" to populate `data` with the raw data object
-* @param {string} [filter] Optional Vue filter to run the result through before outputting
+* @param {function|string} [filter] Optional function filter or named Vue filter to run the result through before outputting
 * @param {string} [label] Use this label before fetching a remote one, if specifed the entity is treated as valid (including valid class and icon)
 * @param {boolean} [lazy=true] If true, fetching will be defered until the element is actually shown within the content area
 * @param {string} [lazyParents='#main, body'] jQuery compatible string listing the intersection parents to probe for when lazy==true, the first one found is assumed to be the parent
@@ -58,7 +58,7 @@ app.component('digest', {
 	props: {
 		url: {type: [Object, String], required: true},
 		field: {type: String, default: "title"},
-		filter: {type: String},
+		filter: {type: [Function, String]},
 		label: {type: String},
 		lazy: {type: Boolean, default: true},
 		lazyParents: {type: String, default: '#main, body'},
@@ -87,7 +87,9 @@ app.component('digest', {
 							: typeof this.$props.textValid == 'function' ? this.$props.textValid(value)
 							: value;
 
-						if (this.$props.filter) this.displayContent = app.filter(this.$props.filter)(this.displayContent);
+						if (this.$props.filter) this.displayContent =
+							_.isFunction(this.$props.filter) ? this.$props.filter(this.displayContent) // As func(v)
+							: Vue.filter(this.$props.filter)(this.displayContent); // As named filter
 
 						this.displayIcon = this.$props.iconValid;
 						if (this.$props.classValid) this.displayClass = this.$props.classValid;
