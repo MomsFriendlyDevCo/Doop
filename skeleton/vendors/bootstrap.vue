@@ -1,4 +1,7 @@
 <script lang="js" frontend>
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 /**
 * Various Bootstrap 4 fixes
 */
