@@ -11,7 +11,7 @@ app.ready.then(()=> {
 	* @param {string|number} [location.url] Alternate method of passing the URL to navigate to
 	* @param {string} [location.transition="none"] Transition to apply when navigating
 	* @param {boolean} [force=false] Force redirection even if the destination is the same (useful for inner page transitions)
-	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window, use '_self' to redirec the entire document
+	* @param {string} [target] What pane to target, use '_blank' to force a new tab / window, use '_self' to redirect the entire document location
 	* @param {function} [before] Async function called as `(settings)` to wait for before performing the action
 	* @param {function} [after] Function called as `(settings)` after performing the action (since actions are pretty much instant async is ignored)
 	* @returns {Promise} A promise which will resolve when the navigation completes
