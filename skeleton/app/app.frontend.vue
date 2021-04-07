@@ -305,19 +305,18 @@ global.app = {
 		// }}}
 
 		// INIT: Router routes {{{
-		app.router.addRoutes(
-			_(app.component.register)
-				.pickBy(component => component.route) // Only include components with routes
-				.map((component, id) => ({
-					path: component.route,
-					component: Vue.component(id),
-				}))
-				.sortBy(route => route.path
-					.replace(/\//g, String.fromCharCode(824))
-					.replace(/:/g, String.fromCharCode(818))
-				)
-				.value(),
-		);
+		_(app.component.register)
+			.pickBy(component => component.route) // Only include components with routes
+			.map((component, id) => ({
+				path: component.route,
+				component: Vue.component(id),
+			}))
+			.sortBy(route => route.path
+				.replace(/\//g, String.fromCharCode(824))
+				.replace(/:/g, String.fromCharCode(818))
+			)
+			.forEach(route => app.router.addRoute(route))
+
 		app.router.options.routeRequiresAuth = new Set( // Create lookup set for all components that need auth
 			Object.values(app.component.register)
 				.filter(component => component.route && (component.routeRequiresAuth ?? true))
