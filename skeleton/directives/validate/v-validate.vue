@@ -6,12 +6,12 @@
 * @param {string} [settings.classInvalid="is-invalid"] Class to apply to the input element when invalid
 * @param {string} [settings.classValid=""] Class to apply to the input element when valid
 * @param {boolean} [settings.immediate=false] Run the validator immediately on mount instead of waiting for an event to fire
-* @param {string} [settings.layout="title"] How to signal that the field is invalid. ENUM: "title" - set the title (the mouse tooltip) to the error, "tooltip" - attach a tooltip, "help" - attach a `<small/>` help block after the element
+* @param {string} [settings.layout="help"] How to signal that the field is invalid. ENUM: "title" - set the title (the mouse tooltip) to the error, "tooltip" - attach a tooltip, "help" - attach a `<small/>` help block after the element
 * @param {Object} [settings.tooltip] Additional tooltip options if layout==tooltip
 * @param {string|array} [settings.events='blur'] Event(s) to trigger validation on
 *
 * @param {array} settings.rules rules to use (implied if settings is an array), rules are evaulated in order. Some rules are sync (`endpoint` + functions if a promise is returned) which may take time to evaluate
-* @param {string} [settings.rules.err="Invalid"] The error message to display if the validation checks fail
+* @param {string} [settings.rules.err] Overriding error message to display if the validation checks fail, defaults to something logical per rule
 * @param {function} [settings.onData] Function called as `(data, value, settings)` when data is pulled for `endpoint` rules, expected to return the data (after any possible rewrites)
 * @param {function} [settings.onValid] Function called as `(isValid, error, settings)` when the validation recalculates
 *
@@ -46,7 +46,7 @@ app.directive('v-validate', {
 			classInvalid: 'is-invalid',
 			events: 'blur',
 			immediate: false,
-			layout: 'title',
+			layout: 'help',
 			onValid: (isValid, error, data, settings) => {},
 			onData: (data, value, settings) => data,
 			...binding.value,
@@ -69,9 +69,9 @@ app.directive('v-validate', {
 			var failedValidate = false;
 			settings.rules.find(validator => { // Process rules until the first one is truthy
 				if (validator.required && !value) { // Check against required field but no value
-					return failedValidate = 'Required'; // Return basic default message
+					return failedValidate = validator.err || 'Required'; // Return basic default message
 				} else if (validator.regExp && !validator.regExp.test(value)) { // Check against RegExp fail
-					return failedValidate = 'Is not valid';
+					return failedValidate = validator.err || 'Is not valid';
 				} else if (validator.satisfies) {
 					var res = validator.satisfies(value, settings);
 					if (Promise.isPromiseLike(res)) { // Returned async - wait on it then call invalidate later
@@ -83,7 +83,7 @@ app.directive('v-validate', {
 							.catch(e => invalidate( // Promise threw, assume invalid
 								_.isString(e) ? e // Is already a string
 								: e.toString().length > 0 ? e.toString() // Stringifyable?
-								: 'Invalid'
+								: validator.err || 'Invalid'
 							))
 					} else if (res === true) { // Simple scalar response that the function was satisifed
 						return false;
@@ -102,7 +102,7 @@ app.directive('v-validate', {
 						invalidate( // Use the error message specified or the server basic text if any
 							_.isString(validator.err) ? validator.err
 							: _.isString(data) ? data
-							: 'Invalid'
+							: validator.err || 'Invalid'
 						);
 					})
 					.catch(e => { // Server threw error - assume invalid
@@ -110,7 +110,7 @@ app.directive('v-validate', {
 							_.isString(validator.err) ? validator.err
 							: _.isString(e?.response?.data) ? e.response.data
 							: e.toString().length > 0 ? e.toString() // Use generic error
-							: 'Invalid'
+							: validator.err || 'Invalid'
 						);
 					})
 				} else { // Everything ok
