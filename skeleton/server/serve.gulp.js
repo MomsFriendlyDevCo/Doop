@@ -72,20 +72,6 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		}, throttleTimeout, throttleOptions));
 		// }}}
 
-		// Theme rebuild {{{
-		watch([
-			'**/*.css',
-			'**/*.scss'
-		], {
-			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
-			ignoreInitial: true,
-			awaitWriteFinish: true,
-		}).on('all', _.throttle(file => {
-			gulp.log('Rebuild CSS files...');
-			gulp.run('build.css', ()=> serverProcess.emit('restart'));
-		}, throttleTimeout, throttleOptions));
-		// }}}
-
 		// Backend rebuild (server process restart) {{{
 		watch([
 			'**/*.doop',
@@ -124,7 +110,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 				ignoreInitial: true,
 			}).on('all', _.throttle(()=> {
 				gulp.log('Node_modules has changed, Rebuild Vendors...');
-				gulp.run('build.vendors.main', ()=> serverProcess.emit('restart'));
+				gulp.run('build.vue', ()=> serverProcess.emit('restart'));
 			}, throttleTimeout, throttleOptions));
 		}
 
@@ -134,7 +120,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 				ignoreInitial: true,
 			}).on('all', _.throttle(()=> {
 				gulp.log('Vendors file has changed, Rebuild Vendors...');
-				gulp.run('build.vendors.main', ()=> serverProcess.emit('restart'));
+				gulp.run('build.vue', ()=> serverProcess.emit('restart'));
 			}, throttleTimeout, throttleOptions));
 		}
 		// }}}
