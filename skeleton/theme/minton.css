@@ -1,9 +1,9 @@
-<style>
 /*
 Template Name: Minton - Bootstrap 4 Admin Dashboard
 Author: Coderthemes
 Email: coderthemes@gmail.com
 File: Main Css
+NOTE: This file is a .CSS file rather than .VUE is because it needs to be loaded in the right order from vendors/bootstrap.vue
 */
 /*===================================
   Menu
@@ -5880,4 +5880,3 @@ File: Responsive
             box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) !important;
   }
 }
-</style>
