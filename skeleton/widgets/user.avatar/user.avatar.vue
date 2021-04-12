@@ -8,7 +8,7 @@
 *
 * @see https://en.gravatar.com/site/implement/images/
 */
-import md5 from 'crypto-js/md5';
+import {MD5} from 'jscrypto/es6/MD5';
 
 app.component('userAvatar', {
 	props: {
@@ -24,7 +24,7 @@ app.component('userAvatar', {
 				return;
 			} else {
 				return 'https://gravatar.com/avatar/'
-					+ md5(email).toString()
+					+ MD5.hash(email).toString()
 					+ '?'
 					+ `size=${this.size}&`
 					+ `d=${this.fallback}`
