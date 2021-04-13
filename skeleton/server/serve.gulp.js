@@ -83,10 +83,10 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		], {
 			ignored: ['build/**/*', 'data/**/*', 'dist/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
-		}).on('all', _.throttle((e, path) => {
+		}).on('all', ()=> {
 			gulp.log('Rebuild backend hook / layout / path files...');
 			serverProcess.emit('restart');
-		}, throttleTimeout, throttleOptions));
+		});
 
 		watch('package.json').on('change', ()=> {
 			gulp.log('Check NPM installs...');
