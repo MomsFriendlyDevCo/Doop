@@ -1,0 +1,40 @@
+<script lang="js" backend on="middleware">
+var _ = require('lodash');
+
+/**
+* Copy a parameter from one segment of an incomming request to another
+* Parameters are only copied if the have a truthy, non-null value
+*
+* @param {Object} options Configuration options
+* @param {array<Object>} params Parameters to copy, each key is the dotted notation of the read value, each value is the dotted notation on where to copy
+* @param {boolean} [move=false] Remove the source value after copying
+* @return {function} Express middleware
+*
+* @example Copy req.params.id -> req.body.id
+* app.post('/api/widgets/:id?',
+*   app.middleware.express.copyParams({params: {'req.params.id': 'req.body.id'}})
+*   (req, res) => ...
+* )
+*/
+app.middleware.express.copyParams = (options) => {
+	var settings = {
+		params: undefined,
+		move: false,
+		...options,
+	};
+
+	if (!settings.params) throw new Error('At least one parameter should be specified');
+
+	return (req, res, next) => {
+		Object.entries(settings.params)
+			.forEach(([key, val]) => {
+				var readVal = _.get({req, res}, key);
+				if (!readVal) return; // Value is falsy - ignore
+				_.set({req, res}, val, readVal);
+				if (settings.move) _.unset({req, res}, key);
+			})
+
+		next();
+	};
+};
+</script>
