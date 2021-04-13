@@ -18,7 +18,7 @@ Installation
 
 1. Clone the repo:
 
-```
+```bash
 git clone git@github.com:MomsFriendlyDevCo/{{FIXME}}.git
 cd {{FIXME:Basename}}
 ```
@@ -26,15 +26,15 @@ cd {{FIXME:Basename}}
 
 2. Install all NPM dependencies:
 
-```
+```bash
 npm ci
 ```
 
 
 3. Build a prototype database:
 
-```
-gulp db
+```bash
+npm run sample:data
 ```
 
 
@@ -42,7 +42,6 @@ gulp db
 
 To execute the server in 'watchful mode' (i.e if you update a file the server will auto-restart):
 
+```bash
+npm run dev
 ```
-gulp
-```
-

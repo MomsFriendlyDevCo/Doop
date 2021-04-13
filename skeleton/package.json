@@ -5,6 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "build": "gulp build",
+    "sample:data": "gulp db",
     "dev": "gulp serve",
     "start": "node server",
     "test": "mocha"
