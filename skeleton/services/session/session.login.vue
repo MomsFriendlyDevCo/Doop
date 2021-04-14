@@ -17,8 +17,8 @@ app.component({
 				.then(()=> $('body').removeClass('minimal'))
 				.then(()=> notification && this.$toast.success('Successful Login'))
 				.then(()=> this.$session.settings.get('redirect', '/'))
-				.then(url=> this.$session.settings.unset('redirect', 'local').then(() => url))
-				.then(url=> redirect && this.$router.push(url))
+				.then(url => this.$session.settings.unset('redirect', 'local').then(() => url))
+				.then(url => redirect && this.$router.go({url, force: true}))
 				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))
 				.finally(()=> this.$loader.stop())
 		},
