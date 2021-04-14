@@ -87,9 +87,17 @@ app.component('digest', {
 							: typeof this.$props.textValid == 'function' ? this.$props.textValid(value)
 							: value;
 
-						if (this.$props.filter) this.displayContent =
-							_.isFunction(this.$props.filter) ? this.$props.filter(this.displayContent) // As func(v)
-							: Vue.filter(this.$props.filter)(this.displayContent); // As named filter
+						if (this.$props.filter) {
+							if (_.isFunction(this.filter)) {
+								this.displayContent = this.$props.filter(this.displayContent) // As func(v)
+							} else if (_.isString(this.$props.filter)) {
+								var filter = Vue.filter(this.filter)
+								if (!filter) throw new Error(`Unknown filter "${this.filter}" specified in <digest filter/>`);
+								this.displayContent = filter(this.displayContent); // As named filter
+							} else {
+								throw new Error(`Unknown filter type specified in <digest filter/>`)
+							}
+						}
 
 						this.displayIcon = this.$props.iconValid;
 						if (this.$props.classValid) this.displayClass = this.$props.classValid;
