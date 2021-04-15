@@ -27,9 +27,11 @@ app.ready.then(()=> {
 		}
 	});
 
-	// When [data-dismiss="dropdown"] is set on a dropdown-item also close the dropdown
-	$(document).on('click', '.dropdown-item[data-dismiss="dropdown"]', e => {
-		$(e.target).closest('.dropdown-menu').removeClass('show');
-	});
+	// When clicking dropdowns close automatically unless it has class `.dropdown-item-no-dismiss`
+	$(document).on('mousedown', '.dropdown-item:not(.dropdown-item-no-dismiss)', e =>
+		setTimeout(()=> // Add behind timeout so Bootstrap has time to react
+			$(e.target).closest('.dropdown-menu').removeClass('show')
+		, 100)
+	);
 });
 </script>
