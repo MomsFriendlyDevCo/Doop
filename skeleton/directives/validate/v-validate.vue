@@ -29,6 +29,9 @@
 * @example Input is required
 * <input type="text" class="form-control" v-validate="{rules: {required: true}}"/>
 *
+* @example Input is required (using Vue modifier flags)
+* <input type="text" class="form-control" v-validate.required/>
+*
 * @example Input must match a RegExp
 * <input type="text" class="form-control" v-validate="[{regExp: /[a-z]/, err: 'Must be only lower case a-z'}]"/>
 *
@@ -51,11 +54,17 @@ app.directive('v-validate', {
 			onData: (data, value, settings) => data,
 			...binding.value,
 			rules: Array.isArray(binding.value) ? binding.value // Given only an array
-				: binding.value.rules && _.isPlainObject(binding.value.rules) ? [binding.value.rules] // Given {rules: Object}
-				: binding.value.rules && Array.isArray(binding.value.rules) ? binding.value.rules // Given {rules: Array}
-				: false, // Fail
+				: binding.value?.rules && _.isPlainObject(binding.value.rules) ? [binding.value.rules] // Given {rules: Object}
+				: binding.value?.rules && Array.isArray(binding.value.rules) ? binding.value.rules // Given {rules: Array}
+				: [], // Create empty array as we may be given modifiers next
 		};
-		if (!settings.rules) throw new Error('No rules passed, v-validate only accepts an array of rules or the `{rules: Array|Object}` structure');
+		Object.keys(binding.modifiers).forEach(mod => {
+			if (app.service.$config.isProduction) { // Extra check for colliding rules
+				if (settings.rules.some(rule => rule[mod])) throw new Error(`v-validate directive has conflicting modifier + rule spec "${mod}" - specify only a modifier OR a full rule config`);
+			}
+			settings.rules.push({[mod]: true});
+		});
+		if (!settings.rules?.length) throw new Error('No rules passed, v-validate accepts an array of rules, the `{rules: Array|Object}` structure or Vue modifier flags');
 
 		// checkValidate() {{{
 		/**
