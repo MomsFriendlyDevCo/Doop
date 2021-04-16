@@ -327,7 +327,19 @@ global.app = {
 		// }}}
 
 		app.vue.$mount('#app'); // Mount the headless Vue instance and kick off the chain of component loading
-		setTimeout(()=> app.ready.resolve(), 10); // Let app.ready set itself up then resolve
+
+		var tryResolve = ()=> { // Let app.ready set itself up then resolve (keep trying if its not there)
+			console.count('Try app.ready.resolve()');
+			if (!app.ready.resolve) {
+				if (++tryResolve.tryCount >= 8) throw new Error('Given up after 8 attempts trying to call app.ready.resolve() - app payload corrupt?');
+				setTimeout(tryResolve, Math.pow(2, tryResolve.tryCount) * 5);
+			} else {
+				app.ready.resolve();
+			}
+		}
+		tryResolve.tryCount = 0;
+		tryResolve(); // Kick off resolve trier
+
 		$debug('app.init() - complete!');
 	},
 };
