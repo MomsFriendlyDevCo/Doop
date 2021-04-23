@@ -29,6 +29,8 @@
     "@babel/plugin-proposal-optional-chaining": "^7.13.8",
     "@babel/plugin-proposal-pipeline-operator": "^7.12.13",
     "@babel/preset-env": "^7.13.10",
+    "@doop/core-vue": "^0.0.6",
+    "@fortawesome/fontawesome-free": "^5.15.3",
     "@momsfriendlydevco/cache": "^2.1.3",
     "@momsfriendlydevco/crash": "^0.0.10",
     "@momsfriendlydevco/email": "^2.3.4",

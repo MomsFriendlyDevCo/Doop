@@ -343,4 +343,6 @@ global.app = {
 		$debug('app.init() - complete!');
 	},
 };
+
+window.addEventListener('load', app.init); // Kick everything off when the window is ready
 </script>

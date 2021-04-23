@@ -60,16 +60,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		// }}}
 
 		// Frontend rebuild {{{
-		watch([
-			'**/*.vue'
-		], {
-			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
-			ignoreInitial: true,
-			awaitWriteFinish: true,
-		}).on('all', _.throttle(file => {
-			gulp.log('Rebuild Vue files...');
-			gulp.run('build.vue');
-		}, throttleTimeout, throttleOptions));
+		// NOTE: This is handled automatically by Webpack / webpack-{dev,hot}-middleware in Express
 		// }}}
 
 		// Backend rebuild (server process restart) {{{
