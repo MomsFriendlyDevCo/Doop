@@ -157,6 +157,11 @@ module.exports = {
 		watchVendors: false,
 		fontGlob: '*.{css,eot,svg,ttf,woff,woff2}', // Fonts to cache internally, can be tweaked by Cordova or other build process
 	},
+	hmr: { // Hot module reloading when in dev mode
+		enabled: true,
+		backend: true, // Allow backend to detect file changes + recompile /dist files
+		frontend: true, // Allow frontend to poll + respond to module changes
+	},
 	layout: {
 		headInject: [ // Aditional HTML compliant content to inject into the page header (line feeds added automatically)
 			// '<meta name="description" content="FIXME: SEO description"/>',
