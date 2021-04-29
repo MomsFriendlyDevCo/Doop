@@ -6,7 +6,7 @@ cypress.env.json
 .o
 
 # Dynamic data
-frontend.doop.vue.js
+frontend.doop.*.js
 data/
 dist/
 node_modules/

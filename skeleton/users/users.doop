@@ -2,6 +2,9 @@
 var crypto = require('crypto');
 var _ = require('lodash');
 
+/**
+ * Users
+ */
 app.middleware.db.schema('users', {
 	created: {type: Date, default: ()=> new Date()},
 	lastLogin: {type: Date, default: ()=> new Date()},
@@ -27,6 +30,7 @@ app.middleware.db.schema('users', {
 	}],
 })
 
+// TODO: Documentation blocks for model methods.
 
 // Logins + user passwords {{{
 // FIXME: Method works still? Not 'static()'? Why 'static()' in "search"?
@@ -173,10 +177,16 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 			if (req.user.permissions.usersEdit) req.query.select += ',permissions'; // Can also edit other users permissions
 			next();
 		},
-		app.middleware.express.isUser(),
+		app.middleware.express.hasAccess({
+			viaApikey: false,
+			viaCookie: true,
+		}),
 	],
-	query: app.middleware.express.isUser(),
-	count: app.middleware.express.isUser(),
+	query: app.middleware.express.hasAccess({
+		viaApikey: false,
+		viaCookie: true,
+	}),
+	count: 'query',
 	create: app.middleware.express.hasPermission('usersEdit'),
 	save: (req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
 		// Allow user to save their own profile

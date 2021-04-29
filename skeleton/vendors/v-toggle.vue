@@ -37,6 +37,7 @@
 * </div>
 */
 import {ToggleButton} from 'vue-js-toggle-button';
+
 app.component('v-toggle', ToggleButton);
 </script>
 

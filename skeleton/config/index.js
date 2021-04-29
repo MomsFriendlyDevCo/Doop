@@ -190,22 +190,18 @@ module.exports = {
 			'prefetch-src': [],
 			'script-src': [
 				`'self'`, // Allow access to this server
+				`'unsafe-eval'`, // Used by WebPack for inline JS
 			],
 			'style-src': [
 				`'self'`, // Allow access to this server
+				`'unsafe-eval'`, // Used by WebPack for inline CSS
 				`'unsafe-inline'`, // Used by Vue components
 			],
 			'worker-src': [],
 		},
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
-			'/dist/app.css',
-			'/dist/app.js',
-			'/dist/vendors.core.css',
-			'/dist/vendors.core.js',
-			'/dist/vendors.fonts.css',
-			'/dist/vendors.main.css',
-			'/dist/vendors.main.js',
-			'/dist/vendors.repack.js',
+			'/dist/app.setup.js',
+			'/dist/app.main.js',
 		],
 		http2Inject: config => config.layout.assets, // Links to files that should be HTTP2 injected on initial page hit
 	},

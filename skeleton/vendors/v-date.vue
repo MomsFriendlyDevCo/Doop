@@ -10,5 +10,6 @@
 * <v-date :value="myDate" @selected="myDate = $event"/>
 */
 import Datepicker from 'vuejs-datepicker';
+
 app.component('v-date', Datepicker);
 </script>

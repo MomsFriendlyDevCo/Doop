@@ -1,5 +1,5 @@
 <script lang="js" frontend>
-import Waves from 'node-waves'
+import Waves from 'node-waves';
 
 /**
 * Inject the material design waves effect to all things that look like buttons

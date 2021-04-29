@@ -48,7 +48,9 @@ app.express.use(helmet());
 app.express.use(cors());
 app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',
-	exclusions: ['/api/*', '/dist/*', '/go/*', '/generated/*'],
+	exclusions: [/^\/api\/.*/, /^\/dist\/.*/, /^\/go\/.*/, /^\/generated\/.*/],
+	//verbose: true,
+	logger: app.log.bind(app),
 }));
 app.express.use(cookieParser());
 app.express.use(bodyParser.json({limit: '64mb'}));

@@ -12,7 +12,7 @@ th.col-icon { width: 20px }
 th.col-thumbnail, td.col-thumbnail { width: 40px; text-align: center }
 th.col-thumbnail { visibility: collapse }
 
-th.col-date { width: 280px }
+th.col-date { width: 200px }
 body.screen-xs th.col-date { width: 130px }
 
 th.col-currency { width: 100px }

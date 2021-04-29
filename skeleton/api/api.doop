@@ -1,0 +1,8 @@
+<script lang="js" backend endpoint>
+/**
+* Accessing /api as a regular user should show the generated documentation via @doop/docs which lives in dist/docs
+*/
+app.get('/api', (req, res) => res.sendFile('rest.html', {root: `${app.config.paths.root}/dist/docs`}));
+app.get('/api/rest.json', (req, res) => res.sendFile('rest.json', {root: `${app.config.paths.root}/dist/docs`}));
+app.get('/api/rest.md', (req, res) => res.sendFile('rest.md', {root: `${app.config.paths.root}/dist/docs`}));
+</script>
