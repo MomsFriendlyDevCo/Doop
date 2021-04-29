@@ -35,10 +35,7 @@ app.middleware.db.schema('logs', {
 <script lang="js" backend endpoint>
 app.use('/api/logs/:id?', app.middleware.express.rest('logs', {
 	data: req => req.user ? {user: req.user._id} : undefined,
-	query: app.middleware.express.hasAccess({
-		viaApikey: false,
-		viaCookie: true,
-	}),
+	query: app.middleware.express.isUser(),
 	get: 'query',
 	count: 'query',
 	create: false,
