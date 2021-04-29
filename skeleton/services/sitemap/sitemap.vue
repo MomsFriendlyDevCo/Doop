@@ -35,6 +35,7 @@ app.service('$sitemap', function() {
 			icon: 'fal fa-cog',
 			show: ()=> this.$session.hasPermission('debug'),
 			children: [
+				{title: 'API', href: '/debug/api'},
 				{title: 'Config', href: '/debug/config'},
 				{title: 'DB', href: '/debug/db'},
 				{title: 'DirtyChecker', href: '/debug/dirtyChecker'},

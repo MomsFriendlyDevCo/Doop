@@ -13,5 +13,6 @@
 * <div v-mask="'#,###'"/>
 */
 import {VueMaskDirective} from 'v-mask';
+
 app.directive('v-mask', VueMaskDirective);
 </script>

@@ -51,8 +51,7 @@ app.ready.then(()=> {
 					if (settings.force) {
 						app.router.$debug(`$route.go('${settings.url}') (FORCED, same URL)`);
 						app.router.routeVersion++;
-						return app.router.push('/redir')
-							.then(()=> app.router.push(settings.url));
+						return app.router.push(settings.url);
 					} else {
 						app.router.$debug(`$route.go('${settings.url}') (skipped, same URL)`);
 					}

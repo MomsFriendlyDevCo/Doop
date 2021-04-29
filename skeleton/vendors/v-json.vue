@@ -17,6 +17,6 @@
 * />
 */
 import VJsoneditor from 'v-jsoneditor';
- 
+
 app.component('v-json', VJsoneditor);
 </script>

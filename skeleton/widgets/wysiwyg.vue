@@ -13,6 +13,7 @@
 * />
 */
 import {VueEditor} from 'vue2-editor';
+
 app.component('wysiwyg', {
 	components: {VueEditor},
 	props: {

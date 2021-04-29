@@ -1,4 +1,5 @@
 <script lang="js" backend schema>
+var _ = require('lodash');
 /**
 * Generic logging sub-system
 * Each log is a HTML payload (stored as 'body') attached to col(lection) / doc
@@ -13,56 +14,33 @@ app.middleware.db.schema('logs', {
 	col: {type: String},
 	doc: {type: String}, // Either the OID of the pointer document or a string pointing to a product / customer in MySQL
 	body: {type: String},
-	type: {type: String},
-	status: {type: String, enum: ['active', 'deleted'], default: 'active', index: true},
+	type: {type: String}, // ENUM: InqDocument (success, warn, error)
 })
 	.index(['col', 'doc'])
-</script>
 
-
-<script lang="js" backend endpoint>
-/**
-* Push a log item by collection + id
-* @param {string} req.params.col The collection to append to
-* @param {string} req.params.doc The document ID to append to
-* @param {string} req.body.creator Creator ID for the log entry
-* @param {string} req.body.body Body HTML to append
-* @returns 200 Simple status code return if successful
-*/
-app.post('/api/logs/:col/:doc', app.middleware.express.isUser(), (req, res) => {
-	Promise.resolve()
-		// Sanity checks {{{
-		.then(()=> {
-			if (!db[req.params.col]) throw ('400: Unknown collection');
-			if (!req.body.creator) throw ('400: "creator" post filed must be specified');
-			if (!req.body.body) throw ('400: No "body" payload specified');
-		})
-		// }}}
-		.then(()=> db.logs.create({
-			creator: req.body.creator,
-			col: req.params.col,
-			doc: req.params.doc,
-			body: req.body.body,
-			type: req.body.type || null,
-		}))
-		.then(()=> res.sendStatus(200))
-		.catch(e => res.sendError(e))
-});
+	/**
+	* Trim down a log entry to user-facing exposable safe data
+	* This basically picks all data that the user is allowed to see
+	* @returns {Object} User visible version of a log entry
+	*/
+	.method('digest', function() {
+		return {
+			id: this._id,
+			..._.pick(this, ['created', 'type', 'body']),
+		};
+	})
 </script>
 
 
 <script lang="js" backend endpoint>
 app.use('/api/logs/:id?', app.middleware.express.rest('logs', {
 	data: req => req.user ? {user: req.user._id} : undefined,
-	get: app.middleware.express.isUser(),
 	query: app.middleware.express.isUser(),
-	count: app.middleware.express.isUser(),
-	create: app.middleware.express.isUser(),
-	save: app.middleware.express.isUser(),
-	meta: true,
-	delete: [
-		app.middleware.express.isUser(),
-		app.middleware.express.setDocStatus({collection: 'logs', status: 'deleted'}),
-	],
+	get: 'query',
+	count: 'query',
+	create: false,
+	save: false,
+	meta: false,
+	delete: false,
 }));
 </script>

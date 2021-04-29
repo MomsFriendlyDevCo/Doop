@@ -9,7 +9,6 @@
 
 var crash = require('@momsfriendlydevco/crash');
 var debug = require('debug')('doop');
-var globby = require('globby');
 
 Promise.resolve()
 	// Load app core {{{
@@ -20,17 +19,6 @@ Promise.resolve()
 	// }}}
 	// Initialize all .doop files {{{
 	.then(()=> app.setup())
-	// }}}
-	// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js'])
-	.then(()=> globby([
-			`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
-			`!${app.config.paths.root}/node_modules/**/node_modules`,
-		])
-		.then(modPaths => modPaths.forEach(modPath => {
-			debug('Load module', modPath);
-			require(modPath)
-		}))
-	)
 	// }}}
 	// Emit events to boot server in order {{{
 	.then(()=> app.emit('preInit'))

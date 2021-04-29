@@ -26,12 +26,9 @@ app.component('layoutRoot', {
 	<div id="app">
 		<!-- Topbar {{{ -->
 		<div class="topbar">
-			<div class="topbar-left" v-tooltip.bottom="$config.git.current.release + '<br/>' + $config.git.current.shortHash + '<br/>' + $config.git.current.date">
+			<div class="topbar-left" v-tooltip.bottom="`${$config.title}<br/>v${$config.version}`">
 				<div class="text-center">
 					<a v-href="'/'" class="logo">
-						<div v-if="$config.tagline" class="logo-tagline" :class="$config.tagline == 'LOCAL' ? 'bg-warning' : 'bg-danger'">
-							{{$config.tagline}}
-						</div>
 						<span class="logo-inner-sm">
 							<img src="/assets/logo/logo.svg"/>
 						</span>
