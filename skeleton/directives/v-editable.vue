@@ -4,6 +4,7 @@
 *
 * @param {Object|function} options The options to process, if this is a function it is assumed to set the `options.handler` function
 * @param {string|function} [options.value] The value to display when editing, if omitted the element inner text is used instead. If a function this is called as ($el, options)
+* @param {boolean} [options.enabled] Enable editing
 * @param {function} [options.handler] Function to call when editing completes, called as (value, $el, options)
 * @param {function} [options.preEdit] Function to call as `(value)` before editing, can return the actual value that the user can edit
 * @param {function} [options.postEdit] Function to call as `(value)` before exiting edit mode, can be used to mangle user provided value back into stored value
@@ -20,6 +21,7 @@ app.directive('v-editable', {
 		var settings = {
 			value: ()=> $el.text(),
 			handler: _.isFunction(binding.value) ? binding.value : v => {},
+			enabled: true,
 			preEdit: v => v,
 			postEdit: v => v,
 			classEditing: 'editing',
@@ -30,6 +32,8 @@ app.directive('v-editable', {
 		$el
 			.addClass('editable')
 			.on('click', ()=> {
+				if (!settings.enabled) return; // Not enabled - do nothing
+
 				// Set text value before we begin if .value is set {{{
 				if (settings.value && _.isFunction(settings.value)) {
 					$el.text(settings.value($el, settings) |> settings.preEdit);
