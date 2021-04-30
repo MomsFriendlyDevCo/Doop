@@ -51,6 +51,32 @@ methods.up = function(msg, ...payload) {
 
 
 /**
+* Operates like vm.$emit.broadcast() but will only be recieved by named components
+* This does not recurse upwards or downwards but targets any component matching the specified target
+* @param {string|array<string>} target The camelCase / snake_case / kebab-case name of the component(s) to recieve the emitted event (all target names are converted via `_.camelCase()`)
+* @param {string} msg The name of the event to emit
+* @param {*} [payload...] The payload of the event
+* @returns {VueComponent} This chainable VM
+*/
+methods.to = function(target, msg, ...payload) {
+	var nameFilters = new Set( // Create lookup set of names to filter by (after kebab casing to match Vue's internal system)
+		_.castArray(target).map(_.kebabCase)
+	);
+
+	var recurseDown = function(component) {
+		if (nameFilters.has(component.$options._componentTag))
+			component.$emit(msg, ...payload);
+
+		component.$children.forEach(child => recurseDown(child));
+	};
+
+	recurseDown(app.vue);
+
+	return this;
+};
+
+
+/**
 * Extend the base app.vue.prototye.$emit with promise support
 * Any function returning a promise will be waited on
 * NOTE: As of 2019-07-10 (Vue 2.6.10) it is not possible to glue this as vm.$emit.promise for some reason, maybe one day this will change
