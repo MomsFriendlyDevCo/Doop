@@ -9,6 +9,8 @@ import moment from 'moment';
 * @param {string} [formatDesktop="ddd MMM Do YYYY h:mma"] Date format to use on larger displays
 * @param {string} [formatTooltip="dddd MMMM Do YYYY h:mma"] Date format to display in the tooltip
 *
+* @listens $screen.resize Triggers the component to reapply which profile it should display as (e.g. moving from Desktop to Mobile screen sizes)
+*
 * @example Display a date
 * <date :date="someDate"/>
 */

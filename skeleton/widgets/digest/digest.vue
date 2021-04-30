@@ -22,6 +22,11 @@
 * @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into this.$toast.catch
 * @param {string} [hashMethod='urlField] How to cache the digest result, see the $digest service for more info
 *
+* @listens digest.force.class Recieved as `(newClass)` to force a specific class on a digest component
+* @listens digest.force.icon Recieved as `(newIconClass)` to force a specific icon class on a digest component
+* @listens digest.force.text Recieved as `(newText)` to force a specific text value on the digest component
+* @listens digest.force.valid Recieved as `(newIsValid)` to force validity checks on the digest component, this switches all classes, icons and text as needed
+*
 * @slot [loading] What to display when loading - defaults to a FA5 loading spinner. Bindings are `{config}`
 * @slot [display] What to display when data is loaded. Bindings are `{config, data, displayContent}`
 *
