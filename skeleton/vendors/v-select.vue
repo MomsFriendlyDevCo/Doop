@@ -1,4 +1,18 @@
 <script lang="js" frontend>
+/**
+* Wrapped implementation of vue-select
+* @see https://vue-select.org/api/props.html
+*
+* @param {array<Object>} options Collection of options to choose from
+* @param {boolean} [clearable=true] Whether to allow user clearing of the selected item
+* @param {boolean} [searchable=true] Whether the element should present a search UI
+* @param {string} [label='label'] How to find the title of the active element
+* @param {string} [value] The currently selcted item (if any), should correspond to the full object selected (`label` is used by default as text) or override with a slot
+* @param {*} [...] See https://vue-select.org/api/props.html for more options
+*
+* @emits input Emitted as `(newSelection: Object)` when the selection changes
+*/
+
 import vSelect from "vue-select";
 import '/node_modules/vue-select/dist/vue-select.css';
 
