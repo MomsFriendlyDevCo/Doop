@@ -4,6 +4,8 @@
 *
 * @url https://github.com/davidroyer/vue2-editor
 * @param {string} [value] The existing HTML content to display
+* @param {string} [toolbar='full'] Type of toolbar UI to use. ENUM: 'none', 'simple', 'full'
+*
 * @emits change Emitted as `(html)` when the value changes
 *
 * @example Simple WYSIWYG component
@@ -17,6 +19,7 @@ import {VueEditor} from 'vue2-editor';
 app.component('wysiwyg', {
 	components: {VueEditor},
 	props: {
+		toolbar: {type: String, default: 'full', validator: v => ['none', 'simple', 'full'].includes(v)},
 		value: {type: String},
 	},
 	methods: {
@@ -31,8 +34,8 @@ app.component('wysiwyg', {
 		return h('vue-editor', {
 			props: {
 				value: this.value,
-				editorToolbar: [
-					[{header: [false, 1, 2, 3, 4, 5, 6]}],
+				editorToolbar: this.toolbar == 'none' ? [[]] : [
+					this.toolbar == 'full' && [{header: [false, 1, 2, 3, 4, 5, 6]}],
 					[
 						'bold',
 						'italic',
@@ -49,12 +52,12 @@ app.component('wysiwyg', {
 						'blockquote',
 						'code-block',
 					],
-					[
+					this.toolbar == 'full' && [
 						{list: 'ordered'},
 						{list: 'bullet'},
 						{list: 'check'}
 					],
-					[
+					this.toolbar == 'full' && [
 						{indent: '-1'},
 						{indent: '+1'}
 					],
@@ -62,7 +65,7 @@ app.component('wysiwyg', {
 						{color: []},
 						{background: []},
 					],
-					[
+					this.toolbar == 'full' && [
 						'link',
 						'image',
 						'video',
@@ -70,7 +73,7 @@ app.component('wysiwyg', {
 					[
 						'clean', // remove formatting button
 					],
-				],
+				].filter(Boolean),
 			},
 			on: {
 				input: v => this.$emit('change', v),
@@ -79,3 +82,25 @@ app.component('wysiwyg', {
 	},
 });
 </script>
+
+<style lang="scss">
+.quillWrapper {
+	width: 100%;
+
+	/* Special .quill-no-toolbar rules {{{ */
+	&.quill-no-toolbar {
+		& .ql-toolbar.ql-snow {
+			display: none;
+		}
+	}
+	/* }}} */
+
+	/* Special .quill-no-border rules {{{ */
+	&.quill-no-border {
+		& .ql-toolbar.ql-snow, & .ql-container.ql-snow {
+			border: none !important;
+		}
+	}
+	/* }}} */
+}
+</style>
