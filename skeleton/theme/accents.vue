@@ -4,10 +4,11 @@
 */
 :root {
 	--main: #32a4d5;
+	--main-lighter: #e0eaf4;;
 	--main-highlight: #9dd5ec;
 
 	/* Misc assistant colors */
-	--gray-light: #eeeeee;
+	--gray-light: #eee;
 
 	/* Font awsome config */
 	--fa-primary-color: #32a4d5;

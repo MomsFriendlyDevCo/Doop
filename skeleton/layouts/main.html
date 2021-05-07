@@ -27,7 +27,8 @@
 
 <body class="bootstrapping widescreen fixed-left">
 	<!-- Splashes {{{ -->
-	<div class="splash splash-init">
+	<!-- Bootstrapping splash screen injection needs all styles inline - taken from theme/bootstrap-exensions/splash.vue -->
+	<div class="splash splash-init" style="position: fixed; top: 0px; left: 0px; right: 0px; bottom: 0px; display: flex; align-items: center; justify-content: center; background: #ccc">
 		<img src="/assets/logo/logo.svg"/>
 	</div>
 
@@ -44,9 +45,9 @@
 		</div>
 	</div>
 
-	<div class="splash splash-loading-foreground">
+	<div class="splash splash-loading-foreground" style="display:none">
+		<!-- All .splash style attribs removed after bootstrap in layoutRoot - prevents multiple splashes present before Vue takes over -->
 		<img src="/assets/logo/logo.svg"/>
-		<div class="splah-loading-foreground-spinner"></div>
 	</div>
 	<!-- }}} -->
 
