@@ -86,22 +86,13 @@ var Loader = {
 	* @param {boolean} [foreground=true] Whether to load the object in the foreground (if false $scope.startBackground is used instead)
 	* @return {Object} This chainable loader object
 	*/
-	start: function(id, foreground) {
-		if (!id) id = 'default';
-		if (foreground === undefined) foreground = true;
-
-		var wasBackground = false;
-
+	start: function(id = 'loader', foreground = true) {
 		if (foreground) {
-			wasBackground = Loader.isBackground();
 			Loader.waitingForeground.add(id);
 		} else {
 			Loader.waitingBackground.add(id);
 		}
 
-		var isForeground = Loader.isForeground();
-		document.body.classList.add('loading', isForeground ? 'loading-foreground' : 'loading-background');
-		document.body.classList.remove(isForeground ? 'loading-background' : 'loading-foreground');
 		Loader.updateStates();
 
 
@@ -115,7 +106,7 @@ var Loader = {
 	* @param {string} [id='default'] Optional ID to use
 	* @return {Object} This chainable loader object
 	*/
-	startBackground: function(id) {
+	startBackground: function(id = 'loader') {
 		return Loader.start(id, false);
 	},
 
@@ -130,6 +121,10 @@ var Loader = {
 		Loader.loading = isLoading;
 		Loader.loadingForeground = isForeground;
 		Loader.loadingBackground = isBackground;
+
+		document.body.classList.toggle('loading', isLoading);
+		document.body.classList.toggle('loading-foreground', isForeground);
+		document.body.classList.toggle('loading-background', !isForeground && isBackground);
 	},
 
 
@@ -139,24 +134,9 @@ var Loader = {
 	* @param {string} [id='default'] Optional ID to use
 	* @return {Object} This chainable loader object
 	*/
-	stop: function(id) {
-		if (!id) id = 'default';
-
-		var wasForeground = Loader.waitingForeground.has(id);
-		if (wasForeground) {
-			delete Loader.waitingForeground.delete(id);
-		} else if (Loader.waitingBackground[id]) {
-			delete Loader.waitingBackground.delete(id);
-		} else { // Unknown ID
-			return;
-		}
-
-		if (!Loader.isActive()) { // Nothing waiting
-			document.body.classList.remove('loading', 'loading-foreground', 'loading-background');
-		} else if (!Loader.isForeground()) { // Transition from foreground -> background
-			document.body.classList.add('loading-background');
-			document.body.classList.remove('loading-foreground');
-		}
+	stop: function(id = 'loader') {
+		delete Loader.waitingForeground.delete(id);
+		delete Loader.waitingBackground.delete(id);
 		Loader.updateStates();
 
 		return Loader;
@@ -185,6 +165,11 @@ var Loader = {
 		elem.id = 'core-loader';
 		elem.innerHTML = '<div class="loader-spinner"></div>';
 		document.body.appendChild(elem);
+
+		setInterval(()=> console.log('Loader wait on', {
+			foreground: Array.from(Loader.waitingForeground),
+			background: Array.from(Loader.waitingBackground),
+		}), 1000);
 	},
 };
 
@@ -203,11 +188,8 @@ app.mixin({
 			* @param {boolean} [foreground] Specify that the foreground loader type should be used
 			*/
 			start: (id, foreground) => {
-				if (typeof id == 'string') {
-					return Loader.start(id, foreground);
-				} else {
-					return Loader.start(this._uid, foreground);
-				}
+				console.log('START UID', id || this._uid);
+				return Loader.start(id || `uid-${this._uid}`, foreground);
 			},
 
 
@@ -215,14 +197,20 @@ app.mixin({
 			* Shortcut to start a process in the background
 			* @param {string} [id=vm._uid] A unique ID to assign to this loader, if omitted vm._uid is used
 			*/
-			startBackground: id => Loader.start(id || this._uid, false),
+			startBackground: id => {
+				console.log('START BACKGROUND UID', id || this._uid);
+				Loader.start(id || `uid-${this._uid}`, false);
+			},
 
 
 			/**
 			* Signal that a process has finished
 			* @param {string} [id=vm._uid] A unique ID to stop, if omitted vm._uid is used
 			*/
-			stop: id => Loader.stop(id || this._uid),
+			stop: id => {
+				console.log('STOP UID', id || this._uid);
+				Loader.stop(id || `uid-${this._uid}`);
+			},
 		};
 	},
 });
@@ -240,6 +228,7 @@ body.loading-background #core-loader .loader-spinner {
 	& .loader-spinner {
 		--loader-size: 50px;
 
+		pointer-events: none;
 		display: block;
 		opacity: 0;
 		position: absolute;
