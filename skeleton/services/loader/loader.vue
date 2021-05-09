@@ -165,11 +165,6 @@ var Loader = {
 		elem.id = 'core-loader';
 		elem.innerHTML = '<div class="loader-spinner"></div>';
 		document.body.appendChild(elem);
-
-		setInterval(()=> console.log('Loader wait on', {
-			foreground: Array.from(Loader.waitingForeground),
-			background: Array.from(Loader.waitingBackground),
-		}), 1000);
 	},
 };
 
@@ -187,30 +182,21 @@ app.mixin({
 			* @param {string} [id=vm._uid] A unique ID to assign to this loader, if omitted vm._uid is used
 			* @param {boolean} [foreground] Specify that the foreground loader type should be used
 			*/
-			start: (id, foreground) => {
-				console.log('START UID', id || this._uid);
-				return Loader.start(id || `uid-${this._uid}`, foreground);
-			},
+			start: (id, foreground) => Loader.start(id || `uid-${this._uid}`, foreground),
 
 
 			/**
 			* Shortcut to start a process in the background
 			* @param {string} [id=vm._uid] A unique ID to assign to this loader, if omitted vm._uid is used
 			*/
-			startBackground: id => {
-				console.log('START BACKGROUND UID', id || this._uid);
-				Loader.start(id || `uid-${this._uid}`, false);
-			},
+			startBackground: id => Loader.start(id || `uid-${this._uid}`, false),
 
 
 			/**
 			* Signal that a process has finished
 			* @param {string} [id=vm._uid] A unique ID to stop, if omitted vm._uid is used
 			*/
-			stop: id => {
-				console.log('STOP UID', id || this._uid);
-				Loader.stop(id || `uid-${this._uid}`);
-			},
+			stop: id => Loader.stop(id || `uid-${this._uid}`),
 		};
 	},
 });
