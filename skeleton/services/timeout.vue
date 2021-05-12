@@ -7,7 +7,10 @@
 app.mixin({
 	methods: {
 		$timeout(func, timeout = 100) {
-			this.$nextTick(()=> setTimeout(func, timeout));
+			this.$nextTick(()=> {
+				if (this._isDestroyed) return console.log('$timeout - component', this._uid, 'is marked as destroyed - aborting'); // Component has died since last Tick
+				setTimeout(func, timeout);
+			});
 		},
 	},
 });
