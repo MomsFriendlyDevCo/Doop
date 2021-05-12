@@ -218,7 +218,6 @@ global.app = {
 		// }}}
 
 		// INIT: Generic plugins {{{
-		$debug(`app.use() X`, app.use.register.length);
 		_.forEach(app.use.register, plugin => {
 			Vue.use(plugin);
 		});

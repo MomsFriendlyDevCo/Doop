@@ -10,7 +10,7 @@
 	/* Misc assistant colors */
 	--gray-light: #eee;
 
-	/* Font awsome config */
+	/* Font awesome config */
 	--fa-primary-color: #32a4d5;
 	--fa-primary-opacity: 1;
 
