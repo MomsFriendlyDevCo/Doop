@@ -27,10 +27,11 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "@babel/core": "^7.13.10",
-    "@babel/plugin-proposal-optional-chaining": "^7.13.8",
+    "@babel/core": "^7.13.15",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.12",
     "@babel/plugin-proposal-pipeline-operator": "^7.12.13",
-    "@babel/preset-env": "^7.13.10",
+    "@babel/plugin-proposal-throw-expressions": "^7.12.13",
+    "@babel/preset-env": "^7.13.15",
     "@doop/core-vue": "^0.0.8",
     "@doop/docs": "^0.0.3",
     "@fortawesome/fontawesome-free": "^5.15.3",
@@ -61,11 +62,10 @@
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
     "body-parser": "^1.19.0",
-    "bootstrap": "^4.4.1",
+    "bootstrap": "^4.6.0",
     "chai": "^4.3.3",
     "chalk": "^4.1.0",
-    "chart.js": "^2.9.3",
-    "cheerio": "^1.0.0-rc.3",
+    "chart.js": "^3.2.1",
     "chokidar": "^3.3.1",
     "commander": "^5.1.0",
     "commander-extras": "^1.1.1",
@@ -160,7 +160,10 @@
         {
           "proposal": "fsharp"
         }
-      ]
+      ],
+      "@babel/plugin-proposal-optional-chaining",
+      "@babel/plugin-proposal-throw-expressions",
+      "@babel/plugin-syntax-dynamic-import"
     ]
   }
 }
