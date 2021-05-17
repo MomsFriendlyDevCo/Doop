@@ -250,10 +250,10 @@ if [ "$DOLIVE" == 1 ]; then
 	if [ "$DORESTART" == 1 ]; then
 		if [[ `pm2 show fixme-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
 			echo "Starting PRODUCTION PM2 process for the first time..."
-			pm2 start --name 'fixme-a' --time server/index.js -- -e production -o port=10101 -o papertrail.program=fixme-a -o mintsoft.apiKey=f5cfcdac-7a96-4a11-9316-6cd5de8ae07c -o cache.cleanAuto=true -o mongo.migration=true
-			pm2 start --name 'fixme-b' --time server/index.js -- -e production -o port=10102 -o papertrail.program=fixme-b -o mintsoft.apiKey=397b96f9-9124-4d54-8a88-35d6df3a03cd
-			pm2 start --name 'fixme-c' --time server/index.js -- -e production -o port=10103 -o papertrail.program=fixme-c -o mintsoft.apiKey=12931d0c-26dd-4dec-bdbb-ddd0c59479a3
-			pm2 start --name 'fixme-d' --time server/index.js -- -e production -o port=10104 -o papertrail.program=fixme-d -o mintsoft.apiKey=5c258c4a-5da7-4848-ae29-11d9b53a994f
+			pm2 start --name 'fixme-a' --time server/index.js -- -e production -o port=10101 -o papertrail.program=fixme-a -o cache.cleanAuto=true -o mongo.migration=true
+			pm2 start --name 'fixme-b' --time server/index.js -- -e production -o port=10102 -o papertrail.program=fixme-b
+			pm2 start --name 'fixme-c' --time server/index.js -- -e production -o port=10103 -o papertrail.program=fixme-c
+			pm2 start --name 'fixme-d' --time server/index.js -- -e production -o port=10104 -o papertrail.program=fixme-d
 		else
 			echo "Rebooting PM2 process..."
 			pm2 restart --wait-ready --listen-timeout=10000 fixme-a fixme-b fixme-c fixme-d
