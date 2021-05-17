@@ -13,6 +13,9 @@ module.exports = {
 		debugCSS: false,
 		minifyCSS: false, // FIXME: Untested
 	},
+	hmr: {
+		enabled: false,
+	},
 	mongo: {
 		migration: false,
 	},
