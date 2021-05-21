@@ -82,6 +82,7 @@ app.component('userAvatar', {
 	border-radius: 50%;
 	width: 32px;
 	height: 32px;
+	overflow: hidden;
 
 	& .user-avatar-spinner {
 		opacity: 0.5;
