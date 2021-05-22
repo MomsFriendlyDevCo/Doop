@@ -23,6 +23,9 @@ app.component('dashboard', {
 				.finally(()=> this.$loader.stop())
 		},
 	},
+	beforeRouteEnter(to, from, next) { // Ensure we know who the user is before we can load
+		Vue.services().$session.promise(next);
+	},
 	created() {
 		return this.refresh();
 	},
