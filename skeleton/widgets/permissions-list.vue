@@ -172,7 +172,7 @@ app.component('permissionsList', {
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debugging = false;
 	},
 });
 </script>

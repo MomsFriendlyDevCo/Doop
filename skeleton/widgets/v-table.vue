@@ -233,7 +233,7 @@ app.component('vTable', {
 		* @returns {string} Final formatted string
 		*/
 		format(value, formatter) {
-			if (typeof formatter === 'function') return formatter.call(Vue, value);
+			if (typeof formatter === 'function') return formatter.call(app, value);
 			return value;
 		},
 

@@ -19,7 +19,10 @@ app.component({
 				.then(()=> this.$session.settings.get('redirect', '/'))
 				.then(url=> this.$session.settings.unset('redirect', 'local').then(() => url))
 				.then(url=> redirect && this.$router.push(url))
-				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))
+				.catch(e => {
+					if (e.toString().startsWith('NavigationDuplicated')) return; // Ignore $router complaints
+					this.$toast.catch(e, {position: 'centerBottom'});
+				})
 				.finally(()=> this.$loader.stop())
 		},
 		recover(notification = false, redirect = false) {
@@ -58,7 +61,7 @@ app.component({
 										<i class="fal fa-user"/>
 									</span>
 								</div>
-								<input type="email" name="email" v-model="data.email" class="form-control input-outline-primary" required autofocus placeholder="fry@planet-express.com"/>
+								<input type="email" name="email" v-model="data.email" class="form-control input-outline-primary" required autofocus placeholder="you@example.com"/>
 							</div>
 						</div>
 					</div>

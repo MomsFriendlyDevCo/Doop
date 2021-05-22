@@ -4,9 +4,10 @@
 * AGENT_PRELOAD=agents/agentLoader.js ./run-agents -d assets
 */
 
-var _ = require('lodash');
-var colors = require('chalk');
-var debug = require('debug')('doop');
+//var crash = require('@momsfriendlydevco/crash');
+var colors = require('colors');
+var debug = require('debug')('doop:agentLoader');
+var globby = require('globby');
 
 process.env.DOOP_IGNORE_CMD_ARGS = 1; // Stop Doop config loader accepting this programs command line arguments
 
@@ -21,11 +22,22 @@ module.exports = session => session
 			// Load app core {{{
 			.then(()=> {
 				debug('load app core')
-				require('../app');
+				require('../app/app.backend');
 			})
 			// }}}
 			// Initialize all .doop files {{{
 			.then(()=> app.setup())
+			// }}}
+			// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js'])
+			.then(()=> globby([
+					`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
+					`!${app.config.paths.root}/node_modules/**/node_modules`,
+				])
+				.then(modPaths => modPaths.forEach(modPath => {
+					debug('Load module', modPath);
+					require(modPath)
+				}))
+			)
 			// }}}
 			// Emit events to boot server in order {{{
 			.then(()=> app.emit('preInit'))
@@ -49,6 +61,9 @@ module.exports = session => session
 			//.then(()=> app.emit('preReady'))
 			.then(()=> app.log(app.log.colors.bold.blue('⚝  Doop! ⚝')))
 			//.then(()=> app.emit('ready'))
+			// }}}
+			// Error handling {{{
+			//.catch(e => crash.stop(e, {prefix: 'Fatal server process exit'}))
 			// }}}
 			.then(()=> {
 				agents

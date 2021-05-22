@@ -1,33 +1,30 @@
 <script lang="js" backend on="agents">
 var Agents = require('@momsfriendlydevco/agents');
 
-exports = ()=> new Promise(resolve => {
-	app.log('Initialising');
-	app.agents = new Agents(app.config.agents);
+app.log('Agents Initialising');
+app.agents = new Agents(app.config.agents);
 
-	app.agents
-		.on('init', ()=> app.log('Created agents interface'))
-		.on('ready', ()=> {
-			app.log('Agents interface ready');
-			resolve();
-		})
-		.on('destroy', ()=> app.log('Destroying agents interface'))
-		.on('destroyed', ()=> app.log('Destroyed agents interface'))
-		.on('refreshWarn', (path, msg) => app.log(app.log.colors.yellow('WARNING'), app.log.colors.cyan(path), msg))
-		.on('refresh', ids => app.log('Loaded agents:', ids.map(i => app.log.colors.cyan(i)).join(', ')))
-		.on('tick', id => app.log('Refreshing agent', app.log.colors.cyan(id), 'from cron timing', app.log.colors.cyan(app.agents._agents[id].timing)))
-		.on('scheduled', id => app.log('Installed agent', app.log.colors.cyan(id), 'with timing', app.log.colors.cyan(app.agents._agents[id].timing)))
-		.on('runImmediate', id => app.log('Agent', app.log.colors.cyan(id), 'marked for immediate run!'))
-		.on('log', (session, ...args) => app.log.apply(this, [app.log.colors.blue(`[agents / ${session.cacheKey}]`)].concat(args)))
-		.on('warn', (session, ...args) => app.log.apply(this, [app.log.colors.blue(`[agents / ${session.cacheKey}]`), 'WARN'].concat(args)))
+app.agents
+	.on('init', ()=> app.log('Created agents interface'))
+	.on('ready', ()=> {
+		app.log('Agents interface ready');
+	})
+	.on('destroy', ()=> app.log('Destroying agents interface'))
+	.on('destroyed', ()=> app.log('Destroyed agents interface'))
+	.on('refreshWarn', (path, msg) => app.log(app.log.colors.yellow('WARNING'), app.log.colors.cyan(path), msg))
+	.on('refresh', ids => app.log('Loaded agents:', ids.map(i => app.log.colors.cyan(i)).join(', ')))
+	.on('tick', id => app.log('Refreshing agent', app.log.colors.cyan(id), 'from cron timing', app.log.colors.cyan(app.agents._agents[id].timing)))
+	.on('scheduled', id => app.log('Installed agent', app.log.colors.cyan(id), 'with timing', app.log.colors.cyan(app.agents._agents[id].timing)))
+	.on('runImmediate', id => app.log('Agent', app.log.colors.cyan(id), 'marked for immediate run!'))
+	.on('log', (session, ...args) => app.log.apply(this, [app.log.colors.blue(`[agents / ${session.cacheKey}]`)].concat(args)))
+	.on('warn', (session, ...args) => app.log.apply(this, [app.log.colors.blue(`[agents / ${session.cacheKey}]`), 'WARN'].concat(args)))
 
-	app.on('exit', ()=>
-		app.agents.destroy()
-			.then(()=> app.log('Agents Destroyed'))
-	);
+app.on('exit', ()=>
+	app.agents.destroy()
+		.then(()=> app.log('Agents Destroyed'))
+);
 
-	app.agents.init()
-});
+app.agents.init()
 </script>
 
 <script lang="js" backend on="endpoints">

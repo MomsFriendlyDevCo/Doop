@@ -14,7 +14,7 @@ app.middleware.db.schema('doopMigrations', {
 * correctly bumps the version sequencially until it hits the highest stratergy version found
 *
 * @example Simple migration example
-* <server on="migrations">
+* <script lang="js" backend on="migrations">
 * app.migration('widgetsFix', 'Fix widgets', ()=>               // Declare we are upgrading to version 101
 *   db.widgets.find().cursor.eachAsync(widget => {                // Iterate over each widget (3 at a time, see later)
 *     widget.status = 'newStatus';                                // Change doc in some way

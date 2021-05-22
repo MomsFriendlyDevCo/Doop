@@ -55,15 +55,13 @@ app.get('/api/db/:collection', app.middleware.express.hasPermission('debug'), (r
 
 	var includeTypes = ['string', 'number', 'date', 'boolean']; // Field types to return
 
-	db[req.params.collection].meta()
-		.then(meta => db[req.params.collection].find(_.omit(req.query, ['limit', 'sort', 'skip']))
-			.skip(Number(req.query.skip || 0))
-			.limit(Number(req.query.limit || 30))
-			.sort(req.query.sort)
-			.lean()
-			.then(docs => ({docs, meta}))
-		)
-		.then(({docs, meta}) => docs.map(doc =>
+	var meta = db[req.params.collection].meta();
+	db[req.params.collection].find(_.omit(req.query, ['limit', 'sort', 'skip']))
+		.skip(Number(req.query.skip || 0))
+		.limit(Number(req.query.limit || 30))
+		.sort(req.query.sort)
+		.lean()
+		.then(docs => docs.map(doc =>
 			_.pickBy(doc, (v, k) =>
 				k == '_id' // Always include _id
 				|| (
@@ -104,8 +102,8 @@ app.get('/api/db/:collection/count', app.middleware.express.hasPermission('debug
 app.get('/api/db/:collection/meta', app.middleware.express.hasPermission('debug'), (req, res) => {
 	if (!db[req.params.collection]) return res.sendError('404: Collection not found');
 
-	db[req.params.collection].meta({$indexes: true})
-		.then(meta => res.send(meta))
+	var meta = db[req.params.collection].meta({$indexes: true});
+	res.send(meta)
 		.catch(res.sendError)
 });
 </script>

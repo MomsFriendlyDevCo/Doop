@@ -13,7 +13,7 @@ var gulp = require('gulp');
 * @example Reindex only the "widgets" + " users" collections
 * REINDEX_COLLECTION=widgets,users gulp search.reindex
 */
-gulp.task('search.reindex', 'load:app.db', ()=> {
+gulp.task('search.reindex', ['load:app', 'load:app.db', 'load:app.git'], ()=> {
 	var reindexed = 0;
 	var filterCollections = (process.env.REINDEX_COLLECTION || '').split(/\s*,\s*/).filter(Boolean);
 	var filterIds = (process.env.REINDEX_ID || '').split(/\s*,\s*/).filter(Boolean);
@@ -29,6 +29,7 @@ gulp.task('search.reindex', 'load:app.db', ()=> {
 			var docQuery = filterIds.length ? {_id: {$in: filterIds}} : undefined;
 
 			return ()=> app.db[model].count(docQuery)
+				// FIXME: Mongoosy?
 				.then(totalDocs => new Promise((resolve, reject) => app.db[model].find(docQuery)
 					.forEach((next, doc) => {
 						gulp.log('Reindex', gulp.colors.cyan(model), '/', gulp.colors.cyan(`#${doc._id}`), gulp.colors.gray(`${docNumber} / ${totalDocs} ~ ${Math.round(++docNumber / totalDocs * 100)}%`));

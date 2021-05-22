@@ -269,7 +269,10 @@ app.service('$session', function() {
 	$session.logout = ()=> Promise.resolve()
 		.then(()=> this.$loader.start('$session.logout'))
 		.then(()=> app.vue.$emit.promise('$session.reset'))
-		.then(()=> this.$config.session.preference == 'authHeader' && $session.settings.unset('authToken'))
+		.then(()=> Promise.all([
+			this.$config.session.preference == 'authHeader' && $session.settings.unset('authToken'),
+			$session.settings.unset('refresh'),
+		]))
 		.then(()=> this.$http.post('/api/session/logout'))
 		.then(()=> window.location = '/')
 		.finally(()=> this.$loader.stop('$session.logout'))

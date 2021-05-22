@@ -20,7 +20,6 @@ app.get('/api/session', (req, res) => {
 			...(app.config.isProduction ? undefined : app.config.session.profile.forcePermissions),
 		},
 	});
-	// }}}
 });
 
 

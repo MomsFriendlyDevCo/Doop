@@ -149,8 +149,11 @@ app.directive('v-validate', {
 			// Apply failed / valid classes {{{
 			if (status) {
 				$el.addClass(settings.classInvalid).removeClass(settings.classValid);
+				$el.on('invalid', e => e.preventDefault());
+				el.setCustomValidity(status);
 			} else {
 				$el.addClass(settings.classValid).removeClass(settings.classInvalid);
+				el.setCustomValidity('');
 			}
 			// }}}
 

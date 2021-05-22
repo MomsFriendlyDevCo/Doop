@@ -32,9 +32,6 @@ app.component({
 <template>
 	<div>
 		<splash-solid background="white"/>
-		<splash-substrate
-			stroke-color="#83d3f5"
-		/>
 		<div class="container-fluid session-float">
 			<div class="row d-flex justify-content-center">
 				<a v-href="'/'">

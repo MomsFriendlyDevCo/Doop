@@ -1,4 +1,7 @@
 <script lang="js" frontend>
+/**
+* User dropdown menu component
+*/
 app.component('userDropdown', {
 	data() { return {
 		$session: this.$session,
@@ -6,11 +9,11 @@ app.component('userDropdown', {
 	methods: {
 		refresh() {
 			return Promise.resolve()
-				.then(()=> Vue.services().$loader.start('$session.refresh'))
+				.then(()=> app.service.$loader.start('$session.refresh'))
 				.then(()=> app.vue.$emit.promise('$session.refresh'))
 				.then(()=> this.$http.post('/api/session/refresh'))
 				.then(()=> window.location.reload())
-				.finally(()=> Vue.services().$loader.stop('$session.refresh'));
+				.finally(()=> app.service.$loader.stop('$session.refresh'));
 		},
 	},
 });
@@ -25,7 +28,6 @@ app.component('userDropdown', {
 			</span>
 		</a>
 		<div class="dropdown-menu dropdown-menu-right profile-dropdown ">
-
 			<!--div class="dropdown-header noti-title">
 				<h6 class="text-overflow m-0">Welcome !</h6>
 			</div-->

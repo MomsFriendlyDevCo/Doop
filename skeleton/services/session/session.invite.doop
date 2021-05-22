@@ -22,7 +22,7 @@ app.get('/go/invite/:token', (req, res) => {
 			return user.save();
 		})
 		// Utilising forgot password functionality to prompt user.
-		.then(()=> res.redirect('/recover'))
+		.then(()=> res.redirect('/reset'))
 		.catch(e => res.sendError(403, e.toString()))
 });
 </script>

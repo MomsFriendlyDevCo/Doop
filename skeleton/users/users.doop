@@ -30,6 +30,13 @@ app.middleware.db.schema('users', {
 	}],
 })
 
+.plugin(app.middleware.db.search, {
+	fields: [
+		{path: 'name', weight: 10},
+		{path: 'email', weight: 5},
+	]
+})
+
 // TODO: Documentation blocks for model methods.
 
 // Logins + user passwords {{{
@@ -180,6 +187,7 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 		app.middleware.express.isUser(),
 	],
 	query: app.middleware.express.isUser(),
+	search: 'query',
 	count: 'query',
 	create: app.middleware.express.hasPermission('usersEdit'),
 	save: (req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?

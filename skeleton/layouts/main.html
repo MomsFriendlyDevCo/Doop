@@ -25,32 +25,20 @@
 	<%= layoutHeaders.join('\n') %>
 </head>
 
-<body class="bootstrapping widescreen fixed-left">
+<body class="bootstrapping">
 	<!-- Splashes {{{ -->
-	<div class="splash splash-init">
+	<!-- Bootstrapping splash screen injection needs all styles inline - taken from theme/bootstrap-exensions/splash.vue -->
+	<div class="splash splash-init" style="position: fixed; top: 0px; left: 0px; right: 0px; bottom: 0px; display: flex; align-items: center; justify-content: center; background: #ccc">
 		<img src="/assets/logo/logo.svg"/>
 	</div>
 
-	<div class="splash splash-crash">
+	<div class="splash splash-loading-foreground" style="display:none">
+		<!-- All .splash style attribs removed after bootstrap in layoutRoot - prevents multiple splashes present before Vue takes over -->
 		<img src="/assets/logo/logo.svg"/>
-		<div class="splash-crash-text">
-			<h3>Can't connect to server</h3>
-		</div>
-		<div class="splash-crash-reload mt-3">
-			<a class="btn btn-light btn-lg" onclick="location.reload()">
-				<i class="far fa-sync"></i>
-				Reload
-			</a>
-		</div>
-	</div>
-
-	<div class="splash splash-loading-foreground">
-		<img src="/assets/logo/logo.svg"/>
-		<div class="splah-loading-foreground-spinner"></div>
 	</div>
 	<!-- }}} -->
 
-	<div id="wrapper" class="forced">
+	<div id="wrapper">
 		<div id="app"></div>
 	</div>
 

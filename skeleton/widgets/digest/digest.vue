@@ -96,7 +96,7 @@ app.component('digest', {
 							if (_.isFunction(this.filter)) {
 								this.displayContent = this.$props.filter(this.displayContent) // As func(v)
 							} else if (_.isString(this.$props.filter)) {
-								var filter = Vue.filter(this.filter)
+								var filter = app.filter(this.filter)
 								if (!filter) throw new Error(`Unknown filter "${this.filter}" specified in <digest filter/>`);
 								this.displayContent = filter(this.displayContent); // As named filter
 							} else {

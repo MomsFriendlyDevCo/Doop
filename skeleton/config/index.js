@@ -200,7 +200,6 @@ module.exports = {
 			'worker-src': [],
 		},
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
-			'/dist/app.setup.js',
 			'/dist/app.main.js',
 		],
 		http2Inject: config => config.layout.assets, // Links to files that should be HTTP2 injected on initial page hit
@@ -258,6 +257,11 @@ module.exports = {
 		data: path.normalize(`${__dirname}/../data`),
 		dist: path.normalize(`${__dirname}/../dist`),
 		root: path.normalize(`${__dirname}/..`),
+	},
+	reports: {
+		paths: [
+			config => `${config.paths.root}/reports/queries`,
+		],
 	},
 	sanity: {
 		user: 'sanity',

@@ -1,4 +1,4 @@
-<endpoint>
+<script lang="js" backend endpoint>
 /**
  * Have server tell the client to clear cached items with redirect
  * @param {string} [req.query.clear] Browser objects to clear i.e. "cache", "cookies", "storage", "executionContexts"
@@ -8,9 +8,9 @@ app.get('/api/session/refresh', (req, res) => {
 	res.set('Clear-Site-Data', req.query.clear || '"cache"');
 	res.redirect(req.query.redirect || '/');
 });
-</endpoint>
+</script>
 
-<endpoint>
+<script lang="js" backend endpoint>
 /**
  * Have server tell the client to clear cached items
  * @param {string} [req.query.clear] Browser objects to clear i.e. "cache", "cookies", "storage", "executionContexts"
@@ -19,4 +19,4 @@ app.post('/api/session/refresh', (req, res) => {
 	res.set('Clear-Site-Data', req.query.clear || '"cache"');
 	res.sendStatus(200);
 });
-</endpoint>
+</script>
