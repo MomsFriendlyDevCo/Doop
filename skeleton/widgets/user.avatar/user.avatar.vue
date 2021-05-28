@@ -2,7 +2,7 @@
 /**
 * Display a simple User Avatar sourced from Gravatar.com
 * @param {string} [url] Alternate URL to try BEFORE using Gravatar, if valid its return is used instead
-* @param {Object} [user] The user object, takes precedence if present
+* @param {Object|string} [user] The user object or ID, takes precedence if present the user data is fetch if not already present in the $digest cache
 * @param {string} [email] The users email
 * @param {number|string} [size=32] The size, in pixels of the Avatar
 * @param {string} [fallback='identicon'] Fallback style to use if the user doesn't have a registered icon. ENUM: 'mp', 'identicon', 'monsterid', 'wavatar', 'retro', 'robohash', 'blank'
@@ -15,11 +15,12 @@ import {MD5} from 'jscrypto/es6/MD5';
 app.component('userAvatar', {
 	data() { return {
 		imageUrl: undefined,
+		tooltip: undefined,
 	}},
 	props: {
 		url: {type: String},
 		email: {type: String},
-		user: {type: Object},
+		user: {type: [Object, String]},
 		size: {type: [Number, String], default: 32},
 		fallback: {type: String, default: 'identicon'},
 		failIcon: {type: String, default: 'https://www.gravatar.com/avatar/00000000000000000000000000000000'},
@@ -27,7 +28,29 @@ app.component('userAvatar', {
 	methods: {
 		refresh() {
 			return Promise.resolve()
-				.then(()=> this.imageUrl = undefined)
+				.then(()=> this.imageUrl = this.tooltip = undefined)
+				// Use user (object or data) if present {{{
+				.then(()=> {
+					if (!this.user) return; // No user data present
+					return Promise.resolve()
+						.then(()=> {
+							if (_.isString(this.user)) { // Is raw ID - need to fetch user
+								return this.$digest.get(`/api/users/${this.user}`)
+							} else {
+								return this.user;
+							}
+						})
+						.then(user => {
+							this.tooltip = user.name;
+							this.imageUrl = 'https://gravatar.com/avatar/'
+								+ MD5.hash(user.email).toString()
+								+ '?'
+								+ `size=${this.size}&`
+								+ `d=${this.fallback}`
+							throw 'DONE';
+						})
+				})
+				// }}}
 				// Check if URL exists and is valid {{{
 				.then(()=> {
 					if (this.url) return this.$http.head(this.url)
@@ -38,11 +61,10 @@ app.component('userAvatar', {
 				// }}}
 				// Fallback to Gravatar on email || user.email {{{
 				.then(()=> {
-					var email = this.user?.email || this.email;
-					if (!email) return // Not enough data - do nothing
+					if (!this.email) return // Not enough data - do nothing
 
 					this.imageUrl = 'https://gravatar.com/avatar/'
-						+ MD5.hash(email).toString()
+						+ MD5.hash(this.email).toString()
 						+ '?'
 						+ `size=${this.size}&`
 						+ `d=${this.fallback}`
@@ -67,21 +89,20 @@ app.component('userAvatar', {
 </script>
 
 <template>
-	<div class="user-avatar">
+	<div class="user-avatar" v-tooltip="tooltip">
 		<div v-if="imageUrl === undefined" class="user-avatar-spinner far fa-spinner fa-spin"/>
-		<img :src="imageUrl"/>
+		<img :src="imageUrl" :style="{width: size, height: size}"/>
 	</div>
 </template>
 
 <style lang="scss">
 .user-avatar {
+	/* width + height populated in element props by Vue template */
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border: 1px solid var(--light);
 	border-radius: 50%;
-	width: 32px;
-	height: 32px;
 	overflow: hidden;
 
 	& .user-avatar-spinner {
