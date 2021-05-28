@@ -1,6 +1,5 @@
 <script lang="js" frontend>
 app.ready.then(()=> {
-	app.router.routeVersion = 0; // Used to invalidate routes where the route is identical
 	app.router._go = app.router.go; // Store real router.go() function
 	app.router.$debug = app.service.$debug.new('$router').enable(true);
 
@@ -42,18 +41,28 @@ app.ready.then(()=> {
 					settings.url();
 				} else if (_.isNumber(location.url)) {
 					app.router.$debug(`$route.goHistory(${settings.url})`);
-					app.router.routeVersion++;
 					app.router._go(settings.url);
 				} else if (/^https?:\/\//.test(settings.url) || /\/go\//.test(settings.url)) {
 					app.router.$debug(`Absolute redirection to ${settings.url}`);
 					window.location = settings.url;
 				} else if (app.router.currentRoute && app.router.currentRoute.fullPath == settings.url) {
 					if (settings.force) {
-						app.router.$debug(`$route.go('${settings.url}') (FORCED, same URL)`);
-						app.router.routeVersion++;
-						return app.router.push(settings.url);
+						app.router.$debug(`$route.go('${settings.url}') (FORCED, same URL - reload component)`);
+						return app.router.replace('/redirect') // Throw to fake URL to reset router
+							.then(()=> app.router.push(settings.url)) // Finally redirect to actual destination
 					} else {
 						app.router.$debug(`$route.go('${settings.url}') (skipped, same URL)`);
+					}
+				} else if (settings.force) {
+					var currentComponent = _.get(app, 'router.currentRoute.matched.0.components.default');
+					var targetComponent = _.get(app.router.resolve(settings.url), 'resolved.matched[0].components.default');
+					if (currentComponent && targetComponent && currentComponent == targetComponent) { // Long winded way of saying "are we using the same component as the destination"
+						app.router.$debug(`$route.go('${settings.url}') (FORCED navigate to same component - reload component)`);
+						return app.router.replace('/redirect') // Throw to fake URL to reset router
+							.then(()=> app.router.push(settings.url)) // Finally redirect to actual destination
+					} else {
+						app.router.$debug(`$route.go('${settings.url}') (FORCED navigate but differenting component - regular redirect)`);
+						return app.router.push(settings.url);
 					}
 				} else {
 					app.router.$debug(`$route.go('${settings.url}')`);
