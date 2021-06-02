@@ -5,8 +5,11 @@
   "main": "server/index.js",
   "scripts": {
     "build": "gulp build",
-    "sample:data": "gulp db",
     "dev": "gulp serve",
+    "deploy": "doop-deploy",
+    "deploy:pre": "gulp preDeploy",
+    "deploy:post": "gulp postDeploy",
+    "sample:data": "gulp db",
     "start": "node server",
     "test": "mocha",
     "webpack": "webpack --mode production",
