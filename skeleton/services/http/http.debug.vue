@@ -14,7 +14,7 @@ app.component('debugHttp', {
 <template>
 	<div class="card">
 		<div class="card-body card-padding">
-			<p>Simple controller showing the result of vairious back-end HTTP response codes and how they are automatically handled by $toast</p>
+			<p>Simple controller showing the result of various back-end HTTP response codes and how they are automatically handled by $toast</p>
 		</div>
 		<div class="list-group">
 			<a class="list-group-item" @click="testFetch('/api/debug/http/200')">Trigger Code 200</a>

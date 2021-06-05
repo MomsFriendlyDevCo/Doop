@@ -29,7 +29,6 @@ app.component({
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
 				.then(()=> this.$session.recover(this.data))
-				//.then(()=> $('body').removeClass('minimal'))
 				.then(()=> notification && this.$toast.success('Check your email'))
 				.then(()=> redirect && this.$router.push('/login'))
 				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))

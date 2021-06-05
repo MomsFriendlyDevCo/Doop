@@ -19,10 +19,7 @@ import {VueEditor} from 'vue2-editor';
 app.component('wysiwyg', {
 	components: {VueEditor},
 	props: {
-<<<<<<< HEAD
 		modules: {type: Object},
-=======
->>>>>>> f528269f34ddd0f07d54f2c2265063bce3de8dcd
 		toolbar: {type: String, default: 'full', validator: v => ['none', 'simple', 'full'].includes(v)},
 		value: {type: String},
 	},
@@ -51,7 +48,6 @@ app.component('wysiwyg', {
 		return h('vue-editor', {
 			props: {
 				value: this.value,
-<<<<<<< HEAD
 				//useMarkdownShortcuts: true,
 				editorOptions: {
 					modules: {
@@ -60,8 +56,6 @@ app.component('wysiwyg', {
 						...this.modules,
 					}
 				},
-=======
->>>>>>> f528269f34ddd0f07d54f2c2265063bce3de8dcd
 				editorToolbar: this.toolbar == 'none' ? [[]] : [
 					this.toolbar == 'full' && [{header: [false, 1, 2, 3, 4, 5, 6]}],
 					[
@@ -125,12 +119,8 @@ app.component('wysiwyg', {
 
 	/* Special .quill-no-border rules {{{ */
 	&.quill-no-border {
-<<<<<<< HEAD
 		& .ql-toolbar.ql-snow,
 		& .ql-container.ql-snow {
-=======
-		& .ql-toolbar.ql-snow, & .ql-container.ql-snow {
->>>>>>> f528269f34ddd0f07d54f2c2265063bce3de8dcd
 			border: none !important;
 		}
 	}
