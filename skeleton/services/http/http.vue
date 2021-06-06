@@ -27,8 +27,10 @@ axios.defaults.paramsSerializer = params =>
 axios.interceptors.response.use(response => response, error => {
 	if (!error.response || !error.response.status) { // Recommended method to catch network errors as per https://github.com/axios/axios/issues/383#issuecomment-234079506
 		return Promise.reject('Network error');
-	} else if (error.response && error.response.data && error.response.status === 403) {
-		app.router.go('/login')
+	} else if (error.response && error.response.data
+		&& _.startsWith(error.response.request.responseURL, window.location.origin) // Only redirect hits to domain
+		&& (error.response.status === 401 || error.response.status === 403)) {
+		app.router.go('/login');
 		return Promise.reject(error.response.data);
 	} else if (error.response && error.response.data) {
 		return Promise.reject(error.response.data);
@@ -41,6 +43,7 @@ axios.interceptors.response.use(response => response, error => {
 app.ready.then(()=> {
 	if (app.isCordova) {
 		console.log('[$service.http]', 'Override baseUrl:', this.$config.apiUrl);
+		// FIXME: app.ready stacked twice?
 		app.ready.then(()=> axios.defaults.baseURL = this.$config.apiUrl);
 	}
 });
