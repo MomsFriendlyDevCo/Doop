@@ -4,6 +4,7 @@
 *
 * @url https://github.com/davidroyer/vue2-editor
 * @param {string} [value] The existing HTML content to display
+* @param {object} [modules] Extended configuration for VueEditor, useful for configuring quill modules. See: https://quilljs.com/docs/modules/
 * @param {string} [toolbar='full'] Type of toolbar UI to use. ENUM: 'none', 'simple', 'full'
 *
 * @emits change Emitted as `(html)` when the value changes
