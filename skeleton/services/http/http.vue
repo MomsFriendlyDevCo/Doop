@@ -27,6 +27,9 @@ axios.defaults.paramsSerializer = params =>
 axios.interceptors.response.use(response => response, error => {
 	if (!error.response || !error.response.status) { // Recommended method to catch network errors as per https://github.com/axios/axios/issues/383#issuecomment-234079506
 		return Promise.reject('Network error');
+	} else if (error.response && error.response.data && error.response.status === 403) {
+		app.router.go('/login')
+		return Promise.reject(error.response.data);
 	} else if (error.response && error.response.data) {
 		return Promise.reject(error.response.data);
 	} else {
