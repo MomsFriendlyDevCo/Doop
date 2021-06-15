@@ -16,6 +16,8 @@
 * @param {function} [settings.onValid] Function called as `(isValid, error, settings)` when the validation recalculates
 *
 * @param {RegExp} [settings.rules.regExp] Validate a regular expression
+* @param {boolean} [settings.rules.email=false] Shorthand for pre-defined regular expressions to check for a email address
+* @param {boolean} [settings.rules.slug=false] Shorthand for pre-defined regular expressions to check for a URL Safe slug
 *
 * @param {boolean} [settings.rules.required=false] Validate against whether a field has any value
 *
@@ -81,6 +83,10 @@ app.directive('v-validate', {
 					return failedValidate = validator.err || 'Required'; // Return basic default message
 				} else if (validator.regExp && !validator.regExp.test(value)) { // Check against RegExp fail
 					return failedValidate = validator.err || 'Is not valid';
+				} else if (validator.email && !/^.+@.+$/i.test(value)) {
+					return failedValidate = validator.err || 'Not a valid email address';;
+				} else if (validator.slug && !/^[a-z0-9\-_]+$/i.test(value)) {
+					return failedValidate = validator.err || 'Not a valid URL Slug';
 				} else if (validator.satisfies) {
 					var res = validator.satisfies(value, settings);
 					if (Promise.isPromiseLike(res)) { // Returned async - wait on it then call invalidate later
@@ -149,8 +155,11 @@ app.directive('v-validate', {
 			// Apply failed / valid classes {{{
 			if (status) {
 				$el.addClass(settings.classInvalid).removeClass(settings.classValid);
+				$el.on('invalid', e => e.preventDefault());
+				el.setCustomValidity(status);
 			} else {
 				$el.addClass(settings.classValid).removeClass(settings.classInvalid);
+				el.setCustomValidity('');
 			}
 			// }}}
 
