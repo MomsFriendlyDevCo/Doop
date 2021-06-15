@@ -27,6 +27,9 @@ module.exports = session => session
 			// }}}
 			// Initialize all .doop files {{{
 			.then(()=> app.setup())
+			// Disabling HMR for agents, otherwise they keep compiling beyond what is required
+			// FIXME: Is this indicative of a promise bug in HMR middleware?
+			.then(()=> app.config.hmr.enabled = false)
 			// }}}
 			// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js'])
 			.then(()=> globby([
@@ -49,9 +52,9 @@ module.exports = session => session
 			.then(()=> app.emit('preSchemas'))
 			.then(()=> app.emit('schemas'))
 			.then(()=> app.emit('postSchemas'))
-			//.then(()=> app.emit('preAgents'))
-			//.then(()=> app.emit('agents'))
-			//.then(()=> app.emit('postAgents'))
+			.then(()=> app.emit('preAgents'))
+			.then(()=> app.emit('agents'))
+			.then(()=> app.emit('postAgents'))
 			//.then(()=> app.emit('preEndpoints'))
 			//.then(()=> app.emit('endpoints'))
 			//.then(()=> app.emit('postEndpoints'))
