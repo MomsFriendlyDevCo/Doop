@@ -278,6 +278,14 @@ global.app = {
 		['delete', 'nextTick', 'set'].forEach(fn => app[fn] = Vue[fn].bind(app.vue));
 		// }}}
 
+		// INIT: Determine which routes require authentication {{{
+		app.router.options.routeRequiresAuth = new Set( // Create lookup set for all components that need auth
+			Object.values(app.component.register)
+				.filter(component => component.route && (component.routeRequiresAuth ?? true))
+				.map(component => component.route)
+		);
+		// }}}
+
 		// INIT: Route guards must be attached before routes or first hit will not trigger middleware {{{
 		app.router.beforeEach((to, from, next) => {
 			app.service.$session.promise()
@@ -285,9 +293,9 @@ global.app = {
 				.then(()=> app.vue.$emit('$beforeRoute', {to, from}))
 				.then(() => next())
 				.catch(()=> { // Forbid nav if not logged in an the path is in a whitelist
-					app.router.$debug('Route', from.path, to.path);
+					app.router.$debug('Route', from.path, to.path, to, app.router.options.routeRequiresAuth.has(to.matched[0].path));
 
-					if (app.router.options.routeRequiresAuth.has(to.path)) { // Target component requires auth
+					if (app.router.options.routeRequiresAuth.has(to.matched[0].path)) { // Target component requires auth
 						app.router.$debug('No session auth present and', {routeRequiresAuth: true}, 'on routes', {to, from}, '- redirect to /login');
 						if (to.path !== '/logout') app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
 						next({path: '/login'}); // Redirect everything else
@@ -316,12 +324,6 @@ global.app = {
 				.replace(/:/g, String.fromCharCode(818))
 			)
 			.forEach(route => app.router.addRoute(route))
-
-		app.router.options.routeRequiresAuth = new Set( // Create lookup set for all components that need auth
-			Object.values(app.component.register)
-				.filter(component => component.route && (component.routeRequiresAuth ?? true))
-				.map(component => component.route)
-		)
 
 		delete app.component.register; // Free up memory of loaded components
 		// }}}
