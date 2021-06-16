@@ -29,7 +29,7 @@ app.ready.then(()=> {
 
 	// When clicking dropdowns close automatically unless it has class `.dropdown-item-no-dismiss`
 	$(document).on('mousedown', '.dropdown-item:not(.dropdown-item-no-dismiss)', e =>
-		Vue.$nextTick(()=> // Wait for Vue to settle
+		app.vue.$nextTick(()=> // Wait for Vue to settle
 			setTimeout(()=> // Add behind timeout so Bootstrap has time to react
 				$(e.target).closest('.dropdown-menu').removeClass('show')
 			, 100)
