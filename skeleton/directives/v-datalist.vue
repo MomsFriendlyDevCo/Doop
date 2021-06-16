@@ -14,7 +14,7 @@
 * @example Show a text box with suggested data loaded from a URL
 * <input v-model="myData" v-datalist="{url: '/api/widgets'}"/>
 */
-app.component('v-datalist', {
+app.directive('v-datalist', {
 	bind(el, binding) {
 		var $el = $(el);
 		var isLoading = false;
