@@ -1,4 +1,11 @@
 <style lang="scss">
+/**
+* Transform a standard Bootstrap button to another on hover
+* This effect is usually used when hovering over "dangerous" buttons
+*
+* @example
+* <a class="btn btn-light btn-hover-danger">Delete!</a>
+*/
 .btn.btn-hover-danger {
 	transition: background 0.5s ease-out, border 0.5s ease-out, color 0.5s ease-out;
 
