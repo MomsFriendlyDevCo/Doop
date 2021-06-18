@@ -11,6 +11,17 @@
 * @param {*} [...] See https://vue-select.org/api/props.html for more options
 *
 * @emits input Emitted as `(newSelection: Object)` when the selection changes
+*
+* @example Show a simple list of widgets using `title` as the visible text
+*
+* <v-select
+*   :options="widgets"
+*   :value="selectedWidget"
+*   label="title"
+*   :clearable="false"
+*   :searchable="false"
+*   @input="selectedWidget = $event"
+* />
 */
 
 import vSelect from "vue-select";
