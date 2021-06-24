@@ -60,16 +60,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		// }}}
 
 		// Frontend rebuild {{{
-		watch([
-			'**/*.vue'
-		], {
-			ignored: ['dist/**/*', 'data/**/*', 'fonts*/**/*', 'node_modules/**/*'],
-			ignoreInitial: true,
-			awaitWriteFinish: true,
-		}).on('all', _.throttle(file => {
-			gulp.log('Rebuild Vue files...');
-			gulp.run('build.vue');
-		}, throttleTimeout, throttleOptions));
+		// NOTE: This is handled automatically by Webpack / webpack-{dev,hot}-middleware in Express
 		// }}}
 
 		// Backend rebuild (server process restart) {{{
@@ -83,10 +74,10 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		], {
 			ignored: ['build/**/*', 'data/**/*', 'dist/**/*', 'node_modules/**/*'],
 			ignoreInitial: true,
-		}).on('all', _.throttle((e, path) => {
+		}).on('all', ()=> {
 			gulp.log('Rebuild backend hook / layout / path files...');
 			serverProcess.emit('restart');
-		}, throttleTimeout, throttleOptions));
+		});
 
 		watch('package.json').on('change', ()=> {
 			gulp.log('Check NPM installs...');
