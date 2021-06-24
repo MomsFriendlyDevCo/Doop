@@ -36,9 +36,7 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 		// Gulp manages file changes so specify an invalid extension so nodemon doesn't actually watch anything valid
 		var serverProcess = nodemon(`--ext FAKEFILE '${app.config.paths.root}/server/index.js'`)
 			.once('start', ()=> finish())
-			.on('start', ()=> app.log(app.log.colors.bgGreen('FIXME:NODEMON'), 'start'))
 			.on('crash', ()=> !isQuitting && app.log.warn(app.log.colors.bgGreen('FIXME:NODEMON'), 'Server has crashed'))
-			.on('restart', files => app.log(app.log.colors.bgGreen('FIXME:NODEMON'), 'Server restarting', {files}))
 			.on('exit', ()=> {
 				if (!isQuitting && app.config.isProduction) {
 					app.log.warn('Server exited cleanly - but its not supposed to ever exit, forcing restart');
