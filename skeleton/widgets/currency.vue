@@ -1,7 +1,6 @@
 <script lang="js" frontend>
 import {VueMaskDirective} from 'v-mask'
 import createNumberMask from 'text-mask-addons/dist/createNumberMask';
-app.directive(VueMaskDirective);
 
 
 /**
@@ -20,6 +19,9 @@ app.directive(VueMaskDirective);
 * <currency :value="someValue" @change="someValue = $event">
 */
 app.component('currency', {
+	directives: {
+		mask: VueMaskDirective,
+	},
 	data() { return {
 		currencyMask: createNumberMask({
 			prefix: '', // We handle prefix in display anyway
