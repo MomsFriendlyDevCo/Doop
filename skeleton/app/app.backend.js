@@ -21,7 +21,7 @@ var fs = require('fs');
 var fspath = require('path');
 var url = require('url');
 
-// Setup global `app` object
+// Setup global `app` object {{{
 global.app = {
 	config: {}, // Loaded in next step
 	db: {}, // DB stub - gets populate when the driver is loaded
@@ -86,7 +86,7 @@ global.app = {
 	configLoad(profile) {
 		var program = {};
 		if (!profile && !process.env.DOOP_IGNORE_CMD_ARGS) {
-			// Load command line arguments
+			// Load command line arguments {{{
 			program = require('commander');
 			require('commander-extras');
 			program
@@ -112,7 +112,7 @@ global.app = {
 				.option('--merge-config <env>', 'Merge a CSV of other config profiles over the base config')
 				.env('DOOP_IGNORE_CMD_ARGS', 'If truthy no further processing is done on extra command arguments such as `-e [env]` or `o [opt=val]`')
 				.parse(process.argv);
-			//
+			// }}}
 		}
 
 		if (profile) {
@@ -133,7 +133,7 @@ global.app = {
 			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(no NODE_ENV, using default)'));
 		}
 
-		// Load initial config
+		// Load initial config {{{
 		app.config = require('../config');
 		if (fs.existsSync(`${__dirname}/../config/private.js`)) {
 			_.merge(app.config, require(`${__dirname}/../config/private.js`));
@@ -148,13 +148,13 @@ global.app = {
 		} else {
 			app.log.warn('ENV config file', app.log.colors.cyan(fspath.resolve(`${__dirname}/../config/${app.env}.js`)), 'not found');
 		}
-		//
-		// Flatten all functions into values (i.e. resolve them into what they should be to support recursion)
+		// }}}
+		// Flatten all functions into values (i.e. resolve them into what they should be to support recursion) {{{
 		app.config = _.cloneDeepWith(app.config, node =>
 			_.isFunction(node) ? node(app.config) : undefined // Eval functions, Let Lodash handle the rest
 		);
-		//
-		// If NODE_ENV_CONFIG exists process it as a CSV of dotted config values to override local
+		// }}}
+		// If NODE_ENV_CONFIG exists process it as a CSV of dotted config values to override local {{{
 		/**
 		* The following config types are supported:
 		* 	- KEY=VAL - set KEY (dotted notation) to VAL
@@ -173,47 +173,47 @@ global.app = {
 				}
 			});
 		}
-		//
-		// If CLI provided overrides - merge them
+		// }}}
+		// If CLI provided overrides - merge them {{{
 		_.merge(app.config, program.opt);
-		//
-		// If config.url doesn't contain a port append it
+		// }}}
+		// If config.url doesn't contain a port append it {{{
 		if (app.config.port != 80 && url.parse(app.config.url).port != app.config.port) {
 			var parsedURL = url.parse(app.config.url);
 			parsedURL.host = undefined; // Have to set this to undef to force a hostname rebuild
 			parsedURL.port = app.config.port;
 			app.config.url = url.format(parsedURL);
 		}
-		//
-		// Trim remaining '/' from url
+		// }}}
+		// Trim remaining '/' from url {{{
 		app.config.url = _.trimEnd(app.config.url, '/');
-		//
-		// Calculate config.publicUrl - same as config.url with port forced to 80
+		// }}}
+		// Calculate config.publicUrl - same as config.url with port forced to 80 {{{
 		var parsedURL = url.parse(app.config.url);
 		parsedURL.host = undefined; // Have to set this to undef to force a hostname rebuild
 		parsedURL.port = undefined; // Have to set this to reset the port to default (80 doesn't work for some reason)
 		app.config.publicUrl = _.trimEnd(url.format(parsedURL), '/');
-		//
+		// }}}
 	},
 };
-
-// Setup initial logging (likely to be called again later or overridden)
+// }}}
+// Setup initial logging (likely to be called again later or overridden) {{{
 app.refresh.log(console);
-
-// Bootstrap
+// }}}
+// Bootstrap {{{
 app.configLoad = app.log.wrap('config', app.configLoad);
-
-// Load app.config
+// }}}
+// Load app.config {{{
 app.configLoad();
-
-// Prepare for early Mongo load
+// }}}
+// Prepare for early Mongo load {{{
 _.set(app, 'config.mongo.hooks', false); // Disable Mongo hooks until the full app boots
-
-// Setup unhandled promise method
+// }}}
+// Setup unhandled promise method {{{
 process.on('unhandledRejection', e => crash.trace(e, {prefix: 'Unhandled promise rejection'}));
-
-// Return a function which will load everthing async
+// }}}
+// Return a function which will load everthing async {{{
 app.setup = require('./app.backend.setup');
-
+// }}}
 // Return basic app object
 module.exports = app;
