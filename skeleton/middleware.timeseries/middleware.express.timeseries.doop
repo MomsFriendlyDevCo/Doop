@@ -39,7 +39,7 @@ app.middleware.express.timeSeries = options => {
 		// FIXME: interval defined again below
 		interval: '1d',
 		start: (req, res) => (req.query.start ? moment(req.query.start) : moment().subtract(1, 'week')).set('hour', 0).set('minute', 0).set('second', 0).set('millisecond', 0),
-		end: (req, res) => (req.query.end ? moment(req.query.end) : moment()).set('hour', 23).set('minute', 59).set('second', 59),
+		end: (req, res) => (req.query.end ? moment(req.query.end) : moment()).set('hour', 23).set('minute', 59).set('second', 59).set('millisecond', 0),
 		interval: (req, res) => timestring(req.query.interval || '1d', 'ms'),
 		timeLabel: (req, res, date) => (req.query.timeLabel) ? moment(date).format(req.query.timeLabel) : moment(date).format('ddd Do MMM'),
 		passthru: false,
@@ -61,6 +61,7 @@ app.middleware.express.timeSeries = options => {
 				var iter = start;
 
 				// FIXME: Is every second one off by 30mins? http://localhost:8080/api/jobs/timeseries?interval=1month&timeLabel=MMM&start=2020-05-25T00:00:00Z&end=2021-05-25T23:59:59Z
+				// "boundaries":["2020-06-14T14:00:00.000Z","2020-07-15T00:30:00.000Z",
 				while (iter.isBefore(end)) {
 					boundaries.push(iter.toDate());
 					iter.add(interval, 'ms');

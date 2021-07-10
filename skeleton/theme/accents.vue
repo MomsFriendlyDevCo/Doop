@@ -3,13 +3,15 @@
 * Color scheme variable additions
 */
 :root {
-	--main: #32a4d5;
-	--main-highlight: #9dd5ec;
+	--main: #10d48e;
+	--main-lighter: #47f1b5;
+	--main-darker: #47f1b5;
+	--main-highlight: #47f1b5;
 
 	/* Misc assistant colors */
-	--gray-light: #eeeeee;
+	--gray-light: #eee;
 
-	/* Font awsome config */
+	/* Font awesome config */
 	--fa-primary-color: #32a4d5;
 	--fa-primary-opacity: 1;
 

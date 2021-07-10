@@ -203,6 +203,11 @@ module.exports = {
 			'/dist/app.main.js',
 		],
 		http2Inject: config => config.layout.assets, // Links to files that should be HTTP2 injected on initial page hit
+		excludeBase: [ // Array of all URL globs (if endining in '*') / RegExps to NOT serve the default layout page for, everything else gets the base layout
+			'/api/*',
+			'/dist/*',
+			'/go/*',
+		],
 	},
 	lock: {
 		expiry: 1000 * 60 * 60, // 1 hour

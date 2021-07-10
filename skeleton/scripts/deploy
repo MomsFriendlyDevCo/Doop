@@ -1,0 +1,265 @@
+#!/bin/bash
+HELP="
+redeploy <--dev|--live|--both> [--no-pull] [--no-build] [--backend|--restart] [--branch BRANCH]
+
+Re-Deploy the DEV and/or LIVE PRODUCTION server
+
+--branch [branch]       Specify a branch to use instead of 'master'
+--force                 Force deploy, even if the branches mismatch
+
+-l, --live              Perform actions on the LIVE PRODUCTION server
+-d, --dev               Perform actions on the DEV server
+-a, --all               Alias of --dev --live
+
+-P, --no-pull           Skip pulling from Git before rebuilding
+-B, --no-build          Skip rebuilding frontend resources
+-R, --no-restart        Skip restarting PM2 processes
+
+-b, --backend           Alias of --no-build
+-r, --restart           Alias for --no-pull --no-build
+
+-h, --help              Show command line help
+"
+
+# Defaults {{{
+DEVPATH=""
+LIVEPATH="/sites/chatstat.com"
+BUILDPATH=""
+DODEV=0
+DOLIVE=0
+DOPULL=1
+DOBUILD=1
+DORESTART=1
+FORCE=0
+BRANCH=master
+# }}}
+
+# Argument processing {{{
+PARAMS=()
+while (( "$#" )); do
+	case "$1" in
+		--dev|-d)
+			DODEV=1
+			shift
+			;;
+		--live|-l)
+			DOLIVE=1
+			shift
+			;;
+		--all|-a)
+			DODEV=1
+			DOLIVE=1
+			shift
+			;;
+		--no-pull|-P)
+			DOPULL=0
+			shift
+			;;
+		--no-build|-B)
+			DOBUILD=0
+			shift
+			;;
+		--no-restart|-R)
+			DORESTART=0
+			shift
+			;;
+		--backend|-b)
+			DOBUILD=0
+			shift
+			;;
+		--restart|-r)
+			DOPULL=0
+			DOBUILD=0
+			shift
+			;;
+		--path)
+			BUILDPATH="$2"
+			shift
+			shift
+			;;
+		--force)
+			FORCE=1
+			shift
+			;;
+		--branch)
+			FORCE=1
+			BRANCH="$2"
+			shift
+			shift
+			;;
+		-h|--help)
+			echo "$HELP"
+			exit 0
+			;;
+		--) # end argument parsing
+			shift
+			break
+			;;
+		-*|--*=) # unsupported flags
+			echo "Error: Unsupported flag $1" >&2
+			exit 1
+			;;
+		*) # preserve positional arguments
+			PARAMS+=("$1")
+			shift
+			;;
+	esac
+done
+# }}}
+
+# Sanity checks {{{
+if [[ "$DODEV" == 0 && "$DOLIVE" == 0 ]]; then
+	echo "$HELP"
+	echo
+	echo "Must specify --live / --dev / --both"
+	echo
+	echo "To deploy live: ~/redeploy -l"
+	echo "To deploy dev : ~/redeploy -d"
+	echo "To deploy both: ~/redeploy -b"
+	echo
+	exit 1
+fi
+
+
+if [[ -z "$DEVPATH" && "$DODEV" == 1 ]]; then
+	echo "No dev profile available for deployment"
+	exit 1
+fi
+# }}}
+
+# Stop on errors
+set -euo pipefail
+
+# Deploy dev {{{
+if [ "$DODEV" == 1 ]; then
+	if [ ! -d "$DEVPATH" ]; then
+		echo "Dev path '$DEVPATH' is invalid"
+		exit 1
+	fi
+
+	echo "Performing DEV deployment of $BRANCH branch"
+	cd "$DEVPATH"
+	export NODE_ENV=dev
+	export FORCE_COLOR=2
+
+	if [ "$DOBUILD" == 1 ]; then
+		echo "Pre-deploying via Gulp..."
+		gulp preDeploy
+	fi
+
+	if [ "$DOPULL" == 1 ]; then
+		THISBRANCH=`git branch --show-current`
+		if [[ "$FORCE" == 0 && "$THISBRANCH" != "$BRANCH" ]]; then
+			echo "Currently deployed branch mismatches deployment branch"
+			echo
+			echo "CURRENT BRANCH: ${THISBRANCH}"
+			echo "DEPLOY  BRANCH: ${BRANCH}"
+			echo
+			echo "Aborting deploy."
+			echo "Use --force if you really want this or specify --branch <branch> explicitly."
+			exit 1
+		elif [ "$THISBRANCH" != "$BRANCH" ]; then
+			echo "Currently deployed branch '${THISBRANCH}' mismatches deployment branch '${BRANCH}' but continuing anyway..."
+		fi
+
+		echo "Pulling Git $BRANCH branch..."
+		git checkout -B "$BRANCH" "origin/${BRANCH}"
+		git pull origin "$BRANCH"
+	else
+		echo "Skipping Git + Gulp"
+	fi
+
+	if [ "$DOBUILD" == 1 ]; then
+		echo "Installing NPM packages..."
+		npm ci
+
+		echo "Building via Gulp..."
+		gulp build
+
+		echo "post-deploying via Gulp..."
+		gulp postDeploy
+	fi
+
+
+	if [ "$DORESTART" == 1 ]; then
+		if [[ `pm2 show dev-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
+			echo "Starting DEV PM2 process for the first time..."
+			pm2 start --name 'dev-a' --time server/index.js -- -e dev -o port=10001 -o papertrail.program=dev-a -o cache.cleanAuto=true -o mongo.migration=true
+			pm2 start --name 'dev-b' --time server/index.js -- -e dev -o port=10002 -o papertrail.program=dev-b
+		else
+			echo "Rebooting PM2 process..."
+			pm2 restart --wait-ready --listen-timeout=10000 dev-a dev-b
+		fi
+	else
+		echo "Skipping PM2 process restart"
+	fi
+fi
+# }}}
+
+# Deploy live {{{
+if [ "$DOLIVE" == 1 ]; then
+	if [ ! -d "$LIVEPATH" ]; then
+		echo "Live path '$LIVEPATH' is invalid"
+		exit 1
+	fi
+
+	echo "Performing LIVE deployment of $BRANCH branch"
+	cd "$LIVEPATH"
+	export NODE_ENV=production
+	export FORCE_COLOR=2
+
+	if [ "$DOBUILD" == 1 ]; then
+		echo "Pre-deploying via Gulp..."
+		gulp preDeploy
+	fi
+
+	if [ "$DOPULL" == 1 ]; then
+		THISBRANCH=`git branch --show-current`
+		if [[ "$FORCE" == 0 && "$THISBRANCH" != "$BRANCH" ]]; then
+			echo "Currently deployed branch mismatches deployment branch"
+			echo
+			echo "CURRENT BRANCH: ${THISBRANCH}"
+			echo "DEPLOY  BRANCH: ${BRANCH}"
+			echo
+			echo "Aborting deploy."
+			echo "Use --force if you really want this or specify --branch <branch> explicitly."
+			exit 1
+		elif [ "$THISBRANCH" != "$BRANCH" ]; then
+			echo "Currently deployed branch '${THISBRANCH}' mismatches deployment branch '${BRANCH}' but continuing anyway..."
+		fi
+
+		echo "Pulling Git $BRANCH branch..."
+		git checkout -B "$BRANCH" "origin/${BRANCH}"
+		git pull origin "$BRANCH"
+	else
+		echo "Skipping Git + Gulp"
+	fi
+
+	if [ "$DOBUILD" == 1 ]; then
+		echo "Installing NPM packages..."
+		npm ci
+
+		echo "Building via Gulp..."
+		gulp build
+
+		echo "post-deploying via Gulp..."
+		gulp postDeploy
+	fi
+
+
+	if [ "$DORESTART" == 1 ]; then
+		if [[ `pm2 show chatstat-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
+			echo "Starting PRODUCTION PM2 process for the first time..."
+			pm2 start --name 'chatstat-a' --time server/index.js -- -e production -o port=10101 -o papertrail.program=chatstat-a -o cache.cleanAuto=true -o mongo.migration=true
+			pm2 start --name 'chatstat-b' --time server/index.js -- -e production -o port=10102 -o papertrail.program=chatstat-b
+		else
+			echo "Rebooting PM2 process..."
+			pm2 restart --wait-ready --listen-timeout=10000 chatstat-a chatstat-b chatstat-c chatstat-d
+		fi
+	else
+		echo "Skipping PM2 process restart"
+	fi
+fi
+# }}}
+
+echo "done."

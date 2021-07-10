@@ -48,7 +48,12 @@ app.express.use(helmet());
 app.express.use(cors());
 app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',
-	exclusions: [/^\/api\/.*/, /^\/dist\/.*/, /^\/go\/.*/, /^\/generated\/.*/],
+	exclusions: app.config.layout.excludeBase.map(b =>
+		_.isString(b) && b.endsWith('*') ? new RegExp('^' + RegExp.escape(b) + '\/.*', 'i')
+		: _.isString(b) ? new RegExp('^' + RegExp.escape(b) + '$', 'i')
+		: _.isRegExp(b) ? b
+		: (()=> { throw new Error(`Unknown app.config.layout.excludeBase rule: "${b}"`) })()
+	),
 	//verbose: true,
 	logger: app.log.bind(app),
 }));

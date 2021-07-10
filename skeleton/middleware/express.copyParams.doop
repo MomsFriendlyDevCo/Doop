@@ -6,8 +6,9 @@ var _ = require('lodash');
 * Parameters are only copied if the have a truthy, non-null value
 *
 * @param {Object} options Configuration options
-* @param {array<Object>} params Parameters to copy, each key is the dotted notation of the read value, each value is the dotted notation on where to copy
-* @param {boolean} [move=false] Remove the source value after copying
+* @param {array<Object>} options.params Parameters to copy, each key is the dotted notation of the read value, each value is the dotted notation on where to copy or a function called as `(v, req, res)`
+* @param {boolean} [options.debug=false] Show debugging information
+* @param {boolean} [options.move=false] Remove the source value after copying
 * @return {function} Express middleware
 *
 * @example Copy req.params.id -> req.body.id
@@ -18,6 +19,7 @@ var _ = require('lodash');
 */
 app.middleware.express.copyParams = (options) => {
 	var settings = {
+		debug: false,
 		params: undefined,
 		move: false,
 		...options,
@@ -29,9 +31,17 @@ app.middleware.express.copyParams = (options) => {
 		Object.entries(settings.params)
 			.forEach(([key, val]) => {
 				var readVal = _.get({req, res}, key);
-				if (!readVal) return; // Value is falsy - ignore
-				_.set({req, res}, val, readVal);
-				if (settings.move) _.unset({req, res}, key);
+				if (settings.debug && readVal === undefined) app.log.as('middleware.express.copyParams', app.log.colors.yellow('SKIP'), app.log.colors.blue(settings.move ? 'move' : 'copy'), key, '(source has no value)');
+				if (readVal === undefined) return; // Value is undef - ignore
+				if (_.isFunction(val)) {
+					if (settings.move) throw new Error('copyParams `move` cannot be specified with functions');
+					val(readVal, req, res);
+					if (settings.debug) app.log.as('middleware.express.copyParams', app.log.colors.blue(settings.move ? 'move' : 'copy'), key, 'via function');
+				} else {
+					if (settings.debug) app.log.as('middleware.express.copyParams', app.log.colors.blue(settings.move ? 'move' : 'copy'), key, '=>', val, 'value:', readVal);
+					_.set({req, res}, val, readVal);
+					if (settings.move) _.unset({req, res}, key);
+				}
 			})
 
 		next();

@@ -32,7 +32,7 @@ app.component('promptInjector', {
 				<div class="modal-content">
 					<div class="modal-header">
 						<h4 class="modal-title" v-html="settings.title"/>
-						<a class="close" @click="$prompt.close(false, 'cancel')"><i class="far fa-times fa-lg"/></a>
+						<a class="close" @click="$prompt.close(false, 'cancel')"><i class="fa fa-times fa-lg"/></a>
 					</div>
 					<div class="modal-body">
 						<div v-if="settings.bodyHeader" v-html="settings.$bodyHeader"/>

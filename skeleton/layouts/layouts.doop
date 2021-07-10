@@ -32,10 +32,13 @@ exports = Promise.resolve()
 	))
 </script>
 
-<script lang="js" backend on="postPaths">
-app.get('/robots.txt', (req, res) =>
-	res.send(
-		'User-agent: *\n'
+<script lang="js" backend endpoint>
+app.config.layout.excludeBase.push('/robots.txt'); // Add to base exclusion rules
+
+app.get('/robots.txt', (req, res) => res
+	.type('text/plain; charset=utf-8')
+	.send(''
+		+ 'User-agent: *\n'
 		+ 'Disallow: /\n'
 	)
 );
