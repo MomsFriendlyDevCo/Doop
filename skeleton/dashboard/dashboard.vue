@@ -33,7 +33,7 @@ app.component('dashboard', {
 </script>
 
 <template>
-	<div>
+	<div class="dashboard">
 		<div class="row">
 			<a v-if="$session.data.permissions.usersEdit" v-href="{href: '/users', transition: 'slide-right'}" class="col-sm-6 col-md-3">
 				<div class="card-box">

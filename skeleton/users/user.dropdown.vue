@@ -1,6 +1,7 @@
 <script lang="js" frontend>
 /**
 * User dropdown menu component
+* @listens changeLocation Trigger the "Choose a location" modal
 */
 app.component('userDropdown', {
 	data() { return {

@@ -37,6 +37,7 @@ app.post([
 		// }}}
 		// Fetch user and verify password {{{
 		.then(()=> app.log('Check login for', req.body.username))
+		// FIXME: Ensure user status is active.
 		.then(()=> app.db.users.findOne({
 			//$errNotFound: false, // Monoxide
 			$or: [

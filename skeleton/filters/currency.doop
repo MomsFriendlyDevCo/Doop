@@ -1,4 +1,6 @@
 <script lang="js" backend on="middleware, dbMiddleware">
--// TODO: Options
--_.set(app, 'filters.currency', value => Number(value || 0).toLocaleString(undefined, {style: 'currency', currency: 'AUD'}));
+// FIXME: Why no global here?
+const _ = require('lodash');
+// TODO: Options
+_.set(app, 'filters.currency', value => Number(value || 0).toLocaleString('en-AU', {style: 'currency', currency: 'AUD'}));
 </script>
