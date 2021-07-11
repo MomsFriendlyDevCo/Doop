@@ -25,6 +25,7 @@ app.middleware.express.timeSeries = options => {
 		collection: undefined,
 		field: 'created',
 		field2: 'status',
+		// FIXME: Warn when enum is undefined
 		values: (req, res, settings) => _.get(app.db, [settings.collection, 'schema', 'paths', settings.field2, 'options', 'enum']),
 		valueLabel: (key, offset, dataSet, settings) => _.startCase(key),
 		valueBackgroundColor: (key, offset, dataSet, settings) => {
@@ -78,7 +79,7 @@ app.middleware.express.timeSeries = options => {
 						...(settings.fixDates // Optionally fix date conversion
 							? [{$project: {
 								[settings.field]: {$toDate: '$' + settings.field},
-								status: 1,
+								[settings.field2]: 1,
 								..._(settings.output)
 									.mapValues(() => 1)
 									.value(),

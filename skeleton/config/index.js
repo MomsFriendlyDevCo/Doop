@@ -35,6 +35,7 @@ module.exports = {
 	isProduction: false, // Master `is this production mode` switch - disables debugging and various other speed tweaks when enabled
 	name: '{{FIXME:name}}', // Short project name, must be unique on the system
 	title: '{{FIXME:title}}',
+	version: '0.0.1',
 	env: env,
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
