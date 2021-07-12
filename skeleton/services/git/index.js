@@ -24,12 +24,14 @@ git.current = options => git.history({...options, limit: 1}).then(history => his
 * @param {Object} [options] Options to specify
 * @param {number} [options.limit=30] The number of rows to return
 * @param {boolean} [options.firstLine=true] Only show first line of any multi-line commit messages, disabling this returns the raw subject
+* @param {boolean} [options.simulate=true] If no Git history is available create a fake entry rather than throwing
 * @returns {Promise} A promise which will resolve with the Git history collection
 */
 git.history = options => {
 	var settings = {
 		limit: 30,
 		firstLine: true,
+		simulate: true,
 		...options,
 	};
 
@@ -60,6 +62,21 @@ git.history = options => {
 			.filter()
 			.value()
 		)
+		.catch(e => {
+			if (e == 'Non-zero exit code: 128' && settings.simulate) {
+				return [{
+					release: 'Heretical History',
+					hash: 'NO-GIT-REPO-FOUND-IN-ROOT-PATH',
+					shortHash: 'NO-GIT-REPO',
+					date: (new Date()).toISOString(),
+					committer: 'Noone',
+					subject: 'No valid Git repo found in root path',
+
+				}];
+			} else {
+				throw e;
+			}
+		})
 };
 
 
