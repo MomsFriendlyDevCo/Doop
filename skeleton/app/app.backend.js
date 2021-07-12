@@ -13,6 +13,7 @@
 * app.load() // Read in all `.doop` files and setup the event emitter
 */
 var _ = require('lodash');
+var babelRegister = require('@babel/register');
 var colors = require('chalk');
 var crash = require('@momsfriendlydevco/crash');
 var debug = require('debug')('doop');
@@ -217,3 +218,8 @@ app.setup = require('./app.backend.setup');
 // }}}
 // Return basic app object
 module.exports = app;
+
+// Register all .mjs files for transpile
+babelRegister({
+	extensions: ['.mjs'],
+});

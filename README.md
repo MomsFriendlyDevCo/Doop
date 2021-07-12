@@ -89,6 +89,7 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/users`                       | User schemas and management
 | `/vendors`                     | Externally supported vendor scripts
 | `/widgets`                     | Shared frontend Vue services
+| `/**/*.mjs`                    | Isomorphic JS files available to frontend/backend as required via `import` / `require` respectively
 | `/**/*.doop`                   | Backend Doop modules
 | `/**/*.gulp.js`                | Global Gulp build-system task files
 | `/**/*.vue`                    | Frontend Vue modules
