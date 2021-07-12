@@ -2,7 +2,7 @@
 /* table.table-sticky-thead {{{ */
 table.table.table-sticky-thead thead > tr > td,
 table.table.table-sticky-thead thead > tr > th {
-	top: -20px;
+	top: 0px;
 	position: sticky;
 	background: #FFF;
 	z-index: 1;
@@ -40,6 +40,12 @@ table.table.table-sticky-tfoot tfoot > tr > th:before {
 	left: 0;
 	right: 0;
 	border-top: 2px solid #ddd;
+}
+/* }}} */
+
+/* Fix .col-verbs collapsing {{{ */
+table.table-sticky-thead th.col-verbs {
+	visibility: visible;
 }
 /* }}} */
 </style>
