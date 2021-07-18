@@ -290,7 +290,7 @@ app.service('$toast', function() {
 			: _.has(obj, 'statusText') && obj.statusText ? obj.statusText
 			: _.has(obj, 'status') && obj.status === -1 ? 'Server connection failed'
 			: _.has(obj, 'message') && /Received: ".+"/.test(obj.message) ? (function(text) { var matches = /^.+Received: "(.+?)"/.exec(text); return matches[1]; }(obj.message))
-			: _.isFunction(obj.toString) && obj.toString() !== '[object Object]' ? obj.toString() :
+			: obj && _.isFunction(obj.toString) && obj.toString() !== '[object Object]' ? obj.toString() :
 			'An error has occured'
 		, options);
 	};
