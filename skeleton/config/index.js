@@ -75,6 +75,9 @@ module.exports = {
 			//config => `${config.paths.root}/node_modules/@momsfriendlydevco/agents/examples/*.agent.js`,
 		],
 	},
+	build: {
+		minimize: false,
+	},
 	cache: {
 		enabled: true,
 		keyMangle: config => key => `${config.name}-${config.env}-${key}`, // Configure cache to use the site name prefix (prevents cache collosions if multiple instances are running on the same box)
@@ -147,10 +150,6 @@ module.exports = {
 	},
 	gulp: {
 		npmUpdate: true,
-		debugJS: true,
-		minifyJS: false,
-		debugCSS: true,
-		minifyCSS: false,
 		watchRestart: [], // Additional files to watch and trigger a server restart when modified
 		watchModules: false,
 		watchModulesInclude: [], // Additional globs to count as modules when `watchModules` is enabled

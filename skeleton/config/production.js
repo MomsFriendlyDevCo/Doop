@@ -6,12 +6,11 @@ module.exports = {
 	isProduction: true,
 	url: '{{FIXME:productionUrl}}', // NOTE: Protocol segment will get overridden if SSL is enabled
 	port: process.env.PORT || 80, // NOTE: Will get overridden if SSL is enabled
+	build: {
+		minimize: false, // Server has low memory and needs override
+	},
 	gulp: {
 		notifications: false,
-		debugJS: false,
-		minifyJS: false, // FIXME: Untested
-		debugCSS: false,
-		minifyCSS: false, // FIXME: Untested
 	},
 	hmr: {
 		enabled: false,
