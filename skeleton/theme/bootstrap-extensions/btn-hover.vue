@@ -17,6 +17,16 @@
 }
 
 
+.btn.btn-hover-light {
+	transition: background 0.5s ease-out, border 0.5s ease-out, color 0.5s ease-out;
+
+	&:hover {
+		background: var(--light) !important;
+		border: 1px solid var(--light) !important;
+	}
+}
+
+
 .btn.btn-hover-success {
 	transition: background 0.5s ease-out, border 0.5s ease-out, color 0.5s ease-out;
 	&:hover {
