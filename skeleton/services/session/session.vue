@@ -202,6 +202,14 @@ app.service('$session', function() {
 		settled: ()=> {
 			return Promise.resolve()
 				.then(()=> this.$debug('stage', 'settled'))
+				// Apply mimic setting from localStorage {{{
+				.then(()=> this.$session.settings.get('mimic'))
+				.then(mimicAs => {
+					if (!mimicAs) return; // No mimic enabled
+					this.$debug.force('Restoring mimic session as user', mimicAs, 'delete the localStorage "mimic" key to prevent this behaviour');
+					return $session.mimic(mimicAs);
+				})
+				// }}}
 				.then(()=> app.vue.$emit.promise('$session.settled', $session.data))
 				.then(()=> $session.isSettled = true)
 				.then(()=> {
@@ -447,6 +455,9 @@ app.service('$session', function() {
 			this.$debug.force('Mimic as', user);
 			this.$http.defaults.headers.common.mimic = user._id; // Glue mimic header onto future $http requests so the backend responds accordingly
 			$session.data = user;
+			$session.data.isMimic = true; // Set flag to indicate we are in mimic mode
+			$session.data.permissions.sessionMimic = true; // Allow changing again
+			$session.settings.set('mimic', user._id, 'local'); // Save to localStorage to refresh on F5
 		});
 
 
