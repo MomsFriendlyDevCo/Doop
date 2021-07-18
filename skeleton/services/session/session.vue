@@ -398,6 +398,34 @@ app.service('$session', function() {
 		}
 	};
 
+
+	/**
+	* Prompt for a user and mimic their login including permissions
+	* @param {Object|string} [user] User to mimic as an object or ID, if omitted a prompt is shown
+	* @returns {Promise} A promise which will complete when the mimic operation has completed
+	*/
+	$session.mimic = user => Promise.resolve()
+		.then(()=> {
+			if (_.isObject(user) && user.permissions) { // Given full user object
+				return user;
+			} else if (_.isString(user) || _.isObject(user)) { // Given partial object or ID
+				return this.$http.get(`/api/users/${user._id || user}`)
+			} else { // Prompt for user
+				return this.$prompt.list({
+					url: `/api/users?project=${this.$projects.current._id}`,
+					field: 'name',
+				})
+					.then(selected => this.$http.get(`/api/users/${selected._id}`))
+			}
+		})
+		.then(({data: user}) => user.permissions ? user : Promise.reject('Server supplied incomplete user object - check permissions to mimic'))
+		.then(user => {
+			this.$debug.force('Mimic as', user);
+			this.$http.defaults.headers.common.mimic = user._id; // Glue mimic header onto future $http requests so the backend responds accordingly
+			$session.data = user;
+		});
+
+
 	app.ready.then(()=> {
 		$session.stagePromise = Promise.defer();
 		$session.stages.run(0); // Kickoff initial session pull

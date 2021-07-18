@@ -15,6 +15,9 @@ module.exports = {
 	hmr: {
 		enabled: false,
 	},
+	mimic: {
+		enabled: true, // System is still in beta
+	},
 	mongo: {
 		migration: false,
 	},

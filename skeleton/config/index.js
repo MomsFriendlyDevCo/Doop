@@ -297,6 +297,11 @@ module.exports = {
 			maxAge: (3600000 * 48), // 48 hours
 		},
 		logoutUrl: '/login', // Where to redirect to post-logout
+		mimic: {
+			enabled: true,
+			header: 'mimic', // Header to set to user ID when requesting mimic from front end
+			permission: 'sessionMimic', // Logged in user must have this permission to mimic on backend
+		},
 		profile: {
 			forcePermissions: { // Force permission setter (only applies to non production boxes)
 				// debug: true,
