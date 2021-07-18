@@ -73,5 +73,41 @@ app.service('$components', {
 
 		recurseDown(app.vue);
 	},
+
+
+	/**
+	* Tiny property validator compatible with the Vue Props spec
+	* @param {Object} spec The property spec to validate
+	* @param {Object} target The target values to validate
+	* @param {Object} [options] Additional options to use when validating
+	* @param {boolean} [options.throw=true] Throw on errors, otherwise returns the string value of the first error
+	* @param {boolean} [options.applyDefaults=false] Apply default values to `target` if there are any defined
+	* @returns {boolean} Boolean true if the spec validates against the target, if `throw` is truthy this function will throw
+	*/
+	propsValidate(spec, target, options = {}) {
+		try {
+			return Object.entries(spec)
+				.every((key, validator) => {
+					if (!_.isPlainObject(validator)) validator = {type: validator}; // Map {key: Type} => {key: {type: Type}}
+
+					// Validate type(s)
+					if (validator.type && !_.castArray(validator.type).some(type =>
+						! (target[key] instanceof type)
+					)) throw new Error(`Expected key "${key}" to be of type "${(validator.type).toString().replace(/^.*function\s*(.+?)\(.+/, '$1')}"`) // Gah. Horrible kludge to translate String => 'String' but here we are
+
+					// Validate required
+					if (validator.required && !target.hasOwnProperty(key)) throw new Error(`Expected required key "${key}"`);
+
+					// Validate validator
+					if (validator.validate && !validator.validate(target[key])) throw new Error(`Validator failed on key "${key}"`);
+
+					// Apply defaults (if options.applyDefaults)
+					if (validator.default && (options?.applyDefaults ?? true)) target[key] = _.isFunction(validator.default) ? validator.default() : validator.default;
+				})
+		} catch (e) {
+			if (options?.throw ?? true) throw e;
+			return e;
+		}
+	},
 });
 </script>
