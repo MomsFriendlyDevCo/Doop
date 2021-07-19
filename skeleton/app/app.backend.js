@@ -125,13 +125,13 @@ global.app = {
 			app.env = process.env.NODE_ENV = profile;
 		} else if (program.environment) {
 			app.env = program.environment;
-			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from CLI)'));
+			if (!process.env.DOOP_QUIET) app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from CLI)'));
 		} else if (process.env.NODE_ENV) {
 			app.env = process.env.NODE_ENV;
-			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from NODE_ENV)'));
+			if (!process.env.DOOP_QUIET) app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from NODE_ENV)'));
 		} else {
 			app.env = 'dev';
-			app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(no NODE_ENV, using default)'));
+			if (!process.env.DOOP_QUIET) app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(no NODE_ENV, using default)'));
 		}
 
 		// Load initial config {{{

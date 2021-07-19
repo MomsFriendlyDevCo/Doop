@@ -1,6 +1,6 @@
 var colors = require('chalk');
 
-console.log(colors.bold.red('RUNNING IN PRODUCTION MODE'));
+if (!process.env.DOOP_QUIET) console.log(colors.bold.red('RUNNING IN PRODUCTION MODE'));
 
 module.exports = {
 	isProduction: true,
