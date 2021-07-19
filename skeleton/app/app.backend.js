@@ -8,6 +8,11 @@
 * It is the upstream modules job to fire the event handlers to run a full server - e.g. server/index.js
 * This file is designed to be a stand alone which loads everything - but does not execute it
 *
+* @param {string} [process.env.DOOP_ENV='dev'] What environment config to load
+* @param {string} [process.env.DOOP_ENV_CONFIG] CSV of dotted notation key/values in the form `KEY=VAL` to splice into the config
+* @param {boolean} [process.env.DOOP_IGNORE_CMD_ARGS] If truthy, ignore all command line overrides
+* @param {boolean} [process.env.DOOP_QUIET] If truthy don't print messages about the environment loading
+*
 * @example Load a Doop stack
 * var app = require('doop') // Basic app object
 * app.load() // Read in all `.doop` files and setup the event emitter
