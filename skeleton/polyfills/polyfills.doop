@@ -20,7 +20,7 @@ var polyfills = [
 	{id: 'regexp.escape', test: ()=> RegExp.escape === undefined},
 ];
 
-app.log('Injected:',
+if (!process.env.DOOP_QUIET) app.log('Injected:',
 	polyfills
 		.filter(p => p.test())
 		.map(p => {
