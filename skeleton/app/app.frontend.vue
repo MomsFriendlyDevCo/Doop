@@ -15,6 +15,9 @@ Vue.use(VueRouter);
 * Wrapper around Vue which provides global level access to front-end functionality
 */
 global.app = {
+	debug: Debug('Doop-Core').enable(false),
+
+
 	/**
 	* Whether the running app is inside a Cordova wrapper
 	* @type {boolean}
@@ -80,6 +83,7 @@ global.app = {
 			return Vue.component(id, spec);
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.component.register) app.component.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.component.register[id]) app.debug.force('Component', id, 'already declared as', app.component.register[id], 'clobbering with new component spec', spec);
 			return app.component.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.component(id);
@@ -120,6 +124,7 @@ global.app = {
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.isProduction && !/^[\$_]/.test(id)) throw new Error(`All service registration and queries should have a '$' or '_' prefix. Given "${id}"`);
 			if (!app.service.register) app.service.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.service.register[id]) app.debug.force('Service', id, 'already declared as', app.service.register[id], 'clobbering with new service spec', spec);
 			return app.service.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.prototype[id];
@@ -140,6 +145,7 @@ global.app = {
 			return Vue.prototype.$filter[id] = func;
 		} else if (func) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.filter.register) app.filter.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.filter.register[id]) app.debug.force('filter', id, 'already declared as', app.filter.register[id], 'clobbering with new filter func', func);
 			return app.filter.register[id] = app.filter[id] = func;
 		} else if (Vue.prototype.$filter) { // Fetch an existing component (app loaded)
 			return Vue.prototype.$filter[id];
@@ -162,6 +168,7 @@ global.app = {
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.isProduction && !id.startsWith('v-')) throw new Error(`All directive IDs must begin with "v-", given "${id}"`);
 			if (!app.directive.register) app.directive.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.directive.register[id]) app.debug.force('directive', id, 'already declared as', app.directive.register[id], 'clobbering with new directive spec', spec);
 			return app.directive.register[id.replace(/^v-/, '')] = spec;
 		} else { // Fetch an existing component
 			return Vue.directive(id);
@@ -201,7 +208,7 @@ global.app = {
 	* Init all components, registering their routes to the router and resetting app.component etc. as pointers to app.vue.component
 	*/
 	init() {
-		var $debug = Debug('INIT').enable(false);
+		var $debug = Debug('Doop-Core-Init').enable(false);
 
 		app.isReady = true; // Set this early so trying to register other components / services / filters etc. will warn
 
