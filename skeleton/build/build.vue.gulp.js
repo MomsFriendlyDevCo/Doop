@@ -8,5 +8,6 @@ gulp.task('build.vue', ['load:app', 'load:app.git'], ()=>
 	compiler({
 		cacheCompiler: app.config.isProduction, // Reuse cached compiler in dev mode
 		log: gulp.log, // Fancy logging output
+		once: process.argv.slice(2).some(arg => arg == 'build.vue'), // Terminate after one build if we find this gulp task anywhere in the build chain
 	})
 );
