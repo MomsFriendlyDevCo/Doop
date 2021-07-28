@@ -95,6 +95,17 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/**/*.vue`                    | Frontend Vue modules
 
 
+Modules
+=======
+The following modules are provided separately and can be optionally included within a project.
+
+| Module                     | Default | Description                                                             |
+|----------------------------|---------|-------------------------------------------------------------------------|
+| `@doop/service-components` | Yes     | `$components` service allowing cross talk and enumeration of components |
+| `@doop/service-toast`      | Yes     | `$toast` service to display simple UI messages                          |
+| `@doop/service-data`       | Yes     | Various data I/O services - `$assign`, `${has,get,set}Path`, `$push`    |
+
+
 Content Blocks
 ==============
 
