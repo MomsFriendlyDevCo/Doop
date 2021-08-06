@@ -190,7 +190,7 @@ app.component('attachments', {
 					{{attachment.name}}
 				</a>
 				<slot name="uploadButton" :upload="upload">
-					<div class="d-flex justify-content-end mt-2">
+					<div class="mt-2">
 						<a
 							v-if="showControls"
 							@click.stop="upload()"
