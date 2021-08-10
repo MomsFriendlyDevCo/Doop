@@ -5,7 +5,7 @@ global._ = _;
 import Debug from '/services/debug';
 
 import Vue from 'vue';
-Vue.config.devtools = false;
+Vue.config.devtools = true; // FIXME: Better way of doing $isProduction blocks
 Vue.config.productionTip = false;
 
 import VueRouter from 'vue-router';
