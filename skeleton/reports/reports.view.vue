@@ -44,7 +44,7 @@ app.component({
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debug.enable(false);
 
 		this.$sitemap.setTitle(this.$route.params.id);
 		return this.refresh();
@@ -122,7 +122,7 @@ app.component({
 		</v-table>
 		<!--:cell-href="row => `/api/reports/${$route.params.id}/history/${row.date}?format=json`"-->
 
-		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
+		<div v-if="$debug.isEnabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

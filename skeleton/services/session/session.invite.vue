@@ -59,7 +59,7 @@ app.component({
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debug.enable(false);
 		// TODO: Throw a 404 when user does not have permission
 		return this.refresh();
 	},
@@ -130,7 +130,7 @@ app.component({
 		</div>
 		<!-- }}} -->
 
-		<div v-if="this.$debugging && $session.hasPermission('debug')" class="card">
+		<div v-if="$debug.isEnabled && $session.hasPermission('debug')" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

@@ -36,7 +36,7 @@ var $debugGlobal = {
 */
 var DebugFactory = function DebugFactory(context) {
 	var $debug = function $debug(...msg) {
-		if (!$debug.$enabled) return $debug;
+		if (!$debug.isEnabled) return $debug;
 
 		// Allocate color {{{
 		if ($debugGlobal.seen[$debug.prefix] === undefined) { // Not seen this prefix before
@@ -51,7 +51,7 @@ var DebugFactory = function DebugFactory(context) {
 	};
 
 	$debug.$prefix = 'UNKNOWN';
-	$debug.$enabled = true;
+	$debug.isEnabled = true;
 	$debug.as = 'log'; // Method to use to output
 
 
@@ -83,7 +83,7 @@ var DebugFactory = function DebugFactory(context) {
 	* @param {*} msg... The message contents to output
 	* @returns {$debug} This chainable $debug instance
 	*
-	* @example Force debugging even if vm.$debugging is disabled
+	* @example Force debugging even if vm.$debug.isEnabled is disabled
 	* vm.$debug.force('Hello', this.world);
 	*/
 	$debug.warn = (...msg) => {
@@ -100,14 +100,14 @@ var DebugFactory = function DebugFactory(context) {
 	* @param {*} msg... The message contents to output
 	* @returns {$debug} This chainable $debug instance
 	*
-	* @example Force debugging even if vm.$debugging is disabled
+	* @example Force debugging even if vm.$debug.isEnabled is disabled
 	* vm.$debug.force('Hello', this.world);
 	*/
 	$debug.force = (...msg) => {
-		var oldEnabled = $debug.$enabled;
-		$debug.$enabled = true;
+		var oldEnabled = $debug.isEnabled;
+		$debug.isEnabled = true;
 		if (msg.length) $debug(...msg);
-		$debug.$enabled = oldEnabled;
+		$debug.isEnabled = oldEnabled;
 		return $debug;
 	};
 
@@ -118,7 +118,7 @@ var DebugFactory = function DebugFactory(context) {
 	* @returns {$debug} This chainable $debug instance
 	*/
 	$debug.enable = isEnabled => {
-		$debug.$enabled = isEnabled ?? true;
+		$debug.isEnabled = isEnabled ?? true;
 		return $debug;
 	};
 
@@ -129,7 +129,7 @@ var DebugFactory = function DebugFactory(context) {
 	* @returns {$debug} This chainable $debug instance
 	*/
 	$debug.disable = isDisabled => {
-		$debug.$enabled = isDisabled == true;
+		$debug.isEnabled = isDisabled == true;
 		return $debug;
 	};
 

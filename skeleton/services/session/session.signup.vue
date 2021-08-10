@@ -19,9 +19,6 @@ app.component({
 				.finally(()=> this.$loader.stop())
 		},
 	},
-	created() {
-		this.$debugging = true;
-	},
 
 	// Bind special Login styles
 	beforeCreate: ()=> $('body').addClass('minimal').removeClass('bootstrapping'),

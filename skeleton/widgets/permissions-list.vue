@@ -172,7 +172,7 @@ app.component('permissionsList', {
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debug.enable(false);
 	},
 });
 </script>
@@ -202,7 +202,7 @@ app.component('permissionsList', {
 			</li>
 			<li class="nav-item" style="margin-left: auto">
 				<div class="btn-group">
-					<a class="btn btn-default far fa-ellipsis-v" data-toggle="dropdown"/>
+					<a class="btn btn-default fas fa-ellipsis-v" data-toggle="dropdown"/>
 					<ul class="dropdown-menu">
 						<a @click="select('all')" class="dropdown-item">Select all</a>
 						<a @click="select('none')" class="dropdown-item">Clear all</a>
@@ -255,7 +255,7 @@ app.component('permissionsList', {
 			</div>
 		</div>
 
-		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
+		<div v-if="$debug.isEnabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

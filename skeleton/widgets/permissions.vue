@@ -65,7 +65,6 @@ app.component('permissions', {
 	functional: true,
 	render: function (createElement, context) {
 		var $session = app.service.$session;
-		//$session.$debugging = true;
 		if (context.props.any && !$session.hasPermission.any(context.props.allow)) return;
 		if (!$session.hasPermission(context.props.allow)) return;
 		// Transparently pass any attributes, event listeners, children, etc.
