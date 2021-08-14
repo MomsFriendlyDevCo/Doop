@@ -268,7 +268,7 @@ app.service('$session', function() {
 	$session.signup = user => Promise.resolve()
 		.then(()=> this.$loader.start('$session.signup'))
 		.then(()=> this.$http.post('/api/session/signup', user))
-		.then(()=> $session.$debug('signup done'))
+		.then(()=> this.$debug('signup done'))
 		.finally(()=> this.$loader.stop('$session.signup'))
 
 
