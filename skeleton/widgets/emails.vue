@@ -5,6 +5,8 @@
 *
 * @param {array <Object>|array <string>} selected Collection of emails that are currently selected
 * @param {string} [placeholder="Enter email addresses or pick a user..."]
+* @param {array} [exclude] Array of items in the form `{user: String, email: String}` of options to NOT allow within the list, can be used to exclude existing users on an invite form
+* @param {number} [limit=0] Number of entries to limit to, set to zero or a negative for unlimited
 *
 * @param {boolean} [allowSearch=true] Allow searching of existing users
 * @param {string} [searchUrl="/api/users"] Where to pull the user list from (default is composed of the url + selection of idField, labelField, emailField)
@@ -35,6 +37,8 @@ app.component('emails', {
 	props: {
 		selected: {type: Array},
 		placeholder: {type: String, default: 'Enter email addresses or pick a user...'},
+		exclude: {type: Array},
+		limit: {type: Number, default: 0},
 
 		allowSearch: {type: Boolean, default: true},
 		searchUrl: {type: String, default() { return '/api/users' }},
@@ -47,6 +51,10 @@ app.component('emails', {
 		allowInvite: {type: Boolean, default: false},
 	},
 	computed: {
+		/**
+		* Compute the vue-select compatible iteration list
+		* @returns {array<Object>} A vue-select compatible selection list
+		*/
 		selectedItems() {
 			return (this.selected || [])
 				.map(i => {
@@ -85,16 +93,11 @@ app.component('emails', {
 				})
 				.filter(i => i);
 		},
-		url() {
-			return this.userUrl
-				+ (/\?/.test(this.userUrl) ? '&' : '?') // Already contains '?' - use '&' url joiner instead
-				+ `select=${this.idField},${this.labelField},${this.emailField}` // Append select= criteria
-		},
 	},
 	methods: {
 		/**
 		* Function which handles the vue-select change event
-		* This function processes the incomming data and remaps it to the changes / change-emails emitters
+		* This function processes the incoming data and remaps it to the changes / change-emails emitters
 		* @param {array<Object>} value Raw internal value to emit
 		*/
 		change(value) {
@@ -124,11 +127,24 @@ app.component('emails', {
 					+ `&q=${term}`
 				)
 				.then(searchUrl => this.$digest.get(searchUrl))
-				.then(res => this.options = res.map(u => ({
-					id: u[this.idField],
-					label: u[this.labelField],
-					email: u[this.emailField],
-				})))
+				.then(res => {
+					var excludedEmails = new Set([ // Set of excluded email addresses
+						...(this.excluded ?? []).filter(e => e[this.emailField]).map(e => e[this.emailField]), // Take from excluded[]
+						this.selected.filter(s => s[this.emailField]).map(s => s[this.emailField]),
+					]);
+					var excludedUsers = new Set([ // Set of excluded user IDs
+						...(this.excluded ?? []).filter(e => e.user).map(e => e.user),
+						...this.selected.filter(s => s.user).map(s => s.user),
+					]);
+
+					this.options = res
+						.filter(u => !excludedEmails.has(u[this.emailField]) && !excludedUsers.has(u[this.idField]))
+						.map(u => ({
+							id: u[this.idField],
+							label: u[this.labelField],
+							email: u[this.emailField],
+						}))
+				})
 				.finally(()=> this.$loader.stop())
 		},
 
@@ -170,7 +186,7 @@ app.component('emails', {
 
 		/**
 		* Wrapper around the keymap which accepts the dropdown item under the cursor (if searching) or an email address (if valid)
-		* @param {VueComponent} vSelect The vSelect element passed via Keymap
+		* @param {VueComponent} vSelect The vSelect element passed via keymap
 		* @param {Event} e The currently executing event
 		*/
 		maybeAcceptInvite(vSelect, e) {
@@ -199,6 +215,18 @@ app.component('emails', {
 			// Refocus search box
 			$(vSelect.searchEl).focus();
 		},
+
+
+		/**
+		* Returns if items are selectable
+		* @returns {boolean} True if more items are selectable
+		*/
+		isSelectable() {
+			return (
+				this.limit < 1
+				|| this.selectedItems.length < this.limit
+			);
+		},
 	},
 });
 </script>
@@ -216,6 +244,7 @@ app.component('emails', {
 			@search="searchDebounced"
 			ref="select"
 			:map-keydown="keyMap"
+			:selectable="isSelectable"
 		>
 			<template #option="option">
 				<i class="fas fa-user"/>
