@@ -321,7 +321,7 @@ global.app = {
 					// Note: We register only individual components as routes below. The first matched index should always be a Doop component.
 					if (_.isArray(to.matched) && to.matched.length > 0 && app.router.options.routeRequiresAuth.has(to.matched[0].path)) { // Target component requires auth
 						app.router.$debug('No session auth present and', {routeRequiresAuth: true}, 'on routes', {to, from}, '- redirect to /login');
-						if (to.path !== '/logout') app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
+						if (!['/logout', '/signup'].includes(to.path)) app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
 						next({path: '/login'}); // Redirect everything else
 					} else { // Controller endpoint does not require auth - serve page normally
 						next();
