@@ -16,7 +16,7 @@ var _ = require('lodash');
 */
 app.endpoints = [];
 
-['all', 'delete', 'get', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
+['all', 'delete', 'get', 'head', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
 	app[method] = (path, ...args) => {
 		if (!app.config.isProduction && app.endpoints.some(e => e.method == method && e.path == path)) app.log.warn('Duplicate endpoint registered -', app.log.colors.blue(`app.${method}('${path}')`));
 		app.endpoints.push({method, path, args})
