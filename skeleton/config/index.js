@@ -177,12 +177,16 @@ module.exports = {
 			'frame-src': [
 				`'self'`, // Allow access to this server
 			],
-			'font-src': [],
+			'font-src': [
+				`'self'`,
+				'fonts.gstatic.com',
+			],
 			'frame-src': [],
 			'img-src': [
 				`'self'`, // Allow access to this server
 				`data:`, // Allow inline image data
 				`blob:`, // Allow JS dynamic image data like webcams
+				'gravatar.com',
 			],
 			'media-src': [],
 			'object-src': [],
@@ -195,6 +199,7 @@ module.exports = {
 				`'self'`, // Allow access to this server
 				`'unsafe-eval'`, // Used by WebPack for inline CSS
 				`'unsafe-inline'`, // Used by Vue components
+				'fonts.googleapis.com',
 			],
 			'worker-src': [],
 		},
