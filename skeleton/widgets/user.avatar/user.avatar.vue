@@ -120,7 +120,7 @@ app.component('userAvatar', {
 		:class="editable && 'editable'"
 		:style="{width: `${size}px`, height: `${size}px`}"
 		v-tooltip="tooltip"
-		@click.prevent.stop="upload"
+		@click="upload"
 	>
 		<div v-if="imageUrl === undefined" class="user-avatar-spinner far fa-spinner fa-spin"/>
 		<div v-else>
