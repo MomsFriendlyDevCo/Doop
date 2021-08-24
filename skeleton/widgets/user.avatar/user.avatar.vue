@@ -41,7 +41,7 @@ app.component('userAvatar', {
 		refresh() {
 			return Promise.resolve()
 				.then(()=> this.imageUrl = this.tooltip = undefined)
-				// Use user (object or data) if present {{{
+				// Fetch user if not already present {{{
 				.then(()=> {
 					if (!this.user) return; // No user data present
 					return Promise.resolve()
@@ -73,10 +73,10 @@ app.component('userAvatar', {
 				// }}}
 				// Fallback to Gravatar on email || user.email {{{
 				.then(()=> {
-					if (!this.email) return; // Not enough data - do nothing
+					if (!this.email && !this.user?.email) return; // Not enough data - do nothing
 
 					this.imageUrl = 'https://gravatar.com/avatar/'
-						+ MD5.hash(this.email).toString()
+						+ MD5.hash(this.email || this.user.email).toString()
 						+ '?'
 						+ `size=${this.size}&`
 						+ `d=${this.fallback}`
