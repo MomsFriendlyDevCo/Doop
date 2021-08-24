@@ -39,7 +39,7 @@
     "@doop/core-vue": "^0.0.13",
     "@doop/deploy": "^0.0.1",
     "@doop/docs": "^0.0.3",
-    "@doop/service-components": "^1.0.0",
+    "@doop/service-components": "^1.1.0",
     "@doop/service-data": "^1.0.1",
     "@doop/service-morph": "^1.0.0",
     "@doop/service-toast": "^1.0.0",

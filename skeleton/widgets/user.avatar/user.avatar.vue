@@ -9,6 +9,11 @@
 * @param {string} [failIcon] URL to use if none of the above data matches - defaults to the 'power symbol' Gravatar fallback icon
 * @param {string} [overlay] Optional overlay effect to apply. ENUM: 'mask'
 *
+* @param {boolean} [editable=false] Allow uploading a replacement image over the avatar
+* @param {string} [editablePost='/api/session/avatar'] Post path to send the editable URL to
+* @param {boolean} [editableUploadedRefresh=true] Attempt to reload avatar content after upload
+* @param {boolean} [editableUploadedRefreshUrl] Attempt to refresh all <user-avatar/> elements with the same `url` property
+*
 * @see https://en.gravatar.com/site/implement/images/
 */
 import {MD5} from 'jscrypto/es6/MD5';
@@ -24,8 +29,13 @@ app.component('userAvatar', {
 		user: {type: [Object, String]},
 		size: {type: [Number, String], default: 32},
 		fallback: {type: String, default: 'identicon'},
-		failIcon: {type: String, default: 'https://www.gravatar.com/avatar/00000000000000000000000000000000'},
+		failIcon: {type: String, default: 'https://gravatar.com/avatar/00000000000000000000000000000000'},
 		overlay: {type: String},
+
+		editable: {type: Boolean, default: false},
+		editablePost: {type: String, default: '/api/session/avatar'},
+		editableUploadedRefresh: {type: Boolean, default: true},
+		editableUploadedRefreshUrl: {type: Boolean, default: true},
 	},
 	methods: {
 		refresh() {
@@ -43,13 +53,7 @@ app.component('userAvatar', {
 							}
 						})
 						.then(user => {
-							this.tooltip = user.name;
-							this.imageUrl = 'https://gravatar.com/avatar/'
-								+ MD5.hash(user.email).toString()
-								+ '?'
-								+ `size=${this.size}&`
-								+ `d=${this.fallback}`
-							throw 'DONE';
+							this.tooltip = user.name + (user.company ? `<br/>${user.company}` : '');
 						})
 				})
 				// }}}
@@ -57,13 +61,19 @@ app.component('userAvatar', {
 				.then(()=> {
 					if (this.url) return this.$http.head(this.url)
 						.then(res => {
-							console.log('GOT HEAD', res);
+							console.log('USE URL', this.url);
+							this.imageUrl = this.url;
+							throw 'DONE';
+						})
+						.catch(e => {
+							if (e === 'DONE') throw e;
+							return; // Carry on trying to find a valid avatar
 						})
 				})
 				// }}}
 				// Fallback to Gravatar on email || user.email {{{
 				.then(()=> {
-					if (!this.email) return // Not enough data - do nothing
+					if (!this.email) return; // Not enough data - do nothing
 
 					this.imageUrl = 'https://gravatar.com/avatar/'
 						+ MD5.hash(this.email).toString()
@@ -83,6 +93,20 @@ app.component('userAvatar', {
 				})
 				// }}}
 		},
+
+		upload() {
+			if (!this.editable) return;
+			return this.$files.upload({
+				url: this.editablePost,
+				multiple: false,
+			})
+				.then(()=> this.editableUploadedRefresh && this.refresh())
+				.then(()=> this.editableUploadedRefreshUrl && this.$components.tell('userAvatar', component => {
+					if (component === this) return; // Ignore this component
+					if (component.$props?.url == this.url) return component.refresh(); // URL matches - refresh
+				}))
+				.catch(this.$toast.catch);
+		},
 	},
 	created() {
 		this.$watchAll(['url', 'user.email', 'email'], this.refresh, {immediate: true})
@@ -91,7 +115,13 @@ app.component('userAvatar', {
 </script>
 
 <template>
-	<div class="user-avatar" v-tooltip="tooltip">
+	<div
+		class="user-avatar"
+		:class="editable && 'editable'"
+		:style="{width: `${size}px`, height: `${size}px`}"
+		v-tooltip="tooltip"
+		@click.prevent.stop="upload"
+	>
 		<div v-if="imageUrl === undefined" class="user-avatar-spinner far fa-spinner fa-spin"/>
 		<div v-else>
 			<i v-if="overlay == 'mask'" class="overlay-mask fas fa-mask fa-lg"/>
@@ -110,6 +140,38 @@ app.component('userAvatar', {
 	border-radius: 50%;
 	overflow: hidden;
 	position: relative;
+	margin: auto;
+
+	/* Image area {{{ */
+	& img {
+		width: 100%;
+		height: 100%;
+	}
+	/* }}} */
+
+	/* Editable {{{ */
+	&.editable {
+		cursor: pointer;
+
+		/* Upload prompt {{{ */
+		&:hover::after {
+			visibility: visible;
+		}
+
+		&::after {
+			visibility: hidden;
+			display: flex;
+			background: #eeed;
+			content: "Upload...";
+			position: absolute;
+			justify-content: center;
+			align-items: center;
+			border-radius: 10px;
+			padding: 5px;
+		}
+		/* }}} */
+	}
+	/* }}} */
 
 	& .user-avatar-spinner {
 		opacity: 0.5;
