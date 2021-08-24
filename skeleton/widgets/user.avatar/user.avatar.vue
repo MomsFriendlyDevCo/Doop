@@ -1,6 +1,13 @@
 <script lang="js" frontend>
 /**
 * Display a simple User Avatar sourced from Gravatar.com
+*
+* This component tries to find the user avatar in the following order:
+*     1. `$props.url` is present and responds to a HEAD probe
+*     2. `user.avatarUrl` if `user` (derrived from `$props.user`) is specified and `user.avatarUrl` responds to a HEAD probe
+*     3. Gravatar image if either `$props.email` OR `user.email` is specified
+*     4. `$props.failIcon` if all else fails
+*
 * @param {string} [url] Alternate URL to try BEFORE using Gravatar, if valid its return is used instead
 * @param {Object|string} [user] The user object or ID, takes precedence if present the user data is fetch if not already present in the $digest cache
 * @param {string} [email] The users email
@@ -11,8 +18,8 @@
 *
 * @param {boolean} [editable=false] Allow uploading a replacement image over the avatar
 * @param {string} [editablePost='/api/session/avatar'] Post path to send the editable URL to
-* @param {boolean} [editableUploadedRefresh=true] Attempt to reload avatar content after upload
-* @param {boolean} [editableUploadedRefreshUrl] Attempt to refresh all <user-avatar/> elements with the same `url` property
+* @param {boolean} [editableUploadedRefreshSelf=true] Attempt to reload avatar content after upload
+* @param {boolean} [editableUploadedRefreshPeers=true] Attempt to refresh all <user-avatar/> elements with the same `url` property (either specified directly in $props.url or derrived from the $props.user), see $methods.refreshPeers() for full details
 *
 * @see https://en.gravatar.com/site/implement/images/
 */
@@ -22,6 +29,7 @@ app.component('userAvatar', {
 	data() { return {
 		imageUrl: undefined,
 		tooltip: undefined,
+		userResolved: undefined, // Calculated user - copy of $props.user if its an object or the fetched varient if $props.user was a string
 	}},
 	props: {
 		url: {type: String},
@@ -34,10 +42,14 @@ app.component('userAvatar', {
 
 		editable: {type: Boolean, default: false},
 		editablePost: {type: String, default: '/api/session/avatar'},
-		editableUploadedRefresh: {type: Boolean, default: true},
-		editableUploadedRefreshUrl: {type: Boolean, default: true},
+		editableUploadedRefreshSelf: {type: Boolean, default: true},
+		editableUploadedRefreshPeers: {type: Boolean, default: true},
 	},
 	methods: {
+		/**
+		* Refresh this components data
+		* @returns {Promise} A promise which resolves when the operation has completed
+		*/
 		refresh() {
 			return Promise.resolve()
 				.then(()=> this.imageUrl = this.tooltip = undefined)
@@ -52,8 +64,9 @@ app.component('userAvatar', {
 								return this.user;
 							}
 						})
-						.then(user => {
-							this.tooltip = user.name + (user.company ? `<br/>${user.company}` : '');
+						.then(user => this.userResolved = user)
+						.then(()=> {
+							this.tooltip = this.userResolved.name + (this.userResolved.company ? `<br/>${this.userResolved.company}` : '');
 						})
 				})
 				// }}}
@@ -61,8 +74,20 @@ app.component('userAvatar', {
 				.then(()=> {
 					if (this.url) return this.$http.head(this.url)
 						.then(res => {
-							console.log('USE URL', this.url);
 							this.imageUrl = this.url;
+							throw 'DONE';
+						})
+						.catch(e => {
+							if (e === 'DONE') throw e;
+							return; // Carry on trying to find a valid avatar
+						})
+				})
+				// }}}
+				// Check if user.avatarUrl exists and is valid {{{
+				.then(()=> {
+					if (this.userResolved?.avatarUrl) return this.$http.head(this.userResolved.avatarUrl)
+						.then(res => {
+							this.imageUrl = this.userResolved.avatarUrl;
 							throw 'DONE';
 						})
 						.catch(e => {
@@ -94,17 +119,36 @@ app.component('userAvatar', {
 				// }}}
 		},
 
+
+		/**
+		* Refresh this module and all peer <user-avatar/> components with the same $props.url / $props.user.avatarUrl
+		* @param {boolean} [ignoreSelf=false] Ignore this instance when refreshing
+		* @returns {Promise} A promise which resolves when the operation has completed
+		*/
+		refreshPeers(ignoreSelf = false) {
+			return this.$components.tell('userAvatar', component => {
+				if (ignoreSelf && component === this) return; // Ignore this component
+				if (
+					(this.url && component.$props?.url == this.url) // URL matches
+					|| (this.userResolved && component.userResolved.avatarUrl) // Resolved Avatar URL matches
+				) return component.refresh();
+			});
+		},
+
+
+		/**
+		* Upload a new avatar and post it to $props.editablePost
+		* @returns {Promise} A promise which resolves when the operation has completed
+		*/
 		upload() {
 			if (!this.editable) return;
 			return this.$files.upload({
 				url: this.editablePost,
 				multiple: false,
+				accept: 'image/*',
 			})
-				.then(()=> this.editableUploadedRefresh && this.refresh())
-				.then(()=> this.editableUploadedRefreshUrl && this.$components.tell('userAvatar', component => {
-					if (component === this) return; // Ignore this component
-					if (component.$props?.url == this.url) return component.refresh(); // URL matches - refresh
-				}))
+				.then(()=> this.editableUploadedRefreshSelf && this.refresh())
+				.then(()=> this.editableUploadedRefreshPeers && this.refreshPeers(true))
 				.catch(this.$toast.catch);
 		},
 	},

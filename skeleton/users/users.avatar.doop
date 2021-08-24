@@ -1,0 +1,30 @@
+<script lang="js" backend endpoint>
+var glob = require('globby');
+
+/**
+* Return whether a users avatar is present
+* @param {string} req.params.id The ID of the user to fetch the avatar of
+* @returns {Object} A valid HTTP HEAD response if the avatar exists, otherwise a 404
+*/
+app.head('/api/users/:id/avatar', app.middleware.express.isUser(), (req, res) => {
+	glob(`./users/${req.params.id}/avatar.png`, {cwd: app.config.paths.data})
+		.then(avatarPaths => avatarPaths.length > 0 ? avatarPaths[0] : Promise.reject('404: User avatar not found'))
+		.then(avatarPath => res.sendFile(avatarPath, {root: app.config.paths.data}))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
+* Fetch a users avatar if there is one
+* @param {string} req.params.id The ID of the user to fetch the avatar of
+* @returns {Buffer} The image contents of the user avatar if it is present, otherwise 404
+*/
+app.get('/api/users/:id/avatar', app.middleware.express.isUser(), (req, res) => {
+	glob(`./users/${req.params.id}/avatar.png`, {cwd: app.config.paths.data})
+		.then(avatarPaths => avatarPaths.length > 0 ? avatarPaths[0] : Promise.reject('404: User avatar not found'))
+		.then(avatarPath => res.sendFile(avatarPath, {root: app.config.paths.data}))
+		.catch(res.sendError);
+});
+</script>
