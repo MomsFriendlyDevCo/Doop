@@ -4,12 +4,16 @@
 *
 * @example Accept a single file upload using the 'file' field. req.file gets populated with the decoded file
 * app.post('/api/upload', app.middleware.express.uploads.single('file'), (req, res) => {
-*   fs.rename(req.file.path, '/a/path/somewhere.txt', ()=> res.sendStatus(200));
+*   fs.promises.move(req.file.path, '/a/path/somewhere.txt')
+*   	then(()=> res.sendStatus(200));
 * });
 *
 * @example Accept multiple files req.files gets populated with the decoded file collections
 * app.post('/api/upload', app.middleware.express.uploads.any(), (req, res) => {
-*   // ... iterate over req.files and presumably use fs.rename() to move them somewhere ... //
+	Promise.all(req.files.map(file => // Iterate over all files
+		fs.promises.move(file.path, //... SOME PATH ...//) // ...moving them elsewhere
+	))
+		.then(()=> res.sendStatus(200))
 * });
 */
 var _ = require('lodash');
