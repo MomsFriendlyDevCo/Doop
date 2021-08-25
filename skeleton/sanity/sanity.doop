@@ -18,7 +18,7 @@ var sanityChecks = glob.sync(`${app.config.paths.root}/sanity/*.js`)
 	})
 	.sort((a, b) => a.id > b.id ? 1 : -1)
 
-app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sanityChecks.map(s => s.id).map(i => app.log.colors.cyan(i)).join(', '));
+app.log('Loaded', sanityChecks.length, 'sanity checks:', sanityChecks.map(s => s.id).map(i => app.log.colors.cyan(i)).join(', '));
 
 
 /**
@@ -31,6 +31,7 @@ app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sa
 *   - Resolve as an object - The object keys are used as the test names with the values being optional string payloads
 *
 * @param {string} [req.params.test] Specific test to run, if omitted all are run
+* @param {string} [req.query.email] If set an email is dispatched to the given email address on sanity fail
 */
 app.get(
 	'/api/sanity/:test?',
@@ -50,7 +51,7 @@ app.get(
 						if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
 							return _.map(result, (v, k) => `PASS ${k} - ${v || 'OK'}`);
 						} else {
-							return `PASS ${s.id} - ${m || 'OK'}`;
+							return `PASS ${s.id} - ${result || 'OK'}`;
 						}
 					})
 					.catch(e => {
@@ -65,10 +66,20 @@ app.get(
 
 				if (fail) res.status(500);
 
-				res.send(
+				var results =
 					(fail ? 'SANITY:FAIL\n' : 'SANITY:OK\n')
-					+ results.join('\n')
-				);
+					+ results.join('\n');
+
+				if (req.query.email) {
+					app.log.warn.as('sanity', 'Sanity fail, dispatching email to', app.log.colors.cyan(req.query.email));
+					email()
+						.to(req.query.email)
+						.subject(`Sanity fail on ${app.config.publicUrl}`)
+						.text(results)
+						.send()
+				}
+
+				res.send(results);
 			})
 			.catch(e => res.send(`SANITY:FAULT:${e.toString()}`)) // Generic fallback
 	}
