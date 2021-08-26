@@ -4,7 +4,7 @@
 *
 * Features:
 *           - Handles next, previous wizard progression
-*           - `autofocus` on attributes per pane is honored
+*           - `autofocus` on attributes per pane is honored (also `[data-autofocus-method="select"] as with Bootstrap
 *
 * @param {string} [start] Optional ID of the step to start from, if omitted the first step is used
 *
@@ -83,7 +83,21 @@ app.component('vWizard', {
 				.then(()=> stepNext && _.isFunction(stepNext.onStart) && stepNext.onStart())
 				// }}}
 				.then(()=> this.$nextTick()) // Wait for everything to settle
-				.then(()=> $(this.$el).find('[autofocus]').focus())
+				.then(()=> $(this.$el) // Handle [autofocus]
+					.find('[autofocus]')
+					.first()
+					.each((index, el) => {
+						var $el = $(el);
+						if ($el.data('autofocus-method') == 'select') { // Use select method
+							setTimeout(()=> {
+								console.log('SELECT', $el);
+								$el.select()
+							}, 250);
+						} else {
+							$el.focus();
+						}
+					})
+				)
 		},
 	},
 	created() {
