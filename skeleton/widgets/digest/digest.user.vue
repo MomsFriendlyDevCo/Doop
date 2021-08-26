@@ -24,7 +24,7 @@ app.component('digestUser', {
 		:url="`/api/users/${userId}`"
 		field="*"
 		:lazy="false"
-		class="d-flex align-items-center"
+		class="digest-user"
 		class-valid="badge badge-primary"
 		class-invalid="badge badge-warning"
 		icon-valid="far fa-user"
@@ -37,8 +37,19 @@ app.component('digestUser', {
 			Loading user...
 		</template>
 		<template #display="{data}">
-			<user-avatar :user="userId" size="24" class="d-inline-block mr-1"/>
+			<user-avatar
+				:user="user"
+				size="32"
+				class="d-inline-block mr-1"
+			/>
 			{{data.name}}
 		</template>
 	</digest>
 </template>
+
+<style lang="scss">
+.digest-user {
+	display: inline-flex;
+	align-items: center;
+}
+</style>
