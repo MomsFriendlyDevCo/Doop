@@ -16,6 +16,8 @@ app.head('/api/users/:id/avatar', app.middleware.express.isUser(), (req, res) =>
 
 
 <script lang="js" backend endpoint>
+var glob = require('globby');
+
 /**
 * Fetch a users avatar if there is one
 * @param {string} req.params.id The ID of the user to fetch the avatar of

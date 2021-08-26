@@ -47,6 +47,7 @@ app.post(
 		fs.promises.mkdir(`${app.config.paths.data}/users/${req.user._id}`, {recursive: true})
 			.then(()=> fs.promises.move(req.file.path, `${app.config.paths.data}/users/${req.user._id}/avatar.png`))
 			.then(()=> res.send('OK'))
+			.catch(res.sendError)
 	},
 );
 </script>
