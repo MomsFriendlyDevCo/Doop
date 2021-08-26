@@ -79,7 +79,7 @@ global.app = {
 
 		if (spec && app.isReady) { // Already live
 			console.warn(`Registered component "${id}" after app.init() was called`);
-			if (!isProduction && spec.template) console.warn('Component', id, 'has a template property - use <template/> tags or a raw renderer!');
+			if (!app.isProduction && spec.template) console.warn('Component', id, 'has a template property - use <template/> tags or a raw renderer!');
 			return Vue.component(id, spec);
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.component.register) app.component.register = {}; // Create the register if it doesn't already exist
