@@ -64,9 +64,16 @@ app.express.use(compression());
 app.express.use(function(req, res, next) {
 
 	/**
-	* Report an error
-	* This is really just a convenience function to set all the weird headers in the event of an error
-	* If err is a string with the prefix `xxx:Text` the first part is used as the return code with the second as the error message
+	* Report an error via Express, optionally showing a trace
+	*
+	* This is really just a convenience function to set all the weird headers when an error occurs
+	*
+	* HTTP response codes are determined by the logic:
+	*
+	*     1. If `code` is provided and is finite
+	*     2. If `err` is a string and is prefixed as `xxx:Text` the first part is used as the HTTP response code with the second as the error message
+	*     3. Otherwise `400` is assumed and a stack trace shown if passed an error object
+	*
 	* @param {number} [code=400] Optional error code to use
 	* @param {string} err The error to report
 	* @return {undefined} This function is fatal to express as it closes the outbound connection when it completes
@@ -74,19 +81,25 @@ app.express.use(function(req, res, next) {
 	* @example Throw error 404
 	* res.sendError(404)
 	*
-	* @example Throw general error with 400
+	* @example Throw general error with 400 - this will also show a trace
 	* res.sendError('This is an error')
 	*
-	* @example Throw error 512 with custom text within one string
+	* @example Throw error 512 with custom text within one string - will not show a trace (as the code indicates the function handled the response)
 	* res.sendError('512: This is a custom error')
 	*/
 	res.sendError = function(code, err) {
-		if (!isFinite(code)) [code, err] = [400, code];
-
 		// Process optional string prefix (if we're using the default error fallback)
-		if (code == 400) {
-			var errBits = /^(\d+)+\s*:\s*(.*)$/.exec(err);
-			if (errBits) [, code, err] = errBits;
+		var providedCode = false;
+		var errBits;
+		if (isFinite(code)) { // User provided explicit code argument
+			providedCode = true;
+		} if (errBits = /^(?<code>\d+)\s*:\s*(?<err>.*)$/.exec(code)?.groups) { // Can extract code from error string
+			code = errBits.code;
+			err = errBits.err;
+			providedCode = true;
+		} else { // No code we can work out nor extract, assume 400
+			code = 400;
+			err = 'An error occured';
 		}
 
 		res.errorBody = err;
@@ -99,7 +112,8 @@ app.express.use(function(req, res, next) {
 			app.log.warn('Cannot send error when headers have already been sent');
 		}
 
-		crash.trace(err, {prefix: 'Caught server error'});
+		if (_.isError(err) && !providedCode) // If given an actual error object AND the user didn't provide a handled HTTP code - show a trace
+			crash.trace(err, {prefix: 'Caught server error'});
 	};
 
 	next();
