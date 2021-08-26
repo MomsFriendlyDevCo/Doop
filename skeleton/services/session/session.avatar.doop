@@ -3,6 +3,7 @@ var glob = require('globby');
 
 /**
 * Return IF the user avatar exists. See GET /api/session/avatar to actually fetch it
+* @returns {Object} A valid HTTP HEAD response if the avatar exists, otherwise a 404
 */
 app.head('/api/session/avatar', app.middleware.express.isUser(), (req, res) => {
 	glob(`./users/${req.user._id}/avatar.png`, {cwd: app.config.paths.data})
@@ -17,8 +18,8 @@ app.head('/api/session/avatar', app.middleware.express.isUser(), (req, res) => {
 var glob = require('globby');
 
 /**
-* Return whether the users avatar is present
-* @returns {Object} A valid HTTP HEAD response if the avatar exists, otherwise a 404
+* Return users avatar if it is present
+* @returns {Buffer} The Avatar image or a HTTP 404 error
 */
 app.get('/api/session/avatar', app.middleware.express.isUser(), (req, res) => {
 	glob(`./users/${req.user._id}/avatar.png`, {cwd: app.config.paths.data})
