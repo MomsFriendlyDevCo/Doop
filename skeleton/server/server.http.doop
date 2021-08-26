@@ -89,30 +89,43 @@ app.express.use(function(req, res, next) {
 	*/
 	res.sendError = function(code, err) {
 		// Process optional string prefix (if we're using the default error fallback)
-		var providedCode = false;
+		var resCode, resError; // Actual response code(number) + error(string)
+		var showThrow = true; // Whether to show the full trace on the console, disabled if it looks like the upstream handled the response correctly
+
 		var errBits;
 		if (isFinite(code)) { // User provided explicit code argument
-			providedCode = true;
+			showThrow = false;
 		} if (errBits = /^(?<code>\d+)\s*:\s*(?<err>.*)$/.exec(code)?.groups) { // Can extract code from error string
-			code = errBits.code;
-			err = errBits.err;
-			providedCode = true;
+			resCode = errBits.code;
+			resErr = errBits.err;
+			showThrow = false;
+		} else if (_.isError(code)) { // Given raw error object
+			err = code;
+			resCode = 400;
+			resErr = code.toString();
+			showThrow = true;
 		} else { // No code we can work out nor extract, assume 400
-			code = 400;
-			err = 'An error occured';
+			resCode = 400;
+			resErr = 'An error occured';
+			err = new Error('An unhandled error occured');
+			showThrow = true;
 		}
 
-		res.errorBody = err;
+		res.errorBody = resErr; // Populate errorBody so upstream loggers can display a digest
 		if (!res.headersSent) {
 			res.format({
-				json: ()=> res.status(code).send(_.isPlainObject(res.errorBody) ? res.errorBody : {err: res.errorBody.toString()}),
-				default: ()=> res.status(code).send(res.errorBody),
+				json: ()=> res
+					.status(resCode)
+					.send({err: resErr}),
+				default: ()=> res
+					.status(resCode)
+					.send(resErr),
 			})
 		} else {
 			app.log.warn('Cannot send error when headers have already been sent');
 		}
 
-		if (_.isError(err) && !providedCode) // If given an actual error object AND the user didn't provide a handled HTTP code - show a trace
+		if (showThrow) // If given an actual error object AND the user didn't provide a handled HTTP code - show a trace
 			crash.trace(err, {prefix: 'Caught server error'});
 	};
 
