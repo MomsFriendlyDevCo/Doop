@@ -1,13 +1,15 @@
 <script lang="js" backend on="middleware">
+var _ = require('lodash');
 var joi = require('joi');
 
 /**
 * Accepts a Joi template and will error out if the request key does not match
 * @param {string} key The key to investigate, typically 'body', 'query' or 'params'
-* @param {Object|JoiSchema} validator The validator to use - plain objects are automatically wrapped
+* @param {Object|JoiSchema|function} validator The validator to use - plain objects are automatically wrapped, if passed a function it is sync called as `(joi)` and expected to return an object or Joi schema
 * @returns {function} Express middleware function
 *
 * @example Validate a required 'name' paramter in the body
+* var joi = require('joi');
 * app.get('/api/doSomething',
 *   app.middleware.express.validate('body', {
 *     id: joi.string().required(),
@@ -15,12 +17,22 @@ var joi = require('joi');
 *   }),
 *   (req, res) => { ... },
 * )
+*
+* @example Validate a required 'name' paramter in the body via function
+* app.get('/api/doSomething',
+*   app.middleware.express.validate('body', joi => ({
+*     id: joi.string().required(),
+*     ...
+*   })),
+*   (req, res) => { ... },
+* )
 */
 app.middleware.express.validate = (key, validator) => {
-	var schema = joi.isSchema(validator) ? validator : joi.object(validator); // Wrap plain objects if not already a schema
+	var joiSchema = _.isFunction(validator) ? validator(joi) : validator; // Collapse functions into Objects / JoiSchema
+	joiSchema = joi.isSchema(joiSchema) ? joiSchema : joi.object(joiSchema); // Wrap plain objects if not already a schema
 
 	return (req, res, next) => {
-		var result = schema.validate(req[key]);
+		var result = joiSchema.validate(req[key]);
 		if (result.error) {
 			return res.sendError(400, result.error.details.map(d => d.message).join(', '));
 		} else {
