@@ -94,8 +94,10 @@ app.express.use(function(req, res, next) {
 
 		var errBits;
 		if (isFinite(code)) { // User provided explicit code argument
+			resCode = code;
+			resErr = err;
 			showThrow = false;
-		} if (errBits = /^(?<code>\d+)\s*:\s*(?<err>.*)$/.exec(code)?.groups) { // Can extract code from error string
+		} else if (errBits = /^(?<code>\d+)\s*:\s*(?<err>.*)$/.exec(code)?.groups) { // Can extract code from error string
 			resCode = errBits.code;
 			resErr = errBits.err;
 			showThrow = false;
