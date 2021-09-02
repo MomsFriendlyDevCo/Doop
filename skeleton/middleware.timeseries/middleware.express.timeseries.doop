@@ -14,10 +14,12 @@ var timestring = require('timestring');
 * @param {function} [options.valueClor] Function called as `(value, offset, dataSet, settings)` to return a valid CSS color
 * @param {boolean} [options.fixDates=true] Whether to preparse the field into a valid Mongo date before iterating, this fixes string date storage
 * @param {function} [options.interval="1d"] Promisable function called as `(req, res, settings)` which should return the interval of the timeseries, defaults to parsing req.query.interval via timestring or '1d'
-* @param {function} [options.timeLabel] Function called as `(date)` to neaten the date display, defaults to using Moment to return a simple local date
+* @param {function} [options.timeLabel] Function called as `(req, res, date)` to neaten the date display, defaults to using Moment to return a simple local date
 * @param {function} [options.start] Promisable function called as `(req, res, settings)` which should return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
 * @param {function} [options.end] Promisable function called as `(req, res, settings)` which should return the starting point of the timeseries, defaults to parsing req.query.start via moment or 1 week ago if req.query.start is unspecified
+* @param {function} [options.query] Async function called as `(req, res, settings)` which can return an object further used to filter down the query data, this should match any valid aggregation $match syntax
 * @param {boolean} [options.passthru=false] If falsy req.send is called with the calculated timeseries, if falsy this function populates `req.timeSeries` and passes control to the next express middleware function
+* @param {object} [options.output] Aggregation $bucket output as per https://docs.mongodb.com/manual/reference/operator/aggregation/bucket/#std-label-bucket-output
 */
 app.middleware.express.timeSeries = options => {
 	var settings = {
@@ -26,17 +28,21 @@ app.middleware.express.timeSeries = options => {
 		field2: 'status',
 		values: (req, res, settings) => _.get(app.db, [settings.collection, 'schema', 'paths', settings.field2, 'options', 'enum']),
 		valueLabel: (key, offset, dataSet, settings) => _.startCase(key),
-		valueColor: (key, offset, dataSet, settings) => {
+		valueBackgroundColor: (key, offset, dataSet, settings) => {
+			var r = ["rgb(54, 162, 235)", "rgb(75, 192, 192)", "rgb(201, 203, 207)", "rgb(255, 159, 64)", "rgb(153, 102, 255)", "rgb(255, 99, 132)", "rgb(255, 205, 86)"][offset % 7];
+			return r;
+		},
+		valueBorderColor: (key, offset, dataSet, settings) => {
 			var r = ["rgb(54, 162, 235)", "rgb(75, 192, 192)", "rgb(201, 203, 207)", "rgb(255, 159, 64)", "rgb(153, 102, 255)", "rgb(255, 99, 132)", "rgb(255, 205, 86)"][offset % 7];
 			return r;
 		},
 		fixDates: true,
-		interval: '1d',
 		start: (req, res) => (req.query.start ? moment(req.query.start) : moment().subtract(1, 'week')).set('hour', 0).set('minute', 0).set('second', 0).set('millisecond', 0),
 		end: (req, res) => (req.query.end ? moment(req.query.end) : moment()).set('hour', 23).set('minute', 59).set('second', 59),
 		interval: (req, res) => timestring(req.query.interval || '1d', 'ms'),
-		timeLabel: date => moment(date).format('ddd Do MMM'),
+		timeLabel: (req, res, date) => (req.query.timeLabel) ? moment(date).format(req.query.timeLabel) : moment(date).format('ddd Do MMM'),
 		passthru: false,
+		query: (req, res) => ({}),
 		...options,
 	};
 	if (!settings.collection) throw new Error('Collection must be specified for app.middleware.express.timeseries()');
@@ -50,27 +56,34 @@ app.middleware.express.timeSeries = options => {
 				Promise.resolve(settings.end(req, res, settings)),
 				Promise.resolve(settings.interval(req, res, settings)),
 				Promise.resolve(settings.values(req, res, settings)),
+				Promise.resolve(settings.query(req, res, settings)),
 			]))
-			.then(([start, end, interval, values]) => {
+			.then(([start, end, interval, values, query]) => {
 				var iter = start;
 
+				// FIXME: Is every second one off by 30mins? http://localhost:8080/api/jobs/timeseries?interval=1month&timeLabel=MMM&start=2020-05-25T00:00:00Z&end=2021-05-25T23:59:59Z
+				// "boundaries":["2020-06-14T14:00:00.000Z","2020-07-15T00:30:00.000Z",
 				while (iter.isBefore(end)) {
 					boundaries.push(iter.toDate());
 					iter.add(interval, 'ms');
 				}
 
-				return values;
+				return {values, query};
 			})
-			.then(values => app.db[settings.collection].aggregate([{$facet: _(values)
+			.then(({values, query}) => app.db[settings.collection].aggregate([{$facet: _(values)
 					.mapKeys()
 					.mapValues(val => ([
 						{$match: {
 							[settings.field2]: val,
+							...query,
 						}},
 						...(settings.fixDates // Optionally fix date conversion
 							? [{$project: {
 								[settings.field]: {$toDate: '$' + settings.field},
 								status: 1,
+								..._(settings.output)
+									.mapValues(() => 1)
+									.value(),
 							}}]
 							: []
 						),
@@ -78,6 +91,7 @@ app.middleware.express.timeSeries = options => {
 							groupBy: '$' + settings.field,
 							default: 'unparsable',
 							boundaries,
+							...(settings.output && Object.keys(settings.output).length > 0) ? { output: settings.output } : {},
 						}},
 					]))
 					.value()
@@ -88,17 +102,27 @@ app.middleware.express.timeSeries = options => {
 				var dataSet = dataSets[k];
 				var dataSetMap = _(dataSet)
 					.mapKeys('_id')
-					.mapValues('count')
+					.mapValues(d => {
+						if (!settings.output) {
+							return d.count;
+						} else if (Object.keys(settings.output).length === 1) {
+							return d[Object.keys(settings.output)[0]];
+						} else if (Object.keys(settings.output).length > 1) {
+							return _.pick(d, Object.keys(settings.output))
+						}
+					})
 					.value();
 
 				return {
 					label: settings.valueLabel(k, kOffset, dataSet, settings),
-					backgroundColor: settings.valueColor(k, kOffset, dataSet, settings),
+					backgroundColor: settings.valueBackgroundColor(k, kOffset, dataSet, settings),
+					borderColor: settings.valueBorderColor(k, kOffset, dataSet, settings),
 					data: boundaries.map(b => dataSetMap[b] || 0), // Fill in blanks for the sparce dataSet Mongo gives us back
 				};
 			}))
 			.then(datasets => ({
-				labels: boundaries.map(l => settings.timeLabel(l)),
+				boundaries: boundaries,
+				labels: boundaries.map(l => settings.timeLabel(req, res, l)),
 				datasets,
 			}))
 			.then(data => {
