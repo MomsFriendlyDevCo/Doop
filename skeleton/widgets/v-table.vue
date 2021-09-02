@@ -458,7 +458,6 @@ body {
 	& thead {
 		position: sticky;
 		top: 0px;
-		z-index: 1000;
 		background: #FFF;
 		box-shadow: 0 1px 2px -1px rgb(0 0 0 / 40%);
 
