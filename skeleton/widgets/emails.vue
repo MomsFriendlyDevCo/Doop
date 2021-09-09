@@ -101,8 +101,6 @@ app.component('emails', {
 		* @param {array<Object>} value Raw internal value to emit
 		*/
 		change(value) {
-			console.log('Trigger change', value);
-
 			this.$emit('change', value.map(v => v.id ? {user: v.id, email: v.email } : {email: v.label || v}));
 			this.$emit('change-emails', value.map(v => v.email || v.label || v));
 
@@ -130,11 +128,11 @@ app.component('emails', {
 				.then(res => {
 					var excludedEmails = new Set([ // Set of excluded email addresses
 						...(this.excluded ?? []).filter(e => e[this.emailField]).map(e => e[this.emailField]), // Take from excluded[]
-						this.selected.filter(s => s[this.emailField]).map(s => s[this.emailField]),
+						(this.selected ?? []).filter(s => s[this.emailField]).map(s => s[this.emailField]),
 					]);
 					var excludedUsers = new Set([ // Set of excluded user IDs
 						...(this.excluded ?? []).filter(e => e.user).map(e => e.user),
-						...this.selected.filter(s => s.user).map(s => s.user),
+						...(this.selected ?? []).filter(s => s.user).map(s => s.user),
 					]);
 
 					this.options = res
