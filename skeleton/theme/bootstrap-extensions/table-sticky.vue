@@ -1,51 +1,65 @@
-<style>
-/* table.table-sticky-thead {{{ */
-table.table.table-sticky-thead thead > tr > td,
-table.table.table-sticky-thead thead > tr > th {
-	top: 0px;
-	position: sticky;
-	background: #FFF;
-	z-index: 1;
-}
+<style lang="scss">
+table {
+	/* table.table-sticky-thead {{{ */
+	&.table-sticky-thead thead > tr {
+		& > td, & > th {
+			top: 0px;
+			position: sticky;
+			background: #FFF;
+			z-index: 9;
 
-table.table.table-sticky-thead thead > tr > td:first-child,
-table.table.table-sticky-thead thead > tr > th:first-child {
-	z-index: 2;
-}
+			&:first-child {
+				z-index: 11;
+			}
 
-table.table.table-sticky-thead thead > tr > td:after,
-table.table.table-sticky-thead thead > tr > th:after {
-	content: '';
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	border-bottom: 2px solid #ddd;
-}
-/* }}} */
+			/* Add borders to floating items {{{ */
+			&:first-child:before {
+				border-left: 2px solid #ddd;
+			}
 
-/* table.table-sticky-tfoot {{{ */
-table.table.table-sticky-tfoot tfoot > tr > td,
-table.table.table-sticky-tfoot tfoot > tr > th {
-	bottom: -1px;
-	position: sticky;
-	background: #FFF;
-}
+			&:last-child:before {
+				border-right: 2px solid #ddd;
+			}
 
-table.table.table-sticky-tfoot tfoot > tr > td:before,
-table.table.table-sticky-tfoot tfoot > tr > th:before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	border-top: 2px solid #ddd;
-}
-/* }}} */
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				border: {
+					top: 2px solid #ddd;
+					bottom: 2px solid #ddd;
+				}
+			}
+			/* }}} */
 
-/* Fix .col-verbs collapsing {{{ */
-table.table-sticky-thead th.col-verbs {
-	visibility: visible;
+			/* Fix .col-verbs collapsing {{{ */
+			&.col-verbs {
+				visibility: visible;
+			}
+		}
+	}
+	/* }}} */
+
+	/* table.table- sticky-tfoot {{{ */
+	&.table-sticky-thead tfoot > tr {
+		& > td, & > th {
+			bottom: -1px;
+			position: sticky;
+			background: #FFF;
+
+			&:before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				border-top: 2px solid #ddd;
+			}
+		}
+	}
+	/* }}} */
 }
-/* }}} */
 </style>
