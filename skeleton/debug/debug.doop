@@ -34,6 +34,23 @@ app.all('/api/debug/http/500', app.middleware.express.isProduction(false), funct
 
 <script lang="js" backend endpoint>
 /**
+* General echo debugging endpoint
+* This API will return a JSON object of all query parameters and body contents given to it
+* @param {Object} [req.query] Optional request query parameters
+* @param {Object} [req.body] Optional request body
+* @returns {Object} A simple object composed of all parts of the request
+*/
+app.all('/api/debug/echo', function(req, res) {
+	res.send({
+		query: req.query,
+		body: req.body,
+	});
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+/**
 * Throws various 4* errors followed by 200 (one process state only)
 * @param {number} [req.query.delay=0] Optional delay before responding
 */

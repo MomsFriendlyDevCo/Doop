@@ -21,7 +21,7 @@ app.component({
 </script>
 
 <template>
-	<div class="card" :class="cardClass">
+	<div class="card py-3" :class="cardClass">
 		<div class="card-body text-center">
 			<h2>Current page: {{offset}}</h2>
 		</div>

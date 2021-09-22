@@ -10,7 +10,7 @@ app.component({
 </script>
 
 <template>
-	<div class="card">
+	<div class="card py-3">
 		<div class="list-group">
 			<a class="list-group-item" @click="testLoader('start')">vm.$loader.start()</a>
 			<a class="list-group-item" @click="testLoader('startBackground')">vm.$loader.startBackground()</a>

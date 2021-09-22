@@ -267,7 +267,7 @@ app.component('vTable', {
 		},
 	},
 	created() {
-		this.$debugging = true;
+		this.$debug.enable(false);
 
 		// FIXME: If passed a `url` with `sort` defined this may result in 2 sort params being added.
 		this.endpointSort = this.sort || this.rowKey; // Set intial sort state

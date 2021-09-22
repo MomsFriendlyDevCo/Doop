@@ -1,3 +1,6 @@
-docs/*.sql
+dist/
+docs/
+fonts/
 fonts.fa5/fa-pro/
 package-lock.json
+vendors.fa5/lib/

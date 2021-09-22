@@ -11,6 +11,17 @@
 * @param {*} [...] See https://vue-select.org/api/props.html for more options
 *
 * @emits input Emitted as `(newSelection: Object)` when the selection changes
+*
+* @example Show a simple list of widgets using `title` as the visible text
+*
+* <v-select
+*   :options="widgets"
+*   :value="selectedWidget"
+*   label="title"
+*   :clearable="false"
+*   :searchable="false"
+*   @input="selectedWidget = $event"
+* />
 */
 
 import vSelect from "vue-select";
@@ -37,10 +48,29 @@ app.component('v-select', vSelect);
 .disabled .v-select button {
 	display: none;
 }
+
+.vs--disabled .vs__clear,
+.vs--disabled .vs__dropdown-toggle,
+.vs--disabled .vs__open-indicator,
+.vs--disabled .vs__search,
+.vs--disabled .vs__selected {
+	cursor: inherit;
+	background-color: #e9ecef;
+}
 /* }}} */
 
 /* Copy background color from theme */
 .vs__dropdown-option--highlight {
 	background: var(--primary);
+}
+
+/* Unset certain styles if .form-control class is set on the v-select */
+.form-control .vs__dropdown-toggle {
+	border: 0;
+	margin: 0;
+}
+.form-control .vs__selected-options > input {
+	margin: 0;
+	padding: 0.375rem 0.75rem;
 }
 </style>

@@ -3,11 +3,11 @@
 * Accept a user token to confirm email address
 * @param {string} req.params.token The token used to login the user
 */
-// TODO: Could be more universal if `/go/:type/:token` was able to lookup a redirect URL also.
-// TODO: Could simply use the password confirmation endpoint
+// TODO: Rate limit. Throttle middleware?
 app.get('/go/signup/:token', (req, res) => {
 	app.db.users.findOne({
 		//$errNotFound: false, // Monoxide
+		status: { $ne: 'deleted' },
 		_token: req.params.token,
 		_tokenPurpose: 'signup',
 	})
@@ -19,13 +19,43 @@ app.get('/go/signup/:token', (req, res) => {
 			return user.save();
 		})
 		// Utilising forgot password functionality to prompt user.
-		.then(()=> res.redirect('/recover'))
-		.catch(e => res.sendError(403, e.toString()))
+		.then(()=> {
+			if (app.config.session.signup?.redirect) {
+				app.log('Signup complete redirect', app.config.session.signup.redirect);
+				res.redirect(app.config.session.signup.redirect);
+			} else if (app.config.session.signup?.passwordInitial) {
+				app.log('Signup complete welcome', '/welcome');
+				res.redirect('/welcome');
+			} else {
+				if (app.config.session.signup?.externalPasswordReset) {
+					app.log('Signup complete set password', `/recover/${req.params.token}`);
+					res.redirect(`/recover/${req.params.token}`);
+				} else {
+					app.log('Signup complete set password', '/reset');
+					res.redirect('/reset');
+				}
+			}
+		})
+		.catch(() => res.redirect('/signup?failure'));
 });
 </script>
 
 <script lang="js" backend endpoint>
+/**
+* Create new user with optional data
+* @param {string} req.body.email The email address to create the account for
+* @param {string} [req.body.username] The username associated with the account, defaults to email if unspecified
+* @param {string} [req.body.name] Name to create the account with, defaults to username if unspecified
+* @param {string} [req.body.password] Optonal password to create account with
+* @param {boolean} [req.body.sendEmail=true] Whether to dispatch a welcome email along with a generated signup token
+*/
 var _ = require('lodash');
+var email = require('@momsfriendlydevco/email');
+var fs = require('fs');
+var settings = {
+	redirect: false,
+};
+var logo;
 
 app.post([
 	'/api/session/signup',
@@ -33,12 +63,13 @@ app.post([
 ], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
-			if (!app.config.session.signup.enabled) throw new Error('403: User signup is disabled');
+			if (!app.config.session.recover.enabled) throw new Error('501: Feature is disabled');
 			if (!req.body) throw new Error('No login credentials');
-			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
-			if (!req.body.email) throw new Error('400: No email address provided');
-			if (!req.body.username) throw new Error('400: No username provided');
+			if (app.config.session.signup.emailAsUsername && !req.body.email) throw new Error('400: No email address provided');
+			req.body.email = req.body.email.toLowerCase();
 			// TODO: Check valid email
+			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
+			if (!app.config.session.signup.emailAsUsername && !req.body.username) throw new Error('400: No username provided');
 		})
 		// }}}
 		// Validate and create user {{{
@@ -46,17 +77,47 @@ app.post([
 
 		// TODO: When permitted email domain list is defined ensure users domain matches
 
+		// Fetch email attachments {{{
+		.then(()=> Promise.all([
+			fs.promises
+				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
+				.then(res => logo = res)
+		]))
+		// }}}
 		.then(()=> app.db.users.findOne({
 			//$errNotFound: false, // Monoxide
 			username: req.body.username,
 		}))
-		// FIXME: User enumeration
-		.then(user => user ? Promise.reject('403: User already exists'):user)
-		.then(()=> app.db.users.create({
-			email: req.body.email,
-			name: req.body.name || req.body.username || req.body.email,
-			username: req.body.username,
-		}))
+		.then(user => {
+			switch (user?.status) {
+				// User exists and has already verified email or has subsequently been deleted
+				case 'active':
+				case 'deleted':
+					// FIXME: User enumeration
+					return Promise.reject('400: User already exists');
+				// Signup already pending, resend verification email
+				case 'inactive':
+					return user;
+			}
+
+			// Create new user
+			return app.db.users.create({
+				email: req.body.email,
+				name: req.body.name || req.body.username || req.body.email,
+				username: req.body.username,
+				...(req.body.password
+					? {password: req.body.password}
+					: {}
+				),
+				// TODO: Potential for a `permissionGroups: ['User']` virtual.
+				permissions: {
+					riversCreate: true,
+					riversRead: true,
+					riversUpdate: true,
+					riversDelete: true,
+				},
+			});
+		})
 		// }}}
 		// Generate Token {{{
 		.then(user => user.setToken('signup').then(token => [user, token]))
@@ -65,16 +126,42 @@ app.post([
 		.then(([user, token]) => {
 			app.log('Email', user.email, `/go/signup/${token}`);
 			if (!app.config.email.enabled) return user;
+			if (!(app.config.session.signup.verifyEmail ?? true)) return user;
 
 			email().send({
 				to: user.email,
 				subject: `Welcome to ${app.config.title}`,
+				attachments: [
+					{
+						filename: 'logo.png',
+						cid: 'logo.png',
+						content: logo.toString('base64'),
+						contentType: 'image/png',
+						encoding: 'base64',
+					}
+				],
 				template: `${app.config.paths.root}/services/session/session.signup.email.html`,
 				templateParams: {
-					...user,
-					config: app.config,
+					user: _.pick(user.toObject(), [
+						'_id',
+						'username',
+						'name',
+						'email',
+						'permissions',
+						'lastLogin',
+						'status',
+						'settings',
+						'apiKeys',
+					]),
+					config: _.pick(app.config, [
+						'name',
+						'title',
+						'email',
+						'session',
+					]),
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-					url: `/go/signup/${token}`,
+					url: `${app.config.publicUrl}/go/signup/${token}`,
+					path: `${app.config.paths.root}`,
 				},
 			});
 			return user;
@@ -82,7 +169,8 @@ app.post([
 		// }}}
 		// End {{{
 		.then(user => res.format({
-			html: ()=> res.redirect('/'),
+		// TODO: When html?
+		//	html: ()=> req.body.redirect ? res.redirect('/') : res.status(406).send('Email already in use'),
 			json: ()=> res.status(200).send({_id: user._id}),
 			default: ()=> res.status(406).send('Not an acceptable login accept type'),
 		}))

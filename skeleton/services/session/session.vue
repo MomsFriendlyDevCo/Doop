@@ -1,5 +1,6 @@
 <script lang="js" frontend>
 import sift from 'sift';
+import Vue from 'vue';
 
 /**
 * Session management service
@@ -7,13 +8,36 @@ import sift from 'sift';
 * @emits $session.request Called as `(axiosRequest)` when about to submit a HTTP request to /api/session, can be mutated by downstream promise subscribers
 */
 app.service('$session', function() {
-	var $session = {};
-
 	this.$debug = this.$debug.new('$session').enable(false);
-	$session.data = {permissions: {}}; // User session data
-	$session.isRefreshed = false; // Have we pinged the server yet
-	$session.isLoggedIn = false; // Whether the user is logged in according to the server
-	$session.isSettled = false; // Have we fully loaded the session + project (and permissions of both)? Use this instead of isLoggedIn when needing both
+
+	var $session = Vue.observable({
+		/**
+		* Current user data
+		* @type {Object}
+		*/
+		data: {permissions: {}},
+
+
+		/**
+		* Indicator as to whether we have pinged the server for session data at least once
+		* @type {Boolean}
+		*/
+		isRefreshed: false,
+
+
+		/**
+		* Indicator as to whether the current user is logged in
+		* @type {Boolean}
+		*/
+		isLoggedIn: false,
+
+
+		/**
+		* Indicator as to whether the session has finished loading, whether or not the user is valid
+		* @type {Boolean}
+		*/
+		isSettled: false,
+	});
 
 
 	// $session.stage bootstrapping {{{
@@ -236,7 +260,7 @@ app.service('$session', function() {
 	$session.signup = user => Promise.resolve()
 		.then(()=> this.$loader.start('$session.signup'))
 		.then(()=> this.$http.post('/api/session/signup', user))
-		.then(()=> $session.$debug('signup done'))
+		.then(()=> this.$debug('signup done'))
 		.finally(()=> this.$loader.stop('$session.signup'))
 
 

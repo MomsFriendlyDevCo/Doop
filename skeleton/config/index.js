@@ -73,8 +73,12 @@ module.exports = {
 		},
 		paths: [
 			config => `${config.paths.root}/**/*.agent.js`,
+			config => `!${config.paths.root}/node_modules`,
 			//config => `${config.paths.root}/node_modules/@momsfriendlydevco/agents/examples/*.agent.js`,
 		],
+	},
+	build: {
+		minimize: false,
 	},
 	cache: {
 		enabled: true,
@@ -179,7 +183,10 @@ module.exports = {
 			'frame-src': [
 				`'self'`, // Allow access to this server
 			],
-			'font-src': [],
+			'font-src': [
+				`'self'`,
+				'https://fonts.gstatic.com',
+			],
 			'frame-src': [],
 			'img-src': [
 				`'self'`, // Allow access to this server
@@ -197,6 +204,7 @@ module.exports = {
 				`'self'`, // Allow access to this server
 				`'unsafe-eval'`, // Used by WebPack for inline CSS
 				`'unsafe-inline'`, // Used by Vue components
+				'https://fonts.googleapis.com',
 			],
 			'worker-src': [],
 		},
@@ -322,6 +330,10 @@ module.exports = {
 			// FIXME: Does this belong under "signup"? Considering it may be enabled when signup is disabled.
 			emailAsUsername: true,
 			// TODO: allowedDomains
+			passwordInitial: true,
+			externalPasswordReset: true, // External: /recover/:token or Internal: /reset route for password resets.
+			//redirect: '/',
+			verifyEmail: true,
 		},
 	},
 	ssl: {

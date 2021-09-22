@@ -56,9 +56,9 @@ app.component('directory', {
 </script>
 
 <template>
-	<div v-if="node" class="directory row mt-n4">
+	<div v-if="node" class="directory row">
 		<a v-for="node in node.children" :key="node.id || node.title" class="directory-item col-md-6 col-lg-4 col-xl-3 mt-4" v-href="node.href">
-			<div class="card shadow-sm h-100">
+			<div class="card h-100">
 				<div class="card-body p-2">
 					<div class="media align-items-center">
 						<i class="directory-icon" :class="(node.icon || 'fas fa-folder') + ' fa-3x m-2'"/>

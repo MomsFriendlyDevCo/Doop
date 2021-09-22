@@ -7,6 +7,9 @@
 * @param {number|string} [size=32] The size, in pixels of the Avatar
 * @param {string} [fallback='identicon'] Fallback style to use if the user doesn't have a registered icon. ENUM: 'mp', 'identicon', 'monsterid', 'wavatar', 'retro', 'robohash', 'blank'
 * @param {string} [failIcon] URL to use if none of the above data matches - defaults to the 'power symbol' Gravatar fallback icon
+* @param {string} [overlay] Optional overlay effect to apply. ENUM: 'mask'
+* @param {boolean} [editable=false] Allow uploading a replacement image over the avatar, url + editableUrl must also be specified, FIXME: NOT YET SUPPORTED
+* @param {string} [editableUrl] Post path to send the editable URL to, FIXME: NOT YET SUPPORTED
 *
 * @see https://en.gravatar.com/site/implement/images/
 */
@@ -24,6 +27,7 @@ app.component('userAvatar', {
 		size: {type: [Number, String], default: 32},
 		fallback: {type: String, default: 'identicon'},
 		failIcon: {type: String, default: 'https://www.gravatar.com/avatar/00000000000000000000000000000000'},
+		overlay: {type: String},
 	},
 	methods: {
 		refresh() {
@@ -91,7 +95,10 @@ app.component('userAvatar', {
 <template>
 	<div class="user-avatar" v-tooltip="tooltip">
 		<div v-if="imageUrl === undefined" class="user-avatar-spinner far fa-spinner fa-spin"/>
-		<img :src="imageUrl" :style="{width: size, height: size}"/>
+		<div v-else>
+			<i v-if="overlay == 'mask'" class="overlay-mask fas fa-mask fa-lg"/>
+			<img :src="imageUrl" :style="{width: size, height: size}"/>
+		</div>
 	</div>
 </template>
 
@@ -104,9 +111,17 @@ app.component('userAvatar', {
 	border: 1px solid var(--light);
 	border-radius: 50%;
 	overflow: hidden;
+	position: relative;
 
 	& .user-avatar-spinner {
 		opacity: 0.5;
+	}
+
+	& .overlay-mask {
+		position: absolute;
+		top: 5px;
+		text-align: center;
+		width: 100%;
 	}
 }
 </style>

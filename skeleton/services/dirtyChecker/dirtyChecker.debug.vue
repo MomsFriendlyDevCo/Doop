@@ -33,7 +33,7 @@ app.component({
 </script>
 
 <template>
-	<div class="row">
+	<div class="row py-3">
 		<div class="col-xs-12 col-md-6">
 			<div class="card">
 				<div class="card-body">

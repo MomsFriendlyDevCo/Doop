@@ -61,6 +61,23 @@ gulp.task('serve', ['load:app', 'build'], function(finish) {
 
 		// Frontend rebuild {{{
 		// NOTE: This is handled automatically by Webpack / webpack-{dev,hot}-middleware in Express
+		var restartWebpack = _.throttle(()=> {
+			gulp.log('Rebuilding Webpack entry points...');
+			app.webpack.watcher.invalidate();
+		}, throttleTimeout, throttleOptions);
+
+		watch([
+			'**/*.vue',
+		], {
+			ignored: ['build/**/*', 'data/**/*', 'dist/**/*', 'node_modules/**/*'],
+			ignoreInitial: true,
+		}).on('add', path => {
+			gulp.log('New file detected:', path);
+			restartWebpack();
+		}).on('unlink', path => {
+			gulp.log('File removed:', path);
+			restartWebpack();
+		});
 		// }}}
 
 		// Backend rebuild (server process restart) {{{

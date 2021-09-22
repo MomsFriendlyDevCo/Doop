@@ -12,7 +12,7 @@ app.component('debugHttp', {
 </script>
 
 <template>
-	<div class="card">
+	<div class="card py-3">
 		<div class="card-body card-padding">
 			<p>Simple controller showing the result of various back-end HTTP response codes and how they are automatically handled by $toast</p>
 		</div>

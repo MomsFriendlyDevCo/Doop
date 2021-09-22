@@ -3,14 +3,16 @@
 * Accept an email invite via token
 * @param {string} req.params.token The token used to login the user
 */
+// TODO: Rate limit. Throttle middleware?
 app.get('/go/invite/:token', (req, res) => {
 	app.db.users.findOne({
 		//$errNotFound: false, // Monoxide
+		status: { $ne: 'deleted' },
 		_token: req.params.token,
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
 	})
 		.then(user => {
-			if (!app.config.session.invite.enabled) throw new Error('User invite is disabled');
+			if (!app.config.session.invite.enabled) throw new Error('501: User invite is disabled');
 			// TODO: Validate any user conditions for invite
 			return user;
 		})
@@ -23,7 +25,7 @@ app.get('/go/invite/:token', (req, res) => {
 		})
 		// Utilising forgot password functionality to prompt user.
 		.then(()=> res.redirect('/reset'))
-		.catch(e => res.sendError(403, e.toString()))
+		.catch(() => res.redirect('/?failure'));
 });
 </script>
 
@@ -31,6 +33,9 @@ app.get('/go/invite/:token', (req, res) => {
 <script lang="js" backend endpoint>
 var _ = require('lodash');
 var email = require('@momsfriendlydevco/email');
+var fs = require('fs');
+
+var logo;
 
 /**
 * Create a basic user record and dispatch an email invite
@@ -45,10 +50,13 @@ app.post([
 ], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
-			if (!app.config.session.invite.enabled) throw new Error('403: User invite is disabled');
-			if (!req.body.email) throw new Error('An email must be provided to invite a new user');
+			if (!app.config.session.recover.enabled) throw new Error('501: Feature is disabled');
+			if (!req.body) throw new Error('No login credentials');
+			if (app.config.session.signup.emailAsUsername && !req.body.email) throw new Error('400: No email address provided');
 			req.body.email = req.body.email.toLowerCase();
 			// TODO: Check valid email
+			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
+			if (!app.config.session.signup.emailAsUsername && !req.body.username) throw new Error('400: No username provided');
 		})
 		// }}}
 		// Sanity check against the requesting user {{{
@@ -56,6 +64,13 @@ app.post([
 			// FIXME: Use hasPermissions
 			if (!req.user.permissions.usersInvite) throw new Error('You are not permitted to invite new members');
 		})
+		// }}}
+		// Fetch email attachments {{{
+		.then(()=> Promise.all([
+			fs.promises
+				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
+				.then(res => logo = res)
+		]))
 		// }}}
 		// Either find existing user or create stub account {{{
 		.then(()=> app.db.users.findOne({
@@ -83,12 +98,37 @@ app.post([
 			email().send({
 				to: user.email,
 				subject: `You have been invited to ${app.config.title}`,
+				attachments: [
+					{
+						filename: 'logo.png',
+						cid: 'logo.png',
+						content: logo.toString('base64'),
+						contentType: 'image/png',
+						encoding: 'base64',
+					}
+				],
 				template: `${app.config.paths.root}/services/session/session.invite.email.html`,
 				templateParams: {
-					...user,
-					config: app.config,
+					user: _.pick(user.toObject(), [
+						'_id',
+						'username',
+						'name',
+						'email',
+						'permissions',
+						'lastLogin',
+						'status',
+						'settings',
+						'apiKeys',
+					]),
+					config: _.pick(app.config, [
+						'name',
+						'title',
+						'email',
+						'session',
+					]),
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-					url: `/go/invite/${token}`,
+					url: `${app.config.publicUrl}/go/invite/${token}`,
+					path: `${app.config.paths.root}`,
 				},
 			});
 			return user;

@@ -24,7 +24,7 @@ app.component({
 </script>
 
 <template>
-	<div class="card">
+	<div class="card py-3">
 		<div class="btn-group-float">
 			<a @click="refresh()" class="btn btn-icon btn-circle btn-success far fa-sync" v-tooltip="'Refresh'"></a>
 		</div>

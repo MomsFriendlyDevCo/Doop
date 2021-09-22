@@ -39,6 +39,7 @@ app.middleware.express.timeSeries = options => {
 		fixDates: true,
 		// FIXME: interval defined again below
 		interval: '1d',
+		// TODO: Use startOf, endOf
 		start: (req, res) => (req.query.start ? moment(req.query.start) : moment().subtract(1, 'week')).set('hour', 0).set('minute', 0).set('second', 0).set('millisecond', 0),
 		end: (req, res) => (req.query.end ? moment(req.query.end) : moment()).set('hour', 23).set('minute', 59).set('second', 59).set('millisecond', 0),
 		interval: (req, res) => timestring(req.query.interval || '1d', 'ms'),

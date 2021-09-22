@@ -346,7 +346,7 @@ app.component('searchInput', {
 	},
 
 	created() {
-		this.$debugging = false;
+		this.$debug.enable(false);
 	},
 
 	watch: {

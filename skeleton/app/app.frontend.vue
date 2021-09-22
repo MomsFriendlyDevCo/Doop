@@ -5,7 +5,7 @@ global._ = _;
 import Debug from '/services/debug';
 
 import Vue from 'vue';
-Vue.config.devtools = false;
+Vue.config.devtools = true; // FIXME: Better way of doing $isProduction blocks
 Vue.config.productionTip = false;
 
 import VueRouter from 'vue-router';
@@ -15,6 +15,9 @@ Vue.use(VueRouter);
 * Wrapper around Vue which provides global level access to front-end functionality
 */
 global.app = {
+	debug: Debug('Doop-Core').enable(false),
+
+
 	/**
 	* Whether the running app is inside a Cordova wrapper
 	* @type {boolean}
@@ -76,10 +79,15 @@ global.app = {
 
 		if (spec && app.isReady) { // Already live
 			console.warn(`Registered component "${id}" after app.init() was called`);
-			if (!isProduction && spec.template) console.warn('Component', id, 'has a template property - use <template/> tags or a raw renderer!');
+			if (!app.isProduction && spec.template) console.warn('Component', id, 'has a template property - use <template/> tags or a raw renderer!');
 			return Vue.component(id, spec);
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.component.register) app.component.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.component.register[id]) {
+				app.debug.force('Component', id, 'already declared as', app.component.register[id], 'clobbering with new component spec', spec);
+				debugger;
+			}
+
 			return app.component.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.component(id);
@@ -120,6 +128,11 @@ global.app = {
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.isProduction && !/^[\$_]/.test(id)) throw new Error(`All service registration and queries should have a '$' or '_' prefix. Given "${id}"`);
 			if (!app.service.register) app.service.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.service.register[id]) {
+				app.debug.force('Service', id, 'already declared as', app.service.register[id], 'clobbering with new service spec', spec);
+				debugger;
+			}
+
 			return app.service.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.prototype[id];
@@ -140,6 +153,11 @@ global.app = {
 			return Vue.prototype.$filter[id] = func;
 		} else if (func) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.filter.register) app.filter.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.filter.register[id]) {
+				app.debug.force('filter', id, 'already declared as', app.filter.register[id], 'clobbering with new filter func', func);
+				debugger;
+			}
+
 			return app.filter.register[id] = app.filter[id] = func;
 		} else if (Vue.prototype.$filter) { // Fetch an existing component (app loaded)
 			return Vue.prototype.$filter[id];
@@ -162,6 +180,11 @@ global.app = {
 		} else if (spec) { // Temporarily hold a component in memory while we slurp all component registrations
 			if (!app.isProduction && !id.startsWith('v-')) throw new Error(`All directive IDs must begin with "v-", given "${id}"`);
 			if (!app.directive.register) app.directive.register = {}; // Create the register if it doesn't already exist
+			if (!app.isProduction && app.directive.register[id]) {
+				app.debug.force('directive', id, 'already declared as', app.directive.register[id], 'clobbering with new directive spec', spec);
+				debugger;
+			}
+
 			return app.directive.register[id.replace(/^v-/, '')] = spec;
 		} else { // Fetch an existing component
 			return Vue.directive(id);
@@ -201,7 +224,7 @@ global.app = {
 	* Init all components, registering their routes to the router and resetting app.component etc. as pointers to app.vue.component
 	*/
 	init() {
-		var $debug = Debug('INIT').enable(false);
+		var $debug = Debug('Doop-Core-Init').enable(false);
 
 		app.isReady = true; // Set this early so trying to register other components / services / filters etc. will warn
 
@@ -299,7 +322,7 @@ global.app = {
 					// Note: We register only individual components as routes below. The first matched index should always be a Doop component.
 					if (_.isArray(to.matched) && to.matched.length > 0 && app.router.options.routeRequiresAuth.has(to.matched[0].path)) { // Target component requires auth
 						app.router.$debug('No session auth present and', {routeRequiresAuth: true}, 'on routes', {to, from}, '- redirect to /login');
-						if (to.path !== '/logout') app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
+						if (!['/logout', '/signup'].includes(to.path)) app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
 						next({path: '/login'}); // Redirect everything else
 					} else { // Controller endpoint does not require auth - serve page normally
 						next();

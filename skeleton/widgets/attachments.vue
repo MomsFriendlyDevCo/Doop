@@ -11,7 +11,7 @@
 *	- "icons": Plain, icon only view where additional data is displayed in tooltips, accepts class mutator 'attachments-sm'
 *
 * @param {string} url The backend endpoint to query for file lists and to POST to
-* @param {string} [view="table"] How to display the widget, ENUM: "table", "directory", "icons", "gallery"
+* @param {string} [view="table"] How to display the widget, ENUM: "table", "directory", "list", "icons", "gallery"
 * @param {boolean} [showControls=false] Whether to show, card like verbs for uploading
 * @param {boolean} [allowDelete=false] Whether to allow file deletion (backend must support DELETE method)
 * @param {boolean} [allowUpload=false] Whether to allow file uploads (backend must support POST method) - NOTE you must setup an upload button somewhere which calls `$refs.attachments.upload()`
@@ -177,6 +177,32 @@ app.component('attachments', {
 				</div>
 			</div>
 			<!-- }}} -->
+			<!-- List view {{{ -->
+			<div v-else-if="$props.view == 'list'" class="attachments-view-list">
+				<a
+					v-for="attachment in attachments"
+					:key="attachment.url"
+					v-href="{href: attachment.url, target: '_blank'}"
+					class="attachment-item"
+				>
+					<a @click.stop.prevent="remove(attachment)" class="btn btn-hover-danger btn-sm far fa-times float-right"/>
+					<i :class="attachment.icon"/>
+					{{attachment.name}}
+				</a>
+				<slot name="uploadButton" :upload="upload">
+					<div class="mt-2 attachment-item-upload">
+						<a
+							v-if="showControls"
+							@click.stop="upload()"
+							class="btn btn-light btn-sm"
+						>
+							<i class="far fa-plus"/>
+							Add file...
+						</a>
+					</div>
+				</slot>
+			</div>
+			<!-- }}} -->
 			<!-- Icons view {{{ -->
 			<div v-else-if="$props.view == 'icons'" class="attachments-view-icons">
 				<a
@@ -310,6 +336,20 @@ app.component('attachments', {
 	transform: scale(0.8);
 }
 /* }}} */
+/* }}} */
+/* list view {{{ */
+.attachments .attachments-view-list .attachment-item {
+	border: 1px solid var(--gray-light);
+	display: block;
+	border-radius: 4px;
+	margin-bottom: 2px;
+	color: var(--dark);
+	padding: 2px 5px;
+}
+
+.attachments .attachments-view-list .attachment-item:hover {
+	border: 1px solid var(--primary);
+}
 /* }}} */
 /* gallery view {{{ */
 .attachments .attachments-view-gallery .attachment-item,

@@ -32,6 +32,9 @@ app.directive('v-href', {
 			...(typeof binding.value == 'string' ? {href: binding.value} : binding.value),
 		};
 
+		// TODO: :href is able to respond to changes, this binding does not.
+		// i.e. :href="`/rivers/edit/${river._id}`" vs v-href="`/rivers/edit/${river._id}`"
+
 		if (settings.url) {
 			console.warn('[DEPRECIATED] Do not pass `v-href="{url}"` property to v-href. Use `v-href="{href}"` for URL', settings.url);
 			settings.href = settings.url;

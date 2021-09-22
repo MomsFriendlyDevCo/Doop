@@ -30,6 +30,7 @@ axios.interceptors.response.use(response => response, error => {
 	} else if (error.response && error.response.data
 		&& _.startsWith(error.response.request.responseURL, window.location.origin) // Only redirect hits to domain
 		&& (error.response.status === 401 || error.response.status === 403)) {
+		// FIXME: Some API routes may wish to throw 401 or 403 while actually being authenticated.
 		app.router.go('/login');
 		return Promise.reject(error.response.data);
 	} else if (error.response && error.response.data) {

@@ -22,7 +22,7 @@ var logger = require('express-log-url');
 var middlewareCache = require('@momsfriendlydevco/express-middleware-cache');
 var promisify = require('util').promisify;
 
-exports = Promise.resolve()
+return Promise.resolve()
 	.then(()=> require('.')())
 	.then(()=> { // Register against event hooks
 		app.cache
@@ -30,7 +30,7 @@ exports = Promise.resolve()
 			.on('routeCacheEtag', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Validated against existing etag hash ${info.hash}`}))
 			.on('routeCacheExisting', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cached using existing hash ${info.hash}`}))
 			.on('routeCacheFresh', (req, info) => logger.log({method: req.method, code: 'CSH', path: req.path, info: `Cache generate new hash ${info.hash}`}))
-			.on('routeCacheInvalidate', (tag, hash) => console.log(colors.grey(`Invalidate cache tag '${tag}' (hash ${hash})`)));
+			.on('routeCacheInvalidate', (tag, hash) => app.log.as('cache', colors.grey(`Invalidate cache tag '${tag}' (hash ${hash})`)));
 	})
 	.then(()=> { // Load app.middleware.express.cache
 		app.middleware.express.cache = middlewareCache;

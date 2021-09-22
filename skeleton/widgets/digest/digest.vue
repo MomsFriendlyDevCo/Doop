@@ -20,7 +20,7 @@
 * @param {string} [iconValid] Optional icon to display next to the context when loaded
 * @param {string} [iconInvalid] Optional icon to display next to the `textInvalid` text when an error occurs
 * @param {boolean} [ignoreErrors=false] Ignore all thrown errors, if false they will be routed into this.$toast.catch
-* @param {string} [hashMethod='urlField] How to cache the digest result, see the $digest service for more info
+* @param {string} [hashMethod='urlField'] How to cache the digest result, see the $digest service for more info
 *
 * @listens digest.force.class Recieved as `(newClass)` to force a specific class on a digest component
 * @listens digest.force.icon Recieved as `(newIconClass)` to force a specific icon class on a digest component

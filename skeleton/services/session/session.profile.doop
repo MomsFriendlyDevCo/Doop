@@ -7,7 +7,7 @@ var crypto = require('crypto');
 * @returns {undefined|Object} Undefined if the user is not logged in, an Object with selected fields otherwise
 */
 app.get('/api/session', (req, res) => {
-	if (!req.user) return res.sendStatus(200);
+	if (!req.user || req.user.status === 'deleted') return res.sendStatus(200);
 
 	res.send({
 		_id: req.user._id,
@@ -28,7 +28,7 @@ app.get('/api/session', (req, res) => {
 * @param {Object} [req.body.settings] The user settings to save (treated as an assignment)
 */
 app.post('/api/session', (req, res) => {
-	if (!req.user) return res.sendStatus(403);
+	if (!req.user || req.user.status === 'deleted') return res.sendStatus(403);
 
 	Object.assign(req.user, _.pick(req.body, ['name', 'settings']));
 

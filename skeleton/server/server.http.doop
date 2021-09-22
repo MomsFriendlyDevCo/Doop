@@ -16,7 +16,7 @@ var _ = require('lodash');
 */
 app.endpoints = [];
 
-['all', 'delete', 'get', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
+['all', 'delete', 'get', 'head', 'options', 'patch', 'post', 'set', 'use'].forEach(method =>
 	app[method] = (path, ...args) => {
 		if (!app.config.isProduction && app.endpoints.some(e => e.method == method && e.path == path)) app.log.warn('Duplicate endpoint registered -', app.log.colors.blue(`app.${method}('${path}')`));
 		app.endpoints.push({method, path, args})
@@ -49,8 +49,8 @@ app.express.use(cors());
 app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',
 	exclusions: app.config.layout.excludeBase.map(b =>
-		_.isString(b) && b.endsWith('*') ? new RegExp('^' + RegExp.escape(b) + '\/.*', 'i')
-		: _.isString(b) ? new RegExp('^' + RegExp.escape(b) + '$', 'i')
+		_.isString(b) && b.endsWith('*') ? new RegExp('^' + RegExp.escape(b.replace(/\*$/, '')), 'i')
+		: _.isString(b) ? new RegExp('^' + RegExp.escape(b.replace(/\*$/, '')) + '$', 'i')
 		: _.isRegExp(b) ? b
 		: (()=> { throw new Error(`Unknown app.config.layout.excludeBase rule: "${b}"`) })()
 	),
@@ -66,9 +66,16 @@ app.express.use(compression());
 app.express.use(function(req, res, next) {
 
 	/**
-	* Report an error
-	* This is really just a convenience function to set all the weird headers in the event of an error
-	* If err is a string with the prefix `xxx:Text` the first part is used as the return code with the second as the error message
+	* Report an error via Express, optionally showing a trace
+	*
+	* This is really just a convenience function to set all the weird headers when an error occurs
+	*
+	* HTTP response codes are determined by the logic:
+	*
+	*     1. If `code` is provided and is finite
+	*     2. If `err` is a string and is prefixed as `xxx:Text` the first part is used as the HTTP response code with the second as the error message
+	*     3. Otherwise `400` is assumed and a stack trace shown if passed an error object
+	*
 	* @param {number} [code=400] Optional error code to use
 	* @param {string} err The error to report
 	* @return {undefined} This function is fatal to express as it closes the outbound connection when it completes
@@ -76,32 +83,54 @@ app.express.use(function(req, res, next) {
 	* @example Throw error 404
 	* res.sendError(404)
 	*
-	* @example Throw general error with 400
+	* @example Throw general error with 400 - this will also show a trace
 	* res.sendError('This is an error')
 	*
-	* @example Throw error 512 with custom text within one string
+	* @example Throw error 512 with custom text within one string - will not show a trace (as the code indicates the function handled the response)
 	* res.sendError('512: This is a custom error')
 	*/
 	res.sendError = function(code, err) {
-		if (!isFinite(code)) [code, err] = [400, code];
-
 		// Process optional string prefix (if we're using the default error fallback)
-		if (code == 400) {
-			var errBits = /^(\d+)+\s*:\s*(.*)$/.exec(err);
-			if (errBits) [, code, err] = errBits;
+		var resCode, resError; // Actual response code(number) + error(string)
+		var showThrow = true; // Whether to show the full trace on the console, disabled if it looks like the upstream handled the response correctly
+
+		var errBits;
+		if (isFinite(code)) { // User provided explicit code argument
+			resCode = code;
+			resErr = err;
+			showThrow = false;
+		} else if (errBits = /^(?<code>\d+)\s*:\s*(?<err>.*)$/.exec(code)?.groups) { // Can extract code from error string
+			resCode = errBits.code;
+			resErr = errBits.err;
+			showThrow = false;
+		} else if (_.isError(code)) { // Given raw error object
+			err = code;
+			resCode = 400;
+			resErr = code.toString();
+			showThrow = true;
+		} else { // No code we can work out nor extract, assume 400
+			resCode = 400;
+			resErr = 'An error occured';
+			err = new Error('An unhandled error occured');
+			showThrow = true;
 		}
 
-		res.errorBody = err;
+		res.errorBody = resErr; // Populate errorBody so upstream loggers can display a digest
 		if (!res.headersSent) {
 			res.format({
-				json: ()=> res.status(code).send(_.isPlainObject(res.errorBody) ? res.errorBody : {err: res.errorBody.toString()}),
-				default: ()=> res.status(code).send(res.errorBody),
+				json: ()=> res
+					.status(resCode)
+					.send({err: resErr}),
+				default: ()=> res
+					.status(resCode)
+					.send(resErr),
 			})
 		} else {
 			app.log.warn('Cannot send error when headers have already been sent');
 		}
 
-		crash.trace(err, {prefix: 'Caught server error'});
+		if (showThrow) // If given an actual error object AND the user didn't provide a handled HTTP code - show a trace
+			crash.trace(err, {prefix: 'Caught server error'});
 	};
 
 	next();

@@ -24,7 +24,7 @@ app.component({
 </script>
 
 <template>
-	<div class="row">
+	<div class="row py-3">
 		<!--
 		<div class="col-md-6">
 			<div class="card">

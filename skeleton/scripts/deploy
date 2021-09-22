@@ -1,6 +1,6 @@
 #!/bin/bash
 HELP="
-redeploy <--dev|--live|--both> [--no-pull] [--no-build] [--backend|--restart] [--branch BRANCH]
+deploy <--dev|--live|--both> [--no-pull] [--no-build] [--backend|--restart] [--branch BRANCH]
 
 Re-Deploy the DEV and/or LIVE PRODUCTION server
 
@@ -113,9 +113,9 @@ if [[ "$DODEV" == 0 && "$DOLIVE" == 0 ]]; then
 	echo
 	echo "Must specify --live / --dev / --both"
 	echo
-	echo "To deploy live: ~/redeploy -l"
-	echo "To deploy dev : ~/redeploy -d"
-	echo "To deploy both: ~/redeploy -b"
+	echo "To deploy live: ~/deploy -l"
+	echo "To deploy dev : ~/deploy -d"
+	echo "To deploy both: ~/deploy -b"
 	echo
 	exit 1
 fi
@@ -250,7 +250,7 @@ if [ "$DOLIVE" == 1 ]; then
 	if [ "$DORESTART" == 1 ]; then
 		if [[ `pm2 show chatstat-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
 			echo "Starting PRODUCTION PM2 process for the first time..."
-			pm2 start --name 'chatstat-a' --time server/index.js -- -e production -o port=10101 -o papertrail.program=chatstat-a -o cache.cleanAuto=true -o mongo.migration=true
+			pm2 start --name 'chatstat-a' --time server/index.js -- -e production -o port=10101 -o papertrail.program=chatstat-a -o cache.cleanAuto=true -o mongo.migration=true -o agents.autoInstall=true
 			pm2 start --name 'chatstat-b' --time server/index.js -- -e production -o port=10102 -o papertrail.program=chatstat-b
 		else
 			echo "Rebooting PM2 process..."

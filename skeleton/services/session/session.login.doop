@@ -4,10 +4,11 @@ var promisify = require('util').promisify;
 * Accept a user token to perform an immediate login
 * @param {string} req.params.token The token used to login the user
 */
-// TODO: Could be more universal if `/go/:type/:token` was able to lookup a redirect URL also.
+// TODO: Rate limit. Throttle middleware?
 app.get('/go/login/:token', (req, res) => {
 	app.db.users.findOne({
 		//$errNotFound: false, // Monoxide
+		status: 'active',
 		_token: req.params.token,
 		_tokenPurpose: 'login', // Restrict the token usage to users requesting logins only
 	})
@@ -15,29 +16,32 @@ app.get('/go/login/:token', (req, res) => {
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken())
 		.then(()=> res.redirect('/'))
-		.catch(e => res.sendError(403, e.toString()))
+		.catch(() => res.redirect('/login?failure'));
 });
 </script>
 
 <script lang="js" backend endpoint>
 var _ = require('lodash');
 
+// TODO: Rate limit. Throttle middleware?
 app.post([
 	'/api/session/login',
 	...(app.config.session.auth.allowPost ? ['/login'] : []),
 ], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
-			if (!app.config.session.login.enabled) throw new Error('403: User login is disabled');
+			if (!app.config.session.recover.enabled) throw new Error('501: Feature is disabled');
 			if (!req.body) throw new Error('No login credentials');
+			if (app.config.session.signup.emailAsUsername && !req.body.email) throw new Error('400: No email address provided');
+			req.body.email = req.body.email.toLowerCase();
+			// TODO: Check valid email
 			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
-			if (!req.body.username) throw new Error('400: No username provided');
+			if (!app.config.session.signup.emailAsUsername && !req.body.username) throw new Error('400: No username provided');
 			if (!req.body.password) throw new Error('400: No password provided');
 		})
 		// }}}
 		// Fetch user and verify password {{{
 		.then(()=> app.log('Check login for', req.body.username))
-		// FIXME: Ensure user status is active.
 		.then(()=> app.db.users.findOne({
 			//$errNotFound: false, // Monoxide
 			$or: [
@@ -45,7 +49,10 @@ app.post([
 				{username: req.body.username},
 			],
 		}))
+		// FIXME: User enumeration
+		// TODO: Should this be 400? Why is it okay to respond with 403 here but not on other routes?
 		.then(user => user || Promise.reject('403: Unknown user'))
+		.then(user => user.status === 'active' && user || Promise.reject('403: User not active'))
 		.then(user => user.checkPassword(req.body.password)
 			.then(res => !res && Promise.reject('403: Invalid password'))
 			.then(()=> user)

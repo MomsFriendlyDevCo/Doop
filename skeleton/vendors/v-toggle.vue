@@ -1,6 +1,7 @@
 <script lang="js" frontend>
 /**
 * Import the vue-js-toggle-button control
+* @param {boolean} [v-model] Data variable to sync with
 * @param {boolean} [value=false] Initial state of the toggle button
 * @param {boolean} [sync=false] If set to true, will be watching changes in value property and overwrite the current state of the button whenever value prop changes
 * @param {number} [speed=300] Transition time for the animation

@@ -45,13 +45,14 @@ var DebugFactory = function DebugFactory(context) {
 		var color = $debugGlobal.colorTable[$debugGlobal.seen[$debug.prefix]] || '#FF00FF'; // Alloc color offset or use fallback purple
 		// }}}
 
-		console.log(`%c[${$debug.$prefix}]`, `color: ${color}; font-weight: bold`, ...msg.map(m => $debug.deconstruct(m)));
+		console[$debug.as](`%c[${$debug.$prefix}]`, `color: ${color}; font-weight: bold`, ...msg.map(m => $debug.deconstruct(m)));
 
 		return $debug;
 	};
 
 	$debug.$prefix = 'UNKNOWN';
 	$debug.$enabled = true;
+	$debug.as = 'log'; // Method to use to output
 
 
 	/**
@@ -78,7 +79,24 @@ var DebugFactory = function DebugFactory(context) {
 
 
 	/**
-	* Switch on debugging and also output
+	* Force output the given message as a warning
+	* @param {*} msg... The message contents to output
+	* @returns {$debug} This chainable $debug instance
+	*
+	* @example Force debugging even if vm.$debugging is disabled
+	* vm.$debug.force('Hello', this.world);
+	*/
+	$debug.warn = (...msg) => {
+		var oldAs = $debug.as;
+		$debug.as = 'warn';
+		if (msg.length) $debug.force(...msg);
+		$debug.as = oldAs;
+		return $debug;
+	};
+
+
+	/**
+	* Switch on debugging for this one message + output
 	* @param {*} msg... The message contents to output
 	* @returns {$debug} This chainable $debug instance
 	*
@@ -86,8 +104,10 @@ var DebugFactory = function DebugFactory(context) {
 	* vm.$debug.force('Hello', this.world);
 	*/
 	$debug.force = (...msg) => {
+		var oldEnabled = $debug.$enabled;
 		$debug.$enabled = true;
 		if (msg.length) $debug(...msg);
+		$debug.$enabled = oldEnabled;
 		return $debug;
 	};
 

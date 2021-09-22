@@ -5,7 +5,7 @@
 */
 app.service('$config', {
 	version: CONFIG.version,
-	url: CONFIG.url,
+	url: CONFIG.url, // FIXME: PORT also?
 	apiUrl: CONFIG.apiUrl,
 	isProduction: CONFIG.isProduction,
 	title: CONFIG.title,

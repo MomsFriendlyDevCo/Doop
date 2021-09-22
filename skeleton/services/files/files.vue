@@ -37,7 +37,7 @@ app.service('$files', function() {
 	* @param {boolean} [options.multiple=true] If prompting for files, allow multiple
 	* @param {string} [options.accept] The file types to accept, can be a mime list or extension list. e.g. 'image/*,.pdf,.zip'
 	* @param {FormData|FileList|File} [options.files] The file(s) to upload in FormData, File or FileList format, specifying this does not prompt the user
-	* @return {Profimise} A promise which will resolve when all uploads complete
+	* @return {Promise} A promise which will resolve when all uploads complete
 	*/
 	$files.upload = (options) => {
 		var settings = {

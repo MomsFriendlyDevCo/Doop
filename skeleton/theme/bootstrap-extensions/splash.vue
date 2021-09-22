@@ -20,7 +20,7 @@ body.bootstrapping #app {
 		/* NOTE: These root styles all need to be injected inline in layouts/main.html due to how early this component loads */
 		align-items: center;
 		justify-content: center;
-		background: #CCC;
+		background: var(--main);
 
 		body.bootstrapping & {
 			display: flex;
@@ -28,7 +28,7 @@ body.bootstrapping #app {
 
 		& > img {
 			width: 50vw;
-			max-width: 200px;
+			max-width: 400px;
 		}
 	}
 

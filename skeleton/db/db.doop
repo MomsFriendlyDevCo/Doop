@@ -3,7 +3,7 @@ var mongoosy = require('@momsfriendlydevco/mongoosy');
 
 return Promise.resolve()
 	.then(()=> app.config.mongo.hooks = true) // Enabled specificaly to queue DB middleware calls
-	.then(()=> app.log('Connecting to', app.log.colors.cyan(app.config.mongo.uri)))
+	.then(()=> app.log('Connecting to', app.log.colors.cyan(app.config.mongo.uri.replace(/:.+?@/, ':***@'))))
 	.then(()=> mongoosy.connect(app.config.mongo.uri, app.config.mongo.options))
 	.then(()=> {
 		app.on('postSchemas', ()=>

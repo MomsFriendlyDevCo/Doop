@@ -3,24 +3,41 @@
 * Accept a user token to perform an immediate login
 * @param {string} req.params.token The token used to login the user
 */
+// TODO: Rate limit. Throttle middleware?
 app.get('/go/recover/:token', (req, res) => {
 	app.db.users.findOne({
 		//$errNotFound: false, // Monoxide
+		status: { $ne: 'deleted' },
 		_token: req.params.token,
 		_tokenPurpose: 'recover', // Restrict the token usage to users requesting logins only
 	})
 		.then(user => user || Promise.reject('403: Password reset token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken())
-		.then(()=> res.redirect('/reset'))
-		// TODO: Wrap error in a page.
-		.catch(res.sendError);
+		.then(user => {
+			user.status = 'active';
+			return user.save();
+		})
+		.then(()=> {
+			if (app.config.session.signup?.externalPasswordReset) {
+				app.log('Recovery verified set password', `/recover/${req.params.token}`);
+				res.redirect(`/recover/${req.params.token}`);
+			} else {
+				app.log('Recovery verified set password', '/reset');
+				res.redirect('/reset');
+			}
+		})
+		.catch(() => res.redirect('/recover?failure'));
 });
 </script>
 
 <script lang="js" backend endpoint>
 var _ = require('lodash');
 var email = require('@momsfriendlydevco/email');
+var fs = require('fs');
+var fspath = require('path');
+
+var logo;
 
 app.post([
 	'/api/session/recover',
@@ -28,24 +45,34 @@ app.post([
 ], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
-			if (!app.config.session.recover.enabled) throw new Error('403: User password recovery is disabled');
+			if (!app.config.session.recover.enabled) throw new Error('501: Feature is disabled');
 			if (!req.body) throw new Error('No login credentials');
 			if (app.config.session.signup.emailAsUsername && !req.body.email) throw new Error('400: No email address provided');
-			if (!app.config.session.signup.emailAsUsername) req.body.email = req.body.username;
+			req.body.email = req.body.email.toLowerCase();
+			// TODO: Check valid email
+			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
 			if (!app.config.session.signup.emailAsUsername && !req.body.username) throw new Error('400: No username provided');
 		})
+		// }}}
+		// Fetch email attachments {{{
+		.then(()=> Promise.all([
+			fs.promises
+				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
+				.then(res => logo = res)
+		]))
 		// }}}
 		// Fetch user {{{
 		.then(()=> app.log('Check login for', req.body.email))
 		.then(()=> app.db.users.findOne({
 			//$errNotFound: false, // Monoxide
+			status: { $ne: 'deleted' },
 			$or: [
 				{email: req.body.email},
 				{username: req.body.username},
 			],
 		}))
 		// FIXME: User enumeration
-		.then(user => user || Promise.reject('403: Unknown email address'))
+		.then(user => user || Promise.reject('400: Unknown user'))
 		// }}}
 		// Generate Token {{{
 		.then(user => user.setToken('recover').then(token => [user, token]))
@@ -59,18 +86,42 @@ app.post([
 			email().send({
 				to: user.email,
 				subject: `Someone has requested a password reset on ${app.config.title}`,
+				attachments: [
+					{
+						filename: 'logo.png',
+						cid: 'logo.png',
+						content: logo.toString('base64'),
+						contentType: 'image/png',
+						encoding: 'base64',
+					}
+				],
 				template: `${app.config.paths.root}/services/session/session.recover.email.html`,
 				templateParams: {
-					...user,
-					config: app.config,
+					user: _.pick(user.toObject(), [
+						'_id',
+						'username',
+						'name',
+						'email',
+						'permissions',
+						'lastLogin',
+						'status',
+						'settings',
+						'apiKeys',
+					]),
+					config: _.pick(app.config, [
+						'name',
+						'title',
+						'email',
+						'session',
+					]),
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-					url: `/go/recover/${token}`,
+					url: `${app.config.publicUrl}/go/recover/${token}`,
 				},
 			});
 			return user;
 		})
 		// }}}
-		
+
 		// End {{{
 		.then(user => res.format({
 			html: ()=> res.redirect('/'),

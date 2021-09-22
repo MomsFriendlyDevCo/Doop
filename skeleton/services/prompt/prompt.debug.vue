@@ -12,7 +12,7 @@ app.component({
 </script>
 
 <template>
-	<div>
+	<div class="py-3">
 		<div id="modal-test" class="modal">
 			<div class="modal-dialog">
 				<div class="modal-content">
