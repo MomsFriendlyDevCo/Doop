@@ -41,6 +41,7 @@ table {
 			border-right: 2px solid #ddd;
 		}
 
+		/* Hack to force a solid background behind all table cells {{{ */
 		&::before {
 			content: '';
 			position: absolute;
@@ -48,11 +49,13 @@ table {
 			bottom: 0;
 			left: 0;
 			right: 0;
+			pointer-events: none;
 			border: {
 				top: 2px solid #ddd;
 				bottom: 2px solid #ddd;
 			}
 		}
+		/* }}} */
 	}
 
 	/* Thinner border widths on tfoot {{{ */
