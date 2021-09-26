@@ -2,7 +2,18 @@
 /**
 * Display a table-of-contents navigation element
 *
+* @param {array<object>} [tree] Tree to populate, each item should be of the form listed below
+* @param {string} [tree.title] Title of the tree element to display
+* @param {DOMElement} [tree.el] DOM element referenced, used to determine current ToC position
+* @param {function} [click] Click handler
+*
+* @param {boolean} [float=true] Float the ToC in place
 * @param {boolean} [useCards=true] Use BS5 card element headers to populate the ToC
+* @param {array} [scroller] Array of classes to try and find the parent scrollable element from, defaults to sane Doop standard defaults
+* @param {boolean} [axisY=true] Scroll the Y axis when seeking to an element
+* @param {boolean} [axisX=false] Scroll the X axis when seeking to an element
+* @param {number} [scrollSpeed=400] Time in milliseconds when animating the scroll to an element
+* @param {string} [scrollEasing='swing'] Easing system to use when scrolling
 */
 app.component('tableOfContents', {
 	data() { return {
@@ -35,7 +46,6 @@ app.component('tableOfContents', {
 						el,
 						click: ()=> this.navigateTo(el),
 					}))
-				console.log('Tree now', this.tree);
 			}
 		},
 
