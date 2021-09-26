@@ -20,6 +20,7 @@ gulp.task('scenario', 'db:nuke', 'load:app.db', ()=> {
 		'!dist/**/*',
 		'!node_modules/**/*',
 	], {
+		circular: true,
 		nuke: true,
 		postStats(stats) {
 			gulp.log(gulp.colors.blue.bold('Created collections:'));
