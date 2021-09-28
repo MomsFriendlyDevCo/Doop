@@ -1,5 +1,11 @@
 <style lang="scss">
 table {
+	/* Set outline for any sticky table so it doesn't look orphaned within a card {{{ */
+	&.table-sticky-thead, &.table-sticky-tfoot {
+		border: 1px solid #dee2e6
+	}
+	/* }}} */
+
 	/* table.table-sticky-thead {{{ */
 	&.table-sticky-thead thead > tr {
 		& > td, & > th {
@@ -33,14 +39,6 @@ table {
 	&.table-sticky-thead thead > tr > td,
 	&.table-sticky-tfoot tfoot > tr > th,
 	&.table-sticky-tfoot tfoot > tr > td {
-		&:first-child:before {
-			border-left: 2px solid #ddd;
-		}
-
-		&:last-child:before {
-			border-right: 2px solid #ddd;
-		}
-
 		/* Hack to force a solid background behind all table cells {{{ */
 		&::before {
 			content: '';
@@ -51,8 +49,8 @@ table {
 			right: 0;
 			pointer-events: none;
 			border: {
-				top: 2px solid #ddd;
-				bottom: 2px solid #ddd;
+				top: 1px solid #ddd;
+				bottom: 1px solid #ddd;
 			}
 		}
 		/* }}} */
