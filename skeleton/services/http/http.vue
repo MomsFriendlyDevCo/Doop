@@ -38,9 +38,30 @@ axios.interceptors.response.use(response => response, error => {
 app.ready.then(()=> {
 	if (app.isCordova) {
 		console.log('[$service.http]', 'Override baseUrl:', this.$config.apiUrl);
-		app.ready.then(()=> axios.defaults.baseURL = this.$config.apiUrl);
+		axios.defaults.baseURL = this.$config.apiUrl;
 	}
 });
+
+
+// Track active requests being made right now as axios.activeRequests {{{
+axios.activeRequests = 0;
+
+axios.interceptors.request.use(config => {
+	axios.activeRequests++;
+	return config;
+});
+
+axios.interceptors.response.use(
+	res => {
+		axios.activeRequests--;
+		return res;
+	},
+	err => {
+		axios.activeRequests--;
+		return err;
+	},
+);
+// }}}
 
 app.service('$http', ()=> axios); // NOTE: Because Axios is a function (with static methods) we have to wrap the return in an arrow function return to not confuse the app.service() scope fetcher
 </script>
