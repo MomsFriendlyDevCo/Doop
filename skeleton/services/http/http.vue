@@ -58,7 +58,7 @@ axios.interceptors.response.use(
 	},
 	err => {
 		axios.activeRequests--;
-		return err;
+		return Promise.reject(err);
 	},
 );
 // }}}
