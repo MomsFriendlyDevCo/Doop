@@ -87,12 +87,12 @@ app.get(
 					if (hasLock && !isFail) { // We have a lock AND we're no longer failing sanity - release lock
 						return app.log.release(sanityLockKey)
 							.then(()=> ({isFail, responseText}))
-					} else if (hasLock) { // We've Seen this lock before and we're still failing sanity checks - pass
+					} else if (hasLock && isFail) { // We've Seen this lock before and we're still failing sanity checks - pass
 						// Pass
 						app.log.warn.as('sanity', 'Sanity fail, but not dispatching email due to throttle');
 						responseText += '\nNOTE: Sanity email not sent due to throttle';
 						return {isFail, responseText};
-					} else { // Not seen this sanity check fail before - lock and send email
+					} else if (!hasLock && isFail) { // Not seen this sanity check fail before - lock and send email
 						var emails = req.query.email.split(/\s*,\s*/);
 						return Promise.resolve()
 							.then(()=> {
@@ -109,10 +109,12 @@ app.get(
 							.then(()=> email()
 								.to(emails)
 								.subject(`Sanity fail on ${app.config.publicUrl}`)
-			s					.text(responseText)
+								.text(responseText)
 								.send()
 							)
 							.then(()=> ({isFail, responseText}))
+					} else { // Not locked and all is well
+						return {isFail, responseText};
 					}
 				})
 		})
