@@ -28,12 +28,11 @@ var mongoosy = require('@momsfriendlydevco/mongoosy');
 * @returns {MonoxideModel} The chainable original MonoxideModel object
 *
 * @example Set the code field on the collection 'widgets' to be a unique code based on a template
-* app.db.widgets.use(app.middleware.db.codeAlloc({
-*   collection: 'widgets',
+* app.db.widgets.use(app.middleware.db.codeAlloc, {
 *   field: 'code',
 *   template: '{{config.theme.code}}-QA-{{unique}}',
 *   templateData: doc => ({config: app.config, worklot: doc}),
-* }))
+* })
 */
 app.middleware.db.codeAlloc = (model, options) => {
 	app.log.warn('MONGOOSY: Untested app.middleware.db.codeAlloc on', app.log.colors.cyan(schema.id), '- verify functionality before moving this warning');
