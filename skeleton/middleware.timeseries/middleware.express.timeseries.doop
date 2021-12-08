@@ -27,7 +27,7 @@ app.middleware.express.timeSeries = options => {
 		field: 'created',
 		field2: 'status',
 		values: (req, res, settings) => _.get(app.db, [settings.collection, 'schema', 'paths', settings.field2, 'options', 'enum']),
-		valueLabel: (key, offset, dataSet, settings) => _.startCase(key),
+		valueLabel: (key, offset, dataSet, settings) => _.upperFirst(key),
 		valueBackgroundColor: (key, offset, dataSet, settings) => {
 			var r = ["rgb(54, 162, 235)", "rgb(75, 192, 192)", "rgb(201, 203, 207)", "rgb(255, 159, 64)", "rgb(153, 102, 255)", "rgb(255, 99, 132)", "rgb(255, 205, 86)"][offset % 7];
 			return r;
@@ -37,10 +37,10 @@ app.middleware.express.timeSeries = options => {
 			return r;
 		},
 		fixDates: true,
-		start: (req, res) => (req.query.start ? moment(req.query.start) : moment().subtract(1, 'week')).set('hour', 0).set('minute', 0).set('second', 0).set('millisecond', 0),
-		end: (req, res) => (req.query.end ? moment(req.query.end) : moment()).set('hour', 23).set('minute', 59).set('second', 59),
+		start: (req, res) => req.query.start ? moment(req.query.start) : moment().subtract(1, 'week'),
+		end: (req, res) => req.query.end ? moment(req.query.end) : moment().endOf('day'),
 		interval: (req, res) => timestring(req.query.interval || '1d', 'ms'),
-		timeLabel: (req, res, date) => (req.query.timeLabel) ? moment(date).format(req.query.timeLabel) : moment(date).format('ddd Do MMM'),
+		timeLabel: (req, res, date) => req.query.timeLabel ? moment(date).format(req.query.timeLabel) : moment(date).format('ddd Do MMM'),
 		passthru: false,
 		query: (req, res) => ({}),
 		...options,
@@ -49,24 +49,26 @@ app.middleware.express.timeSeries = options => {
 
 	return (req, res, next) => {
 		var boundaries = [];
-
 		return Promise.resolve()
 			.then(()=> Promise.all([
 				Promise.resolve(settings.start(req, res, settings)),
 				Promise.resolve(settings.end(req, res, settings)),
 				Promise.resolve(settings.interval(req, res, settings)),
 				Promise.resolve(settings.values(req, res, settings)),
-				Promise.resolve(settings.query(req, res, settings)),
+				Promise.resolve(settings.query(req, res, settings))
+					.then(query => _.pickBy(query, (v, k) => v !== undefined)), // Remove duds from query
 			]))
 			.then(([start, end, interval, values, query]) => {
+				// Work out boundry iterations. This should start at the `start` point and continue incrementing by `interval` until we hit `end`
 				var iter = start;
-
-				// FIXME: Is every second one off by 30mins? http://localhost:8080/api/jobs/timeseries?interval=1month&timeLabel=MMM&start=2020-05-25T00:00:00Z&end=2021-05-25T23:59:59Z
-				// "boundaries":["2020-06-14T14:00:00.000Z","2020-07-15T00:30:00.000Z",
 				while (iter.isBefore(end)) {
 					boundaries.push(iter.toDate());
 					iter.add(interval, 'ms');
 				}
+
+				// Always add last boundry to keep Mongo / Buckets happy, we remove this at the end
+				// This is to avoid fence-bost / off-by-one errors where today's stats don't get caught in the bucket collection from Mongo
+				boundaries.push(iter.toDate());
 
 				return {values, query};
 			})
@@ -97,7 +99,10 @@ app.middleware.express.timeSeries = options => {
 					.value()
 				},
 			]))
-			.then(dataSets => dataSets[0])
+			.then(dataSets => {
+				boundaries.pop(); // Remove last, dud boundry mark
+				return dataSets[0]; // Return only first matching dataset
+			})
 			.then(dataSets => Object.keys(dataSets).map((k, kOffset) => {
 				var dataSet = dataSets[k];
 				var dataSetMap = _(dataSet)
@@ -121,8 +126,8 @@ app.middleware.express.timeSeries = options => {
 				};
 			}))
 			.then(datasets => ({
-				boundaries: boundaries,
 				labels: boundaries.map(l => settings.timeLabel(req, res, l)),
+				boundaries,
 				datasets,
 			}))
 			.then(data => {
