@@ -62,7 +62,6 @@
     "@momsfriendlydevco/readable": "^1.2.1",
     "@momsfriendlydevco/sift-sieve": "^2.0.0",
     "@momsfriendlydevco/throttle": "^0.0.4",
-    "@momsfriendlydevco/vue-setpath": "^0.0.1",
     "@momsfriendlydevco/vue-template": "^0.0.5",
     "@sentry/node": "^5.24.2",
     "@sentry/tracing": "^5.24.2",
