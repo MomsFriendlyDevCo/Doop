@@ -13,11 +13,6 @@ gulp.task.once('load:app.db', 'load:app', ()=>
 			gulp.on('finish', ()=> Promise.all([// Clean up the database connection when we finish
 					mongoosy.disconnect()
 						.then(()=> gulp.log('DB Disconnected')),
-
-					app.dbwp && app.dbwp.destroy
-						? app.dbwp.destroy().then(()=> gulp.log('DBWP Disconnected'))
-						: null,
-				])
 			);
 		})
 		.then(()=> app.emit('dbInit'))

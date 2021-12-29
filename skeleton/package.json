@@ -49,7 +49,7 @@
     "@momsfriendlydevco/cache": "^2.1.3",
     "@momsfriendlydevco/crash": "^0.0.10",
     "@momsfriendlydevco/email": "^2.3.4",
-    "@momsfriendlydevco/eventer": "^1.5.1",
+    "@momsfriendlydevco/eventer": "^1.6.0",
     "@momsfriendlydevco/exec": "^1.5.2",
     "@momsfriendlydevco/express-middleware-cache": "^1.1.13",
     "@momsfriendlydevco/express-middleware-formatter": "^1.1.16",
