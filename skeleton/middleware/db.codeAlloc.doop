@@ -96,10 +96,7 @@ app.middleware.db.codeAlloc = (model, options) => {
 
 				// The incomming document is missing the field we need to check - go fetch it
 				model
-					.findOne({
-						_id: doc._id,
-						//$errNotFound: false
-					})
+					.findById(doc._id)
 					.select(settings.field)
 					.exec((err, found) => {
 						if (err) {
@@ -182,13 +179,11 @@ app.middleware.db.codeAlloc = (model, options) => {
 
 								// Compile candidateCode into a regExp and look for collisions
 								var codeRE = new RegExp('^' + handlebarsCandidate.replace(settings.uniqueToken, settings.uniqueRE) + '$');
-								var query = {
-									//$errNotFound: false,
-									[settings.field]: codeRE,
-								};
 
 								model
-									.findOne(query)
+									.findOne({
+										[settings.field]: codeRE,
+									})
 									.select(['_id', settings.field])
 									.sort('-_id')
 									.limit(1)

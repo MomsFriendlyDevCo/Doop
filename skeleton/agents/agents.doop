@@ -1,7 +1,7 @@
 <script lang="js" backend on="agents">
 var Agents = require('@momsfriendlydevco/agents');
 
-exports = ()=> new Promise(resolve => {
+return new Promise(resolve => {
 	app.log('Initialising');
 	app.agents = new Agents(app.config.agents);
 

@@ -5,5 +5,5 @@ app.lock = new Lock(app.config.lock);
 
 app.on('exit', () => app.lock.destroy());
 
-exports = app.lock.init();
+return app.lock.init();
 </script>

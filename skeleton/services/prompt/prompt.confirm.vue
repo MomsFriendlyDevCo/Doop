@@ -7,6 +7,7 @@ app.ready.then(()=> {
 	* @param {Object|string} options Either an options object or the body text of the confirmation
 	* @param {string} [options.title='Confirm action'] The title of the dialog
 	* @param {string} [options.body='Are you sure you want to do this?'] The body of the dialog
+	* @param {boolean} [options.isHtml=false] Whether the dialog body should be rendered as HTML (must be $sce compilable)
 	* @param {array} [options.buttons=Confirm + Cancel]
 	* @returns {Promise} A promise representing the dialog, closing OR agreeing will resolve the promise
 	*/

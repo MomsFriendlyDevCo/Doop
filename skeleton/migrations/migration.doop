@@ -21,7 +21,6 @@ app.middleware.db.schema('doopMigrations', {
 *     return widget.save();                                       // Save it back
 *   }, {parallel: 3})                                             // Process 3 documents at once
 * )
-* </script>
 */
 
 var _ = require('lodash');
