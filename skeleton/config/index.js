@@ -222,10 +222,7 @@ module.exports = {
 		expiry: 1000 * 60 * 60, // 1 hour
 		mongodb: {
 			uri: config => config.mongo.uri,
-			options: {
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
-			},
+			options: config => config.mongo.options,
 			collection: 'locks',
 		},
 	},
