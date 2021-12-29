@@ -34,9 +34,11 @@ var cookieParser = require('cookie-parser');
 var compression = require('compression');
 var cors = require('cors');
 var crash = require('@momsfriendlydevco/crash');
+var express = require('express');
 var historyFallback = require('connect-history-api-fallback-exclusions');
 var helmet = require('helmet');
-var express = require('express');
+var jail = require('express-jail');
+var logger = require('express-log-url');
 
 app.emit('preExpress');
 app.express = express();
@@ -45,6 +47,21 @@ app.emit('postExpress');
 
 // NOTE: We're using app.express rather than app.use as we want the raw express hook rather than our custom wrapped one
 app.express.use(helmet());
+
+if (app.config.layout.jail.enabled) {
+	app.log.as('jail', 'Jail enabled');
+	app.express.use(jail(_.omit(app.config.layout.jail.enabled, 'enabled'))
+		.on('banned', ({ip, req}) => logger.log({
+			method: req.method,
+			code: 429,
+			path: req.path,
+			responseTime: 10,
+			username: req.user?.username,
+			info: `BANNED IP ${ip}`,
+		}))
+	);
+}
+
 app.express.use(cors());
 app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',

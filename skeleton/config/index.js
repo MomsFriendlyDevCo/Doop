@@ -214,6 +214,9 @@ module.exports = {
 			'/dist/*',
 			'/go/*',
 		],
+		jail: { // Options to pass to express-jail
+			enabled: false,
+		},
 	},
 	lock: {
 		expiry: 1000 * 60 * 60, // 1 hour
