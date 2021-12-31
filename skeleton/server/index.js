@@ -19,9 +19,11 @@ Promise.resolve()
 	})
 	// }}}
 	// Initialize all .doop files {{{
+	.then(()=> debug('app.setup()'))
 	.then(()=> app.setup())
 	// }}}
-	// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js'])
+	// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js']) {{{
+	.then(()=> debug('Load 3rd party ./n*_m*/**/@doop/doop.backend.hooks.js files'))
 	.then(()=> globby([
 			`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
 			`!${app.config.paths.root}/node_modules/**/node_modules`,
@@ -33,6 +35,7 @@ Promise.resolve()
 	)
 	// }}}
 	// Emit events to boot server in order {{{
+	.then(()=> debug('Begin emitter chain'))
 	.then(()=> app.emit('preInit'))
 	.then(()=> app.emit('init'))
 	.then(()=> app.emit('postInit'))
@@ -54,6 +57,7 @@ Promise.resolve()
 	.then(()=> app.emit('preReady'))
 	.then(()=> app.log(app.log.colors.bold.blue('⚝  Doop! ⚝')))
 	.then(()=> app.emit('ready'))
+	.then(()=> debug('Finished bootstrap'))
 	// }}}
 	// Error handling {{{
 	.catch(e => crash.stop(e, {prefix: 'Fatal server process exit'}))
