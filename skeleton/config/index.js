@@ -253,7 +253,10 @@ module.exports = {
 		migration: true, // Whether migration is enabled for this thread, enabled for dev disabled for all but one production thread
 		hooks: false, // Overridden during Doop bootstrap (otherwise ignore all hook calls)
 		uri: 'mongodb://localhost/FIXME-name',
-		options: {},
+		options: { // Explcitly specify options here so other modules (cache, lock etc.) can reuse sane defaults
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		},
 	},
 	papertrail: {
 		enabled: false,
