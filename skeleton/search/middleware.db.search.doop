@@ -68,6 +68,8 @@ var stringSplit = require('string-split-by');
 *   GET /api/users?q=smith+20+after:2020-01-01
 */
 app.middleware.db.search = (schema, options) => {
+	return app.log.warn.as('app.middleware.db.search', 'Unsupported middleware in Doop@3');
+
 	// Settings {{{
 	var settings = {
 		path: '_searchTokens',
@@ -87,7 +89,13 @@ app.middleware.db.search = (schema, options) => {
 			.toString()
 			.thru(v => v.toUpperCase())
 			.deburr()
-			.replace(/[^A-Z0-9\-:]+/g, ' ')
+			.split(/\s+/)
+			.map(word =>
+				/@/.test(word) // Looks like an email?
+					? word.replace(/[^A-Z0-9\-\_\@\.]+/g, ' ') // Email tidy
+					: word.replace(/[^A-Z0-9\-:]+/g, ' ') // Standard tidy
+			)
+			.join(' ')
 			.trim()
 			.value(),
 		searchTermsModify: v => _.chain(v)
@@ -268,7 +276,6 @@ app.middleware.db.search = (schema, options) => {
 					: undefined
 				)
 				.populate(searchSettings.populate ? searchSettings.populate : undefined)
-				.find(searchSettings.filter) // Apply other filters
 				// .filter(searchSettings.softFilter) // Apply soft filters
 				.exec((err, items) => {
 					if (err) {

@@ -15,7 +15,7 @@ var _ = require('lodash');
 *	})
 */
 app.middleware.db.timestamps = (schema, options) => {
-	app.log.warn('MONGOOSY: Untested app.middleware.db.timestamps - verify functionality before moving this warning');
+	return app.log.warn.as('app.middleware.db.timestamps', 'Unsupported middleware in Doop@3');
 
 	// Settings {{{
 	var settings = {

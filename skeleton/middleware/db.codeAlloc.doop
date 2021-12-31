@@ -35,7 +35,7 @@ var mongoosy = require('@momsfriendlydevco/mongoosy');
 * })
 */
 app.middleware.db.codeAlloc = (model, options) => {
-	app.log.warn('MONGOOSY: Untested app.middleware.db.codeAlloc on', app.log.colors.cyan(schema.id), '- verify functionality before moving this warning');
+	return app.log.warn.as('app.middleware.db.codeAlloc', 'Unsupported middleware in Doop@3');
 
 	var settings = {
 		field: 'code',
@@ -248,9 +248,11 @@ app.middleware.db.codeAlloc = (model, options) => {
 			.catch(e => e === 'SKIP' ? done() : done(e))
 	};
 
-	// FIXME: Mongoose hooks...
-	if (settings.allocateCreate) model.hook('create', middlewareHook.bind({operation: 'create'}));
-	if (settings.allocateSave) model.hook('save', middlewareHook.bind({operation: 'save'}));
-	if (settings.allocateSave) model.hook('update', middlewareHook.bind({operation: 'update'}));
+	// CRIT: This whole thing needs recoding to Mongoosy / Mongoose spec instead of Monoxide - MC 2021-12-31
+	/*
+	if (settings.allocateCreate) model.pre('create', middlewareHook.bind({operation: 'create'}));
+	if (settings.allocateSave) model.pre('save', middlewareHook.bind({operation: 'save'}));
+	if (settings.allocateSave) model.pre('update', middlewareHook.bind({operation: 'update'}));
+	*/
 };
 </script>

@@ -12,6 +12,8 @@
 * app.db.widgets.use(app.middleware.db.statusChange)
 */
 app.middleware.db.statusChange = (schema, options) => {
+	return app.log.warn.as('app.middleware.db.statusChange', 'Unsupported middleware in Doop@3');
+
 	var settings = {
 		field: 'status',
 		onChange: (newDoc, oldDoc) =>

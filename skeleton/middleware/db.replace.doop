@@ -11,7 +11,7 @@ var _ = require('lodash');
 * @param {function} [...] Per-field replacement async functions called as `(val, doc)` each is expected to return an alternate value to insert
 */
 app.middleware.db.replace = (schema, options) => {
-	app.log.warn('MONGOOSY: Untested app.middleware.db.replace on', app.log.colors.cyan(schema.id), '- verify functionality before moving this warning');
+	return app.log.warn.as('app.middleware.db.replace', 'Unsupported middleware in Doop@3');
 
 	var settings = {
 		$doc: _.isFunction(options) ? options : undefined,
