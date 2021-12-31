@@ -39,7 +39,7 @@ app.component('dashboard', {
 					</div>
 					<div class="text-right">
 						<h2>
-							<span v-if="users !== undefined" class="text-dark">{{users | number}}</span>
+							<span v-if="users !== undefined" class="text-dark">{{users |> app.filter.number}}</span>
 							<i v-else class="fa fa-spinner fa-spin"/>
 						</h2>
 						<span class="text-muted">Users</span>
@@ -53,7 +53,7 @@ app.component('dashboard', {
 					</div>
 					<div class="text-right">
 						<h2>
-							<span v-if="companies !== undefined" class="text-dark">{{companies | number}}</span>
+							<span v-if="companies !== undefined" class="text-dark">{{companies |> app.filter.number}}</span>
 							<i v-else class="fa fa-spinner fa-spin"/>
 						</h2>
 						<span class="text-muted">Companies</span>

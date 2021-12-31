@@ -184,9 +184,9 @@ app.component('permissionsList', {
 				<a @click="focusSearch" class="nav-link active" data-toggle="tab" data-target="#permissions-roles">
 					Basic roles
 					<span class="badge badge-info">
-						{{this.permissionGroups.filter(pg => pg.selected).length | number}}
+						{{this.permissionGroups.filter(pg => pg.selected).length |> app.filter.number}}
 						/
-						{{this.permissionGroups.length | number}}
+						{{this.permissionGroups.length |> app.filter.number}}
 					</span>
 				</a>
 			</li>
@@ -194,15 +194,15 @@ app.component('permissionsList', {
 				<a @click="focusSearch" class="nav-link" data-toggle="tab" data-target="#permissions-permissions">
 					Custom permissions
 					<span class="badge badge-info">
-						{{this.permissions.filter(p => p.selected).length | number}}
+						{{this.permissions.filter(p => p.selected).length |> app.filter.number}}
 						/
-						{{this.permissions.length | number}}
+						{{this.permissions.length |> app.filter.number}}
 					</span>
 				</a>
 			</li>
 			<li class="nav-item" style="margin-left: auto">
 				<div class="btn-group">
-					<a class="btn btn-default fas fa-ellipsis-v" data-toggle="dropdown"/>
+					<a class="btn btn-default far fa-ellipsis-v" data-toggle="dropdown"/>
 					<ul class="dropdown-menu">
 						<a @click="select('all')" class="dropdown-item">Select all</a>
 						<a @click="select('none')" class="dropdown-item">Clear all</a>

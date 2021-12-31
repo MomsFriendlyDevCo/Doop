@@ -390,11 +390,11 @@ app.component('vTable', {
 						<div class="text-muted">
 							Displaying
 							{{entity}}
-							{{limit * (endpointPage-1) + 1 | number}}
+							{{limit * (endpointPage-1) + 1 |> app.filter.number}}
 							-
-							{{Math.min(rowCount, limit * (endpointPage)) | number}}
+							{{Math.min(rowCount, limit * (endpointPage)) |> app.filter.number}}
 							of
-							{{rowCount | number}}
+							{{rowCount |> app.filter.number}}
 						</div>
 					</slot>
 				</div>
