@@ -25,40 +25,63 @@ app.post([
 	'/api/session/login',
 	...(app.config.session.auth.allowPost ? ['/login'] : []),
 ], (req, res) => Promise.resolve()
-		// Sanity checks {{{
-		.then(()=> {
-			if (!app.config.session.login.enabled) throw new Error('403: User login is disabled');
-			if (!req.body) throw new Error('No login credentials');
-			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
-			if (!req.body.username) throw new Error('400: No username provided');
-			if (!req.body.password) throw new Error('400: No password provided');
-		})
-		// }}}
-		// Fetch user and verify password {{{
-		.then(()=> app.log('Check login for', req.body.username))
-		.then(()=> app.db.users.findOne({
-			//$errNotFound: false, // Monoxide
-			$or: [
-				{email: req.body.username},
-				{username: req.body.username},
-			],
-		}))
-		.then(user => user || Promise.reject('403: Unknown user'))
-		.then(user => user.checkPassword(req.body.password)
-			.then(res => !res && Promise.reject('403: Invalid password'))
-			.then(()=> user)
-		)
-		.then(user => user.logIn(res)
-			.then(()=> user)
-		)
-		// }}}
-		// End {{{
-		.then(user => res.format({
-			html: ()=> res.redirect('/'),
-			json: ()=> res.status(200).send({_id: user._id}),
-			default: ()=> res.status(406).send('Not an acceptable login accept type'),
-		}))
-		.catch(res.sendError)
-		// }}}
+	// Sanity checks {{{
+	.then(()=> {
+		if (!app.config.session.login.enabled) throw new Error('403: User login is disabled');
+		if (!req.body) throw new Error('No login credentials');
+		if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
+		if (!req.body.username) throw new Error('400: No username provided');
+		if (!req.body.password) throw new Error('400: No password provided');
+	})
+	// }}}
+	// Fetch user and verify password {{{
+	.then(()=> app.log('Check login for', req.body.username))
+	.then(()=> app.db.users.findOne({
+		$or: [
+			{email: req.body.username},
+			{username: req.body.username},
+		],
+	}))
+	.then(user => user || Promise.reject('403: Unknown user'))
+	.then(user => user.checkPassword(req.body.password)
+		.then(res => !res && Promise.reject('403: Invalid password'))
+		.then(()=> user)
+	)
+	.then(user => user.logIn(res)
+		.then(()=> user)
+	)
+	// }}}
+	// End {{{
+	.then(user => res.format({
+		html: ()=> res.redirect('/'),
+		json: ()=> res.status(200).send({_id: user._id}),
+		default: ()=> res.status(406).send('Not an acceptable login accept type'),
+	}))
+	.catch(res.sendError)
+	// }}}
+);
+</script>
+
+<script lang="js" backend endpoint>
+/**
+* Bypass login process entirely in debugging environments
+*/
+app.get('/go/login/force', app.middleware.express.debug(), (req, res) => Promise.resolve()
+	.then(()=> app.log('Force login in development mode'))
+	.then(()=> app.db.users.findOne({
+		email: 'matt@mfdc.biz',
+	}))
+	.then(user => user || Promise.reject('403: Unknown user'))
+	.then(user => user.logIn(res)
+		.then(()=> user)
+	)
+	// End {{{
+	.then(user => res.format({
+		html: ()=> res.redirect('/'),
+		json: ()=> res.status(200).send({_id: user._id}),
+		default: ()=> res.status(406).send('Not an acceptable login accept type'),
+	}))
+	.catch(res.sendError)
+	// }}}
 );
 </script>
