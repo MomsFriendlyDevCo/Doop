@@ -217,6 +217,30 @@ module.exports = {
 		jail: { // Options to pass to express-jail
 			enabled: false,
 		},
+		$config: config => app => ({ // Expose certain app.config values to the frontend $config service, NOTE: This is double escaped
+			url: app.config.url,
+			apiUrl: app.config.apiUrl,
+			isProduction: app.config.isProduction,
+			title: app.config.title,
+			tagline: app.config.tagline,
+			git: {
+				url: app.config.git.url,
+				current: app.git?.current || {},
+			},
+			orders: {
+				country: app.config.orders.country,
+				prototypeSelect: app.config.orders.prototypeSelect,
+			},
+			session: {
+				preference: app.config.session.auth.preference,
+				logoutUrl: app.config.session.logoutUrl,
+				login: app.config.session.login,
+				invite: app.config.session.invite,
+				recover: app.config.session.recover,
+				signup: app.config.session.signup,
+			},
+			woo: config.woo,
+		}),
 	},
 	lock: {
 		expiry: 1000 * 60 * 60, // 1 hour
