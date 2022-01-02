@@ -44,7 +44,6 @@ app.emit('preExpress');
 app.express = express();
 app.emit('postExpress');
 
-
 // NOTE: We're using app.express rather than app.use as we want the raw express hook rather than our custom wrapped one
 app.express.use(helmet());
 
@@ -118,6 +117,11 @@ app.express.use(function(req, res, next) {
 			resCode = errBits.code;
 			resErr = errBits.err;
 			showThrow = false;
+		} else if (typeof code == 'string') { // Generic string
+			err = code;
+			resCode = 400;
+			resErr = code;
+			showThrow = true;
 		} else if (_.isError(code)) { // Given raw error object
 			err = code;
 			resCode = 400;
