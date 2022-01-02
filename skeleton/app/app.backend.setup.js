@@ -78,7 +78,7 @@ module.exports = ()=> {
 						// Create a sandbox for the extracted block {{{
 						var sandbox = vm.createContext({
 							app, global, module, process, // Import the standard modules
-							Array, Buffer, Promise, RegExp, // Import standard classes
+							Array, Buffer, JSON, Promise, RegExp, // Import standard classes
 							id, // Glue the module ID onto the base structure
 							db: app.db,
 							console: new Proxy(console, {
