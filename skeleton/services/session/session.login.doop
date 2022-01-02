@@ -7,7 +7,6 @@ var promisify = require('util').promisify;
 // TODO: Could be more universal if `/go/:type/:token` was able to lookup a redirect URL also.
 app.get('/go/login/:token', (req, res) => {
 	app.db.users.findOne({
-		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'login', // Restrict the token usage to users requesting logins only
 	})

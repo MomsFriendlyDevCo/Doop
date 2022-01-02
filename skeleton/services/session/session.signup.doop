@@ -7,7 +7,6 @@
 // TODO: Could simply use the password confirmation endpoint
 app.get('/go/signup/:token', (req, res) => {
 	app.db.users.findOne({
-		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'signup',
 	})
@@ -47,7 +46,6 @@ app.post([
 		// TODO: When permitted email domain list is defined ensure users domain matches
 
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false, // Monoxide
 			username: req.body.username,
 		}))
 		// FIXME: User enumeration

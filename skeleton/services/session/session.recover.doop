@@ -5,7 +5,6 @@
 */
 app.get('/go/recover/:token', (req, res) => {
 	app.db.users.findOne({
-		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'recover', // Restrict the token usage to users requesting logins only
 	})
@@ -38,7 +37,6 @@ app.post([
 		// Fetch user {{{
 		.then(()=> app.log('Check login for', req.body.email))
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false, // Monoxide
 			$or: [
 				{email: req.body.email},
 				{username: req.body.username},

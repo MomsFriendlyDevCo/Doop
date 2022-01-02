@@ -5,7 +5,6 @@
 */
 app.get('/go/invite/:token', (req, res) => {
 	app.db.users.findOne({
-		//$errNotFound: false, // Monoxide
 		_token: req.params.token,
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
 	})
@@ -59,7 +58,6 @@ app.post([
 		// }}}
 		// Either find existing user or create stub account {{{
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false, // Monoxide
 			email: req.body.email,
 		}))
 		.then(user => {
