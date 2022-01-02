@@ -5,7 +5,7 @@ global._ = _;
 import Debug from '/services/debug';
 
 import Vue from 'vue';
-Vue.config.devtools = true; // FIXME: Better way of doing $isProduction blocks
+Vue.config.devtools = false;
 Vue.config.productionTip = false;
 
 import VueRouter from 'vue-router';
@@ -110,7 +110,10 @@ global.app = {
 		// Argument mangling {{{
 		if (_.isObject(id)) { // Passed only spec
 			[id, spec] = [_.camelCase(id.route), id];
-			if (!id) throw new Error(`Register anonymous component with app.component(SPEC) but spec has no route specified, specify a component name or {route: String}`);
+			if (!id) {
+				console.log('No ID or omitted route for spec', {spec});
+				throw new Error(`Register anonymous component with app.component(SPEC) but spec has no route specified, specify a component name or {route: String}`);
+			}
 		}
 		// }}}
 
