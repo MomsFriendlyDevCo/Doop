@@ -29,7 +29,7 @@ app.component({
 		this.$debug.enable(false);
 		this.$data.data = _.pick(this.$route.query, ['email', 'username']);
 		if (_.has(this.$route.query, 'failure'))
-			this.$toast.catch('Unable to validate token');
+			this.$toast.catch('There was a issue with the confirmation link. Please try again, if issue persists contact support', {timeout:0});
 	},
 
 	// Bind special Login styles

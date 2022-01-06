@@ -21,26 +21,16 @@ module.exports = session => session
 		Promise.resolve()
 			// Load app core {{{
 			.then(()=> {
-				debug('load app core')
+				debug('Loading application core: Agents');
 				require('../app/app.backend');
 			})
 			// }}}
 			// Initialize all .doop files {{{
+			// TODO: Do we require vendor *.doop files for Agents?
 			.then(()=> app.setup())
 			// Disabling HMR for agents, otherwise they keep compiling beyond what is required
 			// FIXME: Is this indicative of a promise bug in HMR middleware?
 			.then(()=> app.config.hmr.enabled = false)
-			// }}}
-			// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js'])
-			.then(()=> globby([
-					`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
-					`!${app.config.paths.root}/node_modules/**/node_modules`,
-				])
-				.then(modPaths => modPaths.forEach(modPath => {
-					debug('Load module', modPath);
-					require(modPath)
-				}))
-			)
 			// }}}
 			// Emit events to boot server in order {{{
 			.then(()=> app.emit('preInit'))

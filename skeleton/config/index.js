@@ -164,7 +164,7 @@ module.exports = {
 		fontGlob: '*.{css,eot,svg,ttf,woff,woff2}', // Fonts to cache internally, can be tweaked by Cordova or other build process
 	},
 	hmr: { // Hot module reloading when in dev mode
-		enabled: true,
+		enabled: false, // Disabled by default
 		backend: true, // Allow backend to detect file changes + recompile /dist files
 		frontend: true, // Allow frontend to poll + respond to module changes
 	},

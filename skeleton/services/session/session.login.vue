@@ -8,11 +8,17 @@ app.component({
 			username: '',
 			password: '',
 		},
+		form: {
+			hasValidationErrors: false,
+			showPassword: false,
+			validationError: "",
+		},
 	}),
 	methods: {
 		login(notification = false, redirect = false) {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
+				.then(()=> this.form.hasValidationErrors = false)
 				.then(()=> this.$session.login(this.data))
 				.then(()=> $('body').removeClass('minimal'))
 				.then(()=> notification && this.$toast.success('Successful Login'))
@@ -25,7 +31,9 @@ app.component({
 						path: '/signup/pending',
 						query: { email: this.data.email },
 					});
-					this.$toast.catch(e, {position: 'centerBottom'});
+					this.form.hasValidationErrors = true
+					this.form.validationError = e;
+					// this.$toast.catch(e, {position: 'centerBottom'});
 				})
 				.finally(()=> this.$loader.stop())
 		},
@@ -33,7 +41,7 @@ app.component({
 	created() {
 		this.$debug.enable(false);
 		if (_.has(this.$route.query, 'failure'))
-			this.$toast.catch('Unable to validate token');
+			this.$toast.catch('There was a issue with the confirmation link. Please try again, if issue persists contact support', {timeout:0});
 	},
 
 	// Bind special Login styles
@@ -76,7 +84,6 @@ app.component({
 										<input type="email" name="email" v-model="data.email" class="form-control" required autofocus placeholder="you@example.com"/>
 									</div>
 								</div>
-
 								<div class="form-group mb-3" v-if="!$config.session.signup.emailAsUsername">
 									<label class="form-label" for="">
 										<small class="font-weight-bold">Username</small>
@@ -104,6 +111,11 @@ app.component({
 										<input type="password" name="password" v-model="data.password" class="form-control" required placeholder="Password"/>
 									</div>
 								</div>
+								<div v-if="form.hasValidationErrors" class="alert alert-warning text-center" role="alert">
+									<small class="font-weight-bold">Error:</small>
+									<small class="form-label" >{{form.validationError}}</small>
+								</div>
+
 
 								<button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
 

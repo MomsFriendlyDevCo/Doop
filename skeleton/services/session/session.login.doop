@@ -67,7 +67,8 @@ app.post([
 			json: ()=> res.status(200).send({_id: user._id}),
 			default: ()=> res.status(406).send('Not an acceptable login accept type'),
 		}))
-		.catch(res.sendError)
+		// .catch(res.sendError)
+		.catch(() => res.status(406).send("Invalid email or password"))
 		// }}}
 );
 </script>
