@@ -9,6 +9,10 @@
 * @param {boolean} [prevent=true] Fire event.preventDefault() on click, disabling this will likely cause the link to be clicked twice
 * @param {boolean} [allowTab=true] Allow middle clicking to open a new tab by adding a `href` attribute to `<a/>` tags
 *
+* @param {boolean} [modifier.window] Sets {target: '_blank'} - i.e. open in a new tab / window
+* @param {boolean} [modifier.nostop] Sets {stop: false} - i.e. prevent `e.stopPropagation()` by default
+*
+*
 * @example Make <a/> tags act like `<router-link/>`
 * <a v-href="'/link/to/somewhere'">Text</a>
 *
@@ -33,7 +37,11 @@ app.directive('v-href', {
 		};
 
 		// TODO: :href is able to respond to changes, this binding does not.
-		// i.e. :href="`/rivers/edit/${river._id}`" vs v-href="`/rivers/edit/${river._id}`"
+		// i.e. :href="`/collection/edit/${collection._id}`" vs v-href="`/collection/edit/${collection._id}`"
+
+		// Profess modifiers into settings
+		if (binding.modifiers.window) settings.target = "_blank";
+		if (binding.modifiers.nostop) settings.stop = false;
 
 		if (settings.url) {
 			console.warn('[DEPRECIATED] Do not pass `v-href="{url}"` property to v-href. Use `v-href="{href}"` for URL', settings.url);

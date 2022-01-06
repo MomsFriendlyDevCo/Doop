@@ -8,7 +8,7 @@ app.component('v-chart-timeseries', {
 	}},
 	props: {
 		data: {type: Object},
-		url: {type: String},
+		url: {type: [String, Object]}, // Either a URL as string or Axios request object
 		options: {type: Object},
 	},
 	methods: {
@@ -16,8 +16,7 @@ app.component('v-chart-timeseries', {
 			if (!this.url) return; // No need to pull in data feed
 			return Promise.resolve()
 				.then(()=> this.$loader.startBackground())
-				.then(()=> this.$http.get(this.url))
-				// FIXME: Object.assign?
+				.then(()=> _.isObject(this.url) ? this.$http(this.url) : this.$http.get(this.url))
 				.then(res => this.chartData = res.data)
 				.finally(()=> this.$loader.stop())
 				.catch(this.$toast.catch)
@@ -41,7 +40,7 @@ app.component('v-chart-timeseries', {
 			*/
 
 			// Incoming data schema
-			// FIXME: D3 will ~stomp~ overlay the last "May" when used as a key 
+			// FIXME: D3 will ~stomp~ overlay the last "May" when used as a key
 			/*
 			{
 				"boundaries": [
@@ -198,6 +197,9 @@ app.component('v-chart-timeseries', {
 			// }}}
 		},
 	},
+	created() {
+		this.$debug.prefix('v-chart-timeseries').enable(false);
+	},
 	mounted() {
 		// Initialise SVG/Axis {{{
 		d3.select(this.$el)
@@ -208,14 +210,18 @@ app.component('v-chart-timeseries', {
 
 		this.$watch('$props.data', () => {
 			if (!this.$props.data) return;
+
+			this.$debug('$watch.data', this.data);
 			this.chartData = this.$props.data;
 		}, {immediate: true});
 
 		this.$watch('$props.url', () => {
+			this.$debug('$watch.url', this.url);
 			this.refresh();
 		}, {immediate: true});
 
 		this.$watch('$data.chartData', () => {
+			this.$debug('$watch.chartData', this.chartData);
 			this.update();
 		}, {immediate: false, deep: true});
 

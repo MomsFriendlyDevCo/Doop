@@ -79,6 +79,7 @@ module.exports = {
 	},
 	build: {
 		minimize: false,
+		watchNodeModules: false,
 	},
 	cache: {
 		enabled: true,
@@ -174,6 +175,7 @@ module.exports = {
 		csp: { // Content security policy spec
 			// NOTE: 1. Do not remove empty arrays, they are here for reference and may get mutated by other middleware
 			//       2. All sources are automatically Uniq'd
+			//       3. Meta elements (e.g. 'self', 'unsafe-eval') should be enclosed in single speachmarks, addresses are simple strings. Do not prefix with protocol (i.e. no 'https://' bit)
 			'default-src': [
 				`'self'`, // Allow access to this server
 			],
@@ -185,7 +187,7 @@ module.exports = {
 			],
 			'font-src': [
 				`'self'`,
-				'https://fonts.gstatic.com',
+				'fonts.gstatic.com',
 			],
 			'frame-src': [],
 			'img-src': [
@@ -204,7 +206,7 @@ module.exports = {
 				`'self'`, // Allow access to this server
 				`'unsafe-eval'`, // Used by WebPack for inline CSS
 				`'unsafe-inline'`, // Used by Vue components
-				'https://fonts.googleapis.com',
+				'fonts.googleapis.com',
 			],
 			'worker-src': [],
 		},
@@ -217,6 +219,24 @@ module.exports = {
 			'/dist/*',
 			'/go/*',
 		],
+		$config: config => app => ({ // Expose certain app.config values to the frontend $config service, NOTE: This is double escaped
+			url: app.config.url,
+			apiUrl: app.config.apiUrl,
+			isProduction: app.config.isProduction,
+			title: app.config.title,
+			git: {
+				url: app.config.git.url,
+				current: app.git?.current || {},
+			},
+			session: {
+				preference: app.config.session.auth.preference,
+				logoutUrl: app.config.session.logoutUrl,
+				login: app.config.session.login,
+				invite: app.config.session.invite,
+				recover: app.config.session.recover,
+				signup: app.config.session.signup,
+			},
+		}),
 	},
 	lock: {
 		expiry: 1000 * 60 * 60, // 1 hour

@@ -1,6 +1,6 @@
 <script lang="js" frontend>
 /**
-* Customizable table component with auto data retrieval, sorting and pagnination.
+* Customizable table component with auto data retrieval, pagnination and searching
 *
 * @param {string|Object} url Doop / Monoxide ReST endpoint to connect to, if this is a plain object its assumed to be an Axios compatible request (including a 'url' key) to merge with computed properties such as filters, sorting, pagination
 * @param {string} [sort] Field to sort by, if omitted the rowKey is used instead
@@ -44,7 +44,7 @@
 * @slot state-loading Slot template to display if table data is being loaded
 * @slot state-empty Slot template to display if no data is found to display in the table
 * @slot table-header Slot to template as the header area - wraps pagination and item counts
-* @slot table-header-left Slot to template as the header area (far left) - displays nothing by default
+* @slot table-header-left Slot to template as the header area (far left) - wraps search controls
 * @slot table-header-center Slot to template as the header area (center) - displays nothing by default
 * @slot table-header-right Slot to template as the header area (far right) - displays nothing by default
 * @slot table-footer Slot to template as the footer area - wraps pagination and item counts
@@ -85,7 +85,7 @@ app.component('vTable', {
 			number: {cellClass: 'col-number text-right'},
 			thumbnail: {cellClass: 'col-thumbnail text-center'},
 			verbs: {cellClass: 'col-verbs text-right'},
-		}}, minimize: false}, /* }}} */
+		}}}, /* }}} */
 
 		showPagination: {type: Boolean, default: true},
 		showPaginationDropdown: {type: Boolean, default: false},
@@ -134,7 +134,7 @@ app.component('vTable', {
 				.then(()=> _.merge( // Calculate Axios request object
 					{}, // Empty object so we don't stomp on anything
 					_.isString(this.url) ? {url: this.url} : this.url, // Merge either single URL string OR entire url object
-					{ // Calculate fields from v-table session - filters, sorting, pagination
+					{ // Calculate fields from v-table session - filters, search, sorting, pagination
 						method: 'GET',
 						params: { // Compute AxiosRequest
 							...(this.endpointFilters),
@@ -216,6 +216,7 @@ app.component('vTable', {
 			return this.refresh();
 		},
 
+
 		/**
 		* Adjust the number of items per page
 		* @param {number} limit The number of items per page
@@ -268,6 +269,7 @@ app.component('vTable', {
 	},
 	created() {
 		this.$debug.enable(false);
+		this.$watchAll(['url', 'limit', 'columns'], this.refresh, {immediate: true, deep: true});
 
 		// FIXME: If passed a `url` with `sort` defined this may result in 2 sort params being added.
 		this.endpointSort = this.sort || this.rowKey; // Set intial sort state
@@ -301,7 +303,7 @@ app.component('vTable', {
 			</div>
 		</slot>
 		<!-- }}} -->
-		<!-- Body {{{ -->
+		<!-- Body + table element {{{ -->
 		<div class="v-table-body" :class="layout == 'card' && 'card-body'">
 			<table v-if="state == 'ready' || (state == 'loading' && rows && rows.length > 0)" :class="tableClass">
 				<thead>
@@ -388,9 +390,9 @@ app.component('vTable', {
 						<div class="text-muted">
 							Displaying
 							{{entity}}
-							{{endpointLimit * (endpointPage-1) + 1 | number}}
+							{{limit * (endpointPage-1) + 1 | number}}
 							-
-							{{Math.min(rowCount, endpointLimit * (endpointPage -1) + 1) | number}}
+							{{Math.min(rowCount, limit * (endpointPage)) | number}}
 							of
 							{{rowCount | number}}
 						</div>
@@ -402,38 +404,76 @@ app.component('vTable', {
 	</div>
 </template>
 
-<style>
+<style lang="scss">
 .v-table {
 	min-height: 350px;
+
+	/* Pagination {{{ */
+	& .pagination {
+		margin-bottom: 0;
+	}
+	/* }}} */
+
+	/* Footer {{{ */
+	& .v-table-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	/* }}} */
+
+	/* Loading overlay {{{ */
+	& .v-table-overlay-loading {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
+		opacity: 0.7;
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		right: 0px;
+		border: 0px;
+		background: var(--white);
+		z-index: 10;
+
+		& .v-table-overlay-loading-spinner {
+			margin-bottom: 25px;
+			font-size: 120px;
+		}
+	}
+	/* }}} */
 }
 
-.v-table .v-table-footer {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+/* Sticky thead hacks - Experiment in progress - MC 2021-07-11 {{{ */
+body {
+	overflow-x: initial !important; /* Override theme o-x for body */
 }
 
-.v-table .pagination {
-	margin-bottom: 0;
+#wrapper, .content-page {
+	overflow: initial !important; /* Override theme wrappers */
 }
 
-.v-table .v-table-overlay-loading {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
-	opacity: 0.7;
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	right: 0px;
-	border: 0px;
-	background: var(--white);
-	z-index: 10;
-}
+.v-table {
+	& thead {
+		position: sticky;
+		top: 0px;
+		background: #FFF;
+		box-shadow: 0 1px 2px -1px rgb(0 0 0 / 40%);
 
-.v-table .v-table-overlay-loading-spinner {
-	margin-bottom: 25px;
-	font-size: 120px;
+		/* Correct .col-status from collapsing to just hiding its text element */
+		& th.col-status, & th.col-verbs {
+			visibility: visible;
+
+			& > * { /* Rely on the next level down being a wrapped <a.no-click/> and just hide it */
+				display: none;
+			}
+		}
+
+		& th.col-status > a {
+			display: none;
+		}
+	}
 }
+/* }}} */
 </style>

@@ -1,6 +1,7 @@
 <script lang="js" backend endpoint>
 var _ = require('lodash');
 var basicAuth = require('express-basic-auth');
+var email = require('@momsfriendlydevco/email');
 var fspath = require('path');
 var glob = require('globby');
 
@@ -31,6 +32,8 @@ app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sa
 *   - Resolve as an object - The object keys are used as the test names with the values being optional string payloads
 *
 * @param {string} [req.params.test] Specific test to run, if omitted all are run
+* @param {string} [req.query.email] If set an email is dispatched to the given email address on sanity fail
+* @param {string} [req.query.emailThrottle=1] If truthy (the default, disable with "0" value) will only send the first email on the sanity fail, rather than every time the endpoint is paged
 */
 app.get(
 	'/api/sanity/:test?',
@@ -39,10 +42,9 @@ app.get(
 		realm: app.config.title,
 		users: {[app.config.sanity.user]: app.config.sanity.pass},
 	}),
-	(req, res) => {
-		res.type('text');
-
-		Promise.all(
+	(req, res) => Promise.resolve()
+		// Run all sanity checks and process responses {{{
+		.then(()=> Promise.all(
 			sanityChecks
 				.filter(s => !req.params.test || s.id == req.params.test)
 				.map(s => Promise.resolve(s.func()) // Exec sanity check
@@ -50,7 +52,7 @@ app.get(
 						if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
 							return _.map(result, (v, k) => `PASS ${k} - ${v || 'OK'}`);
 						} else {
-							return `PASS ${s.id} - ${m || 'OK'}`;
+							return `PASS ${s.id} - ${result || 'OK'}`;
 						}
 					})
 					.catch(e => {
@@ -58,19 +60,75 @@ app.get(
 						return `FAIL ${s.id} - ${e.toString()}`;
 					})
 				)
-		)
-			.then(results => _.flatten(results))
-			.then(results => {
-				var fail = results.some(r => typeof r == 'string' && r.startsWith('FAIL '));
+		))
+		.then(results => _.flatten(results))
+		// }}}
+		// Compute ({isFail: Boolean, responseText: String}) {{{
+		.then(results => {
+			var isFail = results.some(r => typeof r == 'string' && r.startsWith('FAIL '));
 
-				if (fail) res.status(500);
-
-				res.send(
-					(fail ? 'SANITY:FAIL\n' : 'SANITY:OK\n')
+			return {
+				isFail,
+				responseText: ''
+					+ (isFail ? 'SANITY:FAIL\n' : 'SANITY:OK\n')
 					+ results.join('\n')
-				);
-			})
-			.catch(e => res.send(`SANITY:FAULT:${e.toString()}`)) // Generic fallback
-	}
+			};
+		})
+		// }}}
+		// Handle email sending (with optional locking) {{{
+		.then(({isFail, responseText}) => {
+			if (!req.query.email) return {isFail, responseText}; // No email provided anyway - no need to handle locking behaviour
+
+			var doThrottle = (req.query.emailThrottle ?? '1') != '0';
+			var sanityLockKey = 'sanity-' + app.lock.hash(req.query.email);
+			return Promise.resolve()
+				.then(()=> doThrottle ? app.lock.exists(sanityLockKey) : false)
+				.then(hasLock => {
+					if (hasLock && !isFail) { // We have a lock AND we're no longer failing sanity - release lock
+						return app.log.release(sanityLockKey)
+							.then(()=> ({isFail, responseText}))
+					} else if (hasLock && isFail) { // We've Seen this lock before and we're still failing sanity checks - pass
+						// Pass
+						app.log.warn.as('sanity', 'Sanity fail, but not dispatching email due to throttle');
+						responseText += '\nNOTE: Sanity email not sent due to throttle';
+						return {isFail, responseText};
+					} else if (!hasLock && isFail) { // Not seen this sanity check fail before - lock and send email
+						var emails = req.query.email.split(/\s*,\s*/);
+						return Promise.resolve()
+							.then(()=> {
+								if (!doThrottle) return;
+
+								responseText += '\nNOTE: Sanity created lock throttle - future failed heartbeats will not be emailed';
+								return app.lock.create(sanityLockKey, {
+									description: 'Sanity lock',
+									created: new Date(),
+									emails,
+								});
+							})
+							.then(()=> app.log.warn.as('sanity', 'Sanity fail, dispatching email to', emails))
+							.then(()=> email()
+								.to(emails)
+								.subject(`Sanity fail on ${app.config.publicUrl}`)
+								.text(responseText)
+								.send()
+							)
+							.then(()=> ({isFail, responseText}))
+					} else { // Not locked and all is well
+						return {isFail, responseText};
+					}
+				})
+		})
+		// }}}
+		// End {{{
+		.then(({isFail, responseText}) => res
+			.type('text')
+			.status(isFail ? 500 : 200)
+			.send(responseText)
+		)
+		.catch(e => res // Generic fallback
+			.type('text')
+			.send(`SANITY:FAULT:${e.toString()}`)
+		)
+		// }}}
 );
 </script>

@@ -8,6 +8,7 @@ app.component('layoutRoot', {
 	}},
 	methods: {
 		toggleSidebar() {
+			this.$debug('toggleSidebar', $('#wrapper').hasClass('enlarged'));
 			$('#wrapper').toggleClass('enlarged');
 			this.sidebarExpanded = ! $('#wrapper').hasClass('enlarged');
 			app.service.$session.settings.set('theme.sidebarExpanded', this.sidebarExpanded, 'session');
@@ -20,6 +21,9 @@ app.component('layoutRoot', {
 		app.service.$session.settings.get('theme.sidebarExpanded', true)
 			.then(res => !res && this.$screen.size != 'xs' && this.toggleSidebar()) // Do initial toggle if the user left it that way
 	},
+	created() {
+		this.$debug().enable(false);
+	}
 });
 </script>
 

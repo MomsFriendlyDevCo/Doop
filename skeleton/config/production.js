@@ -9,6 +9,9 @@ module.exports = {
 	build: {
 		minimize: false, // Server has low memory and needs override
 	},
+	email: {
+		enabled: true,
+	},
 	gulp: {
 		notifications: false,
 		debugJS: false,

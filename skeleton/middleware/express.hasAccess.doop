@@ -1,0 +1,61 @@
+<script lang="js" backend on="middleware">
+var _ = require('lodash');
+
+/**
+* Allow access to an express endpoint based on various criteria
+* NOTE: This function will warn unless you are specific with permissions - i.e. no empty settings object
+* If no tests pass an error is returned and access is denied
+*
+* @param {Object} [options] Additional options when validating
+* @param {boolean} [options.viaApikey=true] Check for and allow access if an ApiKey is provided in the header or body of a request
+* @param {boolean} [options.viaCookie=true] Check for and allow access if the user is a real, single user account validating via cookie
+*
+* @returns {function} Express middleware function
+*/
+app.middleware.express.hasAccess = options => {
+	if (!app.config.isProduction && _.isEmpty(options)) app.log.trace.as('middleware.express.hasAccess', 'Be specific with what permissions you want for readability - e.g. app.middleware.express.hasAccess({viaApikey: true, viaCookie: true})');
+
+	var settings = {
+		viaApikey: true,
+		viaCookie: true,
+	};
+
+	return (req, res, next) => {
+		if (
+			settings.viaApikey
+			&& (req.headers.apikey || req.body.apikey)
+		) {
+			db.accounts.findOne({ // Pull matching account and check apikey is valid
+				status: 'active',
+				'apiKeys.key': req.headers.apikey || req.body.apikey,
+			}).then(account => {
+				if (!account) {
+					res.format({
+						json: ()=> res.status(403).send({err: 'Invalid ApiKey'}),
+						default: ()=> res.sendError(403, 'Invalid ApiKey'),
+					});
+				} else {
+					if (req.body.apikey) delete req.body.apikey; // Remove from body payload so we don't upset Joi validators
+					req.account = account;
+					next();
+				}
+			})
+		} else if (settings.viaCookie && req.user && req.user._id) {
+			next();
+		} else {
+			res.format({
+				json: ()=>
+					res.status(403).send({err:
+						'Unauthorized - Accepted methods of validation are: '
+						+ [
+							settings.viaApikey && 'header `apikey`',
+							settings.viaCookie && 'user cookie',
+						].filter(Boolean).join(', ')
+					}),
+				default: ()=>
+					res.redirect('/?err=noAuth'),
+			});
+		}
+	};
+};
+</script>

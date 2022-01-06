@@ -1,6 +1,7 @@
 <script lang="js" backend schema>
 var crypto = require('crypto');
 var _ = require('lodash');
+var moment = require('moment');
 
 /**
  * Users
@@ -15,6 +16,7 @@ app.middleware.db.schema('users', {
 	_passsalt: {type: String},
 	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
 	_tokenPurpose: {type: String, enum: ['invite', 'login', 'recover', 'signup']},
+	_tokenExpiry: {type: Date},
 	name: {type: String},
 	status: {type: String, enum: ['inactive', 'active', 'deleted'], default: 'inactive', index: true},
 	settings: {},
@@ -113,6 +115,8 @@ app.middleware.db.schema('users', {
 
 			this._token = tryToken;
 			this._tokenPurpose = purpose;
+			// FIXME: UTC?
+			this._tokenExpiry = moment().startOf('day').add(1,'week')
 			this.save()
 				.then(()=> {
 					//app.log('Token saved', purpose, tryToken);
@@ -131,6 +135,7 @@ app.middleware.db.schema('users', {
 	//app.log('releaseToken');
 	this._token = undefined;
 	this._tokenPurpose = undefined;
+	this._tokenExpiry = undefined;
 	return this.save();
 })
 // }}}

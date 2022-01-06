@@ -13,11 +13,13 @@ import moment from 'moment';
 * @param {boolean} [options.fromNow] Display using Moment fromNow() feature
 * @param {string} [options.diff] Difference from now at the given resolution
 * @param {number} [options.diffLimit] Highest diff before switching back to formatMobile
+* @param {boolean} [options.utc=false] Display using Moment utc() feature
 * @returns {string} A formatted date
 */
 app.filter('date', (value, options) => {
 	if (!value) return '';
 
+	// TODO: Could use _.defaults
 	var settings = {
 		format: '',
 		formatMobile: 'Do MMM YYYY',
@@ -26,6 +28,7 @@ app.filter('date', (value, options) => {
 		diff: '',
 		diffLimit: 0,
 		date: !_.isPlainObject(value) ? value : value.date,
+		utc: false,
 		...(_.isPlainObject(value) ? value : undefined),
 		...(_.isPlainObject(options) ? options : undefined), // Ability to pass in options as second parameter `string | date({format: 'YYYY'})`
 	};
@@ -33,6 +36,8 @@ app.filter('date', (value, options) => {
 	var dateMoment =
 		isFinite(settings.date) && settings.date > 1000000000 && settings.date < 2000000000 ? moment.unix(settings.date)
 		: moment(settings.date);
+
+	if (settings.utc) dateMoment = dateMoment.utc();
 
 	if (!dateMoment.isValid()) return '';
 

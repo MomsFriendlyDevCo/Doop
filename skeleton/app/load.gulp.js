@@ -7,6 +7,10 @@ var gulp = require('gulp');
 */
 gulp.task.once('load:app', ()=> {
 	require('./app.backend');
-	return app.setup()
-		.then(()=> app.emit('essencial'))
+	// Tell backend bootstrap that we're only interested in "local" *.doop files in Gulp context
+	return app.setup({
+		local: true,
+		vendor: false,
+	})
+		.then(()=> app.emit('essencial')) // FIXME: essencial? essential
 });
