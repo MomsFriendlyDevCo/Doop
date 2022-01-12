@@ -10,6 +10,15 @@ app.get('/go/invite/:token', (req, res) => {
 		status: { $ne: 'deleted' },
 		_token: req.params.token,
 		_tokenPurpose: 'invite', // Restrict the token usage to users requesting logins only
+		/*
+		// TODO: Fully integrate tokenExpiry
+		_tokenExpiry: {
+			$or: [
+				$exists: false,
+				$gte: moment().utc().toDate(),
+			]
+		},
+		*/
 	})
 		.then(user => {
 			if (!app.config.session.invite.enabled) throw new Error('501: User invite is disabled');
@@ -34,6 +43,8 @@ app.get('/go/invite/:token', (req, res) => {
 var _ = require('lodash');
 var email = require('@momsfriendlydevco/email');
 var fs = require('fs');
+// TODO: Fully integrate tokenExpiry
+//var moment = require('moment');
 
 var logo;
 
@@ -126,6 +137,8 @@ app.post([
 						'email',
 						'session',
 					]),
+					// TODO: Fully integrate tokenExpiry
+					//tokenExpiry: moment().utc(user._tokenExpiry).local().format('MMMM DD, YYYY'),
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
 					url: `${app.config.publicUrl}/go/invite/${token}`,
 					path: `${app.config.paths.root}`,

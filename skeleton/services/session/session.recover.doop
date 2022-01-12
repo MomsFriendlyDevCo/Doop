@@ -10,6 +10,15 @@ app.get('/go/recover/:token', (req, res) => {
 		status: { $ne: 'deleted' },
 		_token: req.params.token,
 		_tokenPurpose: 'recover', // Restrict the token usage to users requesting logins only
+		/*
+		// TODO: Fully integrate tokenExpiry
+		_tokenExpiry: {
+			$or: [
+				$exists: false,
+				$gte: moment().utc().toDate(),
+			]
+		},
+		*/
 	})
 		.then(user => user || Promise.reject('403: Password reset token invalid'))
 		.then(user => user.logIn(res).then(()=> user))
@@ -114,6 +123,8 @@ app.post([
 						'email',
 						'session',
 					]),
+					// TODO: Fully integrate tokenExpiry
+					//tokenExpiry: moment().utc(user._tokenExpiry).local().format('MMMM DD, YYYY'),
 					ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
 					url: `${app.config.publicUrl}/go/recover/${token}`,
 				},
