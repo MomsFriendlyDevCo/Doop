@@ -177,7 +177,8 @@ app.directive('v-sanitize', {
 				if (val != originalVal) { // If we did anything...
 					$el.val(val); // Set component new value
 
-					vnode?.data?.on?.input(e); // Has a v-model binding - tell the binding that the value has changed
+					if (vnode?.data?.on?.input) // Has a v-model binding
+						vnode.data.on.input(e); // Tell the binding that the value has changed
 				}
 				// console.log('DO', e.type, 'SANITIZE', `[${originalVal}] => [${val}]`);
 			});

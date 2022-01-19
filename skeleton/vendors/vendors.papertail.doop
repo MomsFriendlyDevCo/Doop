@@ -4,6 +4,7 @@
 */
 
 var _ = require('lodash');
+var colors = require('chalk');
 var util = require('util');
 var {PapertrailTransport} = require('winston-papertrail-transport');
 var winston = require('winston');
@@ -59,10 +60,10 @@ var initWinston = ()=> {
 	Object.assign(console, {
 		isWinston: true,
 		logRaw: console.log,
-		log: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-		info: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-		warn: (...msg) => logger.log('warn', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
-		error: (...msg) => logger.log('error', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: true, depth: 5})).join(' ')),
+		log: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: colors.supportsColor, depth: 5})).join(' ')),
+		info: (...msg) => logger.log('info', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: colors.supportsColor, depth: 5})).join(' ')),
+		warn: (...msg) => logger.log('warn', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: colors.supportsColor, depth: 5})).join(' ')),
+		error: (...msg) => logger.log('error', msg.map(m => _.isString(m) ? m : util.inspect(m, {colors: colors.supportsColor, depth: 5})).join(' ')),
 	});
 
 	app.refresh.log(); // Reload main loggers

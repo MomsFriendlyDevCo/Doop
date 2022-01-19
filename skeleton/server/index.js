@@ -22,6 +22,7 @@ Promise.resolve()
 	.then(()=> app.setup())
 	// }}}
 	// Emit events to boot server in order {{{
+	.then(()=> debug('Begin emitter chain'))
 	.then(()=> app.emit('preInit'))
 	.then(()=> app.emit('init'))
 	.then(()=> app.emit('postInit'))
@@ -43,6 +44,7 @@ Promise.resolve()
 	.then(()=> app.emit('preReady'))
 	.then(()=> app.log(app.log.colors.bold.blue('⚝  Doop! ⚝')))
 	.then(()=> app.emit('ready'))
+	.then(()=> debug('Finished bootstrap'))
 	// }}}
 	// Error handling {{{
 	.catch(e => crash.stop(e, {prefix: 'Fatal server process exit'}))
