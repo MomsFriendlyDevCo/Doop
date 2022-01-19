@@ -2,7 +2,7 @@
 import _ from 'lodash';
 global._ = _;
 
-import Debug from '/services/debug';
+import Debug from '@doop/service-debug';
 
 import Vue from 'vue';
 Vue.config.devtools = true; // FIXME: Better way of doing $isProduction blocks

@@ -1,4 +1,4 @@
-<script lang="js" backend on="init, dbInit, essencial">
+<script lang="js" backend on="init, dbInit, essential">
 var colors = require('chalk');
 
 var polyfills = [

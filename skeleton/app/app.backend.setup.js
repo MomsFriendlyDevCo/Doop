@@ -161,6 +161,7 @@ module.exports = (options = {}) => {
 			gitignore: true, // Respect .gitignore file (usually excludes node_modules, data, test etc.)
 		}))
 		.then(files => files && files.length > 0 && parseFiles(files)
+			//.then(() => app.log.as('backend', files))
 			.then(() => app.log.as('backend', 'Imported', files.length, 'local .doop files'))
 		)
 
@@ -173,6 +174,7 @@ module.exports = (options = {}) => {
 			gitignore: false,
 		}))
 		.then(files => files && files.length > 0 && parseFiles(files)
+			//.then(() => app.log.as('backend', files))
 			.then(() => app.log.as('backend', 'Imported', files.length, '3rd party .doop files'))
 		)
 

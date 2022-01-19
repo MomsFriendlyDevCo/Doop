@@ -1,4 +1,4 @@
-var gulp = require('gulp');
+const gulp = require('gulp');
 
 /**
 * Loads main app configuration file into `global.app`
@@ -7,10 +7,14 @@ var gulp = require('gulp');
 */
 gulp.task.once('load:app', ()=> {
 	require('./app.backend');
-	// Tell backend bootstrap that we're only interested in "local" *.doop files in Gulp context
+	// We do require vendor loaded also as we're now loading gulp tasks from @doop packages
 	return app.setup({
 		local: true,
-		vendor: false,
+		vendor: true,
 	})
-		.then(()=> app.emit('essencial')) // FIXME: essencial? essential
+		.then(()=> app.emit('essential')) // Load any *.doop files required by all tasks
+		.then(()=> app.emit('gulp')); // Load any *.doop files required by gulp tasks
+		// NOTE: Loading 3rd party gulp tasks may fail when using local (file:../) packages
+		// Throws "Task function must be specified"
+		// This is due to NPM cache functioning differently in this case and gulp not being the mutated version
 });

@@ -1,7 +1,7 @@
-var gulp = require('@momsfriendlydevco/gulpy');
-var mongoosy = require('@momsfriendlydevco/mongoosy');
+const gulp = require('@momsfriendlydevco/gulpy');
+const mongoosy = require('@momsfriendlydevco/mongoosy');
 
-var hasLoaded = false;
+let hasLoaded = false;
 
 gulp.task.once('load:app.db', 'load:app', ()=>
 	Promise.resolve()

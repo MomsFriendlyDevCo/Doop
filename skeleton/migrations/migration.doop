@@ -6,7 +6,7 @@ app.middleware.db.schema('doopMigrations', {
 </script>
 
 
-<script lang="js" backend on="init, essencial">
+<script lang="js" backend on="init, essential">
 /**
 * Database script migration functionality
 *

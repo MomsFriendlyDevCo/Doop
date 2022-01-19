@@ -130,6 +130,8 @@ fi
 # Stop on errors
 set -euo pipefail
 
+# TODO: Stop agents before proceeding with redeploy
+
 # Deploy dev {{{
 if [ "$DODEV" == 1 ]; then
 	if [ ! -d "$DEVPATH" ]; then
