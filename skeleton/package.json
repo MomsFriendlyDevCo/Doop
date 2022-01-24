@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/MomsFriendlyDevCo/{{FIXME:repoBasename}}.git"
   },
-  "author": "Matt Carter <m@ttcarter.com>",
+  "author": "Matt Carter <matt@mfdc.biz>",
   "private": true,
   "bugs": {
     "url": "https://github.com/MomsFriendlyDevCo/{{FIXME:repoBasename}}/issues"
@@ -27,7 +27,7 @@
   "homepage": "https://github.com/MomsFriendlyDevCo/{{FIXME:repoBasename}}#readme",
   "engineStrict": true,
   "engines": {
-    "node": ">=14.15.0"
+    "node": ">=16.13.0"
   },
   "dependencies": {
     "@babel/core": "^7.13.15",

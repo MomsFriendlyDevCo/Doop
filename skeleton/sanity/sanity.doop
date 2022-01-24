@@ -4,6 +4,9 @@ var basicAuth = require('express-basic-auth');
 var email = require('@momsfriendlydevco/email');
 var fspath = require('path');
 var glob = require('globby');
+var moment = require('moment');
+var micromatch = require('micromatch');
+var timestring = require('timestring');
 
 /**
 * Compute an array of sanity checks to run from all fiels in /sanity/*.js
@@ -31,9 +34,13 @@ app.log('Loaded', app.log.colors.cyan(sanityChecks.length), 'sanity checks:', sa
 *   - Resolve - in which case they are marked as passed sanity tests with an optional string payload
 *   - Resolve as an object - The object keys are used as the test names with the values being optional string payloads
 *
+* When email + throttle is enabled a hash is created of the email + emailThrottle + exclude parameters, so multiple combinations are allowed with different throttles
+*
 * @param {string} [req.params.test] Specific test to run, if omitted all are run
-* @param {string} [req.query.email] If set an email is dispatched to the given email address on sanity fail
-* @param {string} [req.query.emailThrottle=1] If truthy (the default, disable with "0" value) will only send the first email on the sanity fail, rather than every time the endpoint is paged
+* @param {string} [req.query.email] If set an email is dispatched to the given CSV of email addresses should sanity checks fail
+* @param {string} [req.query.throttle="1h"] If truthy will only send emails based on the timestring parsable period. e.g. `1h` = only send emails every 1h, disable with "0" value
+* @param {string} [req.query.exclude] CSV of glob module names to exclude
+*
 */
 app.get(
 	'/api/sanity/:test?',
@@ -44,79 +51,116 @@ app.get(
 	}),
 	(req, res) => Promise.resolve()
 		// Run all sanity checks and process responses {{{
-		.then(()=> Promise.all(
-			sanityChecks
-				.filter(s => !req.params.test || s.id == req.params.test)
-				.map(s => Promise.resolve(s.func()) // Exec sanity check
-					.then(result => {
-						if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
-							return _.map(result, (v, k) => `PASS ${k} - ${v || 'OK'}`);
-						} else {
-							return `PASS ${s.id} - ${result || 'OK'}`;
-						}
-					})
-					.catch(e => {
-						app.log.warn.as(`sanity/${s.id}`, e);
-						return `FAIL ${s.id} - ${e.toString()}`;
-					})
-				)
-		))
-		.then(results => _.flatten(results))
+		.then(()=> {
+			var start = Date.now();
+			return Promise.all(
+				sanityChecks
+					.filter(s => !req.params.test || s.id == req.params.test)
+					.filter(s => !req.query.exclude || !micromatch.isMatch(s.id, req.query.exclude.split(/\s*,\s*/))) // Process req.query.exclude
+					.map(s => Promise.resolve(s.func()) // Exec sanity check
+						.then(result => {
+							if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
+								return _.map(result, (v, k) => `PASS: ${k} - ${v || 'OK'}`);
+							} else {
+								return `PASS: ${s.id} - ${result || 'OK'}`;
+							}
+						})
+						.catch(e => {
+							app.log.warn.as(`sanity/${s.id}`, e);
+							return `FAIL: ${s.id} - ${e.toString()}`;
+						})
+					)
+			)
+				.then(results => ({
+					results: _.flatten(results),
+					runTime: Date.now() - start,
+				}))
+		})
 		// }}}
 		// Compute ({isFail: Boolean, responseText: String}) {{{
-		.then(results => {
-			var isFail = results.some(r => typeof r == 'string' && r.startsWith('FAIL '));
+		.then(({results, runTime}) => {
+			var isFail = results.some(r => typeof r == 'string' && r.startsWith('FAIL: '));
 
 			return {
 				isFail,
 				responseText: ''
-					+ (isFail ? 'SANITY:FAIL\n' : 'SANITY:OK\n')
-					+ results.join('\n')
+					+ (isFail ? 'SANITY:FAIL\n\n' : 'SANITY:OK\n\n')
+					+ _.chain(results)
+						.sortBy(line => { // Sort FAIL lines first
+							var parts = /^(?<status>.+): (?<module>.+) - (?<msg>.*)$/.exec(line)?.groups;
+							return [ // Return actual sort criteria
+								parts.status == 'PASS' ? 'Z' : 'A', // Sort FAIL messages first
+								parts.module,
+								parts.msg,
+							].join('-');
+						})
+						.reduce((lines, thisItem) => { // Add spacing between FAIL and PASS items if there are any of the former
+							var lastItem = lines[lines.length-1];
+							if (lastItem && thisItem.startsWith('PASS:') && lastItem.startsWith('FAIL:')) lines.push('-----');
+							lines.push(thisItem);
+							return lines;
+						}, [])
+						.join('\n')
+						.value()
+					+ `\n\nNOTE: ${results.length} sanity tests run in ${runTime}ms`
+						+ (app.config.papertrail.program
+							? ` by process ${app.config.papertrail.program}\n`
+							: ''
+						)
 			};
 		})
 		// }}}
 		// Handle email sending (with optional locking) {{{
 		.then(({isFail, responseText}) => {
-			if (!req.query.email) return {isFail, responseText}; // No email provided anyway - no need to handle locking behaviour
+			// emailSend() function {{{
+			var emailSend = ()=> email()
+				.to(req.query.email.split(/\*s,\s*/))
+				.subject(`Sanity fail on ${app.config.publicUrl}`)
+				.text(responseText)
+				.send()
+			// }}}
 
-			var doThrottle = (req.query.emailThrottle ?? '1') != '0';
-			var sanityLockKey = 'sanity-' + app.lock.hash(req.query.email);
-			return Promise.resolve()
-				.then(()=> doThrottle ? app.lock.exists(sanityLockKey) : false)
-				.then(hasLock => {
-					if (hasLock && !isFail) { // We have a lock AND we're no longer failing sanity - release lock
-						return app.log.release(sanityLockKey)
-							.then(()=> ({isFail, responseText}))
-					} else if (hasLock && isFail) { // We've Seen this lock before and we're still failing sanity checks - pass
-						// Pass
-						app.log.warn.as('sanity', 'Sanity fail, but not dispatching email due to throttle');
-						responseText += '\nNOTE: Sanity email not sent due to throttle';
-						return {isFail, responseText};
-					} else if (!hasLock && isFail) { // Not seen this sanity check fail before - lock and send email
-						var emails = req.query.email.split(/\s*,\s*/);
-						return Promise.resolve()
-							.then(()=> {
-								if (!doThrottle) return;
+			if (!isFail || !req.query.email) { // No failure or no email provided anyway - no need to handle email sending
+				return {isFail, responseText};
+			} else if (!(req.query.throttle ?? '1h')) { // Disabled throttle - send immediate email
+				return emailSend();
+			} else { // Send with throttled timing
+				var throttleHuman = req.query.throttle ?? '1h';
+				var throttle = timestring(throttleHuman, 'ms');
+				var cacheKey = 'sanity-' + app.lock.hash({
+					email: req.query.email,
+					throttle,
+					...(req.query.exclude ? req.query.exclude : {}),
+				});
 
-								responseText += '\nNOTE: Sanity created lock throttle - future failed heartbeats will not be emailed';
-								return app.lock.create(sanityLockKey, {
-									description: 'Sanity lock',
-									created: new Date(),
-									emails,
-								});
-							})
-							.then(()=> app.log.warn.as('sanity', 'Sanity fail, dispatching email to', emails))
-							.then(()=> email()
-								.to(emails)
-								.subject(`Sanity fail on ${app.config.publicUrl}`)
-								.text(responseText)
-								.send()
-							)
-							.then(()=> ({isFail, responseText}))
-					} else { // Not locked and all is well
-						return {isFail, responseText};
-					}
-				})
+				/**
+				* Cache value entry for reference
+				* This is set if the email is actually dispatched and is specified here as a reference object
+				* @type {Object}
+				* @property {Number} lastSend The date, in JS Unix time of the last send for the matching `cacheKey`
+				*/
+				var newCacheValue = {
+					lastSend: new Date(),
+				};
+
+				return app.cache.get(cacheKey)
+					.then(cacheValue => {
+						if (
+							!cacheValue?.lastSend // No existing cache value or invalid
+							|| moment(cacheValue.lastSend).add(throttle, 'ms').isBefore(moment()) // Expired
+						) {
+							responseText += `\nNOTE: Email dispatched to ${req.query.email.split(/\*s,\s*/).join(', ')}`;
+							return app.cache.set(cacheKey, newCacheValue)
+								.then(()=> emailSend());
+
+							responseText += `\nNOTE: Next email will be dispatched (due to timing "${throttleHuman}") at ` + moment().add(throttle, 'ms').format();
+						} else { // Cache value and is still valid
+							responseText += `\nNOTE: Email not sent due to timing "${throttleHuman}" with last email dispatched at ${moment(cacheValue.lastSend).format()} next email due at ${moment(cacheValue.lastSend).add(throttle, 'ms').format()}`;
+							return;
+						}
+					})
+					.then(()=> ({isFail, responseText}))
+			}
 		})
 		// }}}
 		// End {{{
