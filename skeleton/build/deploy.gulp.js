@@ -8,11 +8,11 @@ gulp.task('preDeploy', ['build.docs'], ()=> Promise.resolve());
 
 gulp.task('postDeploy', ['load:app.git', 'load:app.slack'], ()=> Promise.resolve()
 	.then(()=> app.git.historySinceBookmark(app.config.deploy.historyBookmark))
-	.then(history => Promise.allSeries([
+	.then(history => Promise.all([
 		// {type: 'freedcamp'} {{{
 		...app.config.deploy.actions
 			.filter(s => s.type == 'freedcamp' && s.event == 'postDeploy')
-			.map(msg => ()=> {
+			.map(msg => {
 				// Calculate FC parameter slush {{{
 				var timestamp = new Date().valueOf();
 				var params = { // Params to send with each request
@@ -94,7 +94,7 @@ gulp.task('postDeploy', ['load:app.git', 'load:app.slack'], ()=> Promise.resolve
 		// {type: 'slack'} {{{
 		...app.config.deploy.actions
 			.filter(s => s.type == 'slack' && s.event == 'postDeploy')
-			.map(msg => ()=>
+			.map(msg =>
 				Promise.resolve(msg.body(app, history))
 					.then(body => app.slack.post({...msg, body}))
 					.catch(e => {

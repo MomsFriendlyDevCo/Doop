@@ -40,6 +40,8 @@ module.exports = {
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
 	url: 'http://localhost',
+	// TODO: Specify port as part of URL when required?
+	//apiUrl: config => (config.port !== 80) ? config.url + ':' + config.port : config.url,
 	apiUrl: config => config.url,
 	secret: '{{FIXME}}', // Used as Cookie spice, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
 	access: {
