@@ -81,7 +81,6 @@ module.exports = {
 	},
 	build: {
 		minimize: false,
-		watchNodeModules: false,
 	},
 	cache: {
 		enabled: true,
