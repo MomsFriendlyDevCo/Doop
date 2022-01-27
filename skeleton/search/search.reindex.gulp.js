@@ -6,6 +6,7 @@ var gulp = require('gulp');
 *
 * @param {string} [process.env.REINDEX_COLLECTION] CSV of specific collections to reindex, defaults to all collections with a search method attached
 * @param {string} [process.env.REINDEX_ID] CSV of specific document IDs to reindex, defaults to all documents in the collection
+* @param {string} [process.env.REINDEX_FROM] OID to continue reindexing from (i.e. AFTER this ID)
 *
 * @example Reindex all search collections
 * gulp search.reindex
@@ -26,7 +27,8 @@ gulp.task('search.reindex', 'load:app.db', ()=> {
 		.filter(model => !filterCollections.length || filterCollections.includes(model))
 		.map(model => {
 			var docNumber = 0;
-			var docQuery = filterIds.length ? {_id: {$in: filterIds}} : undefined;
+			var docQuery = filterIds.length ? {_id: {$in: filterIds}} : {};
+			if (process.env.REINDEX_FROM) _.set(docQuery, ['_id', '$gt'], process.env.REINDEX_FROM);
 
 			return ()=> app.db[model].count(docQuery)
 				.then(totalDocs => new Promise((resolve, reject) => app.db[model].find(docQuery)
