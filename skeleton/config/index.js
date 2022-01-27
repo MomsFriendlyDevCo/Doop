@@ -222,14 +222,8 @@ module.exports = {
 			apiUrl: app.config.apiUrl,
 			isProduction: app.config.isProduction,
 			title: app.config.title,
-			tagline: app.config.tagline,
 			git: {
 				url: app.config.git.url,
-				current: app.git?.current || {},
-			},
-			orders: {
-				country: app.config.orders.country,
-				prototypeSelect: app.config.orders.prototypeSelect,
 			},
 			session: {
 				preference: app.config.session.auth.preference,
@@ -239,7 +233,6 @@ module.exports = {
 				recover: app.config.session.recover,
 				signup: app.config.session.signup,
 			},
-			woo: config.woo,
 		}),
 	},
 	lock: {
