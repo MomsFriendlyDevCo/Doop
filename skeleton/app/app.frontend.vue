@@ -2,7 +2,7 @@
 import _ from 'lodash';
 global._ = _;
 
-import Debug from '@doop/service-debug';
+import Debug from '@doop/debug';
 
 import Vue from 'vue';
 Vue.config.devtools = true; // FIXME: Better way of doing $isProduction blocks
@@ -73,7 +73,10 @@ global.app = {
 		// Argument mangling {{{
 		if (_.isObject(id)) { // Passed only spec
 			[id, spec] = [_.camelCase(id.route), id];
-			if (!id) throw new Error(`Register anonymous component with app.component(SPEC) but spec has no route specified, specify a component name or {route: String}`);
+			if (!id) {
+				console.log('No ID or omitted route for spec', {spec});
+				throw new Error(`Register anonymous component with app.component(SPEC) but spec has no route specified, specify a component name or {route: String}`);
+			}
 		}
 		// }}}
 

@@ -36,6 +36,7 @@ module.exports = {
 			bypassEmptyPassword: false,
 		},
 	},
+	// FIXME: No longer required?
 	ssl: {
 		enabled: false,
 		redirect: false,
