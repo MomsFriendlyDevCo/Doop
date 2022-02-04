@@ -1,5 +1,6 @@
-const gulp = require('@momsfriendlydevco/gulpy');
 const mongoosy = require('@momsfriendlydevco/mongoosy');
+
+const gulp = require('gulp');
 
 let hasLoaded = false;
 

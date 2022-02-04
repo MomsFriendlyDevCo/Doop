@@ -3,15 +3,18 @@
 * Watch various file types firing off rebuild tasks as changes are detected
 */
 
-var _ = require('lodash');
-var domain = require('domain');
-var gulp = require('@momsfriendlydevco/gulpy'); // Force gulpy as regular gulp is weird when forced to run tasks out-of-sequence
-var nodemon = require('nodemon');
-var spawn = require('child_process').spawn;
-var watch = require('chokidar').watch;
+const _ = require('lodash');
+const domain = require('domain');
+const nodemon = require('nodemon');
+const spawn = require('child_process').spawn;
+const watch = require('chokidar').watch;
+
+const gulp = require('gulp');
+
 var throttleTimeout = 1000; // How long to wait before firing a rebuild again - prevents multiple file updates launching multiple rebuilds simultaneously
 var throttleOptions = {leading: true, trailing: false};
 
+// FIXME: Unused variable?
 var procRunningCount = 0;
 
 /**
@@ -19,6 +22,7 @@ var procRunningCount = 0;
 * This task independently watches the client side files dir (inc. Angular) for changes and only rebuilds those without rebooting the server if a change is detected
 */
 gulp.task('serve', ['load:app', 'build'], function(finish) {
+	// FIXME: "domain" deprecation
 	var watchDomain = domain.create();
 
 	watchDomain.on('error', function(err) {

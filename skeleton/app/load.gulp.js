@@ -1,4 +1,5 @@
-const gulp = require('@momsfriendlydevco/gulpy');
+const gulp = require('gulp');
+
 require('./app.backend');
 
 /**

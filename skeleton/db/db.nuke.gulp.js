@@ -1,6 +1,7 @@
-var _ = require('lodash');
-var gulp = require('gulp');
-var mongoose = require('mongoose');
+const _ = require('lodash');
+const mongoose = require('mongoose');
+
+const gulp = require('gulp');
 
 gulp.task('db:nuke', 'load:app', ()=> {
 	if (app.config.env == 'production' && (!process.env.NUKE || process.env.NUKE != 'FORCE')) throw new Error('Refusing to nuke database in production! If you REALLY want to do this set `export NUKE=FORCE`');

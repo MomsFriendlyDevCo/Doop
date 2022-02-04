@@ -1,12 +1,10 @@
 /**
 * Tasks to populate db with specific scenario data - either default or test scenarios
 */
-
-var gulp = require('gulp');
-var mongoosy = require('@momsfriendlydevco/mongoosy');
+const mongoosy = require('@momsfriendlydevco/mongoosy');
+const gulp = require('gulp');
 
 gulp.task('db', 'scenario');
-
 
 /**
 * Setup the local Mongo DB with all the files located in ./*.json

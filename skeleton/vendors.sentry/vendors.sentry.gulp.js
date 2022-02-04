@@ -1,6 +1,6 @@
-var async = require('async-chainable');
-var gulp = require('gulp');
-var superagent = require('superagent');
+const async = require('async-chainable');
+const superagent = require('superagent');
+const gulp = require('gulp');
 
 gulp.task('deploy:sentry', ['load:app', 'load:app.git'], function(finish) {
 	async()
