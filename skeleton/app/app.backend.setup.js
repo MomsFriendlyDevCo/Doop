@@ -155,26 +155,27 @@ module.exports = (options = {}) => {
 		// Local
 		.then(()=> options.local && glob([
 			`**/*.doop`,
-			!app.config.isProduction && '**/*.vue', // Process .vue files in non-production only (syntax checks block headers)
+			// FIXME: Do we need *.vue files here?
+			//!app.config.isProduction && '**/*.vue', // Process .vue files in non-production only (syntax checks block headers)
 			...app.config.paths.ignore,
 		].filter(Boolean), {
 			gitignore: true, // Respect .gitignore file (usually excludes node_modules, data, test etc.)
 		}))
 		.then(files => files && files.length > 0 && parseFiles(files)
-			//.then(() => app.log.as('backend', files))
+			.then(() => app.log.debug(files))
 			.then(() => app.log.as('backend', 'Imported', files.length, 'local .doop files'))
 		)
 
 		// 3rd Party
 		.then(()=> options.vendor && glob([
 			`./node_modules/@doop/**/*.doop`,
-			// TODO: Do we need *.vue from node_modules?
-			//!app.config.isProduction && './node_modules/@doop/**/*.vue', // Process .vue files in non-production only (syntax checks block headers)
 		].filter(Boolean), {
-			gitignore: false,
+			ignore: [
+				'./node_modules/@doop/**/node_modules',
+			],
 		}))
 		.then(files => files && files.length > 0 && parseFiles(files)
-			//.then(() => app.log.as('backend', files))
+			.then(() => app.log.debug(files))
 			.then(() => app.log.as('backend', 'Imported', files.length, '3rd party .doop files'))
 		)
 
@@ -182,16 +183,19 @@ module.exports = (options = {}) => {
 
 		// Execute any 3rd party backend hooks {{{
 		.then(()=> options.vendor && glob([
-			`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
-			`!${app.config.paths.root}/node_modules/**/node_modules`,
-		])
+			`./node_modules/@doop/**/doop.backend.hooks.js`,
+		].filter(Boolean), {
+			ignore: [
+				'./node_modules/@doop/**/node_modules',
+			],
+		}))
 		.then(files => {
 			files.forEach(modPath => {
 				app.log.debug('Load module', modPath);
 				require(modPath);
 			});
 			app.log.as('backend', 'Imported', files.length, '3rd party hook files')
-		}))
+		})
 		// }}}
 
 		// Glue debugging onto app.emit / app.on if debugging is enabled {{{
