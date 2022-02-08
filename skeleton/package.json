@@ -73,6 +73,7 @@
     "@doop/service-morph": "^1.0.0",
     "@doop/service-toast": "^1.0.4",
     "@doop/slack": "^1.0.0",
+    "@doop/table": "^1.0.0",
     "@doop/throttle": "^1.0.0",
     "@doop/timeout": "^1.0.1",
     "@doop/timeseries-chart": "^1.0.6",
