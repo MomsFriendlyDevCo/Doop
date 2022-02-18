@@ -1,4 +1,7 @@
-const gulp = require('gulp');
+// NOTE: If we import "gulp" then "finish" listener never fires
+//const gulp = require('gulp');
+// FIXME: Does gulpy need to extend eventer in some other manner?
+const gulp = require('@momsfriendlydevco/gulpy');
 
 require('./app.backend');
 

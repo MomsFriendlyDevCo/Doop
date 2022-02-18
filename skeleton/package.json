@@ -92,7 +92,7 @@
     "@momsfriendlydevco/express-middleware-formatter": "^1.1.16",
     "@momsfriendlydevco/express-middleware-throttle": "^0.0.4",
     "@momsfriendlydevco/fa-icons": "^1.0.1",
-    "@momsfriendlydevco/gulpy": "^1.4.2",
+    "@momsfriendlydevco/gulpy": "^1.4.3",
     "@momsfriendlydevco/macgyver": "git+https://github.com/MomsFriendlyDevCo/MacGyver2.git",
     "@momsfriendlydevco/mongoosy": "^1.4.1",
     "@momsfriendlydevco/readable": "^1.2.1",
