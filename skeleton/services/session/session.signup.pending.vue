@@ -24,11 +24,11 @@ app.component({
 				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
 					<h4>
 						<strong>
-							Chatstat — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
+							FIXME:title — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
 						</strong>
 					</h4>
 					<p class="lead">
-						Enhance your financial due diligance. Chatstat allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
+						Enhance your financial due diligance. FIXME:title allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
 					</p>
 					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
 				</div>

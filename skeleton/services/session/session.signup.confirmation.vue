@@ -18,7 +18,7 @@ app.component({
 								Thank you for registering for an account.
 								Your email address has been successfully verified!
 							</p>
-							<a href="/" class="btn btn-lg btn-primary d-block mt-4">Start using ChatStat</a>
+							<a href="/" class="btn btn-lg btn-primary d-block mt-4">Start using FIXME:title</a>
 						</div>
 					</div>
 

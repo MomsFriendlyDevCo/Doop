@@ -46,11 +46,11 @@ app.component({
 				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
 					<h4>
 						<strong>
-							Chatstat — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
+							FIXME:title — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
 						</strong>
 					</h4>
 					<p class="lead">
-						Enhance your financial due diligance. Chatstat allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
+						Enhance your financial due diligance. FIXME:title allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
 					</p>
 					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
 				</div>
@@ -90,8 +90,8 @@ app.component({
 								</div>
 								<div v-else class="form-group text-center mb-3">
 									<h3 class="d-none d-lg-block mb-4">Recover password</h3>
-									<p v-if="$config.session.signup.emailAsUsername">An email will be sent to {{data.email}} if this email address is associated with a registered Chatstat account.</p>
-									<p v-if="!$config.session.signup.emailAsUsername">An email will be sent to your address if this username is associated with a registered Chatstat account.</p>
+									<p v-if="$config.session.signup.emailAsUsername">An email will be sent to {{data.email}} if this email address is associated with a registered FIXME:title account.</p>
+									<p v-if="!$config.session.signup.emailAsUsername">An email will be sent to your address if this username is associated with a registered FIXME:title account.</p>
 									<br>
 									<p class="mb-0">Please check your inbox and follow the instructions in this email to reset your password</p>
 								</div>
