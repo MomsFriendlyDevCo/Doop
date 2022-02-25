@@ -9,7 +9,7 @@ app.component({
 	<div class="session-float position-fixed d-flex flex-column vh-100">
 		<div class="container flex-grow-1">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
-				<div class="col-sm-10 col-md-8 col-lg-6">
+				<div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
 					<h4 class="d-lg-none text-center mb-4">Email verified</h4>
 					<div class="card bg-light shadow">
 						<div class="card-body p-4">
@@ -18,7 +18,9 @@ app.component({
 								Thank you for registering for an account.
 								Your email address has been successfully verified!
 							</p>
-							<a href="/" class="btn btn-lg btn-primary d-block mt-4">Start using FIXME:title</a>
+							<div class="d-grid mt-4">
+								<a href="/" class="btn btn-lg btn-primary d-block mt-4">Start using FIXME:title</a>
+							</div>
 						</div>
 					</div>
 

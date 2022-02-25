@@ -18,36 +18,26 @@ app.component({
 
 <template>
 	<div class="session-float d-flex flex-column vh-100">
-		<sitenav/>
 		<div class="container flex-grow-1">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
-				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
-					<h4>
-						<strong>
-							FIXME:title — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
-						</strong>
-					</h4>
-					<p class="lead">
-						Enhance your financial due diligance. FIXME:title allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
-					</p>
-					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
-				</div>
-				<div class="col-sm-10 col-md-8 col-lg-6">
-					<h4 class="d-lg-none text-center mb-4">Pending email confirmation</h4>
+				<div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
+					<picture class="d-flex justify-content-center mb-4">
+						<img src="/assets/logo/logo.svg" style="height: 9rem">
+					</picture>
 
 					<!-- TODO: Something different if email is blank? -->
-					<form class="card bg-light shadow">
+					<form class="card shadow">
 						<div class="card-body p-4">
 							<div class="form-horizontal">
 								<h3 class="text-center d-none d-lg-block mb-4">Pending email confirmation</h3>
 								<p class="text-center">
 									Thank you for registering for an account.
-									A confirmation email has been sent to <strong>{{this.$route.query.email}}</strong>.
+									A confirmation email has been sent to <u>{{this.$route.query.email}}</u>.
 								</p>
 								<p class="text-center">
 									Please follow the instructions in the email to complete your account.
 								</p>
-								<hr size="0">
+								<hr class="my-4">
 								<small class="text-muted text-center">
 									<p class="mb-0">
 										Still waiting for an email? — <button v-on:click.prevent="recover(true, false)" class="btn btn-sm btn-link align-baseline p-0">Resend email</button>

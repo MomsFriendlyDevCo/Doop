@@ -52,23 +52,13 @@ app.component({
 
 <template>
 	<div class="session-float d-flex flex-column vh-100">
-		<sitenav class="position-fixed vw-100" />
 		<div class="container flex-grow-1 pt-6">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
-				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
-					<h4>
-						<strong>
-							FIXME:title — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
-						</strong>
-					</h4>
-					<p class="lead">
-						Enhance your financial due diligance. FIXME:title allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
-					</p>
-					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
-				</div>
-				<div class="col-sm-10 col-md-8 col-lg-6">
-					<h4 class="d-lg-none text-center mb-4">Welcome back!</h4>
-					<form class="card bg-light shadow" @submit.prevent="login(false, true)">
+				<div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
+					<picture class="d-flex justify-content-center mb-4">
+						<img src="/assets/logo/logo.svg" style="height: 9rem">
+					</picture>
+					<form class="card shadow" @submit.prevent="login(false, true)">
 						<div class="card-body p-4">
 							<div class="form-horizontal">
 								<div class="form-group mb-3" v-if="$config.session.signup.emailAsUsername">
@@ -76,12 +66,10 @@ app.component({
 										<small class="font-weight-bold">Email</small>
 									</label>
 									<div class="input-group input-group-lg">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<i class="fal fa-fw fa-user"/>
-											</span>
-										</div>
-										<input type="email" name="email" v-model="data.email" class="form-control" required autofocus placeholder="you@example.com"/>
+										<span class="input-group-text">
+											<i class="fal fa-fw fa-user"/>
+										</span>
+										<input type="email" name="email" v-model="data.email" class="form-control" required autofocus placeholder="name@example.com"/>
 									</div>
 								</div>
 								<div class="form-group mb-3" v-if="!$config.session.signup.emailAsUsername">
@@ -89,11 +77,9 @@ app.component({
 										<small class="font-weight-bold">Username</small>
 									</label>
 									<div class="input-group input-group-lg">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<i class="fal fa-fw fa-user"/>
-											</span>
-										</div>
+										<span class="input-group-text">
+											<i class="fal fa-fw fa-user"/>
+										</span>
 										<input type="text" name="username" v-model="data.username" class="form-control" required autofocus placeholder="Username or email"/>
 									</div>
 								</div>
@@ -103,11 +89,9 @@ app.component({
 										<small class="font-weight-bold">Password</small>
 									</label>
 									<div class="input-group input-group-lg">
-										<div class="input-group-prepend">
-											<span class="input-group-text">
-												<i class="fal fa-fw fa-key"/>
-											</span>
-										</div>
+										<span class="input-group-text">
+											<i class="fal fa-fw fa-key"/>
+										</span>
 										<input type="password" name="password" v-model="data.password" class="form-control" required placeholder="Password"/>
 									</div>
 								</div>
@@ -115,11 +99,11 @@ app.component({
 									<small class="font-weight-bold">Error:</small>
 									<small class="form-label" >{{form.validationError}}</small>
 								</div>
+								<div class="d-grid mt-4">
+									<button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+								</div>
 
-
-								<button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
-
-								<hr size="0">
+								<hr class="my-4">
 								<small class="text-muted text-center">
 									<p class="mb-0">
 										I forgot my password — <a
@@ -154,9 +138,5 @@ app.component({
 
 .session-float .card {
 	border-radius: 5px;
-}
-
-.session-float .footer {
-	z-index: 1000;
 }
 </style>

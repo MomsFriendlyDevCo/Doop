@@ -44,21 +44,13 @@ app.component({
 
 <template>
 	<div class="session-float d-flex flex-column vh-100">
-		<sitenav/>
 		<div class="container flex-grow-1">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
-				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
-					<h4>
-						<strong>Welcome to enim ad minim veniam, quis nostrud exercitation&nbsp;ullamco</strong>
-					</h4>
-					<p class="lead">
-						Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est&nbsp;laborum.
-					</p>
-					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
-				</div>
-				<div class="col-sm-10 col-md-8 col-lg-6">
-					<h4 class="d-lg-none text-center mb-4">Welcome back!</h4>
-					<form class="card bg-light shadow">
+				<div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
+					<picture class="d-flex justify-content-center mb-4">
+						<img src="/assets/logo/logo.svg" style="height: 9rem">
+					</picture>
+					<form class="card shadow">
 						<div class="card-body p-4">
 							<div class="form-horizontal">
 								<div>
@@ -67,11 +59,9 @@ app.component({
 											<small class="font-weight-bold">Password</small>
 										</label>
 										<div class="input-group input-group-lg">
-											<div class="input-group-prepend">
-												<span class="input-group-text">
-													<i class="fal fa-fw fa-user"/>
-												</span>
-											</div>
+											<span class="input-group-text">
+												<i class="fal fa-fw fa-user"/>
+											</span>
 											<input type="password" name="password" v-model="data.password" class="form-control" required autofocus/>
 										</div>
 									</div>
@@ -81,20 +71,20 @@ app.component({
 											<small class="font-weight-bold">Confirmation</small>
 										</label>
 										<div class="input-group input-group-lg">
-											<div class="input-group-prepend">
-												<span class="input-group-text">
-													<i class="fal fa-fw fa-user"/>
-												</span>
-											</div>
+											<span class="input-group-text">
+												<i class="fal fa-fw fa-user"/>
+											</span>
 											<input type="password" name="confirmation" v-model="data.confirmation" class="form-control" required/>
 										</div>
 									</div>
-									<button type="submit" v-on:click.prevent="recover(true, true)" class="btn btn-primary btn-lg btn-block">Reset</button>
+									<div class="d-grid mt-4">
+										<button type="submit" v-on:click.prevent="recover(true, true)" class="btn btn-primary btn-lg btn-block">Reset</button>
+									</div>
 								</div>
-								<hr size="0">
+								<hr class="my-4">
 								<small class="text-muted text-center">
 									<p class="mb-0">
-										Log into your account — <a href="/login" class="btn btn-sm btn-link align-baseline p-0">Login</a>
+										I already have an account — <a href="/login" class="btn btn-sm btn-link align-baseline p-0">Login</a>
 									</p>
 									<p class="mb-0">
 										I don't have an account — <a href="/signup" class="btn btn-sm btn-link align-baseline p-0">Create an account</a>

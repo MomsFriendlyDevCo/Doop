@@ -79,7 +79,7 @@ app.post([
 		// Fetch email attachments {{{
 		.then(()=> Promise.all([
 			fs.promises
-				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
+				.readFile(`${app.config.paths.root}/assets/logo/logo.svg`)
 				.then(res => logo = res)
 		]))
 		// }}}

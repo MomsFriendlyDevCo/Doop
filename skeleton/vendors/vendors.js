@@ -13,8 +13,8 @@ module.exports = {
 		// Dependencies maintain order so list pre-requisites first
 
 		// --- 1. CRITICAL dependency parent packages below this line, keep as sparce as possible (include the dep in comments) --- //
-		'node_modules/jquery/dist/jquery.js', // Needed by most core functions, FIXME: Really?
-		'node_modules/popper.js/dist/umd/popper.js', // Needed by Bootstrap
+		'node_modules/jquery/dist/jquery.js', // Needed by most core functions, FIXME: Really? Bootstrap 5 no longer requires
+		'node_modules/@popperjs/core/dist/umd/popper.js', // Needed by Bootstrap
 
 		// --- 2. DEPENDENT packages below this line --- //
 		'node_modules/bootstrap/dist/css/bootstrap.css',
