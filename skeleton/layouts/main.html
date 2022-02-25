@@ -23,17 +23,39 @@
 
 	<!-- Injection scripts -->
 	<%= layoutHeaders.join('\n') %>
+
+	<!-- Bootstrapping splash screen injection needs all styles inline/embedded (embedded preferred so it can be overriden easily at a later stage) - taken from theme/bootstrap-exensions/splash.vue -->
+	<style>
+		.splash-init {
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.splash-init > img {
+			width: 40vw;
+			max-width: 200px;
+		}
+
+		/* Note: initally hidden on page load, will be overriden once vue + styles are loaded in */
+		.splash-loading-foreground {
+			display: none;
+		}
+	</style>
 </head>
 
 <body class="bootstrapping">
 	<!-- Splashes {{{ -->
-	<!-- Bootstrapping splash screen injection needs all styles inline - taken from theme/bootstrap-exensions/splash.vue -->
-	<div class="splash splash-init" style="position: fixed; top: 0px; left: 0px; right: 0px; bottom: 0px; display: flex; align-items: center; justify-content: center; background: #6DC78D">
-		<img src="/assets/logo/logo.svg" style="width: 50vw; max-width: 400px;" />
+	<div class="splash splash-init">
+		<img src="/assets/logo/logo.svg" />
 	</div>
 
-	<div class="splash splash-loading-foreground" style="display:none">
-		<!-- All .splash style attribs removed after bootstrap in layoutRoot - prevents multiple splashes present before Vue takes over -->
+	<div class="splash splash-loading-foreground">
 		<img src="/assets/logo/logo.svg"/>
 	</div>
 	<!-- }}} -->

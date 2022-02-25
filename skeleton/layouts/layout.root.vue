@@ -16,7 +16,6 @@ app.component('layoutRoot', {
 	},
 	mounted() {
 		$('body').removeClass('bootstrapping');
-		$('body > .splash').removeAttr('style'); // Remove {display: none} overrides for early-load, root level elements allowing CSS precidence to take over now Vue has loaded
 
 		app.service.$session.settings.get('theme.sidebarExpanded', true)
 			.then(res => !res && this.$screen.size != 'xs' && this.toggleSidebar()) // Do initial toggle if the user left it that way
