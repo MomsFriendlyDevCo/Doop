@@ -94,7 +94,6 @@ app.post([
 		]))
 		// }}}
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false, // Monoxide
 			username: req.body.username,
 		}))
 		.then(user => {
@@ -120,10 +119,10 @@ app.post([
 				),
 				// TODO: Potential for a `permissionGroups: ['User']` virtual.
 				permissions: {
-					riversCreate: true,
-					riversRead: true,
-					riversUpdate: true,
-					riversDelete: true,
+					//riversCreate: true,
+					//riversRead: true,
+					//riversUpdate: true,
+					//riversDelete: true,
 				},
 			});
 		})

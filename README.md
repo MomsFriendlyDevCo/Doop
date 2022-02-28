@@ -89,9 +89,24 @@ The project tree breakdown is listed below. For each path an 'edit chance' is gi
 | `/users`                       | User schemas and management
 | `/vendors`                     | Externally supported vendor scripts
 | `/widgets`                     | Shared frontend Vue services
+| `/**/*.mjs`                    | Isomorphic JS files available to frontend/backend as required via `import` / `require` respectively
 | `/**/*.doop`                   | Backend Doop modules
 | `/**/*.gulp.js`                | Global Gulp build-system task files
 | `/**/*.vue`                    | Frontend Vue modules
+
+
+Modules
+=======
+The following modules are provided separately and can be optionally included within a project.
+
+| Module                     | Default | Description                                                             |
+|----------------------------|---------|-------------------------------------------------------------------------|
+| `@doop/service-components` | Yes     | `$components` service allowing cross talk and enumeration of components |
+| `@doop/service-data`       | Yes     | Various data manipulation service components                            |
+| `@doop/service-toast`      | Yes     | `$toast` service to display simple UI messages                          |
+| `@doop/service-data`       | Yes     | Various data I/O services - `$assign`, `${has,get,set}Path`, `$push`    |
+| `@doop/service-morph`      | Yes     | Animation library to transform DOM components with animations           |
+| `@doop/directive-jump`     | Yes     | `v-jump` directive to easily scroll around pages using `<a/>` style anchors |
 
 
 Content Blocks

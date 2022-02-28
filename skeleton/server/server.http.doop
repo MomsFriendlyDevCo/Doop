@@ -44,7 +44,6 @@ app.emit('preExpress');
 app.express = express();
 app.emit('postExpress');
 
-
 // NOTE: We're using app.express rather than app.use as we want the raw express hook rather than our custom wrapped one
 app.express.use(helmet());
 

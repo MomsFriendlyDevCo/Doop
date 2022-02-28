@@ -1,0 +1,53 @@
+<script lang="js" backend endpoint>
+var glob = require('globby');
+
+/**
+* Return IF the user avatar exists. See GET /api/session/avatar to actually fetch it
+* @returns {Object} A valid HTTP HEAD response if the avatar exists, otherwise a 404
+*/
+app.head('/api/session/avatar', app.middleware.express.isUser(), (req, res) => {
+	glob(`./users/${req.user._id}/avatar.png`, {cwd: app.config.paths.data})
+		.then(avatarPaths => avatarPaths.length > 0 ? avatarPaths[0] : Promise.reject('404: User avatar not found'))
+		.then(avatar => res.send('OK'))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var glob = require('globby');
+
+/**
+* Return users avatar if it is present
+* @returns {Buffer} The Avatar image or a HTTP 404 error
+*/
+app.get('/api/session/avatar', app.middleware.express.isUser(), (req, res) => {
+	glob(`./users/${req.user._id}/avatar.png`, {cwd: app.config.paths.data})
+		.then(avatarPaths => avatarPaths.length > 0 ? avatarPaths[0] : Promise.reject('404: User avatar not found'))
+		.then(avatarPath => res.sendFile(avatarPath, {root: app.config.paths.data}))
+		.catch(res.sendError)
+});
+</script>
+
+
+<script lang="js" backend endpoint>
+var _ = require('lodash');
+var fs = require('fs');
+
+/**
+* Override user avatar by uploading an image file
+*/
+app.post(
+	'/api/session/avatar',
+	app.middleware.express.isUser(),
+	app.middleware.express.uploads.single('file'),
+	(req, res) => {
+		if (!req.file) return res.sendError('No file provided');
+
+		fs.promises.mkdir(`${app.config.paths.data}/users/${req.user._id}`, {recursive: true})
+			.then(()=> fs.promises.move(req.file.path, `${app.config.paths.data}/users/${req.user._id}/avatar.png`))
+			.then(()=> res.send('OK'))
+			.catch(res.sendError)
+	},
+);
+</script>

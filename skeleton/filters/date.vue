@@ -30,7 +30,7 @@ app.filter('date', (value, options) => {
 		date: !_.isPlainObject(value) ? value : value.date,
 		utc: false,
 		...(_.isPlainObject(value) ? value : undefined),
-		...(_.isPlainObject(options) ? options : undefined), // Ability to pass in options as second parameter `string | date({format: 'YYYY'})`
+		...(_.isPlainObject(options) ? options : undefined), // Ability to pass in options as second parameter `string |> v => app.filter.date(v, {format: 'YYYY'})`
 	};
 
 	var dateMoment =

@@ -290,7 +290,6 @@ global.app = {
 		// }}}
 
 		// INIT: Generic plugins {{{
-		$debug(`app.use() X`, app.use.register.length);
 		_.forEach(app.use.register, plugin => {
 			Vue.use(plugin);
 		});
@@ -405,7 +404,6 @@ global.app = {
 		app.vue.$mount('#app'); // Mount the headless Vue instance and kick off the chain of component loading
 
 		var tryResolve = ()=> { // Let app.ready set itself up then resolve (keep trying if its not there)
-			console.count('Try app.ready.resolve()');
 			if (!app.ready.resolve) {
 				if (++tryResolve.tryCount >= 8) throw new Error('Given up after 8 attempts trying to call app.ready.resolve() - app payload corrupt?');
 				setTimeout(tryResolve, Math.pow(2, tryResolve.tryCount) * 5);

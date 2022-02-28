@@ -1,0 +1,167 @@
+#!/bin/bash
+
+HELP="
+atlas <--dump|--fetch|--shell> [--db database]
+
+Wrapper for various Atlas related functionality.
+
+
+-d, --dump          Dump the specific database to this folder (into \`dump\` by default, unless path is specified)
+-f, --fetch         Copy database to local
+-s, --shell         Open a Mongo Shell console (using \`mongosh\` if its available or \`mongo\` if not)
+
+--restore [dir]     Restore a given directory of BSON files into the Atlas database
+--list              List available databases
+
+--db [database]     Specify the remote database to work with
+
+-h, --help          Show command line help
+
+
+ENVIORNMENT VARIABLES
+
+ATLAS_SHELL         Shell to use, if unspecified it will be auto-detected
+ATLAS_USER          Username to use with Atlas
+ATLAS_PASS          Password to use with Atlas
+ATLAS_DB            Set default database
+
+All environment variables can also be set in ~/.ATLAS_FIXME as key=vals
+"
+
+MONGOHOST="FIXME.mongodb.net"
+CONFIGFILE="$HOME/.ATLAS_FIXME"
+OPERATION="help"
+DATABASE=""
+
+# Argument processing {{{
+PARAMS=()
+while (( "$#" )); do
+	case "$1" in
+		-d|--dump)
+			OPERATION="dump"
+			shift
+			;;
+		-f|--fetch)
+			OPERATION="fetch"
+			shift
+			;;
+		--list)
+			OPERATION="list"
+			shift
+			;;
+		--restore)
+			OPERATION="restore"
+			RESTOREDIR="$2"
+			shift
+			shift
+			;;
+		-s|--shell)
+			OPERATION="shell"
+			shift
+			;;
+		--db)
+			DATABASE="$2"
+			shift
+			shift
+			;;
+		-h|--help)
+			OPERATION="help"
+			shift
+			;;
+		--) # end argument parsing
+			shift
+			break
+			;;
+		-*|--*=) # unsupported flags
+			echo "Error: Unsupported flag $1" >&2
+			exit 1
+			;;
+		*) # preserve positional arguments
+			PARAMS+=("$1")
+			shift
+			;;
+	esac
+done
+# }}}
+
+# Load config file (if any) {{{
+if [ -e "$CONFIGFILE" ]; then
+	source "$CONFIGFILE"
+fi
+# }}}
+
+# Inherit DATABASE=ATLAS_DB if no DB specified {{{
+if [[ -z "$DATABASE" && -n "$ATLAS_DB" ]]; then
+	DATABASE="$ATLAS_DB"
+fi
+# }}}
+
+# Prerequisite checks (for any operation not "help") {{{
+if [ "$OPERATION" != "help" ]; then
+	if [[ -z "$DATABASE" && "$OPERATION" != "list" ]]; then
+		echo "ERROR: \`--db [database]\` not specified"
+		exit 1
+	fi
+	if [ -z "$ATLAS_USER" ]; then
+		echo "Environment variable ATLAS_USER is not specified"
+		exit 1
+	fi
+
+	if [ -z "$ATLAS_PASS" ]; then
+		echo "Environment variable ATLAS_PASS is not specified"
+		exit 1
+	fi
+fi
+# }}}
+
+# Operations {{{
+case "$OPERATION" in
+	"help")
+		echo "$HELP"
+		exit 0;
+		;;
+	"dump")
+		mongodump "mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@${MONGOHOST}/${DATABASE}"
+		;;
+	"fetch")
+		TMPDIR=`mktemp -q --tmpdir -d atlas.XXXXXXXX`
+		pushd "$TMPDIR"
+		mongodump "mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@${MONGOHOST}/${DATABASE}"
+		mongorestore --drop --noIndexRestore --numParallelCollections=8 --db "$DATABASE" "dump/${DATABASE}"
+		popd
+		rm -r "$TMPDIR"
+		;;
+	"list")
+		/usr/bin/mongo "mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@${MONGOHOST}/${DATABASE}" --eval "db.getMongo().getDBNames()"
+		;;
+	"restore")
+		if [ ! -d "$RESTOREDIR" ]; then
+			echo "--restore <dir> must be a single directory"
+			exit 1
+		fi
+		echo "About to restore $RESTOREDIR -> mongodb://${ATLAS_USER}:***@${MONGOHOST}/${DATABASE}"
+		echo "Are you sure you want to do this?"
+		echo "Ctrl+C to abort, enter to continue"
+		read
+		mongorestore --drop "mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@${MONGOHOST}/${DATABASE}" --db="$DATABASE" --dir="$RESTOREDIR"
+		;;
+	"shell")
+		if [ ! -z "$ATLAS_SHELL" ]; then
+			echo "Using user specified shell \`${ATLAS_SHELL}\`"
+		elif [ `which mongosh >/dev/null ; echo $?` == 0 ]; then
+			ATLAS_SHELL="mongosh"
+		elif [ `which mongo >/dev/null ; echo $?` == 0 ]; then
+			ATLAS_SHELL="mongo"
+		else
+			echo "ERROR: Cannot find any Mongo shell binary"
+			exit 1
+		fi
+
+		exec "$ATLAS_SHELL" "mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@${MONGOHOST}/${DATABASE}"
+		;;
+	*)
+		echo "Unknown Atlas command"
+		exit 1
+		;;
+esac
+# }}}
