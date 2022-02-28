@@ -4,8 +4,8 @@ if (!process.env.DOOP_QUIET) console.log(colors.bold.red('RUNNING IN PRODUCTION 
 
 module.exports = {
 	isProduction: true,
-	url: '{{FIXME:productionUrl}}', // NOTE: Protocol segment will get overridden if SSL is enabled
-	port: process.env.PORT || 80, // NOTE: Will get overridden if SSL is enabled
+	url: 'https://swordfish.mfdc.dev',
+	port: process.env.PORT || 80,
 	build: {
 		minimize: false, // Server has low memory and needs override
 	},
