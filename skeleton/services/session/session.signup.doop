@@ -72,7 +72,7 @@ app.post([
 ], (req, res) => Promise.resolve()
 		// Sanity checks {{{
 		.then(()=> {
-			if (!app.config.session.recover.enabled) throw new Error('501: Feature is disabled');
+			if (!app.config.session.signup.enabled) throw new Error('501: Feature is disabled');
 			if (!req.body) throw new Error('No login credentials');
 			if (app.config.session.signup.emailAsUsername && !req.body.email) throw new Error('400: No email address provided');
 			req.body.email = req.body.email.toLowerCase();
