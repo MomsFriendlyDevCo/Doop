@@ -79,7 +79,7 @@ app.directive('v-sanitize', {
 					.reduce((t, v) => { t[v] = true; return t }, {}) //~ Flatten keys into object with each key as `true`
 				: null
 			),
-			...binding.modifiers, // Read in modifiers
+			...binding.modifiers ?? {}, // Read in modifiers
 		};
 		// }}}
 

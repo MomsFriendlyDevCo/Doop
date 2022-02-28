@@ -63,6 +63,43 @@ global.app = {
 
 
 	/**
+	* Return a (possibly shared) promise when Vue has settled
+	*
+	* Vue is considered to have settled when:
+	* - The DOM has not changed for a set amount of time
+	* - No active Axios / app.service.$http requests are in progress
+	*
+	* @returns {Promise} A promise which will resolve when all settled states have resolved
+	*/
+	settled: ()=> {
+		const settleWait = 500; // Max time to wait for Vue DOM to settle
+		const settleHeartbeat = settleWait / 3; // How often to check the wait hasn't expired
+
+		if (app.settled.promise) return app.settled.promise; // Reuse existing promise if one is already pending
+
+		app.settled.settledLastTick = Date.now();
+
+		return app.settled.mo = new Promise(resolve => {
+			var settleMO = new MutationObserver(()=>
+				app.settled.settledLastTick = Date.now()
+			);
+			settleMO.observe(document.querySelector('.content'), {childList: true, subtree: true});
+
+			var settleMonitor = setInterval(()=> { // Check back that nothing else hit the DOM
+				if (app.service.$http.activeRequests > 0) { // Axios still making requests
+					app.settled.settledLastTick = Date.now();
+				} else if (Date.now() > app.settled.settledLastTick + settleWait) {
+					clearInterval(settleMonitor);
+					settleMO.disconnect();
+					resolve();
+					delete app.settled.promise;
+				}
+			}, settleHeartbeat);
+		});
+	},
+
+
+	/**
 	* Register a global level component
 	* This holds all component registrations inside app.component.register{} then dumps them into app.vue.component() during app.init()
 	* @param {string} [id] The ID of the component to set/get, if omitted and only a spec object is provided the id is computed via _.camelCase(spec.route)

@@ -211,7 +211,7 @@
   },
   "workspaces": [
     "../@modules/*",
-    "../@modules-ditu/*"
+    "../@modules-FIXME_name/*"
   ],
   "devDependencies": {
     "webpack-hot-middleware": "^2.25.1"
