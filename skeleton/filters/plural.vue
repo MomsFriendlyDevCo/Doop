@@ -9,10 +9,10 @@
 * @param {array|string} plurals Expressions to force search for either as an array or CSV, Each entity can be seperated by slashes to force definitions e.g. `['widget/widgets']`
 * 
 * @example Pluralise automatically
-* {{'1 widget' | plural}} //= '1 widget' / '2 widgets'
+* {{'1 widget' |> app.filter.plural}} //= '1 widget' / '2 widgets'
 *
 * @example Pluralise with definitions
-* {{'1 person' | plural('person/people')}} //= '1 person' / '1 people'
+* {{'1 person' |> v => app.filter.plural(v, 'person/people')}} //= '1 person' / '1 people'
 */
 app.filter('plural', (value, plurals) => {
 	var singularToPlural = {};

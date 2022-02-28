@@ -14,13 +14,12 @@ module.exports = {
 	},
 	gulp: {
 		notifications: false,
-		debugJS: false,
-		minifyJS: false, // FIXME: Untested
-		debugCSS: false,
-		minifyCSS: false, // FIXME: Untested
 	},
 	hmr: {
 		enabled: false,
+	},
+	mimic: {
+		enabled: true, // FIXME: System is still in beta
 	},
 	mongo: {
 		migration: false,

@@ -8,7 +8,7 @@
 var _ = require('lodash');
 var fs = require('fs');
 
-exports = Promise.resolve()
+return Promise.resolve()
 	.then(()=> fs.promises.readFile(`${app.config.paths.root}/layouts/main.html`, 'utf8'))
 	.then(contents => _.template(contents))
 	.then(template => app.get('/', (req, res) =>

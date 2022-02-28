@@ -101,6 +101,7 @@ module.exports = {
 	dates: {
 		parseFormats: ['YYYY-MM-DD', 'D/M/YYYY', 'D/M/YYYY', 'D/M/YY', 'D/M'], // Array of formats to pass to moment(value, FORMATS) to parse dates
 	},
+	// TODO: deploy profiles?
 	deploy: {
 		historyBookmark: 'deploy:mfdc:FIXME', // Reference to feed to app.git.historySinceBookmark() to get history since last deploy
 		actions: [ // Actions to run on `gulp preDeploy` + `gulp postDeploy`
@@ -154,10 +155,6 @@ module.exports = {
 	},
 	gulp: {
 		npmUpdate: true,
-		debugJS: true,
-		minifyJS: false,
-		debugCSS: true,
-		minifyCSS: false,
 		watchRestart: [], // Additional files to watch and trigger a server restart when modified
 		watchModules: false,
 		watchModulesInclude: [], // Additional globs to count as modules when `watchModules` is enabled
@@ -195,6 +192,7 @@ module.exports = {
 				`'self'`, // Allow access to this server
 				`data:`, // Allow inline image data
 				`blob:`, // Allow JS dynamic image data like webcams
+				'gravatar.com',
 			],
 			'media-src': [],
 			'object-src': [],
@@ -220,6 +218,9 @@ module.exports = {
 			'/dist/*',
 			'/go/*',
 		],
+		jail: { // Options to pass to express-jail
+			enabled: false,
+		},
 		$config: config => app => ({ // Expose certain app.config values to the frontend $config service, NOTE: This is double escaped
 			url: app.config.url,
 			apiUrl: app.config.apiUrl,
@@ -243,10 +244,7 @@ module.exports = {
 		expiry: 1000 * 60 * 60, // 1 hour
 		mongodb: {
 			uri: config => config.mongo.uri,
-			options: {
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
-			},
+			options: config => config.mongo.options,
 			collection: 'locks',
 		},
 	},
@@ -277,7 +275,10 @@ module.exports = {
 		migration: true, // Whether migration is enabled for this thread, enabled for dev disabled for all but one production thread
 		hooks: false, // Overridden during Doop bootstrap (otherwise ignore all hook calls)
 		uri: 'mongodb://localhost/FIXME-name',
-		options: {},
+		options: { // Explcitly specify options here so other modules (cache, lock etc.) can reuse sane defaults
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		},
 	},
 	papertrail: {
 		enabled: false,
@@ -332,6 +333,11 @@ module.exports = {
 			maxAge: (3600000 * 48), // 48 hours
 		},
 		logoutUrl: '/login', // Where to redirect to post-logout
+		mimic: {
+			enabled: true,
+			header: 'mimic', // Header to set to user ID when requesting mimic from front end
+			permission: 'sessionMimic', // Logged in user must have this permission to mimic on backend
+		},
 		profile: {
 			forcePermissions: { // Force permission setter (only applies to non production boxes)
 				// debug: true,

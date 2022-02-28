@@ -7,6 +7,7 @@
 * <form class="disabled">
 *   Everything below here should be uneditable
 * </form>
+* <a class="btn btn-success hide-disabled">Submit</a>
 */
 .disabled .card-actions {
 	display: none;
@@ -24,5 +25,9 @@ textarea.form-control.disabled {
 .disabled .input-group:not(.never-disable) .input-group-text {
 	background: none;
 	border: none;
+}
+
+.disabled .hide-disabled {
+	display: none;
 }
 </style>

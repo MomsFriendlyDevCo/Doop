@@ -202,6 +202,14 @@ app.service('$session', function() {
 		settled: ()=> {
 			return Promise.resolve()
 				.then(()=> this.$debug('stage', 'settled'))
+				// Apply mimic setting from localStorage {{{
+				.then(()=> this.$session.settings.get('mimic'))
+				.then(mimicAs => {
+					if (!mimicAs) return; // No mimic enabled
+					this.$debug.force('Restoring mimic session as user', mimicAs, 'delete the localStorage "mimic" key to prevent this behaviour');
+					return $session.mimic(mimicAs);
+				})
+				// }}}
 				.then(()=> app.vue.$emit.promise('$session.settled', $session.data))
 				.then(()=> $session.isSettled = true)
 				.then(()=> {
@@ -424,6 +432,37 @@ app.service('$session', function() {
 			default: throw new Error(`Unknown setting unset method "${method}"`);
 		}
 	};
+
+
+	/**
+	* Prompt for a user and mimic their login including permissions
+	* @param {Object|string} [user] User to mimic as an object or ID, if omitted a prompt is shown
+	* @returns {Promise} A promise which will complete when the mimic operation has completed
+	*/
+	$session.mimic = user => Promise.resolve()
+		.then(()=> {
+			if (_.isObject(user) && user.permissions) { // Given full user object
+				return user;
+			} else if (_.isString(user) || _.isObject(user)) { // Given partial object or ID
+				return this.$http.get(`/api/users/${user._id || user}`)
+			} else { // Prompt for user
+				return this.$prompt.list({
+					url: `/api/users?project=${this.$projects.current._id}`,
+					field: 'name',
+				})
+					.then(selected => this.$http.get(`/api/users/${selected._id}`))
+			}
+		})
+		.then(({data: user}) => user.permissions ? user : Promise.reject('Server supplied incomplete user object - check permissions to mimic'))
+		.then(user => {
+			this.$debug.force('Mimic as', user);
+			this.$http.defaults.headers.common.mimic = user._id; // Glue mimic header onto future $http requests so the backend responds accordingly
+			$session.data = user;
+			$session.data.isMimic = true; // Set flag to indicate we are in mimic mode
+			$session.data.permissions.sessionMimic = true; // Allow changing again
+			$session.settings.set('mimic', user._id, 'local'); // Save to localStorage to refresh on F5
+		});
+
 
 	app.ready.then(()=> {
 		$session.stagePromise = Promise.defer();

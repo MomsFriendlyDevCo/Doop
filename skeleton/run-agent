@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Change to project directory
+PROJECTDIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "$PROJECTDIR"
+
 # Provide this root path to the upstream as a root
 # export AGENT_PATH="$PWD/**/*.agent.js,$PWD/node_modules/@momsfriendlydevco/agents/examples/*.agent.js"
 export AGENT_PATH="$PWD/**/*.agent.js"
