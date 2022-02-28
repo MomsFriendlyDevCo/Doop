@@ -30,7 +30,15 @@ import '/node_modules/vue-select/dist/vue-select.css';
 app.component('v-select', vSelect);
 </script>
 
-<style>
+<style lang="scss">
+.vs__selected-options {
+	padding: 0;
+}
+
+.vs__selected {
+	padding: 0.375rem 0.75rem;
+}
+
 .v-select .vs__actions {
 	cursor: pointer;
 }
@@ -48,10 +56,52 @@ app.component('v-select', vSelect);
 .disabled .v-select button {
 	display: none;
 }
+
+.vs--disabled .vs__clear,
+.vs--disabled .vs__dropdown-toggle,
+.vs--disabled .vs__open-indicator,
+.vs--disabled .vs__search,
+.vs--disabled .vs__selected {
+	cursor: inherit;
+	background-color: #e9ecef;
+}
 /* }}} */
 
 /* Copy background color from theme */
 .vs__dropdown-option--highlight {
 	background: var(--primary);
+}
+
+/* Unset certain styles if .form-control class is set on the v-select */
+.v-select.form-control {
+	padding: 0;
+
+	.vs__dropdown-toggle {
+		border: 0;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+	.vs__selected-options > input {
+		margin: 0;
+		padding: 0.375rem 0.75rem;
+	}
+
+	.vs__selected {
+		height: 100%;
+		margin: 0;
+	}
+}
+
+/* If v-select is used in bootstrap input-group */
+.input-group {
+	> .input-group-prepend + .vs--single > .vs__dropdown-toggle,
+	> .input-group-prepend + .vs__dropdown-toggle {
+		border-bottom-left-radius: 0;
+		border-left: 0;
+		border-top-left-radius: 0;
+		height: 100%;
+	}
 }
 </style>

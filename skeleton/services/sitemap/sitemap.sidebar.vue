@@ -52,13 +52,13 @@ app.component('sitemapSidebar', {
 </script>
 
 <template>
-	<ul class="nav flex-column flex-nowrap flex-grow-1 flex-shrink-1 overflow-auto h-100">
+	<ul class="nav bg-white px-md-1" role="navigation">
+
 		<!-- Level 1 - Main sidebar items -->
 		<li class="nav-item" v-for="node in sitemapTree" :class="[node.opened ? 'opened' : 'closed', node.selected && 'active']">
-			<a @click="itemClick(node)" v-href="node.href" class="nav-link d-flex align-items-center flex-nowrap">
-				<i class="flex-grow-0 flex-shrink-0 mr-3" :class="node.icon"></i>
-				<span class="flex-grow-0 flex-shrink-1 overflow-hidden text-truncate">{{node.title}}</span>
-				<span v-if="node.children" class="menu-arrow flex-grow-0 flex-shrink-0 pl-2 ml-auto"/>
+			<a class="nav-link py-3" @click="itemClick(node)" v-href="node.href">
+				<i class="h5 mb-0 align-text-top" :class="node.icon"></i> {{node.title}}
+				<span v-if="node.children" class="menu-arrow pl-2"/>
 			</a>
 
 			<ul class="collapse" v-if="node.children">

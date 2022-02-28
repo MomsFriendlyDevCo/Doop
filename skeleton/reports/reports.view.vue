@@ -44,7 +44,7 @@ app.component({
 		},
 	},
 	created() {
-		this.$debug.enable(false);
+		this.$debug().enable(true);
 
 		this.$sitemap.setTitle(this.$route.params.id);
 		return this.refresh();

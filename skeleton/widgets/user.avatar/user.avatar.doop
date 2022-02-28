@@ -1,4 +1,0 @@
-<script lang="js" backend middleware>
-// Add all Gravatar endpoints to CSP list
-app.config.layout.csp['img-src'].push('https://gravatar.com');
-</script>

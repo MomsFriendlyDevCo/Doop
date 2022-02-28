@@ -1,11 +1,20 @@
 <script lang="js" frontend>
+/**
+* User dropdown menu component
+* @listens changeLocation Trigger the "Choose a location" modal
+*/
 app.component('userDropdown', {
 	data() { return {
 		$session: this.$session,
 	}},
 	methods: {
 		refresh() {
-			window.location.refresh();
+			return Promise.resolve()
+				.then(()=> app.service.$loader.start('$session.refresh'))
+				.then(()=> app.vue.$emit.promise('$session.refresh'))
+				.then(()=> this.$http.post('/api/session/refresh'))
+				.then(()=> window.location.reload())
+				.finally(()=> app.service.$loader.stop('$session.refresh'));
 		},
 	},
 });
@@ -13,9 +22,9 @@ app.component('userDropdown', {
 
 <template>
 	<li v-if="$session.isLoggedIn" class="dropdown notification-list topbar-dropdown">
-		<a class="nav-link dropdown-toggle nav-user mr-0 waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+		<a class="nav-link nav-user d-flex flex-row-reverse align-items-center mr-0 waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
 			<user-avatar size="32" :user="$session.data"/>
-			<span class="pro-user-name ml-1">
+			<span class="pro-user-name text-dark d-none d-md-inline mr-1">
 				{{$session.data.name || $session.data.username || $session.data.email}} <i class="mdi mdi-chevron-down"></i> 
 			</span>
 		</a>

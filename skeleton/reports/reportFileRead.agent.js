@@ -7,12 +7,16 @@
 */
 var _ = require('lodash');
 //var async = require('async-chainable');
-var commentParser = require('comment-parser');
+return;
+// FIXME: Path incorrect?
+const { parse } = require('comment-parser/lib');
 var cronTranslate = require('cronstrue').toString;
 var fspath = require('path');
 var fs = require('fs');
 var fsAsync = require('fs').promises;
 var globby = require('globby');
+
+// FIXME: Does not have the required keys "id", "worker" (or maybe look like a valid agent?)
 
 module.exports = {
 	id: 'reportFileRead',
@@ -31,7 +35,7 @@ module.exports = {
 		});
 
 		// Utility functions {{{
-		var toArray = v => (v || '').split(/\s*,\s*/).filter(i => !!i).map(_.trim);
+		var toArray = v => (_.isString(v)) ? v.split(/\s*,\s*/).filter(i => !!i).map(_.trim) : [];
 		// }}}
 
 		return Promise.resolve()
@@ -65,20 +69,20 @@ module.exports = {
 				try {
 					return _(file.content)
 						.thru(v => {
-							var parsed = commentParser(v)[0];
+							var parsed = parse(v)[0];
 
 							if (!parsed) throw new Error(`No meta information found in ${file.path}`);
 
 							if (parsed.description && !parsed.tags.find(pt => pt.tag == 'description')) { // Found a multi-line description and we don't have a `@description` override
 								parsed.tags.push({
 									tag: 'description',
-									source: '@description ' + parsed.description.split(/\n/)[0], // Take first line of comment as description
+									source: [{ source: '* @description ' + _.trim(parsed.description.split(/\n/)[0]) }], // Take first line of comment as description
 								});
 							}
 							return parsed.tags;
 						})
 						.mapKeys(i => i.tag)
-						.mapValues(i => i.source.substr(i.tag.length + 2)) // Mangle the source into the title so we dont have the 'field' prefix
+						.mapValues(i => i.source[0].source.substr(i.tag.length + 4)) // Mangle the source into the title so we dont have the 'field' prefix
 						.thru(meta => ({
 							name: fspath.basename(file.path, '.js'),
 							title: meta.title,

@@ -21,7 +21,7 @@ var _ = require('lodash');
 var babelRegister = require('@babel/register');
 var colors = require('chalk');
 var crash = require('@momsfriendlydevco/crash');
-var debug = require('debug')('doop');
+var debug = require('debug')('doop:backend');
 var dumper = require('dumper.js');
 var fs = require('fs');
 var fspath = require('path');
@@ -198,7 +198,9 @@ global.app = {
 		var parsedURL = url.parse(app.config.url);
 		parsedURL.host = undefined; // Have to set this to undef to force a hostname rebuild
 		parsedURL.port = undefined; // Have to set this to reset the port to default (80 doesn't work for some reason)
-		app.config.publicUrl = _.trimEnd(url.format(parsedURL), '/');
+
+		app.config.publicUrl = app.env == 'dev' ? app.config.url : url.format(parsedURL).trimEnd().replace(/\/$/, '');
+		// FIXME: app.config.publicUrl = _.trimEnd(url.format(parsedURL), '/'); // here before just incase something happens to break
 		// }}}
 	},
 };

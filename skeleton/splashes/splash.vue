@@ -28,5 +28,6 @@ body.loading.loading-foreground .splash.splash-loading-foreground {
 .splash.splash-loading-foreground > img {
 	width: 40vw;
 	max-width: 200px;
+	padding: 3rem;
 }
 </style>

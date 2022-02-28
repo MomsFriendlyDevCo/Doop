@@ -70,7 +70,6 @@ app.component({
 	},
 	created() {
 		this.$debug.enable(false);
-
 		return this.refresh();
 	},
 });
@@ -113,7 +112,7 @@ app.component({
 		</div>
 		<!-- end row-->
 
-		<div v-if="$debug.isEnabled && $session.hasPermission('debug')" class="card">
+		<div v-if="$debug.$enabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

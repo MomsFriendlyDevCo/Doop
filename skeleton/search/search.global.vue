@@ -53,7 +53,7 @@ app.component('searchGlobal', {
 	</div>
 </template>
 
-<style>
+<style lang="sass">
 /* Search search area when search has content {{{ */
 /*
 .search-global .search-input.has-content .input-group {
@@ -66,7 +66,8 @@ app.component('searchGlobal', {
 	color: var(--white) !important;
 }
 
-.search-global .search-input.has-content .search-input-verbs > a {
+.search-global .search-input.has-content .search-input-verbs > a,
+.search-global .search-input.has-content .search-input-verbs > button {
 	color: var(--dark);
 }
 
@@ -82,7 +83,8 @@ app.component('searchGlobal', {
 	min-width: 400px;
 }
 
-.search-global .search-input .search-input-verbs a {
+.search-global .search-input .search-input-verbs a,
+.search-global .search-input .search-input-verbs button {
 	position: initial;
 	color: var(--white);
 }

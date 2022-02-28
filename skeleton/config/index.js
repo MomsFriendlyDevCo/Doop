@@ -35,10 +35,13 @@ module.exports = {
 	isProduction: false, // Master `is this production mode` switch - disables debugging and various other speed tweaks when enabled
 	name: '{{FIXME:name}}', // Short project name, must be unique on the system
 	title: '{{FIXME:title}}',
+	version: '0.0.1',
 	env: env,
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
 	url: 'http://localhost',
+	// TODO: Specify port as part of URL when required?
+	//apiUrl: config => (config.port !== 80) ? config.url + ':' + config.port : config.url,
 	apiUrl: config => config.url,
 	secret: '{{FIXME}}', // Used as Cookie spice, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
 	access: {
@@ -72,12 +75,12 @@ module.exports = {
 		},
 		paths: [
 			config => `${config.paths.root}/**/*.agent.js`,
+			config => `!${config.paths.root}/node_modules`,
 			//config => `${config.paths.root}/node_modules/@momsfriendlydevco/agents/examples/*.agent.js`,
 		],
 	},
 	build: {
 		minimize: false,
-		watchNodeModules: false,
 	},
 	cache: {
 		enabled: true,
@@ -98,6 +101,7 @@ module.exports = {
 	dates: {
 		parseFormats: ['YYYY-MM-DD', 'D/M/YYYY', 'D/M/YYYY', 'D/M/YY', 'D/M'], // Array of formats to pass to moment(value, FORMATS) to parse dates
 	},
+	// TODO: deploy profiles?
 	deploy: {
 		historyBookmark: 'deploy:mfdc:FIXME', // Reference to feed to app.git.historySinceBookmark() to get history since last deploy
 		actions: [ // Actions to run on `gulp preDeploy` + `gulp postDeploy`
@@ -158,7 +162,7 @@ module.exports = {
 		fontGlob: '*.{css,eot,svg,ttf,woff,woff2}', // Fonts to cache internally, can be tweaked by Cordova or other build process
 	},
 	hmr: { // Hot module reloading when in dev mode
-		enabled: true,
+		enabled: false, // Disabled by default
 		backend: true, // Allow backend to detect file changes + recompile /dist files
 		frontend: true, // Allow frontend to poll + respond to module changes
 	},
@@ -169,6 +173,7 @@ module.exports = {
 		csp: { // Content security policy spec
 			// NOTE: 1. Do not remove empty arrays, they are here for reference and may get mutated by other middleware
 			//       2. All sources are automatically Uniq'd
+			//       3. Meta elements (e.g. 'self', 'unsafe-eval') should be enclosed in single speachmarks, addresses are simple strings. Do not prefix with protocol (i.e. no 'https://' bit)
 			'default-src': [
 				`'self'`, // Allow access to this server
 			],
@@ -205,7 +210,6 @@ module.exports = {
 			'worker-src': [],
 		},
 		assets: [ // Assets that the front-end requires (used when creating the Cordova sandbox and HTTP2 inject headers)
-			'/dist/app.setup.js',
 			'/dist/app.main.js',
 		],
 		http2Inject: config => config.layout.assets, // Links to files that should be HTTP2 injected on initial page hit
@@ -224,6 +228,7 @@ module.exports = {
 			title: app.config.title,
 			git: {
 				url: app.config.git.url,
+				current: app.git?.current || {},
 			},
 			session: {
 				preference: app.config.session.auth.preference,
@@ -289,6 +294,11 @@ module.exports = {
 		dist: path.normalize(`${__dirname}/../dist`),
 		root: path.normalize(`${__dirname}/..`),
 	},
+	reports: {
+		paths: [
+			config => `${config.paths.root}/reports/queries`,
+		],
+	},
 	sanity: {
 		user: 'sanity',
 		pass: '{{FIXME}}', // Used as as basic-auth on /sanity checks, a quick way to populate this is with `cat /dev/urandom | base64 | head -n1`
@@ -347,6 +357,10 @@ module.exports = {
 			// FIXME: Does this belong under "signup"? Considering it may be enabled when signup is disabled.
 			emailAsUsername: true,
 			// TODO: allowedDomains
+			passwordInitial: true,
+			externalPasswordReset: true, // External: /recover/:token or Internal: /reset route for password resets.
+			//redirect: '/',
+			verifyEmail: true,
 		},
 	},
 	ssl: {

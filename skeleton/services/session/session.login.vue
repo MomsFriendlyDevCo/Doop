@@ -8,30 +8,40 @@ app.component({
 			username: '',
 			password: '',
 		},
+		form: {
+			hasValidationErrors: false,
+			showPassword: false,
+			validationError: "",
+		},
 	}),
 	methods: {
 		login(notification = false, redirect = false) {
 			return Promise.resolve()
 				.then(()=> this.$loader.start())
+				.then(()=> this.form.hasValidationErrors = false)
 				.then(()=> this.$session.login(this.data))
 				.then(()=> $('body').removeClass('minimal'))
 				.then(()=> notification && this.$toast.success('Successful Login'))
 				.then(()=> this.$session.settings.get('redirect', '/'))
 				.then(url=> this.$session.settings.unset('redirect', 'local').then(() => url))
 				.then(url=> redirect && this.$router.push(url))
-				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))
+				.catch(e => {
+					if (e.toString().startsWith('NavigationDuplicated')) return; // Ignore $router complaints
+					if (e.err === 'User not active') return this.$router.push({
+						path: '/signup/pending',
+						query: { email: this.data.email },
+					});
+					this.form.hasValidationErrors = true
+					this.form.validationError = e;
+					// this.$toast.catch(e, {position: 'centerBottom'});
+				})
 				.finally(()=> this.$loader.stop())
 		},
-		recover(notification = false, redirect = false) {
-			return Promise.resolve()
-				.then(()=> this.$loader.start())
-				.then(()=> this.$session.recover(this.data))
-				//.then(()=> $('body').removeClass('minimal'))
-				.then(()=> notification && this.$toast.success('Check your email'))
-				.then(()=> redirect && this.$router.push('/login'))
-				.catch(e => this.$toast.catch(e, {position: 'centerBottom'}))
-				.finally(()=> this.$loader.stop())
-		},
+	},
+	created() {
+		this.$debug.enable(false);
+		if (_.has(this.$route.query, 'failure'))
+			this.$toast.catch('There was a issue with the confirmation link. Please try again, if issue persists contact support', {timeout:0});
 	},
 
 	// Bind special Login styles
@@ -41,58 +51,89 @@ app.component({
 </script>
 
 <template>
-	<div>
-		<div class="container-fluid session-float">
-			<div>
-				<div class="row d-flex justify-content-center">
-					<a v-href="'/'">
-						<img class="logo" src="/assets/logo/logo.svg" style="height: 20vh"/>
-					</a>
+	<div class="session-float d-flex flex-column vh-100">
+		<sitenav class="position-fixed vw-100" />
+		<div class="container flex-grow-1 pt-6">
+			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
+				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
+					<h4>
+						<strong>
+							Chatstat — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
+						</strong>
+					</h4>
+					<p class="lead">
+						Enhance your financial due diligance. Chatstat allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
+					</p>
+					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
 				</div>
-				<form class="form-horizontal row row d-flex justify-content-center card p-3" @submit.prevent="login(false, true)">
-					<div class="form-group row" v-if="$config.session.signup.emailAsUsername">
-						<div class="col-sm-12">
-							<div class="input-group mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text">
-										<i class="fal fa-user"/>
-									</span>
+				<div class="col-sm-10 col-md-8 col-lg-6">
+					<h4 class="d-lg-none text-center mb-4">Welcome back!</h4>
+					<form class="card bg-light shadow" @submit.prevent="login(false, true)">
+						<div class="card-body p-4">
+							<div class="form-horizontal">
+								<div class="form-group mb-3" v-if="$config.session.signup.emailAsUsername">
+									<label class="form-label" for="">
+										<small class="font-weight-bold">Email</small>
+									</label>
+									<div class="input-group input-group-lg">
+										<div class="input-group-prepend">
+											<span class="input-group-text">
+												<i class="fal fa-fw fa-user"/>
+											</span>
+										</div>
+										<input type="email" name="email" v-model="data.email" class="form-control" required autofocus placeholder="you@example.com"/>
+									</div>
 								</div>
-								<input type="email" name="email" v-model="data.email" class="form-control input-outline-primary" required autofocus placeholder="fry@planet-express.com"/>
+								<div class="form-group mb-3" v-if="!$config.session.signup.emailAsUsername">
+									<label class="form-label" for="">
+										<small class="font-weight-bold">Username</small>
+									</label>
+									<div class="input-group input-group-lg">
+										<div class="input-group-prepend">
+											<span class="input-group-text">
+												<i class="fal fa-fw fa-user"/>
+											</span>
+										</div>
+										<input type="text" name="username" v-model="data.username" class="form-control" required autofocus placeholder="Username or email"/>
+									</div>
+								</div>
+
+								<div class="form-group mb-3">
+									<label class="form-label" for="">
+										<small class="font-weight-bold">Password</small>
+									</label>
+									<div class="input-group input-group-lg">
+										<div class="input-group-prepend">
+											<span class="input-group-text">
+												<i class="fal fa-fw fa-key"/>
+											</span>
+										</div>
+										<input type="password" name="password" v-model="data.password" class="form-control" required placeholder="Password"/>
+									</div>
+								</div>
+								<div v-if="form.hasValidationErrors" class="alert alert-warning text-center" role="alert">
+									<small class="font-weight-bold">Error:</small>
+									<small class="form-label" >{{form.validationError}}</small>
+								</div>
+
+
+								<button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+
+								<hr size="0">
+								<small class="text-muted text-center">
+									<p class="mb-0">
+										I forgot my password — <a
+											:href="$config.session.signup.emailAsUsername ? `/recover/?email=${data.email}` : `/recover/?username=${data.username}`"
+											class="btn btn-sm btn-link align-baseline p-0">Reset password</a>
+									</p>
+									<p class="mb-0">
+										I don't have an account — <a href="/signup" class="btn btn-sm btn-link align-baseline p-0">Create an account</a>
+									</p>
+								</small>
 							</div>
 						</div>
-					</div>
-
-					<div class="form-group row" v-if="!$config.session.signup.emailAsUsername">
-						<div class="col-sm-12">
-
-							<div class="input-group mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text">
-										<i class="fal fa-user"/>
-									</span>
-								</div>
-								<input type="text" name="username" v-model="data.username" class="form-control input-outline-primary" required autofocus placeholder="Username or email"/>
-							</div>
-						</div>
-					</div>
-
-					<div class="form-group row">
-						<div class="col-sm-12">
-							<div class="input-group mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text">
-										<i class="fal fa-key"/>
-									</span>
-								</div>
-								<input type="password" name="password" v-model="data.password" class="form-control input-outline-primary" required placeholder="**********"/>
-							</div>
-						</div>
-					</div>
-
-					<button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
-					<button v-on:click.prevent="recover(true, false)" class="btn btn-link btn-block text-muted font-sm p-0">Forgot Password</button>
-				</form>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -108,22 +149,11 @@ app.component({
 	bottom: 0px;
 	overflow: auto;
 	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.session-float .card {
-	box-shadow: 0 1px 20px 0 rgba(69,90,100,.8);
+	background: var(--main);
 }
 
 .session-float .card {
 	border-radius: 5px;
-}
-
-.session-float .logo {
-	width: 50vh;
-	margin-top: 5vh;
-	margin-bottom: 5vh;
 }
 
 .session-float .footer {

@@ -1,6 +1,7 @@
-var cache = require('.');
-var gulp = require('gulp');
-var promisify = require('util').promisify;
+const cache = require('.');
+const promisify = require('util').promisify;
+
+const gulp = require('gulp');
 
 /**
 * Clear out anything held by app.cache / app.middleware.cache

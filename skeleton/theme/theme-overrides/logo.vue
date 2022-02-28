@@ -28,6 +28,6 @@ body.screen-xs .topbar .logo .logo-inner-sm {
 	width: 100%;
 	height: 100%;
 	padding: 0 30px;
-	max-height: 50px;
+	max-height: 40px;
 }
 </style>

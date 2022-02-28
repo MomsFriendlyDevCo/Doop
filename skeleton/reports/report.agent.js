@@ -83,9 +83,10 @@ module.exports = {
 					.mapValues((v, k) => ({ // Create (abbreviated db.*) object
 						aggregate: query => promiseFactory({type: 'aggregate'}, (resolve, reject) => {
 							agent.progress(`Run aggregation on db.${k}`);
-							db[k].aggregate(query, (err, result) => {
+							db[k].aggregate(query, (err, res) => {
 								if (err) return reject(err);
-								resolve(results.map(r => r.toObject()));
+								//resolve(res.map(r => r.toObject()));
+								resolve(res);
 							});
 							/*
 							monoxide.aggregate({
@@ -110,9 +111,10 @@ module.exports = {
 						}),
 						find: query => promiseFactory({type: 'find'}, (resolve, reject) => {
 							agent.progress(`Run find query on db.${k}`);
-							db[k].find(query, (err, results) => {
+							db[k].find(query, (err, res) => {
 								if (err) return reject(err);
-								resolve(results.map(r => r.toObject()));
+								//resolve(res.map(r => r.toObject()));
+								resolve(res);
 							});
 						}),
 						count: query => promiseFactory({type: 'count'}, (resolve, reject) => {

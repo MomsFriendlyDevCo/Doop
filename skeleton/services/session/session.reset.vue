@@ -1,4 +1,9 @@
 <script lang="js" frontend>
+
+// TODO: Deprecated? Using recovery for external password resets. 
+// This route still used by signup when passwordInitial is false?
+// This route still used by internal password resets or user directed to recovery via email?
+
 app.component({
 	route: '/reset',
 	data() { return {
@@ -31,14 +36,16 @@ app.component({
 	}},
 	methods: {
 		submit(notification = false, redirect = false) {
-			var doc = { password: this.data.password };
+			const doc = { password: this.data.password };
 
 			return Promise.resolve()
 				// Sanity checks {{{
 				.then(()=> {
 					if (!this.data.password) throw new Error('No password provided');
-					// TODO: Configurable password rules, regex?
-					//if (!this.data.password.length) throw new Error('Password below minimum length');
+					// 5.1.1.2 Memorized Secret Verifiers
+					// Verifiers SHALL require subscriber-chosen memorized secrets to be at least 8 characters in length.
+					// https://pages.nist.gov/800-63-3/sp800-63b.html
+					if (this.data.password.length < 8) throw new Error('Password below minimum length of 8 characters');
 					if (this.data.password !== this.data.confirmation) throw new Error('Passwords do not match');
 				})
 				// }}}
@@ -107,7 +114,7 @@ app.component({
 		</div>
 		<!-- }}} -->
 
-		<div v-if="$debug.isEnabled" v-permissions="'debug'" class="card">
+		<div v-if="$debug.$enabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

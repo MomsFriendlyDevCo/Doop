@@ -1,7 +1,6 @@
-var _ = require('lodash');
-var async = require('async-chainable');
-var gulp = require('gulp');
-
+const _ = require('lodash');
+const async = require('async-chainable');
+const gulp = require('gulp');
 
 /**
 * Clear all migrations from the database

@@ -1,9 +1,0 @@
-<script lang="js" backend on="middleware">
-var Lock = require('@momsfriendlydevco/lock');
-
-app.lock = new Lock(app.config.lock);
-
-app.on('exit', () => app.lock.destroy());
-
-return app.lock.init();
-</script>

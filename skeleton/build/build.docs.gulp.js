@@ -1,8 +1,8 @@
 /**
 * Scan files for inline comments and build documentation 
 */
-let gulp = require('gulp');
-let {documenter} = require('@doop/docs');
+const {documenter} = require('@doop/docs');
+const gulp = require('gulp');
 
 gulp.task('build.docs', ['load:app', 'load:app.db', 'load:app.git'], ()=>
 	documenter({

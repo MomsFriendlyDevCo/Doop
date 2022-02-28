@@ -1,8 +1,8 @@
 /**
-* Process all .vue file <script frontend/>, <template/> and <style/> blocks
+* Process all .vue file <script lang="js" frontend/>, <template/> and <style/> blocks
 */
-let gulp = require('gulp');
-let {compiler} = require('@doop/core-vue');
+const {compiler} = require('@doop/core-vue');
+const gulp = require('gulp');
 
 gulp.task('build.vue', ['load:app', 'load:app.git'], ()=>
 	compiler({

@@ -8,7 +8,7 @@ app.component({
 </script>
 
 <template>
-	<div class="card">
+	<div class="card py-3">
 		<div class="card-body form-horizontal">
 			<!-- Local users only {{{ -->
 			<div class="form-group row">

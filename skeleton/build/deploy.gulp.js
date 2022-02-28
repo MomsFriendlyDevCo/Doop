@@ -1,8 +1,9 @@
-var _ = require('lodash');
-var axios = require('axios');
-var crypto = require('crypto');
-var FormData = require('form-data');
-var gulp = require('gulp');
+const _ = require('lodash');
+const axios = require('axios');
+const crypto = require('crypto');
+const FormData = require('form-data');
+
+const gulp = require('gulp');
 
 gulp.task('preDeploy', ['build.docs'], ()=> Promise.resolve());
 

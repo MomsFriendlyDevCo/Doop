@@ -1,6 +1,6 @@
 <script lang="js" frontend>
 import {Datetime} from 'vue-datetime';
-import '/node_modules/vue-datetime/dist/vue-datetime.css';
+import '../node_modules/vue-datetime/dist/vue-datetime.css';
 import moment from 'moment';
 
 

@@ -1,6 +1,7 @@
 <script lang="js" backend schema>
 var crypto = require('crypto');
 var _ = require('lodash');
+var moment = require('moment');
 
 /**
  * Users
@@ -15,6 +16,7 @@ app.middleware.db.schema('users', {
 	_passsalt: {type: String},
 	_token: {type: String, index: true}, // Do not set directly, use user.setToken(purpose)
 	_tokenPurpose: {type: String, enum: ['invite', 'login', 'recover', 'signup']},
+	_tokenExpiry: {type: Date},
 	name: {type: String},
 	status: {type: String, enum: ['inactive', 'active', 'deleted'], default: 'inactive', index: true},
 	settings: {},
@@ -23,11 +25,24 @@ app.middleware.db.schema('users', {
 	}],
 	permissions: {
 		debug: {type: Boolean, default: false, permissionGroups: ['Debug Testers']},
+
+		usersCreate: {type: 'boolean', default: false, permissionGroups: ['Admin', 'User Management']},
+		usersRead: {type: 'boolean', default: false, permissionGroups: ['Admin', 'User Management']},
+		usersUpdate: {type: 'boolean', default: false, permissionGroups: ['Admin', 'User Management']},
+		usersDelete: {type: 'boolean', default: false, permissionGroups: ['Admin', 'User Management']},
+
 	},
 	accounts: [{
 		account: {type: 'pointer', ref: 'accounts'},
 		status: {type: 'string', enum: ['active', 'pending'], default: 'active'},
 	}],
+})
+
+.plugin(app.middleware.db.search, {
+	fields: [
+		{path: 'name', weight: 10},
+		{path: 'email', weight: 5},
+	]
 })
 
 // TODO: Documentation blocks for model methods.
@@ -41,6 +56,8 @@ app.middleware.db.schema('users', {
 .method('checkPassword', function(candidate) {
 	return Promise.resolve(this.encryptPass(this._passsalt || '', candidate) == this._passhash);
 })
+
+// TODO: Potential for virtual `permissionGroups: ['Admin', 'User']` possible where `permissions` are assigned based on it's value.
 
 // Allow write but not read
 .virtual('password', null, function(password) {
@@ -98,6 +115,8 @@ app.middleware.db.schema('users', {
 
 			this._token = tryToken;
 			this._tokenPurpose = purpose;
+			// FIXME: UTC?
+			this._tokenExpiry = moment().startOf('day').add(1,'week')
 			this.save()
 				.then(()=> {
 					//app.log('Token saved', purpose, tryToken);
@@ -116,6 +135,7 @@ app.middleware.db.schema('users', {
 	//app.log('releaseToken');
 	this._token = undefined;
 	this._tokenPurpose = undefined;
+	this._tokenExpiry = undefined;
 	return this.save();
 })
 // }}}
@@ -130,6 +150,7 @@ app.middleware.db.schema('users', {
 // }}}
 
 // Force username to ALWAYS be lower case {{{
+// TODO: Should forcing username to lowercase be a configurable feature switch?
 .plugin(app.middleware.db.replace, {
 	email: val => val && val.toLowerCase(),
 	username: val => val && val.toLowerCase(),
@@ -163,33 +184,41 @@ app.get('/api/users/types', (req, res) => {
 		'Data Management',
 		'User Management',
 		'Admin',
+		'User',
 	]);
 })
 </script>
 
 
 <script lang="js" backend endpoint>
+// FIXME: These only happen during ReST operations, we may want to always adjust things during create/save on hooks...
 app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
+	// FIXME: Can users retrieve each other? Are they restricted to only their own account?
 	get: [
 		(req, res, next) => {
 			req.query.select = '_id,username,name,email'; // Force safe selection for Users
-			if (req.user.permissions.usersEdit) req.query.select += ',permissions'; // Can also edit other users permissions
+			if (req.user.hasPermission('usersUpdate'))
+				req.query.select += ',permissions'; // Can also edit other users permissions
 			next();
 		},
 		app.middleware.express.isUser(),
 	],
 	query: app.middleware.express.isUser(),
+	search: 'query',
 	count: 'query',
-	create: app.middleware.express.hasPermission('usersEdit'),
-	save: (req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
-		// Allow user to save their own profile
-		if (app.middleware.express.hasPermission('usersEdit') || req.user && req.params.id === req.user._id) {
-			return next();
-		} else {
-			res.sendError('403: You are not an admin or editing your own profile');
-		}
-	},
+	create: app.middleware.express.hasPermission('usersCreate'),
+	save: [
+		(req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
+			// Allow user to save their own profile
+			if (req.user.hasPermission('usersUpdate') || req.user && req.params.id === req.user._id) {
+				return next();
+			} else {
+				// FIXME: Simply "Permission denied"?
+				res.sendError('403: You are not an admin or editing your own profile');
+			}
+		},
+	],
 	meta: true,
 	metaCustomFields: ['permissionGroups'], // Expose additional fields in meta
 	delete: [

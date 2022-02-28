@@ -9,6 +9,9 @@ module.exports = {
 	build: {
 		minimize: false, // Server has low memory and needs override
 	},
+	email: {
+		enabled: true,
+	},
 	gulp: {
 		notifications: false,
 	},
@@ -16,7 +19,7 @@ module.exports = {
 		enabled: false,
 	},
 	mimic: {
-		enabled: true, // System is still in beta
+		enabled: true, // FIXME: System is still in beta
 	},
 	mongo: {
 		migration: false,
@@ -32,6 +35,7 @@ module.exports = {
 			bypassEmptyPassword: false,
 		},
 	},
+	// FIXME: No longer required?
 	ssl: {
 		enabled: false,
 		redirect: false,
