@@ -101,6 +101,7 @@ module.exports = {
 	dates: {
 		parseFormats: ['YYYY-MM-DD', 'D/M/YYYY', 'D/M/YYYY', 'D/M/YY', 'D/M'], // Array of formats to pass to moment(value, FORMATS) to parse dates
 	},
+	// TODO: deploy profiles?
 	deploy: {
 		historyBookmark: 'deploy:mfdc:FIXME', // Reference to feed to app.git.historySinceBookmark() to get history since last deploy
 		actions: [ // Actions to run on `gulp preDeploy` + `gulp postDeploy`
