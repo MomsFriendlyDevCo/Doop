@@ -56,7 +56,7 @@
     "@doop/http": "^1.0.0",
     "@doop/lifecycle": "^1.0.0",
     "@doop/loader": "^1.0.0",
-    "@doop/locking": "^1.0.1",
+    "@doop/locking": "^1.0.3",
     "@doop/lodash": "^1.0.0",
     "@doop/log-change": "^1.0.0",
     "@doop/oid": "^1.0.0",

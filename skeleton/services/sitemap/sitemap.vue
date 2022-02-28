@@ -35,6 +35,7 @@ app.service('$sitemap', function() {
 			icon: 'fal fa-cog',
 			show: ()=> this.$session.hasPermission('debug'),
 			children: [
+				{title: 'Agents', href: '/debug/agents'},
 				{title: 'API', href: '/debug/api'},
 				{title: 'Config', href: '/debug/config'},
 				{title: 'DB', href: '/debug/db'},
@@ -44,6 +45,7 @@ app.service('$sitemap', function() {
 				{title: 'Git', href: '/debug/git'},
 				{title: 'HTTP', href: '/debug/http'},
 				{title: 'Loader', href: '/debug/loader'},
+				{title: 'Locking', href: '/debug/locks'},
 				{title: 'Prompt', href: '/debug/prompt'},
 				{title: 'Session', href: '/debug/session'},
 				{title: 'Transitions', href: '/debug/transitions'},
