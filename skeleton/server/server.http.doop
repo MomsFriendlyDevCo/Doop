@@ -70,6 +70,7 @@ app.express.use(historyFallback({ // Route all HTTP elements to '/' to support n
 		: _.isRegExp(b) ? b
 		: (()=> { throw new Error(`Unknown app.config.layout.excludeBase rule: "${b}"`) })()
 	),
+	logger: ()=> {}, // STFU about rewriting JSON streams
 }));
 app.express.use(cookieParser());
 app.express.use(bodyParser.json({limit: '64mb'}));
