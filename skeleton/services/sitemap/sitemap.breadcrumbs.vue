@@ -10,8 +10,8 @@ app.component('sitemapBreadcrumbs', {
 
 <template name="sitemapBreadcrumbs">
 	<!-- Only show breadcrumb area if we have a valid node AND not mobile -->
-	<div v-if="$sitemap.selected.node" class="page-header">
-		<h4 class="page-title">
+	<div v-if="$sitemap.selected.node" class="d-flex">
+		<h4 class="page-title mr-auto">
 			<span v-if="$sitemap.selected.node.options" class="dropdown">
 				<a class="dropdown-toggle" data-toggle="dropdown">{{$sitemap.selected.node.title}}</a>
 				<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">

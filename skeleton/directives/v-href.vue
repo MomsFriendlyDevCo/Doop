@@ -36,6 +36,9 @@ app.directive('v-href', {
 			...(typeof binding.value == 'string' ? {href: binding.value} : binding.value),
 		};
 
+		// TODO: :href is able to respond to changes, this binding does not.
+		// i.e. :href="`/collection/edit/${collection._id}`" vs v-href="`/collection/edit/${collection._id}`"
+
 		// Profess modifiers into settings
 		if (binding.modifiers.window) settings.target = "_blank";
 		if (binding.modifiers.nostop) settings.stop = false;

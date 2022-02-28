@@ -3,9 +3,10 @@
 * Color scheme variable additions
 */
 :root {
-	--main: #32a4d5;
-	--main-lighter: #e0eaf4;;
-	--main-highlight: #9dd5ec;
+	--main: #10d48e;
+	--main-lighter: #47f1b5;
+	--main-darker: #47f1b5;
+	--main-highlight: #47f1b5;
 
 	/* Misc assistant colors */
 	--gray-light: #eee;

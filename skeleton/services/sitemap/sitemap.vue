@@ -1,7 +1,7 @@
 <script lang="js" frontend>
 app.service('$sitemap', function() {
 	var $sitemap = {};
-	this.$debug = this.$debug.new('$sitemap').enable(false);
+	$sitemap.$debug = this.$debug.new('$sitemap').enable(false);
 
 	// Raw sitemap (uncomputed) {{{
 	/**
@@ -35,6 +35,7 @@ app.service('$sitemap', function() {
 			icon: 'fal fa-cog',
 			show: ()=> this.$session.hasPermission('debug'),
 			children: [
+				{title: 'Agents', href: '/debug/agents'},
 				{title: 'API', href: '/debug/api'},
 				{title: 'Config', href: '/debug/config'},
 				{title: 'DB', href: '/debug/db'},
@@ -44,6 +45,7 @@ app.service('$sitemap', function() {
 				{title: 'Git', href: '/debug/git'},
 				{title: 'HTTP', href: '/debug/http'},
 				{title: 'Loader', href: '/debug/loader'},
+				{title: 'Locking', href: '/debug/locks'},
 				{title: 'Prompt', href: '/debug/prompt'},
 				{title: 'Session', href: '/debug/session'},
 				{title: 'Transitions', href: '/debug/transitions'},
@@ -67,7 +69,7 @@ app.service('$sitemap', function() {
 	$sitemap.refresh = (force = false) => {
 		if (!force && $sitemap.refreshing) return $sitemap.refreshing;
 
-		this.$debug('Refresh');
+		$sitemap.$debug('Refresh');
 		return $sitemap.refreshing = Promise.resolve()
 			.then(()=> this.$session.promise()) // Ensure the user profile pull has completed first
 			.then(()=> $sitemap.resolveTree($sitemap.map))
@@ -77,14 +79,14 @@ app.service('$sitemap', function() {
 				if (e.errno && e.errno == 403) return; // Ignore 403's - user not logged in yet
 				this.$toast.catch(e);
 			})
-			.finally(()=> this.$debug('Final sitemap', $sitemap.computed))
+			.finally(()=> $sitemap.$debug('Final sitemap', $sitemap.computed))
 	};
 
 	app.ready.then(()=> { // Make sitemap refresh when the user profile changes
 		app.vue.$on('$session.update', ()=> $sitemap.refresh(force = true));
 		app.vue.$on('$session.permissions', ()=> $sitemap.refresh(force = true));
 		app.vue.$on('$session.settled', ()=> {
-			this.$debug('Notified that session has settled');
+			$sitemap.$debug('Notified that session has settled');
 			this.$sitemap.refresh(force = true);
 		});
 	});

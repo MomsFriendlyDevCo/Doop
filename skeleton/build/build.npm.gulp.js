@@ -1,12 +1,11 @@
-var _ = require('lodash');
-var fs = require('fs').promises;
-var gulp = require('gulp');
-var semver = require('semver');
-var spawn = require('child_process').spawn;
+const _ = require('lodash');
+const fs = require('fs').promises;
+const semver = require('semver');
+const spawn = require('child_process').spawn;
 
+const gulp = require('gulp');
 
 gulp.task('npm', ['npm.update', 'npm.engineCheck']);
-
 
 /**
 * Perform a `npm cleaninstall` (but only if the package-lock.json file has changed)

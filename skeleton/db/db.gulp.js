@@ -1,7 +1,8 @@
-var gulp = require('@momsfriendlydevco/gulpy');
-var mongoosy = require('@momsfriendlydevco/mongoosy');
+const mongoosy = require('@momsfriendlydevco/mongoosy');
 
-var hasLoaded = false;
+const gulp = require('gulp');
+
+let hasLoaded = false;
 
 gulp.task.once('load:app.db', 'load:app', ()=>
 	Promise.resolve()
@@ -10,9 +11,9 @@ gulp.task.once('load:app.db', 'load:app', ()=>
 		})
 		.then(()=> hasLoaded = true)
 		.then(()=> {
-			gulp.on('finish', ()=> Promise.all([// Clean up the database connection when we finish
-					mongoosy.disconnect()
-						.then(()=> gulp.log('DB Disconnected')),
+			gulp.on('finish', ()=> // Clean up the database connection when we finish
+				mongoosy.disconnect()
+					.then(()=> gulp.log('DB Disconnected'))
 			);
 		})
 		.then(()=> app.emit('dbInit'))

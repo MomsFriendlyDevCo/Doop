@@ -1,5 +1,5 @@
-var gulp = require('gulp');
-var exec = require('@momsfriendlydevco/exec');
+const exec = require('@momsfriendlydevco/exec');
+const gulp = require('gulp');
 
 gulp.task('nginx', ()=> gulp.run('nginx:check', 'nginx:chmod', 'nginx:deploy', 'nginx:reload'));
 

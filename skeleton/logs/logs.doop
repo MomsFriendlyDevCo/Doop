@@ -14,7 +14,7 @@ app.middleware.db.schema('logs', {
 	col: {type: String},
 	doc: {type: String}, // Either the OID of the pointer document or a string pointing to a product / customer in MySQL
 	body: {type: String},
-	type: {type: String},
+	type: {type: String}, // ENUM: (success, warn, error)
 })
 	.index(['col', 'doc'])
 

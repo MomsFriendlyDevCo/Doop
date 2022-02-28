@@ -8,13 +8,13 @@
 */
 
 var crash = require('@momsfriendlydevco/crash');
-var debug = require('debug')('doop');
+var debug = require('debug')('doop:server');
 var globby = require('globby');
 
 Promise.resolve()
 	// Load app core {{{
 	.then(()=> {
-		debug('load app core')
+		debug('Loading application core: Server');
 		require('../app/app.backend');
 	})
 	// }}}

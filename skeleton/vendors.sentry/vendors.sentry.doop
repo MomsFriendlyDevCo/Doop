@@ -7,6 +7,7 @@ if (!app.config.sentry) return Promise.reject('Sentry config structure omitted -
 if (!app.config.sentry.enabled) return Promise.resolve();
 if (!app.config.sentry.dsn) return Promise.reject('Sentry enabled but no DSN specified in app.config.sentry.dsn');
 
+// FIXME: Should this also be publicUrl or are we looking at each instance?
 var hostname = url.parse(app.config.url).hostname;
 
 app.log('Sentry enabled as', app.log.colors.cyan(hostname));

@@ -71,7 +71,7 @@ var initWinston = ()=> {
 	if (ptTransport) {
 		// Monkey-punch in a replacement error handler as the built-in doesn't ever seem to stop trying to connect
 		var tryCount = 0;
-		var maxTries = 3;
+		var maxTries = 5;
 		ptTransport.connection.onErroredOriginal = ptTransport.connection.onErrored; // Backup old error handler
 		ptTransport.connection.onErrored = function(err) {
 			app.log.warn.as('Papertrail', 'Connection error:', err.toString(), 'on attempt', ++tryCount, '/', maxTries);
@@ -79,9 +79,12 @@ var initWinston = ()=> {
 				return ptTransport.connection.onErroredOriginal(err);
 			} else { // Exhausted retries
 				app.log.warn.as('Papertrail', app.log.colors.bold.red('Papertrail faulted - disabling!'));
-				ptTransport.connection.close();
-				app.config.papertrail.enabled = false;
-				initWinston();
+				// FIXME: Is there a hanging promise here?
+				setTimeout(() => {
+					ptTransport.connection.close();
+					app.config.papertrail.enabled = false;
+					initWinston();
+				});
 			}
 		};
 

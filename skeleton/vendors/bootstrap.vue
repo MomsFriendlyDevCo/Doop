@@ -32,7 +32,7 @@ app.ready.then(()=> {
 		app.vue.$nextTick(()=> // Wait for Vue to settle
 			setTimeout(()=> // Add behind timeout so Bootstrap has time to react
 				$(e.target).closest('.dropdown-menu').removeClass('show')
-			, 250)
+			, 100)
 		)
 	);
 });

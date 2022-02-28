@@ -2,10 +2,10 @@
 import _ from 'lodash';
 global._ = _;
 
-import Debug from '/services/debug';
+import Debug from '@doop/debug';
 
 import Vue from 'vue';
-Vue.config.devtools = false;
+Vue.config.devtools = true; // FIXME: Better way of doing $isProduction blocks
 Vue.config.productionTip = false;
 
 import VueRouter from 'vue-router';
@@ -127,7 +127,7 @@ global.app = {
 				app.debug.force('Component', id, 'already declared as', app.component.register[id], 'clobbering with new component spec', spec);
 				debugger;
 			}
-
+			app.debug(`Registered component "${id}"`);
 			return app.component.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.component(id);
@@ -148,6 +148,8 @@ global.app = {
 			return Vue.mgComponent(id, spec);
 		} else if (spec) { // Temporarily hold a mgComponent in memory while we slurp all mgComponent registrations
 			if (!app.mgComponent.register) app.mgComponent.register = {}; // Create the register if it doesn't already exist
+
+			app.debug(`Registered MacGyver component "${id}"`);
 			return app.mgComponent.register[id] = spec;
 		} else { // Fetch an existing mgComponent
 			return Vue.mgComponent(id);
@@ -173,6 +175,7 @@ global.app = {
 				debugger;
 			}
 
+			app.debug(`Registered service "${id}"`);
 			return app.service.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.prototype[id];
@@ -198,6 +201,7 @@ global.app = {
 				debugger;
 			}
 
+			app.debug(`Registered filter "${id}"`);
 			return app.filter.register[id] = app.filter[id] = func;
 		} else if (Vue.prototype.$filter) { // Fetch an existing component (app loaded)
 			return Vue.prototype.$filter[id];
@@ -225,6 +229,7 @@ global.app = {
 				debugger;
 			}
 
+			app.debug(`Registered directive "${id}"`);
 			return app.directive.register[id.replace(/^v-/, '')] = spec;
 		} else { // Fetch an existing component
 			return Vue.directive(id);
@@ -242,6 +247,8 @@ global.app = {
 
 		if (app.isReady) { // Already live
 			console.warn(`Registered app.use() plugin after app.init() was called`);
+
+			//app.debug(`Registered plugin "${???}"`);
 			return Vue.use(plugin);
 		} else { // Temporarily hold a component in memory while we slurp all component registrations
 			return app.use.register.push(plugin);
@@ -256,6 +263,8 @@ global.app = {
 	*/
 	mixin: function(spec) {
 		if (app.isReady) console.warn(`Registered mixin after app.init() was called`, spec);
+
+		//app.debug(`Registered mixin "${???}"`);
 		return Vue.mixin(spec);
 	},
 

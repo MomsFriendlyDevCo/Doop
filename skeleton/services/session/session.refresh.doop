@@ -10,7 +10,6 @@ app.get('/api/session/refresh', (req, res) => {
 });
 </script>
 
-
 <script lang="js" backend endpoint>
 /**
  * Have server tell the client to clear cached items
