@@ -35,12 +35,4 @@ module.exports = {
 			bypassEmptyPassword: false,
 		},
 	},
-	// FIXME: No longer required?
-	ssl: {
-		enabled: false,
-		redirect: false,
-		port: 443,
-		cert: '/etc/letsencrypt/live/{{FIXME:hostname}}/fullchain.pem',
-		key: '/etc/letsencrypt/live/{{FIXME:hostname}}/privkey.pem',
-	},
 };
