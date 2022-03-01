@@ -5,8 +5,8 @@ if (!process.env.DOOP_QUIET) console.log(colors.bold.red('RUNNING IN PRODUCTION 
 module.exports = {
 	isProduction: true,
 	url: 'https://swordfish.mfdc.dev',
-	tagline: false,
 	port: process.env.PORT || 80,
+	tagline: false,
 	build: {
 		minimize: false, // Server has low memory and needs override
 	},

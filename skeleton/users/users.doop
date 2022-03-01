@@ -211,7 +211,7 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	],
 	query: 'get',
 	search: 'get',
-	count: 'get',
+	count: app.middleware.express.isUser(),
 	create: app.middleware.express.hasPermission('usersCreate'),
 	save: [
 		(req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
