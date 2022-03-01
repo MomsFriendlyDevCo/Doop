@@ -10,6 +10,7 @@ app.component('userDropdown', {
 	methods: {
 		refresh() {
 			return Promise.resolve()
+				// FIXME: this.$loader?
 				.then(()=> app.service.$loader.start('$session.refresh'))
 				.then(()=> app.vue.$emit.promise('$session.refresh'))
 				.then(()=> this.$http.post('/api/session/refresh'))

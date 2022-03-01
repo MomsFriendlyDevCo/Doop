@@ -144,7 +144,7 @@ app.component('attachments', {
 								<date :date="attachment.created"/>
 							</td>
 							<td v-if="hasStats.size">
-								{{attachment.size |> app.filter.fileSize}}
+								{{attachment.size | fileSize}}
 							</td>
 							<td v-if="$props.allowDelete">
 								<a @click="remove(attachment)" class="btn btn-danger far fa-trash"/>

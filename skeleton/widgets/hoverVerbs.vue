@@ -3,7 +3,7 @@
 * Provide a set of hoverable buttons which copy everything under this DOM element
 *
 * @param {array|string} verbs Collection to verb buttons to display, specify a collection of verbs (array), a single verb (object) or strings (to use prototypes)
-* @param {string} buttions.class Class to use for the button
+* @param {string} buttons.class Class to use for the button
 * @param {function} buttons.click Click event to fire when the button is clicked
 * @param {string} [buttons.tooltip] Optional tooltip for each button
 *
