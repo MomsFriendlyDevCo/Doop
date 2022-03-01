@@ -53,7 +53,7 @@
     "@doop/eval": "^1.0.1",
     "@doop/files": "^1.0.5",
     "@doop/git": "^1.0.3",
-    "@doop/http": "^1.0.0",
+    "@doop/http": "^1.0.1",
     "@doop/lifecycle": "^1.0.0",
     "@doop/loader": "^1.0.0",
     "@doop/locking": "^1.0.3",
