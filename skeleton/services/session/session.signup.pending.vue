@@ -21,17 +21,11 @@ app.component({
 		<sitenav/>
 		<div class="container flex-grow-1">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
+				<!--
+				TODO: Insertable header, whitelabel session template
 				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
-					<h4>
-						<strong>
-							Chatstat — an valuable supplement to every analyst’s, investor’s or researcher’s&nbsp;toolbox.
-						</strong>
-					</h4>
-					<p class="lead">
-						Enhance your financial due diligance. Chatstat allows you to monitor and analyze social sentiment and trends of the average Joe to the&nbsp;influential.
-					</p>
-					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
 				</div>
+				-->
 				<div class="col-sm-10 col-md-8 col-lg-6">
 					<h4 class="d-lg-none text-center mb-4">Pending email confirmation</h4>
 

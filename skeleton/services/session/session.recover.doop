@@ -50,8 +50,6 @@ var email = require('@momsfriendlydevco/email');
 var fs = require('fs');
 var fspath = require('path');
 
-var logo;
-
 app.post([
 	'/api/session/recover',
 	...(app.config.session.auth.allowPost ? ['/recover'] : []),
@@ -66,13 +64,6 @@ app.post([
 			if (app.config.session.signup.emailAsUsername) req.body.username = req.body.email;
 			if (!app.config.session.signup.emailAsUsername && !req.body.username) throw new Error('400: No username provided');
 		})
-		// }}}
-		// Fetch email attachments {{{
-		.then(()=> Promise.all([
-			fs.promises
-				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
-				.then(res => logo = res)
-		]))
 		// }}}
 		// Fetch user {{{
 		.then(()=> app.log('Check login for', req.body.email))
@@ -89,24 +80,32 @@ app.post([
 		// Generate Token {{{
 		.then(user => user.setToken('recover').then(token => [user, token]))
 		// }}}
+		// Fetch email attachments {{{
+		.then(([user, token])=>
+			Promise.all([
+				fs.promises
+					.readFile(`${app.config.paths.root}/assets/logo/logo.png`)
+					.then(file => ({
+						filename: 'logo.png',
+						cid: 'logo.png',
+						content: file.toString('base64'),
+						contentType: 'image/png',
+						encoding: 'base64',
+					})),
+			]).then(attachments => [user, token, attachments])
+		)
+		// }}}
 		// TODO: Reset the password to lock out any malicious user. Potential back-fire as DoS?
 		// Dispatch email {{{
-		.then(([user, token]) => {
+		.then(([user, token, attachments]) => {
 			app.log('Email', user.email, `/go/recover/${token}`);
+			//app.log('Attachments', attachments);
 			if (!app.config.email.enabled) return user;
 
 			email().send({
 				to: user.email,
 				subject: `Someone has requested a password reset on ${app.config.title}`,
-				attachments: [
-					{
-						filename: 'logo.png',
-						cid: 'logo.png',
-						content: logo.toString('base64'),
-						contentType: 'image/png',
-						encoding: 'base64',
-					}
-				],
+				attachments: attachments,
 				template: `${app.config.paths.root}/services/session/session.recover.email.html`,
 				templateParams: {
 					user: _.pick(user.toObject(), [

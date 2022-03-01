@@ -47,15 +47,11 @@ app.component({
 		<sitenav/>
 		<div class="container flex-grow-1">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
+				<!--
+				TODO: Insertable header, whitelabel session template
 				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
-					<h4>
-						<strong>Welcome to enim ad minim veniam, quis nostrud exercitation&nbsp;ullamco</strong>
-					</h4>
-					<p class="lead">
-						Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est&nbsp;laborum.
-					</p>
-					<a class="btn btn-dark" v-href="'/faq'">Learn more <i class="fas fa-long-arrow-right ml-1"></i></a>
 				</div>
+				-->
 				<div class="col-sm-10 col-md-8 col-lg-6">
 					<h4 class="d-lg-none text-center mb-4">Welcome back!</h4>
 					<form class="card bg-light shadow">

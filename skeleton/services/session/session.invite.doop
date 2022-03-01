@@ -45,8 +45,6 @@ var fs = require('fs');
 // TODO: Fully integrate tokenExpiry
 //var moment = require('moment');
 
-var logo;
-
 /**
 * Create a basic user record and dispatch an email invite
 * @param {string} req.body.email The user email
@@ -75,13 +73,6 @@ app.post([
 			if (!req.user.permissions.usersInvite) throw new Error('You are not permitted to invite new members');
 		})
 		// }}}
-		// Fetch email attachments {{{
-		.then(()=> Promise.all([
-			fs.promises
-				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
-				.then(res => logo = res)
-		]))
-		// }}}
 		// Either find existing user or create stub account {{{
 		.then(()=> app.db.users.findOne({
 			email: req.body.email,
@@ -93,29 +84,38 @@ app.post([
 				email: req.body.email,
 				name: req.body.name || req.body.username || req.body.email,
 				username: req.body.username,
+				// TODO: Configurable list of project specific fields
 			});
 		})
 		// }}}
 		// Generate invite token {{{
 		.then(user => user.setToken('invite').then(token => [user, token]))
 		// }}}
+		// Fetch email attachments {{{
+		.then(([user, token])=>
+			Promise.all([
+				fs.promises
+					.readFile(`${app.config.paths.root}/assets/logo/logo.png`)
+					.then(file => ({
+						filename: 'logo.png',
+						cid: 'logo.png',
+						content: file.toString('base64'),
+						contentType: 'image/png',
+						encoding: 'base64',
+					})),
+			]).then(attachments => [user, token, attachments])
+		)
+		// }}}
 		// Dispatch email {{{
-		.then(([user, token]) => {
+		.then(([user, token, attachments]) => {
 			app.log('Email', user.email, `/go/invite/${token}`);
+			//app.log('Attachments', attachments);
 			if (!app.config.email.enabled) return user;
 
 			email().send({
 				to: user.email,
 				subject: `You have been invited to ${app.config.title}`,
-				attachments: [
-					{
-						filename: 'logo.png',
-						cid: 'logo.png',
-						content: logo.toString('base64'),
-						contentType: 'image/png',
-						encoding: 'base64',
-					}
-				],
+				attachments: attachments,
 				template: `${app.config.paths.root}/services/session/session.invite.email.html`,
 				templateParams: {
 					user: _.pick(user.toObject(), [
