@@ -122,7 +122,7 @@ app.component({
 		</v-table>
 		<!--:cell-href="row => `/api/reports/${$route.params.id}/history/${row.date}?format=json`"-->
 
-		<div v-if="$debug.isEnabled" v-permissions="'debug'" class="card">
+		<div v-if="this.$debug.$enabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

@@ -70,6 +70,7 @@ app.express.use(historyFallback({ // Route all HTTP elements to '/' to support n
 		: _.isRegExp(b) ? b
 		: (()=> { throw new Error(`Unknown app.config.layout.excludeBase rule: "${b}"`) })()
 	),
+	// TODO: `verbose` configuration flag to enable `logger: app.log.bind(app)`
 	logger: ()=> {}, // STFU about rewriting JSON streams
 }));
 app.express.use(cookieParser());

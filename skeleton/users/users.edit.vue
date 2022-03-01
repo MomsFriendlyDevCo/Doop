@@ -100,7 +100,7 @@ app.component({
 			@changeItem="$setPath($data.data, $event.path, $event.value)"
 		/>
 
-		<div v-if="$session.hasPermission('usersPromote')">
+		<div class="row mt-4">
 			<div class="col-12">
 				<!-- Card: Permissions {{{ -->
 				<div class="card">

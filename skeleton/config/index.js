@@ -334,7 +334,7 @@ module.exports = {
 		},
 		logoutUrl: '/login', // Where to redirect to post-logout
 		mimic: {
-			enabled: true,
+			enabled: true, // FIXME: Should this default to false?
 			header: 'mimic', // Header to set to user ID when requesting mimic from front end
 			permission: 'sessionMimic', // Logged in user must have this permission to mimic on backend
 		},

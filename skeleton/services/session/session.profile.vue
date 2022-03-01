@@ -76,7 +76,7 @@ app.component({
 </script>
 
 <template>
-	<form class="form-horizontal" @submit.prevent="save(true, false)">
+	<form class="form-horizontal h-100" @submit.prevent="save(true, false)">
 		<!--div class="btn-group-float">
 			<button
 				v-tooltip="'Save'"
