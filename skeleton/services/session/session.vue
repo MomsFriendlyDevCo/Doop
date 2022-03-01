@@ -175,7 +175,9 @@ app.service('$session', function() {
 						app.crash('Can not connect to the server', showReload=true);
 					} else {
 						this.$debug('Caught error during preBootData', err);
-						throw err;
+						app.ready // App may not be ready yet - wait for it to load
+							.then(() => this.$toast.catch(`${err.err}`)) // Throw to generic $toast handler
+						// throw err;
 					}
 				})
 		},

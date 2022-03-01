@@ -67,7 +67,7 @@
     "@doop/replace": "^1.0.0",
     "@doop/router": "^1.0.0",
     "@doop/screen": "^1.0.0",
-    "@doop/search": "^1.0.2",
+    "@doop/search": "^1.0.5",
     "@doop/service-components": "^1.1.0",
     "@doop/service-data": "^1.0.5",
     "@doop/service-morph": "^1.0.0",

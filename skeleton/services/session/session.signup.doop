@@ -21,6 +21,8 @@ app.get('/go/signup/:token', (req, res) => {
 		*/
 	})
 		.then(user => user || Promise.reject('Signup token invalid'))
+		// TODO: tokenExpiry here?
+		//.then(user => moment().utc(user._tokenExpiry).isBefore(moment().utc()) ? Promise.reject('Signup Token Invalid') : user)
 		.then(user => {
 			if (!app.config.session.signup.enabled) throw new Error('501: Feature is disabled');
 			// TODO: Validate any user conditions

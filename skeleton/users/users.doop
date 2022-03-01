@@ -115,8 +115,8 @@ app.middleware.db.schema('users', {
 
 			this._token = tryToken;
 			this._tokenPurpose = purpose;
-			// FIXME: UTC?
-			this._tokenExpiry = moment().startOf('day').add(1,'week')
+			// Adjust date based on local, but save as UTC for server-side comparison
+			this._tokenExpiry = moment().local().startOf('day').add(1,'week').utc();
 			this.save()
 				.then(()=> {
 					//app.log('Token saved', purpose, tryToken);

@@ -36,7 +36,7 @@ module.exports = {
 	name: '{{FIXME:name}}', // Short project name, must be unique on the system
 	title: '{{FIXME:title}}',
 	tagline: 'LOCAL',
-	version: '0.0.1',
+	version: require('../package.json').version,
 	env: env,
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
