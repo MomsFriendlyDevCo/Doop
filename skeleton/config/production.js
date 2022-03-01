@@ -18,6 +18,7 @@ module.exports = {
 	hmr: {
 		enabled: false,
 	},
+	// FIXME: Is mimic not under the session key?
 	mimic: {
 		enabled: true, // FIXME: System is still in beta
 	},
