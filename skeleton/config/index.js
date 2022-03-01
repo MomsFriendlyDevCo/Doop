@@ -35,6 +35,7 @@ module.exports = {
 	isProduction: false, // Master `is this production mode` switch - disables debugging and various other speed tweaks when enabled
 	name: '{{FIXME:name}}', // Short project name, must be unique on the system
 	title: '{{FIXME:title}}',
+	tagline: 'LOCAL',
 	version: '0.0.1',
 	env: env,
 	host: null, // Listen to all host requests
@@ -95,6 +96,7 @@ module.exports = {
 		},
 		mongodb: {
 			uri: config => config.mongo.uri,
+			options: config => config.mongo.options,
 			collection: 'caches',
 		},
 	},
@@ -226,6 +228,7 @@ module.exports = {
 			apiUrl: app.config.apiUrl,
 			isProduction: app.config.isProduction,
 			title: app.config.title,
+			tagline: app.config.tagline,
 			git: {
 				url: app.config.git.url,
 				current: app.git?.current || {},
@@ -375,5 +378,7 @@ module.exports = {
 	},
 	theme: {
 		faviconRoot: '/assets/favicons',
+	},
+	throttle: {
 	},
 };

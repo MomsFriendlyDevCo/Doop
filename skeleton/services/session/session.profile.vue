@@ -70,6 +70,7 @@ app.component({
 	},
 	created() {
 		this.$debug.enable(false);
+
 		return this.refresh();
 	},
 });

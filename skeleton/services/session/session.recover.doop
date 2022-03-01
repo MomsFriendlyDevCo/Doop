@@ -6,7 +6,6 @@
 // TODO: Rate limit. Throttle middleware?
 app.get('/go/recover/:token', (req, res) => {
 	app.db.users.findOne({
-		//$errNotFound: false, // Monoxide
 		status: { $ne: 'deleted' },
 		_token: req.params.token,
 		_tokenPurpose: 'recover', // Restrict the token usage to users requesting logins only
@@ -21,6 +20,11 @@ app.get('/go/recover/:token', (req, res) => {
 		*/
 	})
 		.then(user => user || Promise.reject('403: Password reset token invalid'))
+		.then(user => {
+			if (!app.config.session.recover.enabled) throw new Error('501: Feature is disabled');
+			// TODO: Validate any user conditions
+			return user;
+		})
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken())
 		.then(user => {
@@ -73,7 +77,6 @@ app.post([
 		// Fetch user {{{
 		.then(()=> app.log('Check login for', req.body.email))
 		.then(()=> app.db.users.findOne({
-			//$errNotFound: false, // Monoxide
 			status: { $ne: 'deleted' },
 			$or: [
 				{email: req.body.email},
@@ -81,7 +84,7 @@ app.post([
 			],
 		}))
 		// FIXME: User enumeration
-		.then(user => user || Promise.reject('400: Unknown user'))
+		.then(user => user || Promise.reject('403: Unknown email address'))
 		// }}}
 		// Generate Token {{{
 		.then(user => user.setToken('recover').then(token => [user, token]))

@@ -5,6 +5,7 @@ if (!process.env.DOOP_QUIET) console.log(colors.bold.red('RUNNING IN PRODUCTION 
 module.exports = {
 	isProduction: true,
 	url: 'https://swordfish.mfdc.dev',
+	tagline: false,
 	port: process.env.PORT || 80,
 	build: {
 		minimize: false, // Server has low memory and needs override
@@ -18,15 +19,14 @@ module.exports = {
 	hmr: {
 		enabled: false,
 	},
-	// FIXME: Is mimic not under the session key?
-	mimic: {
-		enabled: true, // FIXME: System is still in beta
-	},
 	mongo: {
-		migration: false,
+		migration: false, // Enabled on primary only
 	},
 	papertrail: {
 		enabled: true,
+	},
+	search: {
+		exposeEngine: true,
 	},
 	sentry: {
 		enabled: true,

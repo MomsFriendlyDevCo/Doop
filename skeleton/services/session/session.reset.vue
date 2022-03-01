@@ -114,7 +114,7 @@ app.component({
 		</div>
 		<!-- }}} -->
 
-		<div v-if="$debug.$enabled" v-permissions="'debug'" class="card">
+		<div v-if="this.$debug.$enabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

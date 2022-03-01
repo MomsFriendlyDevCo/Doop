@@ -21,6 +21,11 @@ app.get('/go/signup/:token', (req, res) => {
 		*/
 	})
 		.then(user => user || Promise.reject('Signup token invalid'))
+		.then(user => {
+			if (!app.config.session.signup.enabled) throw new Error('501: Feature is disabled');
+			// TODO: Validate any user conditions
+			return user;
+		})
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken().then(()=> user))
 		.then(user => {
