@@ -39,7 +39,8 @@ var _ = require('lodash');
 * @param {Object} [req.body.settings] The user settings to save (treated as an assignment)
 */
 app.post('/api/session', (req, res) => {
-	if (!req.user || req.user.status === 'deleted') return res.sendStatus(403);
+	if (!req.user || req.user.status !== 'active')
+		return res.sendStatus(403);
 
 	Object.assign(req.user, _.pick(req.body, ['name', 'email', 'password', 'settings']));
 
