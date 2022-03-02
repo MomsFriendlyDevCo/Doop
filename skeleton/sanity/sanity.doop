@@ -53,33 +53,51 @@ app.get(
 		// Run all sanity checks and process responses {{{
 		.then(()=> {
 			var start = Date.now();
+
+			var waitingOn = new Set(); // Array of tests we are running
+			var waitingTime = 0;
+			var waitMessage = setInterval(()=> {
+				waitingTime += 2;
+				app.log.warn.as('sanity', `Have been waiting ${waitingTime}s on sanity tests to resolve:`,
+					Array.from(waitingOn)
+						.map(s => s.id)
+						.join(', ')
+				);
+			}, 2000);
+
 			return Promise.all(
 				sanityChecks
 					.filter(s => !req.params.test || s.id == req.params.test)
 					.filter(s => !req.query.exclude || !micromatch.isMatch(s.id, req.query.exclude.split(/\s*,\s*/))) // Process req.query.exclude
-					.map(s => Promise.resolve(s.func()) // Exec sanity check
-						.then(result => {
-							if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
-								return _.map(result, (v, k) => `PASS: ${k} - ${v || 'OK'}`);
-							} else {
-								return `PASS: ${s.id} - ${result || 'OK'}`;
-							}
-						})
-						.catch(e => {
-							app.log.warn.as(`sanity/${s.id}`, e);
-							return `FAIL: ${s.id} - ${e.toString()}`;
-						})
-					)
+					.map(s => {
+						waitingOn.add(s);
+						return Promise.resolve(s.func()) // Exec sanity check
+							.then(result => {
+								if (_.isPlainObject(result)) { // Got back an object mapping - flatten into array of strings
+									return _.map(result, (v, k) => `PASS: ${k} - ${v || 'OK'}`);
+								} else {
+									return `PASS: ${s.id} - ${result || 'OK'}`;
+								}
+							})
+							.catch(e => {
+								app.log.warn.as(`sanity/${s.id}`, e);
+								return `FAIL: ${s.id} - ${e.toString()}`;
+							})
+							.finally(()=> waitingOn.delete(s))
+					})
 			)
 				.then(results => ({
 					results: _.flatten(results),
 					runTime: Date.now() - start,
 				}))
+				.finally(()=> clearInterval(waitMessage))
 		})
 		// }}}
 		// Compute ({isFail: Boolean, responseText: String}) {{{
 		.then(({results, runTime}) => {
 			var isFail = results.some(r => typeof r == 'string' && r.startsWith('FAIL: '));
+
+			app.log.as('sanity', 'Ran', results.length, `sanity tests run in ${runTime}ms`);
 
 			return {
 				isFail,
