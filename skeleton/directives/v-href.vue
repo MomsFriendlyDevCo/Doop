@@ -56,12 +56,14 @@ app.directive('v-href', {
 
 		switch ($el.prop('tagName')) {
 			case 'A':
-				$el.addClass('v-href');
-				$el.first().off('click').on('click', e => {
-					if (settings.prevent) e.preventDefault();
-					if (settings.stop) e.stopPropagation();
-					app.router.go(settings);
-				});
+				if (!$el.hasClass('v-href')) {
+					$el.addClass('v-href');
+					$el.first().off('click').on('click', e => {
+						if (settings.prevent) e.preventDefault();
+						if (settings.stop) e.stopPropagation();
+						app.router.go(settings);
+					});
+				}
 
 				if (settings.allowTab && typeof settings.href == 'string') $el.attr('href', settings.href)
 				break;

@@ -6,6 +6,7 @@ module.exports = {
 	isProduction: true,
 	url: 'https://swordfish.mfdc.dev',
 	port: process.env.PORT || 80,
+	tagline: false,
 	build: {
 		minimize: false, // Server has low memory and needs override
 	},
@@ -18,14 +19,14 @@ module.exports = {
 	hmr: {
 		enabled: false,
 	},
-	mimic: {
-		enabled: true, // FIXME: System is still in beta
-	},
 	mongo: {
-		migration: false,
+		migration: false, // Enabled on primary only
 	},
 	papertrail: {
 		enabled: true,
+	},
+	search: {
+		exposeEngine: true,
 	},
 	sentry: {
 		enabled: true,

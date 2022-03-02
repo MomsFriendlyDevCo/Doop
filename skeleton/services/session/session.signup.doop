@@ -1,4 +1,6 @@
 <script lang="js" backend endpoint>
+var moment = require('moment');
+
 /**
 * Accept a user token to confirm email address
 * @param {string} req.params.token The token used to login the user
@@ -21,6 +23,13 @@ app.get('/go/signup/:token', (req, res) => {
 		*/
 	})
 		.then(user => user || Promise.reject('Signup token invalid'))
+		// TODO: tokenExpiry here?
+		//.then(user => moment().utc(user._tokenExpiry).isBefore(moment().utc()) ? Promise.reject('Signup Token Invalid') : user)
+		.then(user => {
+			if (!app.config.session.signup.enabled) throw new Error('501: Feature is disabled');
+			// TODO: Validate any user conditions
+			return user;
+		})
 		.then(user => user.logIn(res).then(()=> user))
 		.then(user => user.releaseToken().then(()=> user))
 		.then(user => {
@@ -64,7 +73,6 @@ var fs = require('fs');
 var settings = {
 	redirect: false,
 };
-var logo;
 
 app.post([
 	'/api/session/signup',
@@ -86,13 +94,6 @@ app.post([
 
 		// TODO: When permitted email domain list is defined ensure users domain matches
 
-		// Fetch email attachments {{{
-		.then(()=> Promise.all([
-			fs.promises
-				.readFile(`${app.config.paths.root}/assets/logo/logo-full-primary.png`)
-				.then(res => logo = res)
-		]))
-		// }}}
 		.then(()=> app.db.users.findOne({
 			username: req.body.username,
 		}))
@@ -118,6 +119,7 @@ app.post([
 					: {}
 				),
 				// TODO: Potential for a `permissionGroups: ['User']` virtual.
+				// TODO: Configurable list of project specific permissions
 				permissions: {
 					//riversCreate: true,
 					//riversRead: true,
@@ -130,24 +132,32 @@ app.post([
 		// Generate Token {{{
 		.then(user => user.setToken('signup').then(token => [user, token]))
 		// }}}
+		// Fetch email attachments {{{
+		.then(([user, token])=>
+			Promise.all([
+				fs.promises
+					.readFile(`${app.config.paths.root}/assets/logo/logo.png`)
+					.then(file => ({
+						filename: 'logo.png',
+						cid: 'logo.png',
+						content: file.toString('base64'),
+						contentType: 'image/png',
+						encoding: 'base64',
+					})),
+			]).then(attachments => [user, token, attachments])
+		)
+		// }}}
 		// Dispatch email {{{
-		.then(([user, token]) => {
+		.then(([user, token, attachments]) => {
 			app.log('Email', user.email, `/go/signup/${token}`);
+			//app.log('Attachments', attachments);
 			if (!app.config.email.enabled) return user;
 			if (!(app.config.session.signup.verifyEmail ?? true)) return user;
 
 			email().send({
 				to: user.email,
 				subject: `Welcome to ${app.config.title}`,
-				attachments: [
-					{
-						filename: 'logo.png',
-						cid: 'logo.png',
-						content: logo.toString('base64'),
-						contentType: 'image/png',
-						encoding: 'base64',
-					}
-				],
+				attachments: attachments,
 				template: `${app.config.paths.root}/services/session/session.signup.email.html`,
 				templateParams: {
 					user: _.pick(user.toObject(), [
@@ -188,4 +198,19 @@ app.post([
 		.catch(res.sendError)
 		// }}}
 );
+</script>
+
+<script lang="js" backend endpoint>
+// FIXME: User enumeration, throttle
+app.get('/api/checkemail', (req, res) => {
+	if(!req.query.email) return res.send({validates: false});
+	return app.db.users.find({email: req.query.email})
+		.then(user => user?.length > 0 ? res.send({validates: false}) : res.send({validates: true})
+		// req.query.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/) ? res.send({invalidEmail: true}) : res.send({invalidEmail: false})
+		)
+		.catch(err => {
+			app.log(err)
+			res.send({validate: false})
+		})
+})
 </script>

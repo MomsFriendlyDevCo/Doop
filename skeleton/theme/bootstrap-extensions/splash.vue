@@ -43,6 +43,7 @@ body.bootstrapping #app {
 			align-items: center;
 			justify-content: center;
 			background: #FFF;
+			z-index: 1000;
 		}
 
 		/* Foreground surround spinner {{{ */

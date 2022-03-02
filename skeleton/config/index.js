@@ -35,7 +35,8 @@ module.exports = {
 	isProduction: false, // Master `is this production mode` switch - disables debugging and various other speed tweaks when enabled
 	name: '{{FIXME:name}}', // Short project name, must be unique on the system
 	title: '{{FIXME:title}}',
-	version: '0.0.1',
+	tagline: 'LOCAL',
+	version: require('../package.json').version,
 	env: env,
 	host: null, // Listen to all host requests
 	port: process.env.PORT || 8080,
@@ -95,6 +96,7 @@ module.exports = {
 		},
 		mongodb: {
 			uri: config => config.mongo.uri,
+			options: config => config.mongo.options,
 			collection: 'caches',
 		},
 	},
@@ -226,6 +228,7 @@ module.exports = {
 			apiUrl: app.config.apiUrl,
 			isProduction: app.config.isProduction,
 			title: app.config.title,
+			tagline: app.config.tagline,
 			git: {
 				url: app.config.git.url,
 				current: app.git?.current || {},
@@ -334,7 +337,7 @@ module.exports = {
 		},
 		logoutUrl: '/login', // Where to redirect to post-logout
 		mimic: {
-			enabled: true,
+			enabled: true, // FIXME: Should this default to false?
 			header: 'mimic', // Header to set to user ID when requesting mimic from front end
 			permission: 'sessionMimic', // Logged in user must have this permission to mimic on backend
 		},
@@ -375,5 +378,7 @@ module.exports = {
 	},
 	theme: {
 		faviconRoot: '/assets/favicons',
+	},
+	throttle: {
 	},
 };

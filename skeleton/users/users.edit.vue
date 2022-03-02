@@ -100,7 +100,7 @@ app.component({
 			@changeItem="$setPath($data.data, $event.path, $event.value)"
 		/>
 
-		<div v-if="$session.hasPermission('usersPromote')">
+		<div class="row mt-4">
 			<div class="col-12">
 				<!-- Card: Permissions {{{ -->
 				<div class="card">
@@ -119,7 +119,7 @@ app.component({
 			</div>
 		</div>
 
-		<div v-if="this.$debugging" v-permissions="'debug'" class="card">
+		<div v-if="this.$debug.$enabled" v-permissions="'debug'" class="card">
 			<div class="card-header">
 				Raw data
 				<i class="float-right fas fa-debug fa-lg" v-tooltip="'Only visible to users with the Debug permission'"/>

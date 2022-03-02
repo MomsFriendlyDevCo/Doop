@@ -31,22 +31,6 @@ module.exports = session => session
 			// FIXME: Is this indicative of a promise bug in HMR middleware?
 			.then(()=> app.config.hmr.enabled = false)
 			// }}}
-
-			/*
-			// FIXME: This may be legacy...
-			// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js'])
-			.then(()=> globby([
-					`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
-					`!${app.config.paths.root}/node_modules/**/node_modules`,
-				])
-				.then(modPaths => modPaths.forEach(modPath => {
-					debug('Load module', modPath);
-					require(modPath)
-				}))
-			)
-			// }}}
-			*/
-
 			// Emit events to boot server in order {{{
 			.then(()=> app.emit('preInit'))
 			.then(()=> app.emit('init'))

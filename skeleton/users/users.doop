@@ -10,7 +10,7 @@ app.middleware.db.schema('users', {
 	created: {type: Date, default: ()=> new Date()},
 	lastLogin: {type: Date, default: ()=> new Date()},
 	username: {type: String, required: true, index: {unique: true}},
-	email: {type: String, required: true, index: {unique: true}},
+	email: {type: String, validate: val => val && _.isString(val) && val.length > 2, required: true, index: {unique: true}},
 	_passhash: {type: String},
 	_passhash2: {type: String},
 	_passsalt: {type: String},
@@ -115,8 +115,8 @@ app.middleware.db.schema('users', {
 
 			this._token = tryToken;
 			this._tokenPurpose = purpose;
-			// FIXME: UTC?
-			this._tokenExpiry = moment().startOf('day').add(1,'week')
+			// Adjust date based on local, but save as UTC for server-side comparison
+			this._tokenExpiry = moment().local().startOf('day').add(1,'week').utc();
 			this.save()
 				.then(()=> {
 					//app.log('Token saved', purpose, tryToken);
@@ -196,17 +196,22 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
 	// FIXME: Can users retrieve each other? Are they restricted to only their own account?
 	get: [
+		app.middleware.express.isUser(),
+		/**
+		* For security reasons limit the amount of data we give out about users
+		* Only the fields listed in the req.query.select part are given out, even if the incomming request tries to ask for more
+		* @param {string} [req.query.hasSFID=0] If truthy only return users with a valid `externalIds.salesforce` value (only if the user has `usersEdit` permission
+		*/
 		(req, res, next) => {
 			req.query.select = '_id,username,name,email'; // Force safe selection for Users
 			if (req.user.hasPermission('usersUpdate'))
 				req.query.select += ',permissions'; // Can also edit other users permissions
 			next();
 		},
-		app.middleware.express.isUser(),
 	],
-	query: app.middleware.express.isUser(),
-	search: 'query',
-	count: 'query',
+	query: 'get',
+	search: 'get',
+	count: app.middleware.express.isUser(),
 	create: app.middleware.express.hasPermission('usersCreate'),
 	save: [
 		(req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?
