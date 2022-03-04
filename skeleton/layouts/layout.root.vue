@@ -39,6 +39,7 @@ app.component('layoutRoot', {
 						</span>
 						<span class="logo-inner-lg">
 							<img src="/assets/logo/logo.svg"/>
+							FIXME:TITLE
 						</span>
 					</a>
 				</div>
