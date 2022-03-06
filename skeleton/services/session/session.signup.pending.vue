@@ -18,7 +18,6 @@ app.component({
 
 <template>
 	<div class="session-float d-flex flex-column vh-100">
-		<sitenav/>
 		<div class="container flex-grow-1">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
 				<!--

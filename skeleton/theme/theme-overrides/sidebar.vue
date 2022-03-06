@@ -38,6 +38,9 @@
 .topbar, .left.side-menu {
 	box-shadow: 0 0 6px 1px rgb(0 0 0 / 50%);
 }
+.left.side-menu {
+	top: 66px;
+}
 
 
 /* Sidebar animation */

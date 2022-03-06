@@ -71,7 +71,6 @@ app.component({
 
 <template>
 	<div class="session-float d-flex flex-column vh-100">
-		<sitenav class="position-fixed vw-100" />
 		<div class="container flex-grow-1 pt-6">
 			<div class="row h-100 align-items-center justify-content-center py-5 py-lg-6">
 				<div class="d-none d-lg-block col-lg-6 pr-lg-4">
