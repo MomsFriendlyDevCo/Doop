@@ -48,7 +48,6 @@
     "@doop/digest": "^1.0.1",
     "@doop/directive-jump": "^1.1.3",
     "@doop/dirty-checker": "^1.0.0",
-    "@doop/docs": "^0.0.3",
     "@doop/drag-drop": "^1.0.1",
     "@doop/emit": "^1.0.0",
     "@doop/eval": "^1.0.1",
