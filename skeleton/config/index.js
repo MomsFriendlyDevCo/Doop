@@ -143,6 +143,30 @@ module.exports = {
 			},
 			*/
 		],
+		profiles: {
+			live: {
+				title: 'Live',
+				sort: 1,
+				path: '/sites/FIXME:PATH',
+				processes: 2,
+				env: {'NODE_ENV': 'production'},
+				pm2Name: 'FIXME:NAME-${process.alpha}',
+				pm2Args: {
+					default: [
+						'-e', 'production',
+						'-o', 'port=${10100 + process.offset + 1}',
+						'-o', 'papertrail-program=${process.name}',
+					],
+					'FIXME:NAME-a': [
+						'-e', 'production',
+						'-o', 'port=${10100 + process.offset + 1}',
+						'-o', 'papertrail-program=${process.name}',
+						'-o', 'cache.cleanAuto=true',
+						'-o', 'mongo.migration=true',
+					],
+				},
+			},
+		},
 	},
 	email: {
 		enabled: true,
