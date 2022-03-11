@@ -15,7 +15,7 @@ app.component('placeholder', {
 	</div>
 </template>
 
-<style>
+<style lang="scss">
 .placeholder {
 	height: 100%;
 	width: 100%;
@@ -23,54 +23,55 @@ app.component('placeholder', {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-}
 
-/* Style: placeholder-box {{{ */
-.placeholder.placeholder-box {
-	background: #FFF;
-	border: 1px solid #000;
-}
+	/* Style: placeholder-box {{{ */
+	&.placeholder-box  {
+		position: relative; /* Hack to force placeholder-inner::before to span only this element */
+		background: #FFF;
+		border: 1px solid #000;
 
-.placeholder.placeholder-box:before {
-	content: '';
-	position: absolute;
-	left: 15px;
-	top: 1px;
-	right: 15px;
-	bottom: 1px;
-	background:
-		linear-gradient(to top left,
-			rgba(0,0,0,0) 0%,
-			rgba(0,0,0,0) calc(50% - 0.8px),
-			rgba(0,0,0,1) 50%,
-			rgba(0,0,0,0) calc(50% + 0.8px),
-			rgba(0,0,0,0) 100%),
-		linear-gradient(to top right,
-			rgba(0,0,0,0) 0%,
-			rgba(0,0,0,0) calc(50% - 0.8px),
-			rgba(0,0,0,1) 50%,
-			rgba(0,0,0,0) calc(50% + 0.8px),
-			rgba(0,0,0,0) 100%);
-	opacity: 0.3;
-}
+		&::before {
+			content: '';
+			position: absolute;
+			left: 15px;
+			top: 1px;
+			right: 15px;
+			bottom: 1px;
+			background:
+				linear-gradient(to top left,
+					rgba(0,0,0,0) 0%,
+					rgba(0,0,0,0) calc(50% - 0.8px),
+					rgba(0,0,0,1) 50%,
+					rgba(0,0,0,0) calc(50% + 0.8px),
+					rgba(0,0,0,0) 100%),
+				linear-gradient(to top right,
+					rgba(0,0,0,0) 0%,
+					rgba(0,0,0,0) calc(50% - 0.8px),
+					rgba(0,0,0,1) 50%,
+					rgba(0,0,0,0) calc(50% + 0.8px),
+					rgba(0,0,0,0) 100%);
+			opacity: 0.3;
+		}
 
-.placeholder.placeholder-box > .placeholder-text {
-	background: #FFF;
-	border-radius: 10px;
-	padding: 10px;
-	z-index: 1;
-}
-/* }}} */
+		& .placeholder-text {
+				background: #FFF;
+				border-radius: 10px;
+				padding: 10px;
+				z-index: 1;
+		}
+	}
+	/* }}} */
 
-/* Style: placeholder-construction {{{ */
-.placeholder.placeholder-construction {
-	background: repeating-linear-gradient(45deg, #dfc458, #dfc458 10px, #666 10px, #666 20px);
-}
+	/* Style: placeholder-construction {{{ */
+	&.placeholder-construction {
+		background: repeating-linear-gradient(45deg, #dfc458, #dfc458 10px, #666 10px, #666 20px);
 
-.placeholder.placeholder-construction > .placeholder-text {
-	font-size: 20pt;
-	color: #FFF;
-	text-shadow: -2px -2px 1px #000, 2px -2px 1px #000, -2px 2px 1px #000, 2px 2px 1px #000;
+		& > .placeholder-text {
+			font-size: 20pt;
+			color: #FFF;
+			text-shadow: -2px -2px 1px #000, 2px -2px 1px #000, -2px 2px 1px #000, 2px 2px 1px #000;
+		}
+	}
+	/* }}} */
 }
-/* }}} */
 </style>
