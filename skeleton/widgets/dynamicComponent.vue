@@ -1,11 +1,11 @@
 <script lang="js" frontend>
+// TODO: This is dependancy of @doop/search but currently must be included at project level. it seems bigger than @doop/search and should exist in it's own package where both or either can require it.
 /**
 * Extended version of the built in `<script lang="js" frontend>` dynamic component that supports events and props and sanity checks
 *
-* @param {string} component The string name of a component
-* @param {string} [component.component] The component name if passed a string, the component name is always camelCased
-* @param {Object} [component.events] Event bindings as an object lookup
-* @param {Object} [component.props] Prop bindings as an object lookup
+* @param {string} [component] The component name if passed a string (the component name is always camelCased so you can pass in dotted, kebab case of any other varient)
+* @param {Object} [events] Event bindings as an object lookup
+* @param {Object} [props] Prop bindings as an object lookup
 *
 * NOTE: This component exposes a single ref `component` which is the dynamically loaded component
 */
@@ -24,11 +24,10 @@ app.component('dynamicComponent', {
 		events: {type: Object},
 	},
 	render: function(h) {
-		// TODO: Could this use functional pattern with passing through context?
 		return h(this.$props.component, {
 			ref: 'component',
-			props: this.$props.props,
-			on: this.$props.events,
+			props: this.props,
+			on: this.events,
 		});
 	},
 });
