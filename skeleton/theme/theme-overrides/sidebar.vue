@@ -2,14 +2,46 @@
 /* Sidebar should scroll when screen is too small */
 #sidebar-menu {
 	height: 100%;
+	padding-top: 0px;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
+
+/* Various fixes for icon offsets */
+#sidebar-menu > ul.nav {
+	height: 100%;
+	display: block;
+	padding: 0 !important;
+}
+
+
+/* Slightly smaller sidebar when in minimized mode */
+#wrapper.enlarged .left.side-menu {
+	width: 66px;
+	position: fixed;
+}
+
 
 /* Hide menus from diplaying/taking up height on minified sidebar */
 .forced.enlarged #sidebar-menu .listunstyled {
 	display: none !important;
 }
+
+
+/* Keep consistant icon sizes */
+#sidebar-menu ul li a i {
+	font-size: 20px;
+}
+
+
+/* Add dropshadows */
+.topbar, .left.side-menu {
+	box-shadow: 0 0 6px 1px rgb(0 0 0 / 50%);
+}
+.left.side-menu {
+	top: 66px;
+}
+
 
 /* Sidebar animation */
 @media (max-width: 767px) {
@@ -157,14 +189,6 @@
 	}
 	.enlarged .logo-inner-lg {
 		opacity: 0;
-	}
-
-	/* General */
-	#wrapper.enlarged .left.side-menu #sidebar-menu > ul > li > a i {
-		margin-right: 15px !important;
-	}
-	#wrapper.enlarged .left.side-menu #sidebar-menu ul > li > a span {
-		padding-left: 0;
 	}
 }
 </style>

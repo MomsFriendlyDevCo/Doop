@@ -31,7 +31,7 @@ app.component('layoutRoot', {
 	<div id="app">
 		<!-- Topbar {{{ -->
 		<div class="topbar">
-			<div class="topbar-left" v-tooltip.bottom="`${$config.title}<br/>v${$config.version}`">
+			<div class="topbar-left">
 				<div class="text-center">
 					<a v-href="'/'" class="logo">
 						<span class="logo-inner-sm">
@@ -39,6 +39,7 @@ app.component('layoutRoot', {
 						</span>
 						<span class="logo-inner-lg">
 							<img src="/assets/logo/logo.svg"/>
+							FIXME:TITLE
 						</span>
 					</a>
 				</div>

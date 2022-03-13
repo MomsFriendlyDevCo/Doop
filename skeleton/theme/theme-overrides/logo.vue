@@ -1,33 +1,29 @@
-<style>
-/* Logo display on main page is too big */
+<style lang="scss">
 .topbar .logo .logo-inner-sm, .topbar .logo .logo-inner-lg {
-	display: none;
+	display: flex !important;
+	justify-content: center;
+	align-items: center;
+	padding: 0 20px;
+
+	& img {
+		height: 100%;
+		padding: 0 10px;
+		max-height: 40px;
+	}
 }
 
-body:not(.screen-xs) #wrapper:not(.enlarged) .topbar .logo .logo-inner-lg {
-	display: block;
-}
-
-#wrapper.enlarged .topbar .logo .logo-inner-sm {
-	display: block;
-}
-
-/* Force small logo on mobile screens */
-body.screen-xs .topbar .logo .logo-inner-sm {
-	display: block !important;
-}
-
-.topbar .logo .logo-inner-sm img {
-	width: 100%;
+.topbar .logo .logo-inner-sm, .topbar .logo .logo-inner-sm {
+	display: flex !important;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
 	height: 100%;
-	padding: 0 10px;
-	max-height: 70px;
-}
-
-.topbar .logo .logo-inner-lg img {
 	width: 100%;
-	height: 100%;
-	padding: 0 30px;
-	max-height: 40px;
+
+	& img {
+		width: 90px;
+		height: 90px;
+		padding: 0 10px !important;
+	}
 }
 </style>
