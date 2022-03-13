@@ -53,7 +53,7 @@ app.component('searchGlobal', {
 	</div>
 </template>
 
-<style lang="sass">
+<style lang="scss">
 /* Search search area when search has content {{{ */
 /*
 .search-global .search-input.has-content .input-group {
