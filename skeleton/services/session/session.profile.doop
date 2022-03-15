@@ -19,14 +19,9 @@ app.get('/api/session', (req, res) => {
 			...req.user.permissions,
 			...(app.config.isProduction ? undefined : app.config.session.profile.forcePermissions),
 		},
-		avatarUrl: '/api/session/avatar',
 	});
 });
-</script>
 
-
-<script lang="js" backend endpoint>
-var _ = require('lodash');
 
 /**
 * Save (limited) user data back to the current users document

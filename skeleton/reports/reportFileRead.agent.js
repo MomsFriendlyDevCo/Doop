@@ -7,16 +7,12 @@
 */
 var _ = require('lodash');
 //var async = require('async-chainable');
-return;
-// FIXME: Path incorrect?
-const { parse } = require('comment-parser/lib');
+const { parse } = require('comment-parser/lib')
 var cronTranslate = require('cronstrue').toString;
 var fspath = require('path');
 var fs = require('fs');
 var fsAsync = require('fs').promises;
 var globby = require('globby');
-
-// FIXME: Does not have the required keys "id", "worker" (or maybe look like a valid agent?)
 
 module.exports = {
 	id: 'reportFileRead',

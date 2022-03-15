@@ -29,7 +29,7 @@ import {
 	mgGrid,
 	//mgGridDashboard
 	mgHeading,
-	mgHtml,
+	//mgHtml,
 	mgIcon,
 	mgInfoBlock,
 	//mgInfoChart
@@ -48,8 +48,8 @@ import {
 	mgTime,
 	mgToggle,
 	mgUrl,
-	mgVideo,
-	mgWysiwyg
+	mgVideo
+	//mgWysiwyg
 } from '@momsfriendlydevco/macgyver';
 
 app.ready.then(()=> {

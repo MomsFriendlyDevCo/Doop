@@ -63,43 +63,6 @@ global.app = {
 
 
 	/**
-	* Return a (possibly shared) promise when Vue has settled
-	*
-	* Vue is considered to have settled when:
-	* - The DOM has not changed for a set amount of time
-	* - No active Axios / app.service.$http requests are in progress
-	*
-	* @returns {Promise} A promise which will resolve when all settled states have resolved
-	*/
-	settled: ()=> {
-		const settleWait = 500; // Max time to wait for Vue DOM to settle
-		const settleHeartbeat = settleWait / 3; // How often to check the wait hasn't expired
-
-		if (app.settled.promise) return app.settled.promise; // Reuse existing promise if one is already pending
-
-		app.settled.settledLastTick = Date.now();
-
-		return app.settled.mo = new Promise(resolve => {
-			var settleMO = new MutationObserver(()=>
-				app.settled.settledLastTick = Date.now()
-			);
-			settleMO.observe(document.querySelector('.content'), {childList: true, subtree: true});
-
-			var settleMonitor = setInterval(()=> { // Check back that nothing else hit the DOM
-				if (app.service.$http.activeRequests > 0) { // Axios still making requests
-					app.settled.settledLastTick = Date.now();
-				} else if (Date.now() > app.settled.settledLastTick + settleWait) {
-					clearInterval(settleMonitor);
-					settleMO.disconnect();
-					resolve();
-					delete app.settled.promise;
-				}
-			}, settleHeartbeat);
-		});
-	},
-
-
-	/**
 	* Register a global level component
 	* This holds all component registrations inside app.component.register{} then dumps them into app.vue.component() during app.init()
 	* @param {string} [id] The ID of the component to set/get, if omitted and only a spec object is provided the id is computed via _.camelCase(spec.route)
@@ -127,7 +90,7 @@ global.app = {
 				app.debug.force('Component', id, 'already declared as', app.component.register[id], 'clobbering with new component spec', spec);
 				debugger;
 			}
-			app.debug(`Registered component "${id}"`);
+
 			return app.component.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.component(id);
@@ -148,8 +111,6 @@ global.app = {
 			return Vue.mgComponent(id, spec);
 		} else if (spec) { // Temporarily hold a mgComponent in memory while we slurp all mgComponent registrations
 			if (!app.mgComponent.register) app.mgComponent.register = {}; // Create the register if it doesn't already exist
-
-			app.debug(`Registered MacGyver component "${id}"`);
 			return app.mgComponent.register[id] = spec;
 		} else { // Fetch an existing mgComponent
 			return Vue.mgComponent(id);
@@ -175,7 +136,6 @@ global.app = {
 				debugger;
 			}
 
-			app.debug(`Registered service "${id}"`);
 			return app.service.register[id] = spec;
 		} else { // Fetch an existing component
 			return Vue.prototype[id];
@@ -201,7 +161,6 @@ global.app = {
 				debugger;
 			}
 
-			app.debug(`Registered filter "${id}"`);
 			return app.filter.register[id] = app.filter[id] = func;
 		} else if (Vue.prototype.$filter) { // Fetch an existing component (app loaded)
 			return Vue.prototype.$filter[id];
@@ -229,7 +188,6 @@ global.app = {
 				debugger;
 			}
 
-			app.debug(`Registered directive "${id}"`);
 			return app.directive.register[id.replace(/^v-/, '')] = spec;
 		} else { // Fetch an existing component
 			return Vue.directive(id);
@@ -247,8 +205,6 @@ global.app = {
 
 		if (app.isReady) { // Already live
 			console.warn(`Registered app.use() plugin after app.init() was called`);
-
-			//app.debug(`Registered plugin "${???}"`);
 			return Vue.use(plugin);
 		} else { // Temporarily hold a component in memory while we slurp all component registrations
 			return app.use.register.push(plugin);
@@ -263,8 +219,6 @@ global.app = {
 	*/
 	mixin: function(spec) {
 		if (app.isReady) console.warn(`Registered mixin after app.init() was called`, spec);
-
-		//app.debug(`Registered mixin "${???}"`);
 		return Vue.mixin(spec);
 	},
 
@@ -290,6 +244,7 @@ global.app = {
 		// }}}
 
 		// INIT: Generic plugins {{{
+		$debug(`app.use() X`, app.use.register.length);
 		_.forEach(app.use.register, plugin => {
 			Vue.use(plugin);
 		});
@@ -404,6 +359,7 @@ global.app = {
 		app.vue.$mount('#app'); // Mount the headless Vue instance and kick off the chain of component loading
 
 		var tryResolve = ()=> { // Let app.ready set itself up then resolve (keep trying if its not there)
+			console.count('Try app.ready.resolve()');
 			if (!app.ready.resolve) {
 				if (++tryResolve.tryCount >= 8) throw new Error('Given up after 8 attempts trying to call app.ready.resolve() - app payload corrupt?');
 				setTimeout(tryResolve, Math.pow(2, tryResolve.tryCount) * 5);

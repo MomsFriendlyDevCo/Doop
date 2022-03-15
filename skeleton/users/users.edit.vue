@@ -76,7 +76,7 @@ app.component({
 		},
 	},
 	created() {
-		this.$debug().enable(true);
+		this.$debugging = true;
 
 		this.$sitemap.setTitle('');
 		return this.refresh();

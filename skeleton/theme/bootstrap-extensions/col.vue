@@ -1,9 +1,9 @@
 <style>
 /* Various custom "ideal" column sizes for tables */
-th.col-sm, td.col-sm { width: 20px; }
-th.col-md, td.col-md { width: 200px; }
-th.col-lg, td.col-lg { width: 400px; }
-th.col-xl, td.col-xl { width: 500px; }
+th.col-sm { width: 20px; }
+th.col-md { width: 200px; }
+th.col-lg { width: 400px; }
+th.col-xl { width: 500px; }
 
 th.col-status, td.col-status { width: 16px; text-align: center }
 th.col-status { visibility: collapse }
@@ -15,8 +15,8 @@ th.col-thumbnail { visibility: collapse }
 th.col-date { width: 200px }
 body.screen-xs th.col-date { width: 130px }
 
-th.col-currency, th.col-number { width: 110px }
-th.col-currency, td.col-currency, th.col-number, th.col-number { text-align: right }
+th.col-currency { width: 100px }
+th.col-currency, td.col-currency { text-align: right }
 
 th.col-filesize { width: 100px }
 
@@ -26,7 +26,7 @@ th.col-button { width: 50px }
 th.col-toggle { width: 50px }
 
 th.col-verbs { visibility: collapse }
-th.col-verbs, td.col-verbs { width: 65px }
+th.col-verbs, td.col-verbs { width: 50px }
 
 /* Hide first children of anything marked as col-hover until the mouse is over it (useful for dangerous verbs like Delete) {{{ */
 th.col-hover > *,

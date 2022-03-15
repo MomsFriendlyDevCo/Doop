@@ -14,7 +14,7 @@ return Promise.resolve()
 				})
 				.then(()=> app.log('Loaded', app.log.colors.cyan(Object.keys(app.db).length), 'DB schemas:', Object.keys(app.db).map(m => app.log.colors.cyan(m)).join(', ')))
 				.then(()=> app.emit('postDb'))
-		, {order: 'first'});
+		);
 
 		app.on('exit', ()=>
 			mongoosy.disconnect()

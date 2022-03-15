@@ -80,7 +80,7 @@ app.component('layoutRoot', {
 						:duration="$transitions.current.maxKeepAlive"
 						:css="$transitions.current.class != 'page-transition-none'"
 					>
-						<div class="content-area">
+						<div class="content-area" :key="$router.routeVersion">
 							<router-view></router-view>
 						</div>
 					</transition>

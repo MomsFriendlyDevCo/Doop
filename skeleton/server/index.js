@@ -19,20 +19,7 @@ Promise.resolve()
 	})
 	// }}}
 	// Initialize all .doop files {{{
-	.then(()=> debug('app.setup()'))
 	.then(()=> app.setup())
-	// }}}
-	// Load third party components (glob: ['node_modules/@doop/**/doop.backend.hooks.js']) {{{
-	.then(()=> debug('Load 3rd party ./n*_m*/**/@doop/doop.backend.hooks.js files'))
-	.then(()=> globby([
-			`${app.config.paths.root}/node_modules/@doop/**/doop.backend.hooks.js`,
-			`!${app.config.paths.root}/node_modules/**/node_modules`,
-		])
-		.then(modPaths => modPaths.forEach(modPath => {
-			debug('Load module', modPath);
-			require(modPath)
-		}))
-	)
 	// }}}
 	// Emit events to boot server in order {{{
 	.then(()=> debug('Begin emitter chain'))

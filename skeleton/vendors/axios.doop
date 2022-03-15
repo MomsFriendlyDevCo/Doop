@@ -64,13 +64,13 @@ axios.interceptors.request.use(config => {
 // Monkey patch Axios so that any error response also gets thrown to the console
 axios.interceptors.response.use(response => response, err => {
 	if (err.response && err.response.status == 408) { // Request timeout
-		app.log.warn.as('Axios', 'threw', app.log.colors.bold('TIMEOUT / 408'), 'error on', app.log.colors.blue(err.request.method.toUpperCase()), app.log.colors.cyan(err.request.url), '-', err.toString());
+		app.log.warn.as('Axios', 'threw', app.log.colors.bold('TIMEOUT / 408'), 'error on', app.log.colors.blue(err.request.method.toUpperCase()), app.log.colors.cyan(err.config.url), '-', err.toString());
 		throw err;
 	} else if (err.response) { // client received an error response (5xx, 4xx)
-		app.log.warn.as('Axios', 'threw response error on', app.log.colors.blue(err.request.method.toUpperCase()), app.log.colors.blue(err.request.url), '-', err.toString());
+		app.log.warn.as('Axios', 'threw response error on', app.log.colors.blue(err.request.method.toUpperCase()), app.log.colors.blue(err.config.url), '-', err.toString());
 		throw err;
 	} else if (err.request) { // client never received a response, or request never left
-		app.log.warn.as('Axios', 'threw', app.log.colors.bold('REQUEST'), 'error on', app.log.colors.blue(err.request.method.toUpperCase()), app.log.colors.cyan(err.request.url), '-', err.toString());
+		app.log.warn.as('Axios', 'threw', app.log.colors.bold('REQUEST'), 'error on', app.log.colors.blue(err.request.method.toUpperCase()), app.log.colors.cyan(err.config.url), '-', err.toString());
 		throw err;
 	} else { // anything else
 		app.log.warn.as('Axios', 'threw', app.log.colors.bold('GENERIC'), 'error', err.toString());
