@@ -163,12 +163,13 @@ app.component({
 							<button type="submit" class="btn btn-primary btn-lg btn-block mt-4">Create account</button>
 							<hr size="0">
 							<small class="text-muted text-center">
-								<p class="mb-0">
+								<p v-if="$config.session.login.enabled" class="mb-0">
 									Already have a account — <a href="/login" class="btn btn-sm btn-link align-baseline p-0">Login</a>
 								</p>
-								<p class="mb-0">
-									<!-- TODO: We could pass through the email entered in form above -->
-									I forgot my password — <a href="/recover" class="btn btn-sm btn-link align-baseline p-0">Reset password</a>
+								<p v-if="$config.session.recover.enabled" class="mb-0">
+									I forgot my password — <a
+										:href="$config.session.signup.emailAsUsername ? `/recover/?email=${data.email}` : `/recover/?username=${data.username}`"
+										class="btn btn-sm btn-link align-baseline p-0">Reset password</a>
 								</p>
 							</small>
 						</div>

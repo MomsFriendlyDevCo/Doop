@@ -273,7 +273,7 @@ global.app = {
 	* Init all components, registering their routes to the router and resetting app.component etc. as pointers to app.vue.component
 	*/
 	init() {
-		var $debug = Debug('Doop-Core-Init').enable(false);
+		const $debug = Debug('Doop-Core-Init').enable(false);
 
 		app.isReady = true; // Set this early so trying to register other components / services / filters etc. will warn
 
@@ -357,18 +357,29 @@ global.app = {
 		);
 		// }}}
 
-		// INIT: Route guards must be attached before routes or first hit will not trigger middleware {{{
+		// INIT: Route guards {{{
+		// NOTE: must be attached before routes or first hit will not trigger middleware.
 		app.router.beforeEach((to, from, next) => {
 			app.service.$session.promise()
 				.then(()=> $('body').toggleClass('has-session', app.service.$session.isLoggedIn))
 				.then(()=> app.vue.$emit('$beforeRoute', {to, from}))
 				.then(() => next())
 				.catch(()=> { // Forbid nav if not logged in an the path is in a whitelist
-					app.router.$debug('Route', from.path, to.path, to, app.router.options.routeRequiresAuth.has(to.matched[0].path));
+					app.router.$debug('Routes', Array.from(app.router.options.routeRequiresAuth));
+
+					// NOTE: Dashboard route is matched as an empty string rather than "/".
+					let path;
+					if (to.path === '/') {
+						path = to.path;
+					} else if (_.isArray(to.matched) && to.matched.length > 0) {
+						path = to.matched[0].path;
+					}
+
+					app.router.$debug('Route', from.path, to.path, to, path, app.router.options.routeRequiresAuth.has(path));
 
 					// Docs: When the URL is /foo/bar, $route.matched will be an Array containing both objects (cloned), in parent to child order.
 					// Note: We register only individual components as routes below. The first matched index should always be a Doop component.
-					if (_.isArray(to.matched) && to.matched.length > 0 && app.router.options.routeRequiresAuth.has(to.matched[0].path)) { // Target component requires auth
+					if (app.router.options.routeRequiresAuth.has(path)) { // Target component requires auth
 						app.router.$debug('No session auth present and', {routeRequiresAuth: true}, 'on routes', {to, from}, '- redirect to /login');
 						if (!['/logout', '/signup'].includes(to.path)) app.service.$session.settings.set('redirect', to.path, 'local'); // Save eventual destination if the to route is not the logout (prevents loops)
 						next({path: '/login'}); // Redirect everything else
@@ -386,7 +397,10 @@ global.app = {
 		// }}}
 
 		// INIT: Router routes {{{
-		_(app.component.register)
+		// NOTE: When navigation route `next()` is called in an async manner, each time `addRoute` is called `beforeEach` navigation routes run.
+		// An issue discussing `addRoute`/`beforeEach` https://github.com/vuestorefront/vue-storefront/issues/3442
+		// WARNING: `addRoutes` is deprecated in VueRouter v4.
+		app.router.addRoutes(_(app.component.register)
 			.pickBy(component => component.route) // Only include components with routes
 			.map((component, id) => ({
 				path: component.route,
@@ -396,7 +410,7 @@ global.app = {
 				.replace(/\//g, String.fromCharCode(824))
 				.replace(/:/g, String.fromCharCode(818))
 			)
-			.forEach(route => app.router.addRoute(route))
+		);
 
 		delete app.component.register; // Free up memory of loaded components
 		// }}}

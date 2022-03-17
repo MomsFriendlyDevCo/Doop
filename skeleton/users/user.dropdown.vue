@@ -4,9 +4,6 @@
 * @listens changeLocation Trigger the "Choose a location" modal
 */
 app.component('userDropdown', {
-	data() { return {
-		$session: this.$session,
-	}},
 	methods: {
 		refresh() {
 			return Promise.resolve()
@@ -21,14 +18,19 @@ app.component('userDropdown', {
 </script>
 
 <template>
-	<li v-if="$session.isLoggedIn" class="dropdown notification-list topbar-dropdown">
-		<a class="nav-link nav-user d-flex flex-row-reverse align-items-center mr-0 waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+	<li v-if="$session.isLoggedIn" class="dropdown">
+		<a class="nav-link nav-user dropdown-toggle d-flex flex-row-reverse align-items-center mr-0 waves-effect waves-light"
+			:id="_uid"
+			data-toggle="dropdown"
+			href="#" role="button"
+			aria-haspopup="false"
+			aria-expanded="false">
 			<avatar size="32" :user="$session.data"/>
 			<span class="pro-user-name d-none d-md-inline mr-1">
 				{{$session.data.name || $session.data.username || $session.data.email}} <i class="mdi mdi-chevron-down"></i> 
 			</span>
 		</a>
-		<div class="dropdown-menu dropdown-menu-right profile-dropdown ">
+		<div class="dropdown-menu dropdown-menu-right profile-dropdown" :aria-labelledby="_uid" role="menu">
 			<!--div class="dropdown-header noti-title">
 				<h6 class="text-overflow m-0">Welcome !</h6>
 			</div-->

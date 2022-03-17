@@ -2,15 +2,16 @@
 import sift from 'sift';
 import Vue from 'vue';
 
+import Debug from '@doop/debug';
+
 /**
 * Session management service
 *
 * @emits $session.request Called as `(axiosRequest)` when about to submit a HTTP request to /api/session, can be mutated by downstream promise subscribers
 */
 app.service('$session', function() {
-	this.$debug = this.$debug.new('$session').enable(false);
-
 	var $session = Vue.observable({
+		$debug: Debug('$session').enable(false),
 		/**
 		* Current user data
 		* @type {Object}
@@ -79,15 +80,15 @@ app.service('$session', function() {
 		*/
 		run: stage => {
 			if ($session.stage >= 3) {
-				this.$debug('run() REPLACE', $session.stage, 'with', stage, '($session has already settled)');
+				$session.$debug('run() REPLACE', $session.stage, 'with', stage, '($session has already settled)');
 				$session.stagePromise = Promise.defer();
 			} else {
-				this.$debug('run() REVERT', $session.stage, 'to', stage);
+				$session.$debug('run() REVERT', $session.stage, 'to', stage);
 			}
 
 			$session.stage = stage - 1;
 			$session.stages.next();
-			$session.stagePromise.promise.finally(()=> this.$debug('FINALLY!', $session.data));
+			$session.stagePromise.promise.finally(()=> $session.$debug('FINALLY!', $session.data));
 			return $session.stagePromise.promise;
 		},
 
@@ -98,7 +99,7 @@ app.service('$session', function() {
 		* @returns {Promise} A promise representing the stage load chain
 		*/
 		next: ()=> {
-			this.$debug('At stage', $session.stage + 1);
+			$session.$debug('At stage', $session.stage + 1);
 			return app.vue.$emit.promise('$session.stageChange', ++$session.stage)
 				.then(()=> {
 					switch ($session.stage) {
@@ -122,7 +123,7 @@ app.service('$session', function() {
 		*/
 		bootstrap: ()=> {
 			return Promise.resolve()
-				.then(()=> this.$debug('stage', 'bootstrap'))
+				.then(()=> $session.$debug('stage', 'bootstrap'))
 				.then(()=> { // Load auth header token if we're in authHeader session preference mode
 					if (!$session.isRefreshed && this.$config.session.preference == 'authHeader') { // Pull header from localStorage as we're not using cookies
 						return $session.settings.get('authToken').then(token => {
@@ -150,13 +151,13 @@ app.service('$session', function() {
 			};
 
 			return Promise.resolve()
-				.then(()=> this.$debug('stage', 'preBootData'))
+				.then(()=> $session.$debug('stage', 'preBootData'))
 				.then(()=> app.vue.$emit.promise('$session.preBootData'))
 				.then(()=> app.vue.$emit.promise('$session.request', requestPrototype))
 				.then(req => req || requestPrototype) // Did the promise do a complete rewrite or should we use the original?
 				.then(req => this.$http(req))
 				.then(res => {
-					this.$debug('$session.data now', res.data);
+					$session.$debug('$session.data now', res.data);
 					if (res.data._id) {
 						$session.data = this.$assign($session.data, {permissions: {}}, res.data)
 						$session.isLoggedIn = true;
@@ -171,10 +172,10 @@ app.service('$session', function() {
 						&& err == 'Network error'
 						&& !$session.isRefreshed
 					) {
-						this.$debug('Network error during preBootData on first fetch');
+						$session.$debug('Network error during preBootData on first fetch');
 						app.crash('Can not connect to the server', showReload=true);
 					} else {
-						this.$debug('Caught error during preBootData', err);
+						$session.$debug('Caught error during preBootData', err);
 						app.ready // App may not be ready yet - wait for it to load
 							.then(() => this.$toast.catch(`${err.err}`)) // Throw to generic $toast handler
 						// throw err;
@@ -190,7 +191,7 @@ app.service('$session', function() {
 		*/
 		postBootData: ()=> {
 			return Promise.resolve()
-				.then(()=> this.$debug('stage', 'postBootData'))
+				.then(()=> $session.$debug('stage', 'postBootData'))
 				.then(()=> app.vue.$emit.promise('$session.postBootData', $session.data))
 				.then(()=> $session.stages.next())
 		},
@@ -203,12 +204,12 @@ app.service('$session', function() {
 		*/
 		settled: ()=> {
 			return Promise.resolve()
-				.then(()=> this.$debug('stage', 'settled'))
+				.then(()=> $session.$debug('stage', 'settled'))
 				// Apply mimic setting from localStorage {{{
 				.then(()=> this.$session.settings.get('mimic'))
 				.then(mimicAs => {
 					if (!mimicAs) return; // No mimic enabled
-					this.$debug.force('Restoring mimic session as user', mimicAs, 'delete the localStorage "mimic" key to prevent this behaviour');
+					$session.$debug.force('Restoring mimic session as user', mimicAs, 'delete the localStorage "mimic" key to prevent this behaviour');
 					return $session.mimic(mimicAs);
 				})
 				// }}}
@@ -245,7 +246,7 @@ app.service('$session', function() {
 					if (cb) cb();
 				}));
 			} else {
-				this.$debug('$session.promise not ready yet');
+				$session.$debug('$session.promise not ready yet');
 				setTimeout(checkPromise, 10);
 			}
 		};
@@ -270,7 +271,7 @@ app.service('$session', function() {
 	$session.signup = user => Promise.resolve()
 		.then(()=> this.$loader.start('$session.signup'))
 		.then(()=> this.$http.post('/api/session/signup', user))
-		.then(()=> this.$debug('signup done'))
+		.then(()=> $session.$debug('signup done'))
 		.finally(()=> this.$loader.stop('$session.signup'))
 
 
@@ -291,7 +292,7 @@ app.service('$session', function() {
 			}
 		})
 		.then(()=> $session.stages.run(1)) // Reperform the session fetcher
-		.then(()=> this.$debug('login done'))
+		.then(()=> $session.$debug('login done'))
 		.finally(()=> this.$loader.stop('$session.login'))
 
 
@@ -320,7 +321,7 @@ app.service('$session', function() {
 	$session.recover = user => Promise.resolve()
 		.then(()=> this.$loader.start('$session.recover'))
 		.then(()=> this.$http.post('/api/session/recover', user))
-		.then(()=> this.$debug('recover done'))
+		.then(()=> $session.$debug('recover done'))
 		.finally(()=> this.$loader.stop('$session.recover'))
 
 	// $session.permissions - mirror or app.utils.permissions {{{
@@ -457,7 +458,7 @@ app.service('$session', function() {
 		})
 		.then(({data: user}) => user.permissions ? user : Promise.reject('Server supplied incomplete user object - check permissions to mimic'))
 		.then(user => {
-			this.$debug.force('Mimic as', user);
+			$session.$debug.force('Mimic as', user);
 			this.$http.defaults.headers.common.mimic = user._id; // Glue mimic header onto future $http requests so the backend responds accordingly
 			$session.data = user;
 			$session.data.isMimic = true; // Set flag to indicate we are in mimic mode
