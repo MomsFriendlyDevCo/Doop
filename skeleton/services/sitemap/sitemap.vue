@@ -1,7 +1,9 @@
 <script lang="js" frontend>
+import Debug from '@doop/debug';
+
 app.service('$sitemap', function() {
 	var $sitemap = {};
-	$sitemap.$debug = this.$debug.new('$sitemap').enable(false);
+	$sitemap.$debug = Debug('$sitemap').enable(false);
 
 	// Raw sitemap (uncomputed) {{{
 	/**
@@ -67,9 +69,9 @@ app.service('$sitemap', function() {
 	$sitemap.computed;
 	$sitemap.refreshing; // Promise if we are already inside a refresh
 	$sitemap.refresh = (force = false) => {
+		$sitemap.$debug('Refresh', force, $sitemap.refreshing);
 		if (!force && $sitemap.refreshing) return $sitemap.refreshing;
 
-		$sitemap.$debug('Refresh');
 		return $sitemap.refreshing = Promise.resolve()
 			.then(()=> this.$session.promise()) // Ensure the user profile pull has completed first
 			.then(()=> $sitemap.resolveTree($sitemap.map))
@@ -87,7 +89,7 @@ app.service('$sitemap', function() {
 		app.vue.$on('$session.permissions', ()=> $sitemap.refresh(force = true));
 		app.vue.$on('$session.settled', ()=> {
 			$sitemap.$debug('Notified that session has settled');
-			this.$sitemap.refresh(force = true);
+			$sitemap.refresh(true);
 		});
 	});
 

@@ -125,6 +125,7 @@ app.component('v-popover', VPopover);
 /* .popover-dark {{{ */
 /* e.g. <v-popover popover-class="popover-dark"/> */
 .popover.popover-dark .popover-inner {
+	/* TODO: These colors should be from vars */
 	background: #4c5667;
 	color: #FFF;
 	border: none;

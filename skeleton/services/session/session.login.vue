@@ -114,12 +114,12 @@ app.component({
 
 								<hr size="0">
 								<small class="text-muted text-center">
-									<p class="mb-0">
+									<p v-if="$config.session.recover.enabled" class="mb-0">
 										I forgot my password — <a
 											:href="$config.session.signup.emailAsUsername ? `/recover/?email=${data.email}` : `/recover/?username=${data.username}`"
 											class="btn btn-sm btn-link align-baseline p-0">Reset password</a>
 									</p>
-									<p class="mb-0">
+									<p v-if="$config.session.signup.enabled" class="mb-0">
 										I don't have an account — <a href="/signup" class="btn btn-sm btn-link align-baseline p-0">Create an account</a>
 									</p>
 								</small>

@@ -88,10 +88,10 @@ app.component({
 								</div>
 								<hr size="0">
 								<small class="text-muted text-center">
-									<p class="mb-0">
+									<p v-if="$config.session.login.enabled" class="mb-0">
 										Log into your account — <a href="/login" class="btn btn-sm btn-link align-baseline p-0">Login</a>
 									</p>
-									<p class="mb-0">
+									<p v-if="$config.session.signup.enabled" class="mb-0">
 										I don't have an account — <a href="/signup" class="btn btn-sm btn-link align-baseline p-0">Create an account</a>
 									</p>
 								</small>

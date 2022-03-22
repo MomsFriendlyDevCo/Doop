@@ -4,6 +4,7 @@ if (!process.env.DOOP_QUIET) console.log(colors.bold.red('RUNNING IN PRODUCTION 
 
 module.exports = {
 	isProduction: true,
+	// FIXME: project specific
 	url: 'https://swordfish.mfdc.dev',
 	port: process.env.PORT || 80,
 	tagline: false,

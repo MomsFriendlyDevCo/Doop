@@ -45,7 +45,7 @@ app.component({
 									<p class="mb-0">
 										Still waiting for an email? — <button v-on:click.prevent="recover(true, false)" class="btn btn-sm btn-link align-baseline p-0">Resend email</button>
 									</p>
-									<p class="mb-0">
+									<p v-if="$config.session.login.enabled" class="mb-0">
 										I've confirmed my email — <a href="/login" class="btn btn-sm btn-link align-baseline p-0">Login</a>
 									</p>
 								</small>

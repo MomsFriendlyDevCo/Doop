@@ -3,7 +3,7 @@
 	background: #f3f3f3;
 	position: fixed;
 	top: 70px;
-	left: 240px;
+	left: 0px;
 	right: 0;
 	bottom: 0;
 	z-index: 5; /* Must be >.navbar-main */
@@ -11,6 +11,11 @@
 	color: #ccc;
 	align-content: center;
 	justify-content: center;
+}
+
+.splash.splash-loading-foreground::before {
+	border-top: 5px solid var(--main-lighter);
+	z-index: -1;
 }
 
 /* Remove margins when in mobile mode */
@@ -27,7 +32,7 @@ body.loading.loading-foreground .splash.splash-loading-foreground {
 
 .splash.splash-loading-foreground > img {
 	width: 40vw;
-	max-width: 200px;
+	max-width: 500px;
 	padding: 3rem;
 }
 </style>
