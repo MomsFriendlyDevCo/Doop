@@ -54,7 +54,7 @@ global.app = {
 			app.log.as = (as, ...msg) => console.log.apply(app, [app.log.colors.blue(`[${as}]`)].concat(msg));
 			app.log.colors = colors;
 			app.log.debug = (...msg) => debug.apply(app, msg);
-			app.log.debug.as = (as, ...msg) => debug.apply(app, [app.log.colors.blue(`[${as}]`), msg]);
+			app.log.debug.as = (as, ...msg) => debug.apply(app, [app.log.colors.blue(`[${as}]`)].concat(msg));
 			app.dump = app.log.dump = (...args) => args.forEach(a => dumper.dump(a));
 			app.log.log = app.log;
 			app.log.log.as = (as, ...msg) => console.log.apply(app, [app.log.colors.blue(`[${as}]`)].concat(msg));

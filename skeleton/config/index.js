@@ -82,13 +82,11 @@ module.exports = {
 	},
 	build: {
 		minimize: false,
-		/*
 		// Optional importing of extra files such as theme CSS/SCSS.
-		importGlob:[
-			'./theme/**/*.css',
-			'./theme/**/[!exclude_]*.scss',
-		],
-		*/
+		//importGlob:[
+		//	'./theme/**/*.css',
+		//	'./theme/**/[!exclude_]*.scss',
+		//],
 	},
 	cache: {
 		enabled: true,
