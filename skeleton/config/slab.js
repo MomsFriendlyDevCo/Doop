@@ -1,6 +1,7 @@
 // MC's development rig
 module.exports = {
 	...require('./dev'),
+	port: 80,
 	url: 'http://slab',
 	email: {
 		enabled: false,
