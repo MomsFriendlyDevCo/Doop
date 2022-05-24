@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------------
-// Lightbox theme entry point
+// Doop theme entry point
 // ---------------------------------------------------------------------------------
 
 
@@ -12,13 +12,15 @@
 // see: https://getbootstrap.com/docs/5.0/customize/overview/
 
 // 1. Bootstrap variables overrides first.
-// To see full list of available defaults, refer to:
-// node_modules/bootstrap/scss/_variables.scss
-// 2. Then import bootstrap (as option A: including all at once)
+//    To see full list of available defaults, refer to:
+//    node_modules/bootstrap/scss/_variables.scss
+// 2. Then import bootstrap as option A (including all at once)
+//    or alternatively option B (which is only including the Bootstrap
+//    components that are used).
 @import 'overrides/bootstrap-variable-overrides'; // 1.
 @import '../node_modules/bootstrap/scss/bootstrap'; // 2.
 
-// @import 'dependencies/typography';
+@import 'dependencies/typography';
 // @import 'dependencies/utilities';
 
 

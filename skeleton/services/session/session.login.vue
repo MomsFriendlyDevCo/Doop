@@ -67,7 +67,7 @@ app.component({
 									</label>
 									<div class="input-group input-group-lg">
 										<span class="input-group-text">
-											<i class="fal fa-fw fa-user"/>
+											<i class="material-icons">&#xe7fd</i>
 										</span>
 										<input type="email" name="email" v-model="data.email" class="form-control" required autofocus placeholder="name@example.com"/>
 									</div>
@@ -78,7 +78,7 @@ app.component({
 									</label>
 									<div class="input-group input-group-lg">
 										<span class="input-group-text">
-											<i class="fal fa-fw fa-user"/>
+											<i class="material-icons">&#xe7fd</i>
 										</span>
 										<input type="text" name="username" v-model="data.username" class="form-control" required autofocus placeholder="Username or email"/>
 									</div>
@@ -90,7 +90,7 @@ app.component({
 									</label>
 									<div class="input-group input-group-lg">
 										<span class="input-group-text">
-											<i class="fal fa-fw fa-key"/>
+											<i class="material-icons">&#xe73c</i>
 										</span>
 										<input type="password" name="password" v-model="data.password" class="form-control" required placeholder="Password"/>
 									</div>

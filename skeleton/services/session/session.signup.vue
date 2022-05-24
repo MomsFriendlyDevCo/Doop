@@ -86,7 +86,7 @@ app.component({
 									</label>
 									<div class="input-group input-group-lg has-validation">
 										<span class="input-group-text">
-											<i class="fal fa-fw fa-user"/>
+											<i class="material-icons">&#xe7fd</i>
 										</span>
 										<input type="text" placeholder="Name" name="name" v-model="data.name" class="form-control" required autofocus />
 										<div class="invalid-feedback">
@@ -101,7 +101,7 @@ app.component({
 								</label>
 								<div class="input-group input-group-lg has-validation">
 									<span class="input-group-text">
-										<i class="fal fa-fw fa-envelope"/>
+										<i class="material-icons">&#xe158</i>
 									</span>
 									<input type="email" placeholder="name@example.com" name="email" v-model="data.email" class="form-control" required autofocus />
 									<div class="invalid-feedback">
@@ -116,7 +116,7 @@ app.component({
 								</label>
 								<div class="input-group input-group-lg has-validation">
 									<span class="input-group-text">
-										<i class="fal fa-fw fa-user"/>
+										<i class="material-icons">&#xe7fd</i>
 									</span>
 									<input type="text" placeholder="Username" name="username" v-model="data.username" class="form-control" required autofocus />
 								</div>
@@ -128,11 +128,12 @@ app.component({
 								</label>
 								<div class="input-group input-group-lg has-validation">
 									<span class="input-group-text">
-										<i class="fal fa-fw fa-key"/>
+										<i class="material-icons">&#xe73c</i>
 									</span>
 									<input :type="form.showPassword ? 'text' : 'password'" placeholder="Password" name="password" v-model="data.password" class="form-control" pattern=".{8,}" required />
 									<button class="btn btn-secondary" type="button" @click="form.showPassword = !form.showPassword" v-tooltip="form.showPassword ? 'Hide password' : 'Show password'">
-										<i class="far fa-fw" :class="form.showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+										<i v-if="form.showPassword" class="material-icons">&#xe8f4</i>
+										<i v-else class="material-icons">&#xe8f5</i>
 									</button>
 									<div class="invalid-feedback">
 										<span v-if="data.password.length === 0">Please enter a password for your account.</span>

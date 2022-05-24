@@ -1,0 +1,44 @@
+// Material Design Icons -----------------------------------------------------------
+
+// Icons reference: https://fonts.google.com/icons
+
+@font-face {
+	font-family: 'Material Icons';
+	font-style: normal;
+	font-weight: 400;
+	src: url('/assets/fonts/material-design-icons-4.0.0/MaterialIcons-Regular.woff2') format('woff2'),
+		url('/assets/fonts/material-design-icons-4.0.0/MaterialIcons-Regular.ttf') format('truetype');
+}
+
+@mixin material-icons {
+	direction: ltr;
+	display: inline-block;
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 1.125em;
+	letter-spacing: normal;
+	line-height: 1;
+	text-transform: none;
+	vertical-align: sub;
+	white-space: nowrap;
+	word-wrap: normal;
+	-moz-font-feature-settings: 'liga';
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.material-icons {
+	@include material-icons;
+}
+
+
+// General -------------------------------------------------------------------------
+
+body {
+	// Mac OSX font smoothing adjustsments for high DPI screens.
+	// Fonts are rendering arguably too bold on Webkit/Firefox.
+	@media screen and (min-resolution: 2dppx) {
+	    -webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}

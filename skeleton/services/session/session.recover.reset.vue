@@ -60,7 +60,7 @@ app.component({
 										</label>
 										<div class="input-group input-group-lg">
 											<span class="input-group-text">
-												<i class="fal fa-fw fa-user"/>
+												<i class="material-icons">&#xe7fd</i>
 											</span>
 											<input type="password" name="password" v-model="data.password" class="form-control" required autofocus/>
 										</div>
@@ -72,7 +72,7 @@ app.component({
 										</label>
 										<div class="input-group input-group-lg">
 											<span class="input-group-text">
-												<i class="fal fa-fw fa-user"/>
+												<i class="material-icons">&#xe7fd</i>
 											</span>
 											<input type="password" name="confirmation" v-model="data.confirmation" class="form-control" required/>
 										</div>

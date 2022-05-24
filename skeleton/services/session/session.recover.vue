@@ -73,7 +73,7 @@ app.component({
 										</label>
 										<div class="input-group input-group-lg">
 											<span class="input-group-text">
-												<i class="fal fa-fw fa-user"/>
+												<i class="material-icons">&#xe7fd</i>
 											</span>
 											<input type="email" name="email" v-model="data.email" class="form-control has-validation" required autofocus placeholder="name@example.com"/>
 											<div class="invalid-feedback">
@@ -87,7 +87,7 @@ app.component({
 										</label>
 										<div class="input-group input-group-lg">
 											<span class="input-group-text">
-												<i class="fal fa-fw fa-user"/>
+												<i class="material-icons">&#xe7fd</i>
 											</span>
 											<input type="text" name="username" v-model="data.username" class="form-control" required autofocus/>
 										</div>
