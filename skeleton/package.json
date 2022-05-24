@@ -190,9 +190,6 @@
     "winston": "^3.3.3",
     "winston-papertrail-transport": "^1.0.6"
   },
-  "devDependencies": {
-    "webpack-hot-middleware": "^2.25.1"
-  },
   "babel": {
     "presets": [
       [
