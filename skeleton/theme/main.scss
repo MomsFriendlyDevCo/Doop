@@ -1,0 +1,45 @@
+// ---------------------------------------------------------------------------------
+// Lightbox theme entry point
+// ---------------------------------------------------------------------------------
+
+
+// Dependencies --------------------------------------------------------------------
+
+// Critical dependencies
+@import 'dependencies/variables';
+
+// Bootstrap 5
+// see: https://getbootstrap.com/docs/5.0/customize/overview/
+
+// 1. Bootstrap variables overrides first.
+// To see full list of available defaults, refer to:
+// node_modules/bootstrap/scss/_variables.scss
+// 2. Then import bootstrap (as option A: including all at once)
+@import 'overrides/bootstrap-variable-overrides'; // 1.
+@import '../node_modules/bootstrap/scss/bootstrap'; // 2.
+
+// @import 'dependencies/typography';
+// @import 'dependencies/utilities';
+
+
+// Components ----------------------------------------------------------------------
+
+// @import 'components/breadcrumbs';
+// @import 'components/buttons';
+// @import 'components/card';
+// @import 'components/dropdowns';
+// @import 'components/forms';
+// @import 'components/input-group';
+// @import 'components/list-group';
+// @import 'components/modal';
+// @import 'components/nav';
+
+
+// Layout --------------------------------------------------------------------------
+
+// @import 'layout/content-area';
+
+
+// Overrides -----------------------------------------------------------------------
+
+// @import 'overrides/global-search';
