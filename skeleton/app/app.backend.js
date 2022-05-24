@@ -25,7 +25,16 @@ var debug = require('debug')('doop:backend');
 var dumper = require('dumper.js');
 var fs = require('fs');
 var fspath = require('path');
+var package = require('../package.json');
 var url = require('url');
+
+// Register all .mjs files for transpile
+babelRegister({
+	cache: false,
+	extensions: ['.mjs'],
+	ignore: [], // Include node_modules .mjs files in transpile
+	...package.babel, // Splice Babel config from package.json as this doesn't seem to be imported automaticly by the transpiler
+});
 
 // Setup global `app` object {{{
 global.app = {
@@ -226,8 +235,3 @@ app.setup = require('./app.backend.setup');
 // }}}
 // Return basic app object
 module.exports = app;
-
-// Register all .mjs files for transpile
-babelRegister({
-	extensions: ['.mjs'],
-});
