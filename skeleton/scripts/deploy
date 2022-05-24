@@ -113,9 +113,9 @@ if [[ "$DODEV" == 0 && "$DOLIVE" == 0 ]]; then
 	echo
 	echo "Must specify --live / --dev / --both"
 	echo
-	echo "To deploy live: ~/redeploy -l"
-	echo "To deploy dev : ~/redeploy -d"
-	echo "To deploy both: ~/redeploy -b"
+	echo "To deploy live: ~/deploy -l"
+	echo "To deploy dev : ~/deploy -d"
+	echo "To deploy both: ~/deploy -b"
 	echo
 	exit 1
 fi
@@ -129,6 +129,8 @@ fi
 
 # Stop on errors
 set -euo pipefail
+
+# TODO: Stop agents before proceeding with redeploy
 
 # Deploy dev {{{
 if [ "$DODEV" == 1 ]; then
