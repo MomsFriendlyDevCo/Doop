@@ -99,10 +99,11 @@ app.migration.init = ()=> Promise.resolve()
 * @returns {Promise} A promise which will resolve when the migration has been marked as completed
 */
 app.migration.markMigration = id => Promise.resolve()
-	.then(()=> app.db.doopMigrations.create({
+	.then(()=> app.db.doopMigrations.update({
 		ref: id,
 		created: new Date(),
-	}))
+	},
+	{ upsert: true }))
 	.then(()=> app.migration.migrationsApplied.add(id))
 	.catch(()=> null)
 
