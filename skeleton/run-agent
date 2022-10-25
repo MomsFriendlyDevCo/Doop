@@ -12,4 +12,4 @@ export AGENT_PRELOAD="$PWD/agents/agentLoader.js"
 # Set max memory to 2gb
 export AGENT_MAXMEM=$((1024 * 1024 * 1024 * 2))
 
-exec ./node_modules/@momsfriendlydevco/agents/run-agent "--max-ram=$AGENT_MAXMEM" "$@"
+exec ./node_modules/@momsfriendlydevco/agents/agents.js "--max-ram=$AGENT_MAXMEM" "$@"

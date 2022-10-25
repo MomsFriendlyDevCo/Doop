@@ -25,8 +25,13 @@ var debug = require('debug')('doop:backend');
 var dumper = require('dumper.js');
 var fs = require('fs');
 var fspath = require('path');
-var package = require('../package.json');
 var url = require('url');
+var Commander = require('commander');
+var commanderExtras = require('commander-extras');
+var package = require('../package.json');
+
+var command = new Commander.Command();
+var commander = commanderExtras(command);
 
 // Register all .mjs files for transpile
 babelRegister({
@@ -100,15 +105,13 @@ global.app = {
 	* @returns {Object} The new config object
 	*/
 	configLoad(profile) {
-		var program = {};
 		if (!profile && !process.env.DOOP_IGNORE_CMD_ARGS) {
 			// Load command line arguments {{{
-			program = require('commander');
-			require('commander-extras');
-			program
+			var program = commander
 				.version(require('../package.json').version)
+				// NOTE: Optional legacy commander behaviour ".storeOptionsAsProperties()"
 				.usage('[-e env]')
-				.option('-e, --environment <env>', 'Set the envionment to use')
+				.option('-e, --environment <env>', 'Set the environment to use')
 				.option('-o, --opt <key=val>', 'Set a config option by its dotted path', (v, total) => {
 					var bits = [key, val] = v.split(/\s*=\s*/, 2);
 					if (bits.length == 1) { // Assume we are just setting a flag to true
@@ -125,6 +128,7 @@ global.app = {
 					}
 					return total
 				}, {})
+				// FIXME: Option never used?
 				.option('--merge-config <env>', 'Merge a CSV of other config profiles over the base config')
 				.env('DOOP_IGNORE_CMD_ARGS', 'If truthy no further processing is done on extra command arguments such as `-e [env]` or `o [opt=val]`')
 				.parse(process.argv);
@@ -138,8 +142,8 @@ global.app = {
 				app.log('ENV', app.log.colors.cyan.bold(app.env));
 			}
 			app.env = process.env.NODE_ENV = profile;
-		} else if (program.environment) {
-			app.env = program.environment;
+		} else if (_.isFunction(program.opts) && program.opts().environment) {
+			app.env = program.opts().environment;
 			if (!process.env.DOOP_QUIET) app.log('ENV', app.log.colors.cyan.bold(app.env), app.log.colors.grey('(from CLI)'));
 		} else if (process.env.NODE_ENV) {
 			app.env = process.env.NODE_ENV;
@@ -191,7 +195,7 @@ global.app = {
 		}
 		// }}}
 		// If CLI provided overrides - merge them {{{
-		_.merge(app.config, program.opt);
+		if (_.isFunction(program.opts) && program.opts().opt) _.merge(app.config, program.opts().opt);
 		// }}}
 		// If config.url doesn't contain a port append it {{{
 		if (app.config.port != 80 && url.parse(app.config.url).port != app.config.port) {

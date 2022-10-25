@@ -15,6 +15,10 @@ module.exports = {
 	},
 	gulp: {
 		notifications: false,
+		debugJS: false,
+		minifyJS: true,
+		debugCSS: false,
+		minifyCSS: true,
 	},
 	hmr: {
 		enabled: false,

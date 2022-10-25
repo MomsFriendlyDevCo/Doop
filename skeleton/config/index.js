@@ -173,7 +173,7 @@ module.exports = {
 		},
 	},
 	email: {
-		enabled: true,
+		enabled: false,
 		method: 'mailgun',
 		from: 'noreply@{{FIXME:hostname}}',
 		to: '',
@@ -185,6 +185,10 @@ module.exports = {
 	},
 	gulp: {
 		npmUpdate: true,
+		debugJS: true,
+		minifyJS: false,
+		debugCSS: true,
+		minifyCSS: false,
 		watchRestart: [], // Additional files to watch and trigger a server restart when modified
 		watchModules: false,
 		watchModulesInclude: [], // Additional globs to count as modules when `watchModules` is enabled

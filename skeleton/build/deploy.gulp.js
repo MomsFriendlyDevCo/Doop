@@ -5,7 +5,7 @@ const FormData = require('form-data');
 
 const gulp = require('gulp');
 
-gulp.task('preDeploy', ()=> Promise.resolve());
+gulp.task('preDeploy', ['build.docs'], ()=> Promise.resolve());
 
 gulp.task('postDeploy', ['load:app.git', 'load:app.slack'], ()=> Promise.resolve()
 	.then(()=> app.git.historySinceBookmark(app.config.deploy.historyBookmark))

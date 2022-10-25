@@ -112,6 +112,7 @@ app.post([
 			//app.log('Attachments', attachments);
 			if (!app.config.email.enabled) return user;
 
+			// FIXME: Not waiting for promise
 			email().send({
 				to: user.email,
 				subject: `You have been invited to ${app.config.title}`,

@@ -116,7 +116,9 @@ app.middleware.db.schema('users', {
 			this._token = tryToken;
 			this._tokenPurpose = purpose;
 			// Adjust date based on local, but save as UTC for server-side comparison
-			this._tokenExpiry = moment().local().startOf('day').add(1,'week').utc();
+			// TODO: Fully integrate tokenExpiry
+			// TODO: Feature config flag, when not set tokens should never expire
+			//this._tokenExpiry = moment().local().startOf('day').add(1,'week').utc();
 			this.save()
 				.then(()=> {
 					//app.log('Token saved', purpose, tryToken);
@@ -135,7 +137,8 @@ app.middleware.db.schema('users', {
 	//app.log('releaseToken');
 	this._token = undefined;
 	this._tokenPurpose = undefined;
-	this._tokenExpiry = undefined;
+	// TODO: Fully integrate tokenExpiry
+	//this._tokenExpiry = undefined;
 	return this.save();
 })
 // }}}
@@ -209,9 +212,10 @@ app.use('/api/users/:id?', app.middleware.express.rest('users', {
 			next();
 		},
 	],
-	query: 'get',
-	search: 'get',
-	count: app.middleware.express.isUser(),
+	query: app.middleware.express.isUser(),
+	// NOTE: Search itself should restrict/filter response based on user permissions
+	search: 'query',
+	count: 'query',
 	create: app.middleware.express.hasPermission('usersCreate'),
 	save: [
 		(req, res, next) => {	// FIXME: Does this allow user to hack their own permissions?

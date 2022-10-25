@@ -102,6 +102,7 @@ app.post([
 			//app.log('Attachments', attachments);
 			if (!app.config.email.enabled) return user;
 
+			// FIXME: Not waiting for promise
 			email().send({
 				to: user.email,
 				subject: `Someone has requested a password reset on ${app.config.title}`,
