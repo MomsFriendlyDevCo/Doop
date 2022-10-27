@@ -1,269 +1,200 @@
 #!/bin/bash
-HELP="
-redeploy <--dev|--live|--both> [--no-pull] [--no-build] [--backend|--restart] [--branch BRANCH]
-
-Re-Deploy the DEV and/or LIVE PRODUCTION server
-
---branch [branch]       Specify a branch to use instead of 'master'
---force                 Force deploy, even if the branches mismatch
-
--l, --live              Perform actions on the LIVE PRODUCTION server
--d, --dev               Perform actions on the DEV server
--a, --all               Alias of --dev --live
-
--P, --no-pull           Skip pulling from Git before rebuilding
--B, --no-build          Skip rebuilding frontend resources
--R, --no-restart        Skip restarting PM2 processes
-
--b, --backend           Alias of --no-build
--r, --restart           Alias for --no-pull --no-build
-
--h, --help              Show command line help
-"
-
-# Defaults {{{
-DEVPATH=""
-LIVEPATH="/sites/fixme.com"
-BUILDPATH=""
-DODEV=0
-DOLIVE=0
-DOPULL=1
-DOBUILD=1
-DORESTART=1
-FORCE=0
-BRANCH=master
-# }}}
-
-# Argument processing {{{
-PARAMS=()
-while (( "$#" )); do
-	case "$1" in
-		--dev|-d)
-			DODEV=1
-			shift
-			;;
-		--live|-l)
-			DOLIVE=1
-			shift
-			;;
-		--all|-a)
-			DODEV=1
-			DOLIVE=1
-			shift
-			;;
-		--no-pull|-P)
-			DOPULL=0
-			shift
-			;;
-		--no-build|-B)
-			DOBUILD=0
-			shift
-			;;
-		--no-restart|-R)
-			DORESTART=0
-			shift
-			;;
-		--backend|-b)
-			DOBUILD=0
-			shift
-			;;
-		--restart|-r)
-			DOPULL=0
-			DOBUILD=0
-			shift
-			;;
-		--path)
-			BUILDPATH="$2"
-			shift
-			shift
-			;;
-		--force)
-			FORCE=1
-			shift
-			;;
-		--branch)
-			FORCE=1
-			BRANCH="$2"
-			shift
-			shift
-			;;
-		-h|--help)
-			echo "$HELP"
-			exit 0
-			;;
-		--) # end argument parsing
-			shift
-			break
-			;;
-		-*|--*=) # unsupported flags
-			echo "Error: Unsupported flag $1" >&2
-			exit 1
-			;;
-		*) # preserve positional arguments
-			PARAMS+=("$1")
-			shift
-			;;
-	esac
-done
-# }}}
-
-# Sanity checks {{{
-if [[ "$DODEV" == 0 && "$DOLIVE" == 0 ]]; then
-	echo "$HELP"
-	echo
-	echo "Must specify --live / --dev / --both"
-	echo
-	echo "To deploy live: ~/deploy -l"
-	echo "To deploy dev : ~/deploy -d"
-	echo "To deploy both: ~/deploy -b"
-	echo
-	exit 1
-fi
-
-
-if [[ -z "$DEVPATH" && "$DODEV" == 1 ]]; then
-	echo "No dev profile available for deployment"
-	exit 1
-fi
-# }}}
-
-# Stop on errors
 set -euo pipefail
+IFS=$'\n\t'
 
-# TODO: Stop agents before proceeding with redeploy
+clear
+echo
+echo
+echo "NAME: \"$SITE_NAME\""
+echo "PATH: \"$SITE_PATH\""
+echo "BRANCH: \"$SITE_BRANCH\""
+echo "ENV: \"$SITE_ENV\""
+echo "PROCESSES: \"$SITE_PROCESSES\""
+echo "PREFIX: \"$SITE_PREFIX\""
+echo "LIST: \"$SITE_LIST\""
+echo "PORT: \"$SITE_PORT\""
+echo "PRIMARY: \"$SITE_PRIMARY\""
+echo
 
-# Deploy dev {{{
-if [ "$DODEV" == 1 ]; then
-	if [ ! -d "$DEVPATH" ]; then
-		echo "Dev path '$DEVPATH' is invalid"
-		exit 1
-	fi
-
-	echo "Performing DEV deployment of $BRANCH branch"
-	cd "$DEVPATH"
-	export NODE_ENV=dev
-	export FORCE_COLOR=2
-
-	if [ "$DOBUILD" == 1 ]; then
-		echo "Pre-deploying via Gulp..."
-		gulp preDeploy
-	fi
-
-	if [ "$DOPULL" == 1 ]; then
-		THISBRANCH=`git branch --show-current`
-		if [[ "$FORCE" == 0 && "$THISBRANCH" != "$BRANCH" ]]; then
-			echo "Currently deployed branch mismatches deployment branch"
-			echo
-			echo "CURRENT BRANCH: ${THISBRANCH}"
-			echo "DEPLOY  BRANCH: ${BRANCH}"
-			echo
-			echo "Aborting deploy."
-			echo "Use --force if you really want this or specify --branch <branch> explicitly."
-			exit 1
-		elif [ "$THISBRANCH" != "$BRANCH" ]; then
-			echo "Currently deployed branch '${THISBRANCH}' mismatches deployment branch '${BRANCH}' but continuing anyway..."
-		fi
-
-		echo "Pulling Git $BRANCH branch..."
-		git checkout -B "$BRANCH" "origin/${BRANCH}"
-		git pull origin "$BRANCH"
-	else
-		echo "Skipping Git + Gulp"
-	fi
-
-	if [ "$DOBUILD" == 1 ]; then
-		echo "Installing NPM packages..."
-		npm ci
-
-		echo "Building via Gulp..."
-		gulp build
-
-		echo "post-deploying via Gulp..."
-		gulp postDeploy
-	fi
-
-
-	if [ "$DORESTART" == 1 ]; then
-		if [[ `pm2 show dev-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
-			echo "Starting DEV PM2 process for the first time..."
-			pm2 start --name 'dev-a' --time server/index.js -- -e dev -o port=10001 -o papertrail.program=dev-a -o cache.cleanAuto=true -o mongo.migration=true
-			pm2 start --name 'dev-b' --time server/index.js -- -e dev -o port=10002 -o papertrail.program=dev-b
-		else
-			echo "Rebooting PM2 process..."
-			pm2 restart --wait-ready --listen-timeout=10000 dev-a dev-b
-		fi
-	else
-		echo "Skipping PM2 process restart"
-	fi
+if [ -z "$SITE_NAME" ] \
+        || [ -z "$SITE_PATH" ] \
+        || [ -z "$SITE_BRANCH" ] \
+        || [ -z "$SITE_ENV" ]; then
+        echo "Missing required input"
+        echo "ABORTING DEPLOY."
+        exit 1
 fi
-# }}}
 
-# Deploy live {{{
-if [ "$DOLIVE" == 1 ]; then
-	if [ ! -d "$LIVEPATH" ]; then
-		echo "Live path '$LIVEPATH' is invalid"
-		exit 1
-	fi
-
-	echo "Performing LIVE deployment of $BRANCH branch"
-	cd "$LIVEPATH"
-	export NODE_ENV=production
-	export FORCE_COLOR=2
-
-	if [ "$DOBUILD" == 1 ]; then
-		echo "Pre-deploying via Gulp..."
-		gulp preDeploy
-	fi
-
-	if [ "$DOPULL" == 1 ]; then
-		THISBRANCH=`git branch --show-current`
-		if [[ "$FORCE" == 0 && "$THISBRANCH" != "$BRANCH" ]]; then
-			echo "Currently deployed branch mismatches deployment branch"
-			echo
-			echo "CURRENT BRANCH: ${THISBRANCH}"
-			echo "DEPLOY  BRANCH: ${BRANCH}"
-			echo
-			echo "Aborting deploy."
-			echo "Use --force if you really want this or specify --branch <branch> explicitly."
-			exit 1
-		elif [ "$THISBRANCH" != "$BRANCH" ]; then
-			echo "Currently deployed branch '${THISBRANCH}' mismatches deployment branch '${BRANCH}' but continuing anyway..."
-		fi
-
-		echo "Pulling Git $BRANCH branch..."
-		git checkout -B "$BRANCH" "origin/${BRANCH}"
-		git pull origin "$BRANCH"
-	else
-		echo "Skipping Git + Gulp"
-	fi
-
-	if [ "$DOBUILD" == 1 ]; then
-		echo "Installing NPM packages..."
-		npm ci
-
-		echo "Building via Gulp..."
-		gulp build
-
-		echo "post-deploying via Gulp..."
-		gulp postDeploy
-	fi
-
-
-	if [ "$DORESTART" == 1 ]; then
-		if [[ `pm2 show fixme-a >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
-			echo "Starting PRODUCTION PM2 process for the first time..."
-			pm2 start --name 'fixme-a' --time server/index.js -- -e production -o port=10101 -o papertrail.program=fixme-a -o cache.cleanAuto=true -o mongo.migration=true
-			pm2 start --name 'fixme-b' --time server/index.js -- -e production -o port=10102 -o papertrail.program=fixme-b
-			pm2 start --name 'fixme-c' --time server/index.js -- -e production -o port=10103 -o papertrail.program=fixme-c
-			pm2 start --name 'fixme-d' --time server/index.js -- -e production -o port=10104 -o papertrail.program=fixme-d
-		else
-			echo "Rebooting PM2 process..."
-			pm2 restart --wait-ready --listen-timeout=10000 fixme-a fixme-b fixme-c fixme-d
-		fi
-	else
-		echo "Skipping PM2 process restart"
-	fi
+if [ -z "$SITE_LIST" ] \
+        && (
+                [ -z "$SITE_PROCESSES" ] \
+                || [ -z "$SITE_PREFIX" ] \
+                || [ -z "$SITE_PORT" ] \
+                || [ -z "$SITE_PRIMARY" ] \
+        ); then
+        echo "Missing required input"
+        echo "ABORTING DEPLOY."
+        exit 1
 fi
-# }}}
 
-echo "done."
+
+echo
+echo "About to deploy $SITE_NAME from $SITE_PATH"
+echo
+echo
+read -p "Type '$SITE_NAME' to continue > " CONFIRM
+if [ "$CONFIRM" != "$SITE_NAME" ]; then
+        echo "ABORTING $SITE_NAME DEPLOY."
+        exit 1
+fi
+echo
+
+cd $SITE_PATH
+
+echo "Checking local changes..."
+status=`git status --porcelain`
+if [ -z "$status" ]; then
+        echo "No local changes detected"
+else
+        echo "Local changes detected"
+        echo
+        echo "${status}"
+        echo
+        echo "Please commit any required changes to ${SITE_BRANCH}"
+        echo
+        echo "ABORTING $SITE_NAME DEPLOY."
+        exit 1
+fi
+echo
+
+
+#echo "Backing up old $SITE_NAME server to $SITE_PATH.OLD..."
+#if [ -e "$SITE_PATH.OLD" ]; then
+#        echo "Erasing old backup..."
+#        rm "$SITE_PATH.OLD"
+#fi
+#xcp -r --gitignore $SITE_PATH $SITE_PATH.OLD # Replaced with more broadly available rsync
+#rsync -aP $SITE_PATH $SITE_PATH.OLD --exclude=".git" --exclude="$SITE_PATH/.git" --filter="dir-merge,- .gitignore"
+#rsync -aP $SITE_PATH $SITE_PATH.OLD # Include built version and dependancies to make full recovery easier
+
+# TODO: Automatically rotate old backups
+
+echo
+mkdir -p "$SITE_PATH.backups"
+read -p "Do you wish to create a backup? [Y/n] > " DOBACKUP
+if [ -z "$DOBACKUP" ] || [ "${DOBACKUP:0:1}" == "Y" ] || [ "${DOBACKUP:0:1}" == "y" ]; then
+        # NOTE: Including everything makes recovery easier. Builds may be broken and git will be required.
+        backupfile=`date '+%Y-%m-%dT%H:%M:%SZ%z'`
+        backuppath="${SITE_PATH}.backups/${SITE_NAME}_${backupfile}"
+        echo "Copying $SITE_PATH to $backuppath..."
+        rsync -aP "$SITE_PATH" "$backuppath" # --exclude=".git" --exclude="$SITE_PATH/.git" --filter="dir-merge,- .gitignore"
+        echo
+else
+        echo "Skipping creation of backup..."
+fi
+echo
+
+
+echo "Deploying $SITE_NAME server..."
+echo
+
+echo "Pre-deploying via Gulp..."
+NODE_ENV=$SITE_ENV gulp preDeploy
+
+echo "Fetching..."
+git fetch
+packagediff=`git diff --shortstat FETCH_HEAD package-lock.json`
+
+
+echo "Checking current branch..."
+#branch=`git branch --show-current` # Git >=2.22
+branch=`git rev-parse --abbrev-ref HEAD`
+if [ "$branch" != "$SITE_BRANCH" ]; then
+        echo "Currently deployed branch mismatches deployment branch"
+        echo
+        echo "CURRENT BRANCH: ${branch}"
+        echo "EXPECTS BRANCH: ${SITE_BRANCH}"
+        echo
+        echo "ABORTING $SITE_NAME DEPLOY."
+        exit 1
+else
+        echo "Pulling Git $SITE_BRANCH branch..."
+        git checkout -B "$SITE_BRANCH" "origin/${SITE_BRANCH}"
+        git pull origin "$SITE_BRANCH"
+fi
+echo
+
+
+echo "Checking package changes..."
+if [ -z "$packagediff" ]; then
+        echo "No package changes detected - skip NPM install"
+else
+        echo "Package changes detected - clean NPM install"
+        npm ci
+fi
+echo
+
+
+echo "Building via Gulp..."
+NODE_ENV=$SITE_ENV gulp build build.docs
+
+
+
+####################################################################
+# NOTE: Remove this option on sites not using this nuclear pattern #
+####################################################################
+read -p "NUKE database and run scenarios by typing 'DB FORCE NUKE $SITE_NAME' to confirm > " CONFIRM
+if [ "$CONFIRM" == "DB FORCE NUKE $SITE_NAME" ]; then
+        echo "Nuking database and running scenarios..."
+        NODE_ENV=$SITE_ENV NUKE=FORCE gulp db
+else
+        echo "Skipped nuking database and running scenarios..."
+fi
+####################################################################
+
+
+
+echo "post-deploying via Gulp..."
+NODE_ENV=$SITE_ENV gulp postDeploy
+
+
+# When "$SITE_LIST" is provided all processes matching the regex will be restarted
+if [ -z "$SITE_LIST" ]; then
+        letters=({a..z})
+        echo "Checking \"$SITE_PROCESSES\" PM2 processes..."
+        for ((i=0; i<$SITE_PROCESSES; i++));
+        do
+                instance="$SITE_PREFIX-${letters[$i]}"
+                if [[ `pm2 show "$instance" >/dev/null 2>/dev/null; echo "$?"` == "1" ]]; then
+                        echo "Starting \"$instance\" PM2 process..."
+                        if ((i == 0)); then
+                                echo "Adding primary instance configuration"
+                                NODE_ENV=$SITE_ENV pm2 start --name "$instance" --time server/index.js -- -e $SITE_ENV -o port=$(($SITE_PORT + $i)) -o papertrail.program="$instance" $SITE_PRIMARY
+                        else
+                                NODE_ENV=$SITE_ENV pm2 start --name "$instance" --time server/index.js -- -e $SITE_ENV -o port=$(($SITE_PORT + $i)) -o papertrail.program="$instance"
+                        fi
+                else
+                        echo "Restarting \"$instance\" PM2 process..."
+                        pm2 restart --wait-ready --listen-timeout=15000 "$instance"
+                fi
+        done
+else
+        echo "Restarting \"$SITE_LIST\" PM2 processes..."
+        pm2 restart --wait-ready --listen-timeout=15000 $SITE_LIST
+fi
+
+
+if [ -z "$DOBACKUP" ] || [ "${DOBACKUP:0:1}" == "Y" ] || [ "${DOBACKUP:0:1}" == "y" ]; then
+        echo "Archiving $backuppath..."
+        #tar cfj "$backuppath.tar.bz2" "$backuppath"
+        tar cf - -C "$backuppath" . | pv -s $(du -sb "$backuppath" | awk '{print $1}') | bzip2 -9 > "$backuppath.tar.bz2"
+        # --exclude-vcs --exclude="*/node_modules" --exclude="*/.cache"
+        echo "Removing temporary backup $backuppath..."
+        rm -rf "$backuppath"
+        echo
+else
+        echo "Skipping archival of backup..."
+fi
+
+
+echo "Deploy completed!"

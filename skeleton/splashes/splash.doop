@@ -1,3 +1,6 @@
 <script lang="js" backend endpoint>
+/**
+* Serve static resources from /splashes
+*/
 app.use('/splashes', app.middleware.express.static(`${app.config.paths.root}/splashes/assets`, {immutable: true}));
 </script>

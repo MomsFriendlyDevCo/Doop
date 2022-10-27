@@ -48,7 +48,7 @@ module.exports = {
 	access: {
 		lockdown: false, // Set to true to lock the site with the below users
 		users: [
-			{user: 'user',pass: 'password'},
+			{user: 'user', pass: 'password'},
 		],
 	},
 	agents: {

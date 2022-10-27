@@ -3,6 +3,15 @@
 * Accessing /api as a regular user should show the generated documentation via @doop/docs which lives in dist/docs
 */
 app.get('/api', (req, res) => res.sendFile('rest.html', {root: `${app.config.paths.root}/dist/docs`}));
+
+/**
+* Return the OpenAPI / Swagger spec JSON for the generated documentation
+* @returns {Object} OpenAPI / Swagger spec JSON
+*/
 app.get('/api/rest.json', (req, res) => res.sendFile('rest.json', {root: `${app.config.paths.root}/dist/docs`}));
+
+/**
+* Return the Markdown compatible documentation output
+*/
 app.get('/api/rest.md', (req, res) => res.sendFile('rest.md', {root: `${app.config.paths.root}/dist/docs`}));
 </script>

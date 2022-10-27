@@ -194,7 +194,12 @@ app.get('/api/users/types', (req, res) => {
 
 
 <script lang="js" backend endpoint>
-// FIXME: These only happen during ReST operations, we may want to always adjust things during create/save on hooks...
+/**
+* Return a user ReST endpoint
+* This endpoint is INTENTIONALLY locked down as it potencially exposes user data
+* @param {string} [req.params.id] The ID of the user to return or query
+* @returns {array<Object>|Object} The user object(s) found / saved or otherwise altered
+*/
 app.use('/api/users/:id?', app.middleware.express.rest('users', {
 	data: req => req.user ? {user: req.user._id} : undefined,
 	// FIXME: Can users retrieve each other? Are they restricted to only their own account?

@@ -1,0 +1,139 @@
+<script lang="js" backend on="middleware">
+const Buffer = require('buffer');
+const fs = require('fs');
+const fsPath = require('path');
+const Stream = require('stream');
+
+/**
+* Generic middleware which will calculate a final path and try to serve it if it exists
+* If the file exists       - serve it and terminate the middleware chain
+* If the file DOESNT exist - set `req.cachePath` + continue on middleware chain, expect somewhere to write to `req.cachePath` for next hit
+*
+* This function ensures that the directory path is writable before calling the next handler
+*
+* @param {Object} options Options to configure the middleware
+* @param {string|function} options.path Either a static string or an async function called as `(req, res)`, expected to return a string path
+* @param {boolean|function} [options.enabled=true] Whether to use the an async function or always assume invalid cache. If an async function is given its called as `(req, res)` and expected to return an eventual boolean
+* @param {function} [options.onCachedFile] Function used to stream the output cache file, defaults to `(req, res, path) => res.sendFile(path)`
+* @param {function} [options.onCreateFile] Function used before handing over to the next route if no cache file was found. Called as `(req, res, path)`
+* @returns {ExpressMiddleware} An express middleware layer
+*/
+app.middleware.express.cacheFile = (options) => {
+	const settings = {
+		path: req => { throw new Error('No path function in app.middleware.express.cacheFile') },
+		enabled: true,
+		onCachedFile: (req, res, path) => res.sendFile(path),
+		onCreateFile: (req, res, path) => {},
+		...options,
+	};
+
+	return (req, res, next) => {
+
+		// req.cachePath<string> {{{
+		// Add cachePath to store the actual caching endpoint
+		req.cachePath = null;
+		// }}}
+
+		// res.cacheSend(content, options?) {{{
+		/**
+		* Write the caching content to `req.cachePath` and also send it to the user via the `res.send()` method
+		* @param {string|buffer|Stream.Readable} content The content to cache + serve
+		* @param {Object} [options] Other options to pass when serving
+		* @param {booleam} [options.enabled] Whether to actually write the cache file, defaults to the main `options.enabled`
+		* @param {string} [options.type] Optional Express shorthand or MIME type to specify the content as
+		* @returns {Promise} A promise which will resolve when the caching + sending has completed
+		*/
+		res.cacheSend = (content, options) => {
+			const csSettings = {
+				enabled: req.cachePath != null,
+				type: null,
+				...options,
+			};
+
+			return Promise.resolve()
+				.then(()=> csSettings.type && res.type(csSettings.type))
+				.then(()=> {
+					if (csSettings.enabled && content instanceof Stream.Readable) { // Streams {{{
+						return new Promise((resolve, reject) => {
+							content
+								.on('end', ()=> resolve())
+								.on('error', reject)
+								.pipe(fs.createWriteStream(req.cachePath))
+						})
+							.then(()=> res.sendFile(req.cachePath))
+						// }}}
+					} else if (content instanceof Stream.Readable) { // Streams (disabled) {{{
+						return new Promise((resolve, reject) => {
+							content
+								.on('end', ()=> {
+									res.end();
+									resolve();
+								})
+								.on('error', e => {
+									res.end(e.toString());
+									reject();
+								})
+								.pipe(res)
+						})
+						// }}}
+					} else if (typeof content == 'string' || content instanceof Buffer) { // Strings / Buffers {{{
+						return Promise.resolve()
+							.then(()=> settings.enabled && fs.promises.writeFile(req.cachePath, content))
+							.then(()=> res.send(content))
+						// }}}
+					} else { // Else {{{
+						throw new Error('Unknown content type passed to req.cacheSend() - must be a String|Buffer|Stream.Readable');
+						// }}}
+					}
+				})
+		};
+		// }}}
+
+
+		return Promise.resolve()
+			.then(()=> Promise.all([
+				// Calculate if this module is actually enabled
+				typeof settings.enabled == 'function'
+					? settings.enabled(req, res)
+					: settings.enabled,
+
+				// Calculate final on-disk path
+				typeof settings.path =='function'
+					? settings.path(req, res)
+					: settings.path,
+			]).then(([enabled, path]) => ({enabled, path})))
+			.then(({enabled, path}) => {
+				if (!enabled) {
+					app.log.as('middleware.cacheFile', 'Caching endpoint', app.log.colors.cyan(req.path), 'is disabled - passing to next route handler');
+					throw 'NEXT';
+				} else {
+					return path;
+				}
+			})
+			.then(path => fs.promises.access(path, fs.constants.W_OK) // See if the file exists
+				.then(()=> ({path, exists: true}))
+				.catch(()=> ({path, exists: false}))
+			)
+			.then(({path, exists}) => {
+				if (exists) { // File exists - stream to output
+					app.log('cacheFile', app.log.colors.cyan(path), 'exists - streaming to output');
+					return settings.onCachedFile(req, res, path);
+				} else {
+					app.log('cacheFile', app.log.colors.cyan(path), 'does not exist - calling downstream handler');
+					req.cachePath = path;
+
+					return fs.promises.mkdir(fsPath.dirname(path), {recursive: true}) // Mkdir Recursive to ensure writable
+						.then(()=> settings.onCreateFile(req, res, path))
+						.then(()=> next()) // Pass down middleware chain
+				}
+			})
+			.catch(e => {
+				if (e === 'NEXT') {
+					return next();
+				} else {
+					res.sendError(e);
+				}
+			})
+	};
+};
+</script>

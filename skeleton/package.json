@@ -6,15 +6,20 @@
   "scripts": {
     "agents": "agents -l",
     "build": "gulp build",
+    "cypress:open": "cypress open --e2e --browser chrome",
+    "cypress:record": "cypress run --record --key a99d7e80-0c19-47ad-bcbc-805938d3796a",
+    "cypress:run": "cypress run --e2e --browser chrome",
     "dev": "gulp serve",
     "deploy": "doop-deploy",
     "deploy:pre": "gulp preDeploy",
     "deploy:post": "gulp postDeploy",
+    "lint": "eslint assets scenario",
     "sample:data": "gulp db",
     "start": "node server",
     "test": "mocha",
     "webpack": "webpack --mode production",
-    "webpack:dev": "webpack --mode development"
+    "webpack:dev": "webpack --mode development",
+    "watch:scenarios": "chokidar 'scenario/*.scenario.js' -c 'gulp db'"
   },
   "repository": {
     "type": "git",
@@ -50,8 +55,9 @@
     "@doop/digest": "^1.0.1",
     "@doop/directive-jump": "^1.1.3",
     "@doop/dirty-checker": "^1.0.0",
-    "@doop/docs": "^0.0.3",
+    "@doop/docs": "^0.0.9",
     "@doop/drag-drop": "^1.0.1",
+    "@doop/dynamic-component": "^1.0.0",
     "@doop/emit": "^1.0.0",
     "@doop/eval": "^1.0.1",
     "@doop/files": "^1.1.0",
@@ -162,15 +168,15 @@
     "sift": "^13.4.0",
     "string-split-by": "^1.0.0",
     "superagent": "^5.1.3",
-    "swagger-ui": "^3.47.1",
+    "swagger-ui": "^3.52.5",
     "temp": "^0.9.4",
     "text-mask-addons": "^3.8.0",
     "timestring": "^6.0.0",
     "tree-tools": "^1.4.4",
     "uuid": "^8.3.2",
-    "v-jsoneditor": "^1.4.2",
+    "v-jsoneditor": "^1.4.5",
     "v-mask": "^2.2.4",
-    "v-tooltip": "^2.0.3",
+    "v-tooltip": "^2.1.3",
     "validator": "^13.7.0",
     "vue": "^2.6.14",
     "vue-datetime": "^1.0.0-beta.14",
@@ -181,6 +187,18 @@
     "vuejs-datepicker": "^1.6.2",
     "winston": "^3.3.3",
     "winston-papertrail-transport": "^1.0.6"
+  },
+  "devDependencies": {
+    "@percy/cypress": "^3.1.2",
+    "chai": "^4.3.4",
+    "cypress": "^10.8.0",
+    "cypress-email-results": "^1.8.0",
+    "eslint": "^8.17.0",
+    "mocha": "^9.1.3",
+    "webpack-hot-middleware": "^2.25.1"
+  },
+  "alias": {
+    "vue2-leaflet": "./node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"
   },
   "babel": {
     "presets": [
@@ -204,5 +222,25 @@
       "@babel/plugin-proposal-throw-expressions",
       "@babel/plugin-syntax-dynamic-import"
     ]
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "env": {
+      "es6": true,
+      "node": true
+    },
+    "globals": {
+      "_": "readable",
+      "$": "readable",
+      "ditu": "readable",
+      "globalThis": "readable",
+      "TreeTools": "readable",
+      "Vue": "readable",
+      "window": "readable"
+    },
+    "parserOptions": {
+      "ecmaVersion": 13,
+      "sourceType": "module"
+    }
   }
 }

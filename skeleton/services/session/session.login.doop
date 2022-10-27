@@ -36,7 +36,11 @@ app.get('/go/login/:token', (req, res) => {
 <script lang="js" backend endpoint>
 var _ = require('lodash');
 
-// TODO: Rate limit. Throttle middleware?
+/**
+* Attempt user login using POST data
+* @param {string} req.body.email The email address of the user attempting to log in
+* @param {string} req.body.password The password of the usesr attempting to log in
+*/
 app.post([
 	'/api/session/login',
 	...(app.config.session.auth.allowPost ? ['/login'] : []),
