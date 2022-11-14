@@ -11,7 +11,14 @@ import Debug from '@doop/debug';
 */
 app.service('$session', function() {
 	var $session = Vue.observable({
-		$debug: Debug('$session').enable(false),
+		$debug: Debug('$session').enable(true),
+
+		/**
+		 * Session ID
+		 * @type {String}
+		 */
+		id: '',
+
 		/**
 		* Current user data
 		* @type {Object}
@@ -158,6 +165,8 @@ app.service('$session', function() {
 				.then(req => this.$http(req))
 				.then(res => {
 					$session.$debug('$session.data now', res.data);
+					if (res.data.sessionId) $session.id = res.data.sessionId;
+
 					if (res.data._id) {
 						$session.data = this.$assign($session.data, {permissions: {}}, res.data)
 						$session.isLoggedIn = true;

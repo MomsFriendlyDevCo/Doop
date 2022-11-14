@@ -23,6 +23,10 @@
 
 	<!-- Injection scripts -->
 	<%= layoutHeaders.join('\n') %>
+
+	<script lang="js" nonce="<%= nonce %>">
+		window['nonce-<%= sessionId %>'] = '<%= nonce %>';
+	</script>
 </head>
 
 <body class="bootstrapping">

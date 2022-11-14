@@ -4,8 +4,8 @@ if (!process.env.DOOP_QUIET) console.log(colors.bold.red('RUNNING IN PRODUCTION 
 
 module.exports = {
 	isProduction: true,
-	url: 'https://{{FIXME}}',
-	port: process.env.PORT || 80,
+	url: 'https://{{FIXME}}', // NOTE: Protocol segment will get overridden if SSL is enabled
+	port: process.env.PORT || 80, // NOTE: Will get overridden if SSL is enabled
 	tagline: false,
 	build: {
 		minimize: false, // Server has low memory and needs override

@@ -5,6 +5,7 @@
 * This is so that route paths can be 'sane' sorted similar to the front end (i.e. '/api/widgets/create' sorts before '/api/widgets/:id')
 */
 var _ = require('lodash');
+var debug = require('debug')('doop:init');
 
 /**
 * Storage for future endpoints, deleted when processed
@@ -39,6 +40,7 @@ var historyFallback = require('connect-history-api-fallback-exclusions');
 var helmet = require('helmet');
 var jail = require('express-jail');
 var logger = require('express-log-url');
+var debug = require('debug')('doop:server');
 
 app.emit('preExpress');
 app.express = express();
@@ -61,18 +63,28 @@ if (app.config.layout.jail.enabled) {
 	);
 }
 
-app.express.use(cors());
+// Discover routes and exclude them from static serving
+const paths = _(app.endpoints)
+	.filter(endpoint => endpoint.method !== 'set' && endpoint.method !== 'use')
+	.filter(endpoint => typeof endpoint.path !== 'function')
+	.map(endpoint => endpoint.path)
+	.flatten()
+	.map(path => path.slice(1).split('/', 2))
+	.map(path => (path.length > 1) ? `/${path[0]}/*` : `/${path[0]}`)
+	.uniq()
+	.value();
+
 app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',
-	exclusions: app.config.layout.excludeBase.map(b =>
+	exclusions: app.config.layout.excludeBase.concat(paths).map(b =>
 		_.isString(b) && b.endsWith('*') ? new RegExp('^' + RegExp.escape(b.replace(/\*$/, '')), 'i')
 		: _.isString(b) ? new RegExp('^' + RegExp.escape(b.replace(/\*$/, '')) + '$', 'i')
 		: _.isRegExp(b) ? b
 		: (()=> { throw new Error(`Unknown app.config.layout.excludeBase rule: "${b}"`) })()
 	),
-	// TODO: `verbose` configuration flag to enable `logger: app.log.bind(app)`
-	logger: ()=> {}, // STFU about rewriting JSON streams
+	logger: debug.bind(app),
 }));
+
 app.express.use(cors());
 app.express.use(cookieParser());
 app.express.use(bodyParser.json({limit: '64mb'}));
@@ -157,6 +169,7 @@ app.express.use(function(req, res, next) {
 
 	next();
 });
+// }}}
 </script>
 
 <script lang="js" backend on="server">

@@ -11,25 +11,47 @@ var fs = require('fs');
 return Promise.resolve()
 	.then(()=> fs.promises.readFile(`${app.config.paths.root}/layouts/main.html`, 'utf8'))
 	.then(contents => _.template(contents))
-	.then(template => app.get('/', (req, res) =>
-		res
+	.then(template => app.get('/', (req, res) => {
+		let sessionId;
+		if (req?.cookies[app.config.session.cookie.name])
+			sessionId = req?.cookies[app.config.session.cookie.name];
+
+		// NOTE: The crypto.randomBytes() method will not complete until there is sufficient entropy available. This should normally never take longer than a few milliseconds. The only time when generating the random bytes may conceivably block for a longer period of time is right after boot, when the whole system is still low on entropy.
+		// This API uses libuv's threadpool, which can have surprising and negative performance implications for some applications; see the UV_THREADPOOL_SIZE documentation for more information.
+		// @see https://nodejs.org/api/crypto.html#cryptorandombytessize-callback
+		const nonce = app.utils.uuid.generateSync();
+		const csp = Object.entries(app.config.layout.csp) // FIXME: Custom checkboxes base64 embedded SVG icons - https://github.com/twbs/bootstrap/issues/25394
+			.filter(([type, allowed]) => allowed.length > 0) // Remove empty
+			.concat()
+			.map(([type, allowed]) => {
+				// Append a nonce so we can inject scripts at run-time
+				// TODO: Append nonce to all resource types?
+				if (type === 'script-src') {
+					return type
+						+ ' '
+						+ Array.from(new Set(allowed).add(`'nonce-${nonce}'`)).join(' ');
+				} else {
+					return type
+						+ ' '
+						+ Array.from(new Set(allowed)).join(' ');
+				}
+			})
+			.join('; ');
+
+		return res
 			.type('html')
-			.set('Content-Security-Policy', Object.entries(app.config.layout.csp) // FIXME: Custom checkboxes base64 embedded SVG icons - https://github.com/twbs/bootstrap/issues/25394
-				.filter(([type, allowed]) => allowed.length > 0) // Remove empty
-				.map(([type, allowed]) => type
-					+ ' '
-					+ Array.from(new Set(allowed)).join(' ')
-				)
-				.join('; ')
-			)
+			.set('Content-Security-Policy', csp)
 			.send(template({
 				app,
 				layoutHeaders: [].concat(
 					app.config.layout.headInject,
 					req.layoutHeaders ?? [],
 				),
-			}))
-	))
+				nonce: nonce, // TODO: Simply store in a cookie? We only have a session id in cookies so far
+				sessionId: sessionId,
+			}));
+	}
+	));
 </script>
 
 <script lang="js" backend endpoint>

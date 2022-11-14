@@ -125,7 +125,9 @@ global.app = {
 			if (!app.component.register) app.component.register = {}; // Create the register if it doesn't already exist
 			if (!app.isProduction && app.component.register[id]) {
 				app.debug.force('Component', id, 'already declared as', app.component.register[id], 'clobbering with new component spec', spec);
-				debugger;
+
+				// FIXME: "v-select" is imported by a "@doop/search" component...
+				//debugger;
 			}
 			app.debug(`Registered component "${id}"`);
 			return app.component.register[id] = spec;

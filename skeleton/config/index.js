@@ -85,8 +85,17 @@ module.exports = {
 		// Optional importing of extra files such as theme CSS/SCSS.
 		//importGlob:[
 		//	'./theme/**/*.css',
+		//	'./theme/**/*.scss',
 		//	'./theme/**/[!exclude_]*.scss',
 		//],
+		// Optional webpack customisation
+		//webpack: {
+		//	resolve: {
+		//		alias: {
+		//			'vue': 'vue/dist/vue.common.js', // Allow for compilation of templates at runtime
+		//		},
+		//	},
+		//},
 	},
 	cache: {
 		enabled: true,
@@ -153,16 +162,17 @@ module.exports = {
 				sort: 1,
 				path: '/sites/FIXME:PATH',
 				processes: 2,
-				env: {'NODE_ENV': 'production'},
+				branch: 'stable',
+				env: {'NODE_ENV': 'FIXME:CONFIG'},
 				pm2Name: 'FIXME:NAME-${process.alpha}',
 				pm2Args: {
 					default: [
-						'-e', 'production',
+						'-e', 'FIXME:CONFIG',
 						'-o', 'port=${10100 + process.offset + 1}',
 						'-o', 'papertrail.program=${process.name}',
 					],
 					'FIXME:NAME-a': [
-						'-e', 'production',
+						'-e', 'FIXME:CONFIG',
 						'-o', 'port=${10100 + process.offset + 1}',
 						'-o', 'papertrail.program=${process.name}',
 						'-o', 'cache.cleanAuto=true',

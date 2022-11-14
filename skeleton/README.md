@@ -13,6 +13,36 @@ HOW TO CLONE THIS REPO
 {{FIXME: Description}}
 
 
+Deploy/Test Proceedure
+----------------------
+
+1. Ensure current `master` branch passes tests
+
+```
+npm run cypress:run
+```
+
+2. Merge tested `master` to `stable`
+
+```
+git checkout master && git pull
+git checkout stable && git pull
+git merge --no-ff master
+```
+
+3. Re-test `stable` to ensure all merges are functional
+
+```
+npm run cypress:run
+```
+
+4. Deploy `stable`
+
+```
+ssh user@server
+./deploy-{{FIXME}}
+```
+
 Installation
 ------------
 
