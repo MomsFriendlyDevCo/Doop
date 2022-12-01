@@ -69,10 +69,27 @@ const paths = _(app.endpoints)
 	.filter(endpoint => typeof endpoint.path !== 'function')
 	.map(endpoint => endpoint.path)
 	.flatten()
-	.map(path => path.slice(1).split('/', 2))
+	.map((v, k, arr) => {
+		switch (typeof v) {
+			case 'object':
+				arr.concat(Object.keys(v).map(d => d.slice(1).split('/', 2)));
+				break;
+			case 'string':
+				return v.slice(1).split('/', 2);
+		}
+	})
+	.filter(Boolean)
 	.map(path => (path.length > 1) ? `/${path[0]}/*` : `/${path[0]}`)
 	.uniq()
+	.pull(...[
+		'/invite',
+		'/login',
+		'/recover',
+		'/signup',
+		'/',
+	])
 	.value();
+debug('Path exclusions', paths);
 
 app.express.use(historyFallback({ // Route all HTTP elements to '/' to support non-hashbang mode
 	index: '/',
