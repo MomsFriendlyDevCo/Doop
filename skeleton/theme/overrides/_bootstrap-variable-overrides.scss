@@ -1,7 +1,9 @@
 @use 'sass:map';
 @use 'sass:math';
 @use '../dependencies/variables';
-@use '../node_modules/bootstrap/scss/bootstrap' as *;
 
 // Note: please refer to 'node_modules/bootstrap/scss/_variables.scss'
 // for defaults available to be set.
+
+// Bootstrap options
+$enable-negative-margins: true;
